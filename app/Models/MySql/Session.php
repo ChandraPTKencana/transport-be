@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\MySql;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +42,10 @@ class Session extends Model
 
     function the_user()
     {
-        return $this->belongsTo(IsUser::class, 'user_id', 'id_user');
+        return $this->belongsTo(IsUser::class, 'user_id', 'id');
     }
 }
+
+masukkan email ako ko
+
+miausion88@gmail.com

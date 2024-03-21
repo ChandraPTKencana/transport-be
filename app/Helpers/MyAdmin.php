@@ -16,11 +16,11 @@ class MyAdmin
     if ($token == "") {
       throw new MyException(["message" => "Get user info cannot complete, please restart the apps"], 400);
     }
-    $model_query = \App\Models\Session::where("token", $token)->first();
+    $model_query = \App\Models\MySql\Session::where("token", $token)->first();
     if (!$model_query) {
       throw new MyException(["message" => "Unauthenticate"], 401);
     }
-    if ($model_query->the_user->status == "blokir") {
+    if ($model_query->the_user->status == "N") {
       throw new MyException(["message" => "Izin Masuk Tidak Diberikan"], 400);
     }
 

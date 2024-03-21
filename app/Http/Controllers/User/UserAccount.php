@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
-use App\Models\IsUser;
+use App\Models\MySql\IsUser;
 use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Models\HrmRevisiLokasi;
@@ -22,7 +22,7 @@ class UserAccount extends Controller
   {
     $request["username"] = strtolower($request->username);
     $rules = [
-      'username' => 'required|exists:\App\Models\IsUser,username',
+      'username' => 'required|exists:\App\Models\MySql\IsUser,username',
       // 'password' => "required|min:8",
       'password' => "required",
     ];
@@ -46,17 +46,25 @@ class UserAccount extends Controller
 
     $admin = IsUser::where("username", $username)->first();
     
-    if ($admin && $admin->status == 'blokir') {
+    if ($admin && $admin->status == 'N') {
       return response()->json([
         "message" => "Izin Masuk Tidak Diberikan"
       ], 403);
     }
 
-    if($admin->password != md5($password)){
+    if (Hash::check($password,$admin->password)) {
+      $token = $admin->generateToken();
+
       return response()->json([
-        "message" => "Nama Pengguna dan Kata Sandi tidak cocok"
-      ], 403);
+        "message"=>"Berhasil login",
+        "token"=>$token,
+      ],200);
+    }else {
+      return response()->json([
+        "message"=>"Nama Pengguna dan Kata Sandi tidak cocok"
+      ],400);
     }
+
     DB::beginTransaction();
     try{
 
@@ -85,7 +93,7 @@ class UserAccount extends Controller
   public function logout(Request $request)
   {
     $admin = MyAdmin::user();
-    \App\Models\Session::where("token",$admin->token)->delete();
+    \App\Models\MySql\Session::where("token",$admin->token)->delete();
 
     return response()->json([
       "message" => "Logout Berhasil",

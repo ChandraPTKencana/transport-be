@@ -20,5 +20,15 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
+
+        \App\Models\MySql\IsUser::create([
+            "username"=>"Yoseph",
+            "password"=>bcrypt("1234"),
+            "hak_akses"=>"Admin",
+            "status"=>"Y",
+            'created_at'=>date("Y-m-d H:i:s"),
+            'updated_at'=>date("Y-m-d H:i:s"),
+        ]);
     }
 }

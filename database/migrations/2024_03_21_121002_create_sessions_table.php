@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('token',255)->unique();
-            $table->bigInteger('user_id');
-            $table->foreign('user_id')->references('id_user')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
+            // $table->bigInteger('user_id');
+            $table->foreignId('user_id')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
