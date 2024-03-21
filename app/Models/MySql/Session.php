@@ -45,7 +45,3 @@ class Session extends Model
         return $this->belongsTo(IsUser::class, 'user_id', 'id');
     }
 }
-
-masukkan email ako ko
-
-miausion88@gmail.com
