@@ -48,6 +48,10 @@ Route::get('/', function () {
     Route::put('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'update']);
     Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
 
+
+    Route::get('/trx_cpos', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'index']);
+    Route::get('/trx_load_data', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'index']);
+
 // Route::prefix("stok/api")->group(function(){
 
 //     // Route::post('login', function () {
