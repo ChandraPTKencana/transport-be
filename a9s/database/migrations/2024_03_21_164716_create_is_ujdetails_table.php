@@ -13,10 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('is_uj', function (Blueprint $table) {
+        Schema::create('is_ujdetails', function (Blueprint $table) {
             $table->id();
-            $table->string('name',10)->unique();
-            $table->bigInteger('created_by');
+            $table->bigInteger('id_uj');
+            $table->string('xdesc',500);
+            $table->bigInteger('harga');
+            $table->string('status',1);
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('is_uj');
+        Schema::dropIfExists('is_ujdetails');
     }
 };

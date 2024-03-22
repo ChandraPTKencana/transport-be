@@ -28,7 +28,7 @@ class UserAccount extends Controller
     ];
 
     $messages = [
-      'username.required' => 'Nama Pengguna tidak boleh kosong',
+      'username.required' => 'Nama Pengguna tidak boleh kosonmg',
       'username.exists' => 'Nama Pengguna tidak terdaftar',
       'password.required' => 'Kata Sandi tidak boleh kosong',
       'password.min' => 'Kata Sandi minimal 8 Karakter',
@@ -108,9 +108,9 @@ class UserAccount extends Controller
       "user" => [
         // "id"=>$p_user->id,
         "username" => $admin->the_user->username,
-        "fullname" => $admin->the_user->nama_user,
+        // "fullname" => $admin->the_user->nama_user,
         "role" => $admin->the_user->hak_akses,
-        "locs"=>HrmRevisiLokasi::whereRaw("id in (".$admin->the_user->loc.")")->get()
+        // "locs"=>HrmRevisiLokasi::whereRaw("id in (".$admin->the_user->loc.")")->get()
         // // "scope"=>($p_user->role && count($p_user->role->permissions)>0) ? $p_user->role->permissions->pluck('name') : [],
         // "scopes" => $p_user->listPermissions()
       ],

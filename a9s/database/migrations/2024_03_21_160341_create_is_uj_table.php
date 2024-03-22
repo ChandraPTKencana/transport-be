@@ -13,8 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('is_ujdetails', function (Blueprint $table) {
+        Schema::create('is_uj', function (Blueprint $table) {
             $table->id();
+            $table->string('xto',50);
+            $table->string('tipe',100);
+            $table->string('status',1);
+            $table->string('jenis',10);
+            $table->bigInteger('created_user')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('is_ujdetails');
+        Schema::dropIfExists('is_uj');
     }
 };

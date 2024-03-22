@@ -41,6 +41,9 @@ Route::get('/', function () {
     Route::put('/update_profile', [\App\Http\Controllers\User\UserAccount::class, 'updateUser']);
 
 
+
+    Route::get('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'index']);
+
 // Route::prefix("stok/api")->group(function(){
 
 //     // Route::post('login', function () {
