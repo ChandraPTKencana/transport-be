@@ -122,10 +122,10 @@ class UserAccount extends Controller
     $admin = MyAdmin::user();
     return response()->json([
       "username" => $admin->the_user->username,
-      "fullname" => $admin->the_user->nama_user,
-      "email" => $admin->the_user->email ?? '',
-      "photo" => $admin->the_user->foto ? ("/ho/images/user/".$admin->the_user->foto) : null,
-      "phone_number" => $admin->the_user->telepon,
+      // "fullname" => $admin->the_user->nama_user,
+      // "email" => $admin->the_user->email ?? '',
+      // "photo" => $admin->the_user->foto ? ("/ho/images/user/".$admin->the_user->foto) : null,
+      // "phone_number" => $admin->the_user->telepon,
     ], 200);
   }
 
@@ -134,9 +134,9 @@ class UserAccount extends Controller
     $admin = MyAdmin::user();
 
     $rules = [
-      'old_password' => 'required|min:8|max:255',
-      'password' => 'required|confirmed|min:8|max:255',
-      'password_confirmation' => 'required|same:password|min:8|max:255',
+      'old_password' => 'required|min:1',
+      'password' => 'required|confirmed|min:1',
+      'password_confirmation' => 'required|same:password|min:1',
     ];
 
     $rule = [
@@ -161,15 +161,15 @@ class UserAccount extends Controller
     }
 
     $old_password = $request->old_password;
-    if (!Hash::check($old_password, $admin->password)) {
+    if (!Hash::check($old_password, $admin->the_user->password)) {
       return response()->json([
         "message" => "Kata sandi lama tidak sesuai"
       ], 400);
     }
 
-    $admin->password = bcrypt($request->password);
-    $admin->updated_at = MyLib::getMillis();
-    $admin->save();
+    $admin->the_user->password = bcrypt($request->password);
+    $admin->the_user->updated_at = date("Y-m-d H:i:s");
+    $admin->the_user->save();
 
     return response()->json([
       "message" => "Kata sandi berhasil diubah",
