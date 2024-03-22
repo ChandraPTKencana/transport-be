@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('username',50)->unique();
             $table->string('password',255);
             $table->string('hak_akses',50);
-            $table->string('status',1);
+            $table->string('status',1)->default("Y");
             $table->timestamps();
         });
     }

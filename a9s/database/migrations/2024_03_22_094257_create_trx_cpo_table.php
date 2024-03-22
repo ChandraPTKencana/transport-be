@@ -13,22 +13,27 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('is_uj', function (Blueprint $table) {
+        Schema::create('trx_cpo', function (Blueprint $table) {
             $table->id();
+            $table->date('tanggal');            
             $table->string('xto',50);
-            $table->string('tipe',50);
-            $table->string('jenis',50);
-
-            $table->foreignId('created_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreignId('updated_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
-            $table->timestamps();
-            
-            $table->decimal('harga',18);
-
-            $table->string('status',1)->default("Y");
+            $table->foreignId('id_uj')->references('id')->on('is_uj')->onDelete('restrict')->onUpdate('cascade');
+            $table->bigInteger('pv');
+            $table->bigInteger('tiketa');
+            $table->bigInteger('tiketb');
+            $table->bigInteger('bruto');
+            $table->bigInteger('tara');
+            $table->bigInteger('netto');
             $table->string('val',1)->default("N");
             $table->foreignId('val_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamp('val_date')->nullable();
+            $table->bigInteger('print');
+            
+            $table->foreignId('created_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('updated_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
+            $table->timestamps();
+
+            $table->string('status',1)->default("Y");
         });
     }
 
@@ -39,6 +44,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('is_uj');
+        Schema::dropIfExists('trx_cpo');
     }
 };

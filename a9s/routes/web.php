@@ -43,6 +43,10 @@ Route::get('/', function () {
 
 
     Route::get('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'index']);
+    Route::get('/ujalan_', [\App\Http\Controllers\Ujalan\UjalanController::class, 'show']);
+    Route::post('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'store']);
+    Route::put('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'update']);
+    Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
 
 // Route::prefix("stok/api")->group(function(){
 

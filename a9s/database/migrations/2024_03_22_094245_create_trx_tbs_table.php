@@ -13,22 +13,28 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('is_ujdetails', function (Blueprint $table) {
+        Schema::create('trx_tbs', function (Blueprint $table) {
             $table->id();
+            $table->date('tanggal');            
+            $table->string('xto',50);
             $table->foreignId('id_uj')->references('id')->on('is_uj')->onDelete('restrict')->onUpdate('cascade');
-
-            $table->string('xdesc',50);
-            $table->decimal('qty',18);
-            $table->decimal('harga',18);
-
+            $table->string('nopol',12);
+            $table->bigInteger('pv');
+            $table->bigInteger('tiketa');
+            $table->bigInteger('tiketb');
+            $table->bigInteger('bruto');
+            $table->bigInteger('tara');
+            $table->bigInteger('netto');
+            $table->string('val',1)->default("N");
+            $table->foreignId('val_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
+            $table->timestamp('val_date')->nullable();
+            $table->bigInteger('print');
+            
             $table->foreignId('created_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->foreignId('updated_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
 
             $table->string('status',1)->default("Y");
-
-            $table->integer("ordinal");
-            $table->boolean('p_change')->default(false);
         });
     }
 
@@ -39,6 +45,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('is_ujdetails');
+        Schema::dropIfExists('trx_tbs');
     }
 };
