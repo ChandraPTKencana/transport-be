@@ -46,7 +46,7 @@ class TrxLoadDataController extends Controller
 
       $list_ticket = $connectionDB->table("palm_tickets")
       ->select('*')
-      ->limit(2)->get()->toArray();
+      ->limit(2)->get();
 
       // foreach($list_ticket as $row){
       //   foreach($row as $key=>$value){
@@ -68,7 +68,10 @@ class TrxLoadDataController extends Controller
       // $dataArray=json_encode($list_ticket->toArray(),true);
       // $x = $this->objectToArray($list_ticket);
       // $x=json_decode(json_encode($list_ticket), true);
-      dd(json_encode($list_ticket));
+      $x= $list_ticket->map(function ($item) {
+        return array_map('utf8_encode', (array)$item);
+    })->toArray();
+
       
     }
     return response()->json([
