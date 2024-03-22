@@ -34,7 +34,7 @@ Route::get('/', function () {
 
     Route::post('/login', [\App\Http\Controllers\User\UserAccount::class, 'login']);
     Route::post('/logout', [\App\Http\Controllers\User\UserAccount::class, 'logout']);
-    // Route::put('/change_password', [\App\Http\Controllers\Internal\User\UserAccount::class, 'change_password']);
+    Route::put('/change_password', [\App\Http\Controllers\User\UserAccount::class, 'change_password']);
   
     Route::get('/check_user', [\App\Http\Controllers\User\UserAccount::class, 'checkUser']);
     Route::get('/profile', [\App\Http\Controllers\User\UserAccount::class, 'dataUser']);
