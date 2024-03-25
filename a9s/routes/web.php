@@ -50,7 +50,11 @@ Route::get('/', function () {
 
 
     Route::get('/trx_cpos', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'index']);
-    Route::get('/trx_load_data', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'index']);
+    Route::get('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'show']);
+    Route::post('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'store']);
+    Route::put('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'update']);
+    Route::delete('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'delete']);
+    Route::get('/trx_load_for_cpo', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'cpo']);
 
 // Route::prefix("stok/api")->group(function(){
 

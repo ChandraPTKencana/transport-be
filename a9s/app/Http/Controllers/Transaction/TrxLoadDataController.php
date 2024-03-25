@@ -33,73 +33,76 @@ class TrxLoadDataController extends Controller
     // $this->admin = MyAdmin::user();
   }
 
-  public function index(Request $request)
+  public function cpo(Request $request)
   {
     $connectionDB = DB::connection('sqlsrv');
+
+    // $list_ticket = $connectionDB->table("palm_tickets")
+    // ->select('*')
+    // ->first();
+
+    // $nlt = [];
+    // foreach((array)$list_ticket as $key=>$val){
+    //   $nlt[$key]=mb_convert_encoding($val, 'UTF-8');
+    // }
+    
 
     $list_ticket=[];
     $list_pv=[];
 
-    $list_ujalan = \App\Models\MySql\Ujalan::get();
+    $list_ujalan = \App\Models\MySql\Ujalan::where("jenis","CPO")->get();
 
     if($connectionDB->getPdo()){
 
+      $date = now()->subDays(7);
+
       $list_ticket = $connectionDB->table("palm_tickets")
-      ->select('*')
-      ->limit(2)->get();
+      // ->select('*')
+      ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo')
+      ->whereDate('Date','>=', $date)
+      ->whereIn('ProductName',["CPO","PK"]) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+      // ->whereIn('ProductName',["RTBS","MTBS","CPO","PK"]) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+      // ->limit(1)
+      ->get();
 
-      // foreach($list_ticket as $row){
-      //   foreach($row as $key=>$value){
-      //     $row->$key=mb_convert_encoding($value,'UTF-8','auto');
-      //   }
-      // }
-
-      // $encoding = mb_detect_encoding($list_ticket, 'UTF-8', true);
-
-      // if ($encoding !== 'UTF-8') {
-      //     $list_ticket = mb_convert_encoding($list_ticket, 'UTF-8', $encoding);
-      // }
-
-      // $usersArray = array_map('get_object_vars', $list_ticket);
-
-      // dd(get_object_vars($list_ticket[0]));
-      // dd($list_ticket[1]->TicketID);
-      // $dataArray = mb_convert_encoding($list_ticket->toArray(), 'UTF-8', 'UTF-8');
-      // $dataArray=json_encode($list_ticket->toArray(),true);
-      // $x = $this->objectToArray($list_ticket);
-      // $x=json_decode(json_encode($list_ticket), true);
-      $x= $list_ticket->map(function ($item) {
+      $list_ticket= $list_ticket->map(function ($item) {
         return array_map('utf8_encode', (array)$item);
-    })->toArray();
+      })->toArray();
+
+
+      $list_pv = $connectionDB->table("fi_arap")
+      // ->select('*')
+      ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
+      ->whereDate('VoucherDate','>=', $date)
+      ->where('VoucherType',"TRP")
+      ->where("IsAR",0)
+      ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
+      ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
+      ->get();
+
+      $list_pv= $list_pv->map(function ($item) {
+        return array_map('utf8_encode', (array)$item);
+      })->toArray();
+
+      // $list_pv = $connectionDB->table("fi_arapextraitems")
+      // ->select('*')
+      // // ->select('VoucherID','VoucherNo','Date','VoucherDate','AmountPaid','Tara','Netto')
+      // // ->whereDate('VoucherDate','>=', $date)
+      // // ->where('VoucherType',"TRP")
+      // ->where('VoucherID',"791")
+      // ->get();
+
+      // $list_pv= $list_pv->map(function ($item) {
+      //   return array_map('utf8_encode', (array)$item);
+      // })->toArray();
+
 
       
     }
     return response()->json([
-      // "list_ujalan" => $list_ujalan,
-      "list_ticket" => $x,
-      // "list_pv" => $list_pv,
+      "list_ujalan" => $list_ujalan,
+      "list_ticket" => $list_ticket,
+      "list_pv" => $list_pv,
     ], 200);
   }
-
-
-  function objectToArray($d) 
-{
-    if (is_object($d)) {
-        // Gets the properties of the given object
-        // with get_object_vars function
-        $d = get_object_vars($d);
-    }
-
-    if (is_array($d)) {
-        /*
-        * Return array converted to object
-        * Using __FUNCTION__ (Magic constant)
-        * for recursive call
-        */
-        return array_map(__FUNCTION__, $d);
-    } else {
-        // Return array
-        return $d;
-    }
-}
 }

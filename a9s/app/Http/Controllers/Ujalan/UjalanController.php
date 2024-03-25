@@ -275,7 +275,7 @@ class UjalanController extends Controller
 
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
-    
+    $rollback_id = -1;
     DB::beginTransaction();
     try {
       $t_stamp = date("Y-m-d H:i:s");
@@ -296,6 +296,7 @@ class UjalanController extends Controller
       $model_query->updated_user    = $this->admin_id;
 
       $model_query->save();
+      $rollback_id = $model_query->id - 1;
 
       $ordinal=0;
       $unique_items = [];
@@ -332,6 +333,10 @@ class UjalanController extends Controller
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
+
+      if($rollback_id>-1)
+      DB::statement("ALTER TABLE is_uj AUTO_INCREMENT = $rollback_id");
+      
       return response()->json([
         "message" => $e->getMessage(),
       ], 400);

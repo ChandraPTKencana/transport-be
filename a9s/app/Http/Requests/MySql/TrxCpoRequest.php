@@ -31,9 +31,11 @@ class TrxCpoRequest extends FormRequest
             $rules['id'] = 'required|exists:App\Models\MySql\TrxCpo,id';
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
+            $rules['tanggal'] = 'required|date_format:Y-m-d';
             $rules['xto'] = 'required|max:50';
             $rules['tipe'] = 'required|max:50';
-            $rules['jenis'] = 'required|max:50';
+            $rules['supir'] = 'required|max:255';
+            $rules['no_pol'] = 'required|max:12';
         }
         return $rules;
     }
@@ -46,13 +48,16 @@ class TrxCpoRequest extends FormRequest
             'id.exists' => 'ID tidak terdaftar',
 
             'xto.required' => 'To tidak boleh kosong',
-            'xto.max' => 'To Maksimal 50 Karakter',
+            'xto.max' => 'To tidak boleh melebihi 50 karakter',
 
             'tipe.required' => 'Tipe tidak boleh kosong',
-            'tipe.max' => 'Tipe Maksimal 50 Karakter',
+            'tipe.max' => 'Tipe tidak boleh melebihi 50 karakter',
 
-            'jenis.required' => 'Jenis tidak boleh kosong',
-            'jenis.max' => 'Jenis Maksimal 50 Karakter',
+            'supir.required' => 'Supir tidak boleh kosong',
+            'supir.max' => 'Supir tidak boleh melebihi 50 karakter',
+
+            'no_pol.required' => 'No Pol tidak boleh kosong',
+            'no_pol.max' => 'No Pol tidak boleh melebihi 50 karakter',
 
         ];
     }

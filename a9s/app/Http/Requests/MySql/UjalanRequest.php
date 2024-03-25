@@ -33,7 +33,7 @@ class UjalanRequest extends FormRequest
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['xto'] = 'required|max:50';
             $rules['tipe'] = 'required|max:50';
-            $rules['jenis'] = 'required|max:50';
+            $rules['jenis'] = 'required|in:CPO,TBS';
         }
         return $rules;
     }
@@ -52,7 +52,7 @@ class UjalanRequest extends FormRequest
             'tipe.max' => 'Tipe Maksimal 50 Karakter',
 
             'jenis.required' => 'Jenis tidak boleh kosong',
-            'jenis.max' => 'Jenis Maksimal 50 Karakter',
+            'jenis.in' => 'Jenis Harap Dipilih',
 
         ];
     }
