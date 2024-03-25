@@ -209,7 +209,7 @@ class TrxCpoController extends Controller
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Data tidak terdaftar");
+      throw new \Exception("Data tidak terdaftar",1);
 
       $model_query->id_uj           = $ujalan->id;
       $model_query->xto             = $ujalan->xto;
@@ -226,11 +226,11 @@ class TrxCpoController extends Controller
         ->first();
 
         if(!$get_data_pv) 
-        throw new \Exception("Data PV tidak terdaftar");
+        throw new \Exception("Data PV tidak terdaftar",1);
         
         $model_query->pv_id =  $request->pv_id;
         if(\App\Models\MySql\TrxCpo::where("pv_id",$get_data_pv->VoucherID)->first())
-        throw new \Exception("Data PV telah digunakan");
+        throw new \Exception("Data PV telah digunakan",1);
 
         $model_query->pv_no =  $get_data_pv->VoucherNo;
         $model_query->pv_total =  $get_data_pv->total_amount;
@@ -246,10 +246,10 @@ class TrxCpoController extends Controller
         ->first();
 
         if(!$get_data_ticket) 
-        throw new \Exception("Data Ticket tidak terdaftar");
+        throw new \Exception("Data Ticket tidak terdaftar",1);
 
         if(\App\Models\MySql\TrxCpo::where("ticket_id",$get_data_ticket->TicketID)->first())
-        throw new \Exception("Data Ticket telah digunakan");
+        throw new \Exception("Data Ticket telah digunakan",1);
 
         $model_query->ticket_id =  $request->ticket_id;
         $model_query->ticket_no =  $get_data_ticket->TicketNo;
@@ -285,11 +285,11 @@ class TrxCpoController extends Controller
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
-      return response()->json([
-        "message" => $e->getMessage(),
-        "code" => $e->getCode(),
-        "line" => $e->getLine(),
-      ], 400);
+      // return response()->json([
+      //   "message" => $e->getMessage(),
+      //   "code" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      // ], 400);
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
@@ -310,7 +310,7 @@ class TrxCpoController extends Controller
     DB::beginTransaction();
     try {
       $model_query             = TrxCpo::where("id",$request->id)->lockForUpdate()->first();
-      if($model_query->val==1) 
+      if($model_query->val==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
       $model_query->tanggal         = $request->tanggal;
@@ -321,7 +321,7 @@ class TrxCpoController extends Controller
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Data tidak terdaftar");
+      throw new \Exception("Data tidak terdaftar",1);
 
       $model_query->id_uj           = $ujalan->id;
       $model_query->xto             = $ujalan->xto;
@@ -338,11 +338,11 @@ class TrxCpoController extends Controller
         ->first();
 
         if(!$get_data_pv) 
-        throw new \Exception("Data PV tidak terdaftar");
+        throw new \Exception("Data PV tidak terdaftar",1);
         
         if(\App\Models\MySql\TrxCpo::where("pv_id",$get_data_pv->VoucherID)
         ->where("id","!=",$model_query->id)->first())
-        throw new \Exception("Data PV telah digunakan");
+        throw new \Exception("Data PV telah digunakan",1);
 
 
         $model_query->pv_id =  $request->pv_id;
@@ -360,11 +360,11 @@ class TrxCpoController extends Controller
         ->first();
 
         if(!$get_data_ticket) 
-        throw new \Exception("Data Ticket tidak terdaftar");
+        throw new \Exception("Data Ticket tidak terdaftar",1);
 
         if(\App\Models\MySql\TrxCpo::where("ticket_id",$get_data_ticket->TicketID)
         ->where("id","!=",$model_query->id)->first())
-        throw new \Exception("Data Ticket telah digunakan");
+        throw new \Exception("Data Ticket telah digunakan",1);
 
         $model_query->ticket_id =  $request->ticket_id;
         $model_query->ticket_no =  $get_data_ticket->TicketNo;
@@ -399,11 +399,11 @@ class TrxCpoController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);
@@ -425,14 +425,14 @@ class TrxCpoController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if($model_query->val==1) 
+      if($model_query->val==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
-      $model_query->update([
-        "deleted"=>"Y",
-        "deleted_user"=>$this->admin_id,
-        "deleted_at"=>date("Y-m-d H:i:s"),
-      ]);
+
+      $model_query->deleted = 1;
+      $model_query->deleted_user = $this->admin_id;
+      $model_query->deleted_at = date("Y-m-d H:i:s");
+      $model_query->save();
 
       DB::commit();
       return response()->json([
@@ -450,7 +450,11 @@ class TrxCpoController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses hapus data gagal",
       ], 400);
