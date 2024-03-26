@@ -1,0 +1,55 @@
+@font-face {
+  font-family: "MavenPro-Normal";
+  src: local("MavenPro-Normal"),
+    url('fonts/Maven_Pro/MavenPro-VariableFont_wght.ttf') format("truetype");
+}
+
+.mavenpro {
+  font-family: "MavenPro-Normal" !important;
+  /* font-weight: bold; */
+  margin: 0px;
+  padding: 0px;
+  line-height: 20px;
+}
+
+@font-face {
+  font-family: "MavenPro-Black";
+  src: local("MavenPro-Black"),
+    url('fonts/Maven_Pro/static/MavenPro-Black.ttf') format("truetype");
+}
+
+.mavenpro-black {
+  font-family: "MavenPro-Black" !important;
+  /* font-weight: "bold"; */
+  /* font-weight: bolder; */
+  margin: 0px;
+  padding: 0px;
+  line-height: 20px;
+}
+
+@font-face {
+  font-family: "MavenPro-SemiBold";
+  src: local("MavenPro-SemiBold"),
+    url('fonts/Maven_Pro/static/MavenPro-SemiBold.ttf') format("truetype");
+}
+
+.mavenpro-semi-bold {
+  font-family: "MavenPro-SemiBold" !important;
+  /* font-weight: bold; */
+  margin: 0px;
+  padding: 0px;
+  line-height: 20px;
+}
+
+/* @font-face {
+  font-family: "MavenPro-Black";
+  src: local("MavenPro-Black"),
+    url('fonts/Maven_Pro/static/MavenPro-Black.ttf') format("truetype");
+}
+
+.mavenpro-black {
+  font-family: "MavenPro-Black" !important;
+  margin: 0px;
+  padding: 0px;
+  line-height: 20px;
+} */

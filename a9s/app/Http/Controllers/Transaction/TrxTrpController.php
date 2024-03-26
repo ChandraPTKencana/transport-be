@@ -20,8 +20,9 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Image;
 use File;
-use App\Http\Resources\IsUserResource;
+use PDF;
 
+use App\Http\Resources\IsUserResource;
 class TrxTrpController extends Controller
 {
   private $admin;
@@ -34,7 +35,7 @@ class TrxTrpController extends Controller
     $this->admin_id = $this->admin->the_user->id;
   }
 
-  public function index(Request $request)
+  public function index(Request $request, $download = false)
   {
  
     //======================================================================================================
@@ -64,7 +65,10 @@ class TrxTrpController extends Controller
     //======================================================================================================
     // Init Model
     //======================================================================================================
-    $model_query = TrxTrp::offset($offset)->limit($limit);
+    $model_query = new TrxTrp();
+    if (!$download) {
+      $model_query = $model_query->offset($offset)->limit($limit);
+    }
 
     $first_row=[];
     if($request->first_row){
@@ -505,5 +509,91 @@ class TrxTrpController extends Controller
       //throw $th;
     }
   }
+
+function previewFile(Request $request){
+  // set_time_limit(0);
+
+  // $rules = [
+  //   'date_from' => "required|date_format:Y-m-d H:i:s",
+  // ];
+
+  // $messages = [
+  //   'date_from.required' => 'Date From is required',
+  //   'date_from.date_format' => 'Please Select Date From',
+  // ];
+
+  // $validator = \Validator::make($request->all(), $rules, $messages);
+
+  // if ($validator->fails()) {
+  //   throw new ValidationException($validator);
+  // }
+
+
+  // // Change some request value
+  // $request['period'] = "Daily";
+
+  // $date_from = $request->date_from;
+  // $d_from = date("Y-m", MyLib::manualMillis($date_from) / 1000) . "-01 00:00:00";
+  // $date_f = new \DateTime($d_from);
+
+  // $start = clone $date_f;
+  // $start->add(new \DateInterval('P1M'));
+  // $start->sub(new \DateInterval('P1D'));
+  // $x = $start->format("Y-m-d H:i:s");
+
+  // $request['date_from'] = $d_from;
+  // $request['date_to'] = $x;
+  // return response()->json(["data"=>[$d_from,$x]],200);
+
+  set_time_limit(0);
+  $callGet = $this->index($request, true);
+  if ($callGet->getStatusCode() != 200) return $callGet;
+  $ori = json_decode(json_encode($callGet), true)["original"];
+  $data = $ori["data"];
+  
+  // $additional = $ori["additional"];
+
+
+  // $date = new \DateTime();
+  // $filename = $date->format("YmdHis") . "-" . $additional["company_name"] . "[" . $additional["date_from"] . "-" . $additional["date_to"] . "]";
+  // // $filename=$date->format("YmdHis");
+
+  // // return response()->json(["message"=>$filename],200);
+
+  // $mime = MyLib::mime("csv");
+  // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.sensor_get_data_by_location'), $mime["exportType"]));
+  // $mime = MyLib::mime("xlsx");
+  // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.tracking_info2'), $mime["exportType"]));
+
+  
+
+  // $sendData = [
+  //   'pag_no'  => $pag->no,
+  //   'created_at'    => $pag->created_at,
+  //   'updated_at'    => $pag->updated_at,
+  //   'proyek'  => $pag->project ?? "",
+  //   'need'    => $pag->need,
+  //   'part'    => $pag->part,
+  //   'datas'   => $pag->pag_details,
+  //   'title'   => "PENGAMBILAN BARANG GUDANG (PAG)"
+  // ];
+  // dd($sendData);
+  $date = new \DateTime();
+  $filename = $date->format("YmdHis");
+  Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+  $pdf = PDF::loadView('pdf.trx_trp', $ori)->setPaper('a4', 'landscape');
+
+
+  $mime = MyLib::mime("pdf");
+  $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+
+  $result = [
+    "contentType" => $mime["contentType"],
+    "data" => $bs64,
+    "dataBase64" => $mime["dataBase64"] . $bs64,
+    "filename" => $filename . "." . $mime["ext"],
+  ];
+  return $result;
+}
 
 }

@@ -101,3 +101,14 @@ if (!function_exists('mct')) {
         }
     }
 }
+
+
+if (!function_exists('block_negative')) {
+    function block_negative($realnumber)
+    {
+        if($realnumber<0) 
+            return "(".number_format($realnumber*-1, 0,',','.').")";
+        else
+            return number_format($realnumber, 0,',','.');
+    }
+}

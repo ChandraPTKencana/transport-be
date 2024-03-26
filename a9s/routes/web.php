@@ -49,19 +49,12 @@ Route::get('/', function () {
     Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
 
 
-    Route::get('/trx_cpos', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'index']);
-    Route::get('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'show']);
-    Route::post('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'store']);
-    Route::put('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'update']);
-    Route::delete('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'delete']);
-    Route::get('/trx_load_for_cpo', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'cpo']);
-
-
     Route::get('/trx_trps', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'index']);
     Route::get('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'show']);
     Route::post('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'store']);
     Route::put('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'update']);
     Route::delete('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete']);
+    Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFile']);
     Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'trp']);
 
     // Route::prefix("stok/api")->group(function(){
