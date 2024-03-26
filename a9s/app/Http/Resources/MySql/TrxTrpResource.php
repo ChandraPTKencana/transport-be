@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Http\Resources\MySql;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\IsUserResource;
+
+class TrxTrpResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
+     */
+    public function toArray($request)
+    {
+        // return parent::toArray($request);
+        return [
+            'id'                => $this->id,
+            'tanggal'           => $this->tanggal,
+
+            'id_uj'             => $this->id_uj,
+            'jenis'               => $this->jenis,
+            'xto'               => $this->xto,
+            'tipe'              => $this->tipe,
+            'amount'            => $this->amount,
+
+            'pv_id'             => $this->pv_id,
+            'pv_no'             => $this->pv_no,
+            'pv_total'          => $this->pv_total,
+
+            'ticket_a_id'           => $this->ticket_a_id,
+            'ticket_a_no'           => $this->ticket_a_no,
+            'ticket_a_bruto'        => $this->ticket_a_bruto,
+            'ticket_a_tara'         => $this->ticket_a_tara,
+            'ticket_a_netto'        => $this->ticket_a_netto,
+            'ticket_a_supir'        => $this->ticket_a_supir,
+            'ticket_a_no_pol'        => $this->ticket_a_no_pol,
+
+            'ticket_b_id'           => $this->ticket_b_id,
+            'ticket_b_no'           => $this->ticket_b_no,
+            'ticket_b_bruto'        => $this->ticket_b_bruto,
+            'ticket_b_tara'         => $this->ticket_b_tara,
+            'ticket_b_netto'        => $this->ticket_b_netto,
+            'ticket_b_supir'        => $this->ticket_b_supir,
+            'ticket_b_no_pol'        => $this->ticket_b_no_pol,
+
+            'supir'             => $this->supir,
+            'no_pol'            => $this->no_pol,
+
+            'val'               => $this->val,
+            'val_user'          => $this->val_user,
+            'val_date'          => $this->val_date,
+            'print'             => $this->print,
+
+            'created_user'      => $this->created_user,
+            'updated_user'      => $this->updated_user,
+            'created_at'        => $this->created_at,
+            'updated_at'        => $this->updated_at,
+
+            'deleted'           => $this->deleted,
+            'deleted_user'      => $this->deleted_user,
+            'deleted_at'        => $this->deleted_at,
+        ];
+    }
+}

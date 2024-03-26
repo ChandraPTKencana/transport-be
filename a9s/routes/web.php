@@ -56,7 +56,15 @@ Route::get('/', function () {
     Route::delete('/trx_cpo', [\App\Http\Controllers\Transaction\TrxCpoController::class, 'delete']);
     Route::get('/trx_load_for_cpo', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'cpo']);
 
-// Route::prefix("stok/api")->group(function(){
+
+    Route::get('/trx_trps', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'index']);
+    Route::get('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'show']);
+    Route::post('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'store']);
+    Route::put('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'update']);
+    Route::delete('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete']);
+    Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'trp']);
+
+    // Route::prefix("stok/api")->group(function(){
 
 //     // Route::post('login', function () {
 //     //     return response()->json(["error"],400);
