@@ -179,6 +179,21 @@ class TrxTrpController extends Controller
     // Model Filter
     // ==============
     
+    if($request->date_from){
+      $date_from = $request->date_from;
+      if(!strtotime($date_from))
+      throw new MyException(["message" => ["date_from"=>["Format Date From Tidak Cocok"]]], 400);
+      
+      $date_to = $request->date_to;
+      if(!$date_to)
+      throw new MyException(["message" => ["date_to"=>["Date To harus diisi"]]], 400);
+
+      if(!strtotime($date_to))
+      throw new MyException(["message" => ["date_to"=>["Format Date To Tidak Cocok"]]], 400);
+      
+      $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
+    }
+
     $model_query = $model_query->where("deleted",0)->get();
 
     return response()->json([
@@ -244,9 +259,15 @@ class TrxTrpController extends Controller
       if($request->ticket_a_id){
 
         $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo')
-        ->where("TicketID",$request->ticket_a_id)
-        ->first();
+        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+        ->where("TicketID",$request->ticket_a_id);
+
+        if($request->jenis=="CPO"){
+          $get_data_ticket =$get_data_ticket->whereIn('ProductName',["CPO","PK"]);
+        }else{ 
+          $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
+        }
+        $get_data_ticket =$get_data_ticket->first();
 
         if(!$get_data_ticket) 
         throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -261,13 +282,16 @@ class TrxTrpController extends Controller
         $model_query->ticket_a_netto =  $get_data_ticket->Netto;
         $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
+        $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
+        $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;
       }
 
       if($request->ticket_b_id){
 
         $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo')
+        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
         ->where("TicketID",$request->ticket_b_id)
+        ->where('ProductName',"RTBS")
         ->first();
 
         if(!$get_data_ticket) 
@@ -283,10 +307,14 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_netto =  $get_data_ticket->Netto;
         $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
+        $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
+        $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
       }else{
         $model_query->ticket_b_bruto =  $request->ticket_b_bruto;
         $model_query->ticket_b_tara =  $request->ticket_b_tara;
         $model_query->ticket_b_netto =  $request->ticket_b_netto;
+        $model_query->ticket_b_in_at =  $request->ticket_b_in_at;
+        $model_query->ticket_b_out_at =  $request->ticket_b_out_at;
       }
 
       $model_query->supir=$request->supir;
@@ -380,9 +408,15 @@ class TrxTrpController extends Controller
       if($request->ticket_a_id){
 
         $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo')
-        ->where("TicketID",$request->ticket_a_id)
-        ->first();
+        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+        ->where("TicketID",$request->ticket_a_id);
+        if($request->jenis=="CPO"){
+          $get_data_ticket =$get_data_ticket->whereIn('ProductName',["CPO","PK"]);
+        }else{ 
+          $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
+        }
+        $get_data_ticket =$get_data_ticket->first();
+
 
         if(!$get_data_ticket) 
         throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -398,14 +432,16 @@ class TrxTrpController extends Controller
         $model_query->ticket_a_netto =  $get_data_ticket->Netto;
         $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
-        
+        $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
+        $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;       
       }
 
       if($request->ticket_b_id){
 
         $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo')
+        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
         ->where("TicketID",$request->ticket_b_id)
+        ->where('ProductName',"RTBS")
         ->first();
 
         if(!$get_data_ticket) 
@@ -422,10 +458,14 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_netto =  $get_data_ticket->Netto;
         $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
+        $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
+        $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
       }else{
         $model_query->ticket_b_bruto =  $request->ticket_b_bruto;
         $model_query->ticket_b_tara =  $request->ticket_b_tara;
         $model_query->ticket_b_netto =  $request->ticket_b_netto;
+        $model_query->ticket_b_in_at =  $request->ticket_b_in_at;
+        $model_query->ticket_b_out_at =  $request->ticket_b_out_at;
       }
 
       $model_query->supir=$request->supir;

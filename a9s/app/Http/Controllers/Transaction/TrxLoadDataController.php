@@ -122,7 +122,7 @@ class TrxLoadDataController extends Controller
 
       $list_ticket = $connectionDB->table("palm_tickets")
       // ->select('*')
-      ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName')
+      ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
       ->whereDate('Date','>=', $date)
       ->whereIn('ProductName',["RTBS","MTBS","CPO","PK"]) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
       // ->limit(1)
@@ -131,7 +131,6 @@ class TrxLoadDataController extends Controller
       $list_ticket= $list_ticket->map(function ($item) {
         return array_map('utf8_encode', (array)$item);
       })->toArray();
-
 
       $list_pv = $connectionDB->table("fi_arap")
       // ->select('*')

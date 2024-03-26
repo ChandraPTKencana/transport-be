@@ -21,7 +21,7 @@ class TrxTrpResource extends JsonResource
             'tanggal'           => $this->tanggal,
 
             'id_uj'             => $this->id_uj,
-            'jenis'               => $this->jenis,
+            'jenis'             => $this->jenis,
             'xto'               => $this->xto,
             'tipe'              => $this->tipe,
             'amount'            => $this->amount,
@@ -37,6 +37,8 @@ class TrxTrpResource extends JsonResource
             'ticket_a_netto'        => $this->ticket_a_netto,
             'ticket_a_supir'        => $this->ticket_a_supir,
             'ticket_a_no_pol'        => $this->ticket_a_no_pol,
+            'ticket_a_in_at'        => $this->ticket_a_in_at,
+            'ticket_a_out_at'        => $this->ticket_a_out_at,
 
             'ticket_b_id'           => $this->ticket_b_id,
             'ticket_b_no'           => $this->ticket_b_no,
@@ -45,6 +47,8 @@ class TrxTrpResource extends JsonResource
             'ticket_b_netto'        => $this->ticket_b_netto,
             'ticket_b_supir'        => $this->ticket_b_supir,
             'ticket_b_no_pol'        => $this->ticket_b_no_pol,
+            'ticket_b_in_at'        => $this->ticket_b_in_at,
+            'ticket_b_out_at'        => $this->ticket_b_out_at,
 
             'supir'             => $this->supir,
             'no_pol'            => $this->no_pol,

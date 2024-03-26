@@ -34,6 +34,8 @@ return new class extends Migration
             $table->bigInteger('ticket_a_netto')->nullable();
             $table->string('ticket_a_supir',255)->nullable();
             $table->string('ticket_a_no_pol',12)->nullable();
+            $table->timestamp('ticket_a_in_at')->nullable();
+            $table->timestamp('ticket_a_out_at')->nullable();
 
             $table->bigInteger('ticket_b_id')->nullable();
             $table->string('ticket_b_no',255)->nullable();
@@ -42,6 +44,8 @@ return new class extends Migration
             $table->bigInteger('ticket_b_netto')->nullable();
             $table->string('ticket_b_supir',255)->nullable();
             $table->string('ticket_b_no_pol',12)->nullable();
+            $table->timestamp('ticket_b_in_at')->nullable();
+            $table->timestamp('ticket_b_out_at')->nullable();
 
             $table->string('supir',255);
             $table->string('no_pol',12);

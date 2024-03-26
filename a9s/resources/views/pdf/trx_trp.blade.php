@@ -14,8 +14,11 @@
   <link rel="stylesheet" href="{{asset('mycss.css')}}">
 
   <style>
-    @page {
+    /* @page {
       margin: 90px 15px 22px 15px;
+    } */
+    @page {
+      margin: 10px 15px 22px 15px;
     }
 
     .line table,
@@ -82,6 +85,8 @@
             <th rowspan="2" style="border: 1px solid black;">No Pol</th>
             <th rowspan="2" style="border: 1px solid black;">Spec</th>
             <th rowspan="2" style="border: 1px solid black;">Tujuan</th>
+            <th rowspan="2" style="border: 1px solid black;">Berangkat</th>
+            <th rowspan="2" style="border: 1px solid black;">Kembali</th>
             <th colspan="3" style="border: 1px solid black;">Bruto</th>
             <th colspan="3" style="border: 1px solid black;">Tara</th>
             <th colspan="3" style="border: 1px solid black;">Netto</th>
@@ -113,6 +118,8 @@
             <td>{{ $v["no_pol"] }}</td>
             <td>{{ $v["jenis"] }}</td>
             <td>{{ $v["xto"] }}</td>
+            <td>{{ date("d-m-Y H:i",strtotime($v["ticket_a_out_at"])) }}</td>
+            <td>{{ date("d-m-Y H:i",strtotime($v["ticket_b_in_at"])) }}</td>
             <td>{{ number_format($v["ticket_a_bruto"], 0,',','.') }}</td>
             <td>{{ number_format($v["ticket_b_bruto"], 0,',','.') }}</td>
             <td>{{ block_negative($v["ticket_a_bruto"] - $v["ticket_b_bruto"])  }}</td>
@@ -122,10 +129,9 @@
             <td>{{ number_format($v["ticket_a_netto"], 0,',','.') }}</td>
             <td>{{ number_format($v["ticket_b_netto"], 0,',','.') }}</td>
             <td>{{ block_negative($v["ticket_a_netto"] - $v["ticket_b_netto"]) }}</td>
-            <td>?</td>
+            <td>{{ number_format(($v["ticket_a_netto"] - $v["ticket_b_netto"])/$v["ticket_a_bruto"] * 100, 2,',','.') }}</td>
             <td>{{ number_format($v["amount"], 0,',','.') }}</td>
             <td>{{ number_format($v["pv_total"], 0,',','.') }}</td>
-
           </tr>
           
           @endforeach
