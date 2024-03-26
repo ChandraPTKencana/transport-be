@@ -118,13 +118,13 @@ class TrxLoadDataController extends Controller
 
     if($connectionDB->getPdo()){
 
-      $date = now()->subDays(20);
+      $date = now()->subDays(60);
 
       $list_ticket = $connectionDB->table("palm_tickets")
       // ->select('*')
       ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
       ->whereDate('Date','>=', $date)
-      ->whereIn('ProductName',["RTBS","MTBS","CPO","PK"]) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+      ->whereIn('ProductName',["RTBS","MTBS","CPO","KERNEL"]) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
       // ->limit(1)
       ->get();
 
@@ -134,12 +134,12 @@ class TrxLoadDataController extends Controller
 
       $list_pv = $connectionDB->table("fi_arap")
       // ->select('*')
-      ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
+      ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
       ->whereDate('VoucherDate','>=', $date)
       ->where('VoucherType',"TRP")
       ->where("IsAR",0)
       ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-      ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
+      ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
       ->get();
 
       $list_pv= $list_pv->map(function ($item) {

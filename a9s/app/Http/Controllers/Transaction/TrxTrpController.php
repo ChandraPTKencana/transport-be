@@ -203,7 +203,7 @@ class TrxTrpController extends Controller
 
   public function show(TrxTrpRequest $request)
   {
-    $model_query = TrxTrp::find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);

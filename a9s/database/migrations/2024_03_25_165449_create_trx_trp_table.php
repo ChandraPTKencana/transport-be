@@ -59,7 +59,7 @@ return new class extends Migration
             $table->foreignId('updated_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
 
-            $table->boolean('deleted',1)->default(0);
+            $table->boolean('deleted')->default(0);
             $table->foreignId('deleted_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamp('deleted_at')->nullable();
         });

@@ -20,7 +20,7 @@ class UjalanResource extends JsonResource
             'id'                => $this->id,
             'xto'               => $this->xto,
             'tipe'              => $this->tipe,
-            'status'            => $this->status,
+            // 'status'            => $this->status,
             'jenis'             => $this->jenis,
             'harga'             => $this->harga,
             'created_at'        => $this->created_at,

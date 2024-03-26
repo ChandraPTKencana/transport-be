@@ -25,7 +25,10 @@ return new class extends Migration
             
             $table->decimal('harga',18);
 
-            $table->string('status',1)->default("Y");
+            $table->boolean('deleted')->default(0);
+            $table->foreignId('deleted_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
+            $table->timestamp('deleted_at')->nullable();
+
             $table->string('val',1)->default("N");
             $table->foreignId('val_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamp('val_date')->nullable();
