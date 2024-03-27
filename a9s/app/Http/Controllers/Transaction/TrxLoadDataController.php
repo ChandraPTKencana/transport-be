@@ -118,7 +118,7 @@ class TrxLoadDataController extends Controller
 
     if($connectionDB->getPdo()){
 
-      $date = now()->subDays(60);
+      $date = now()->subDays(7);
 
       $list_ticket = $connectionDB->table("palm_tickets")
       // ->select('*')

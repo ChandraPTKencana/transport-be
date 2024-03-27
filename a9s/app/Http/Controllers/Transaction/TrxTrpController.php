@@ -258,7 +258,7 @@ class TrxTrpController extends Controller
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Data tidak terdaftar",1);
+      throw new \Exception("Silahkan pilih To atau Tipe yang telah di sediakan",1);
 
       $model_query->id_uj           = $ujalan->id;
       $model_query->jenis           = $ujalan->jenis;
@@ -403,7 +403,7 @@ class TrxTrpController extends Controller
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Data tidak terdaftar",1);
+      throw new \Exception("Silahkan pilih To atau Tipe yang telah di sediakan",1);
 
       $model_query->id_uj           = $ujalan->id;
       $model_query->jenis           = $ujalan->jenis;
@@ -601,20 +601,22 @@ class TrxTrpController extends Controller
       "total"=>$total,
     ];   
     
-    $date = new \DateTime();
-    $filename = $date->format("YmdHis");
-    Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
-    $pdf = PDF::loadView('pdf.trx_trp_ujalan', $sendData)->setPaper('a4', 'portrait');
+    // $date = new \DateTime();
+    // $filename = $date->format("YmdHis");
+    // Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+    // $pdf = PDF::loadView('pdf.trx_trp_ujalan', $sendData)->setPaper('a4', 'portrait');
+    
+    $html = view("html.trx_trp_ujalan",$sendData);
   
-  
-    $mime = MyLib::mime("pdf");
-    $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+    // $mime = MyLib::mime("pdf");
+    // $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
   
     $result = [
-      "contentType" => $mime["contentType"],
-      "data" => $bs64,
-      "dataBase64" => $mime["dataBase64"] . $bs64,
-      "filename" => $filename . "." . $mime["ext"],
+      // "contentType" => $mime["contentType"],
+      // "data" => $bs64,
+      // "dataBase64" => $mime["dataBase64"] . $bs64,
+      // "filename" => $filename . "." . $mime["ext"],
+      "html"=>$html->render()
     ];
     return $result;
   }

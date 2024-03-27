@@ -303,7 +303,7 @@ class UjalanController extends Controller
       foreach ($details_in as $key => $value) {
         $unique_data = $value['xdesc'];
         if (in_array(strtolower($unique_data), $unique_items) == 1) {
-          throw new \Exception("Maaf terdapat Item yang sama");
+          throw new \Exception("Maaf terdapat Item yang sama",1);
         }
         array_push($unique_items, strtolower($unique_data));
       }
@@ -422,7 +422,7 @@ class UjalanController extends Controller
       }, $data_from_db);
 
       if (count(array_diff($in_keys, $am_ordinal_db)) > 0 || count(array_diff($am_ordinal_db, $in_keys)) > 0) {
-          throw new Exception('Ada ketidak sesuaian data, harap hubungi staff IT atau refresh browser anda');
+          throw new Exception('Ada ketidak sesuaian data, harap hubungi staff IT atau refresh browser anda',1);
       }
 
       $id_items = [];
@@ -436,7 +436,7 @@ class UjalanController extends Controller
         
         if (in_array($v["p_status"], ["Add", "Edit"])) {
           if (in_array(strtolower($v['xdesc']), $id_items) == 1) {
-              throw new \Exception("Maaf terdapat Nama Item yang sama");
+              throw new \Exception("Maaf terdapat Nama Item yang sama",1);
           }
           array_push($id_items, strtolower($v['xdesc']));
         }
@@ -532,7 +532,7 @@ class UjalanController extends Controller
         if ($v["p_status"] == "Remove") {
 
             if ($index === false) {
-                throw new \Exception("Data yang ingin dihapus tidak ditemukan");
+                throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
             } else {
                 $dt = $data_from_db[$index];
                 // $has_permit = count(array_intersect(['ap-project_material_item-remove'], $scopes));
@@ -544,7 +544,7 @@ class UjalanController extends Controller
         } else if ($v["p_status"] == "Edit") {
 
             if ($index === false) {
-                throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k);
+                throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k,1);
             } else {
                 // $dt = $data_from_db[$index];
                 // $has_permit = count(array_intersect(['ap-project_material_item-edit'], $scopes));
