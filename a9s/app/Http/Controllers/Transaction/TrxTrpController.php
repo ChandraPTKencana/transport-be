@@ -91,19 +91,47 @@ class TrxTrpController extends Controller
         $sort_lists[$side[0]] = $side[1];
       }
 
-      // if (isset($sort_lists["id"])) {
-      //   $model_query = $model_query->orderBy("id", $sort_lists["id"]);
-      //   if (count($first_row) > 0) {
-      //     $model_query = $model_query->where("id",$sort_symbol,$first_row["id"]);
-      //   }
-      // }
+      if (isset($sort_lists["id"])) {
+        $model_query = $model_query->orderBy("id", $sort_lists["id"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("id",$sort_symbol,$first_row["id"]);
+        }
+      }
 
-      // if (isset($sort_lists["xto"])) {
-      //   $model_query = $model_query->orderBy("xto", $sort_lists["xto"]);
-      //   if (count($first_row) > 0) {
-      //     $model_query = $model_query->where("xto",$sort_symbol,$first_row["xto"]);
-      //   }
-      // }
+      if (isset($sort_lists["xto"])) {
+        $model_query = $model_query->orderBy("xto", $sort_lists["xto"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("xto",$sort_symbol,$first_row["xto"]);
+        }
+      }
+
+      if (isset($sort_lists["tipe"])) {
+        $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("tipe",$sort_symbol,$first_row["tipe"]);
+        }
+      }
+
+      if (isset($sort_lists["pv_no"])) {
+        $model_query = $model_query->orderBy("pv_no", $sort_lists["pv_no"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("pv_no",$sort_symbol,$first_row["pv_no"]);
+        }
+      }
+
+      if (isset($sort_lists["ticket_a_no"])) {
+        $model_query = $model_query->orderBy("ticket_a_no", $sort_lists["ticket_a_no"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("ticket_a_no",$sort_symbol,$first_row["ticket_a_no"]);
+        }
+      }
+
+      if (isset($sort_lists["ticket_b_no"])) {
+        $model_query = $model_query->orderBy("ticket_b_no", $sort_lists["ticket_b_no"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("ticket_b_no",$sort_symbol,$first_row["ticket_b_no"]);
+        }
+      }
 
       // if (isset($sort_lists["tipe"])) {
       //   $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
@@ -178,18 +206,20 @@ class TrxTrpController extends Controller
     // ==============
     // Model Filter
     // ==============
-    
-    if($request->date_from){
+    if($request->date_from || $request->date_to){
       $date_from = $request->date_from;
+      if(!$date_from)
+      throw new MyException([ "date_from" => ["Date From harus diisi"] ], 422);
+
       if(!strtotime($date_from))
-      throw new MyException(["message" => ["date_from"=>["Format Date From Tidak Cocok"]]], 400);
+      throw new MyException(["date_from"=>["Format Date From Tidak Cocok"]], 422);
       
       $date_to = $request->date_to;
       if(!$date_to)
-      throw new MyException(["message" => ["date_to"=>["Date To harus diisi"]]], 400);
+      throw new MyException([ "date_to" => ["Date To harus diisi"] ], 422);
 
       if(!strtotime($date_to))
-      throw new MyException(["message" => ["date_to"=>["Format Date To Tidak Cocok"]]], 400);
+      throw new MyException(["date_to"=>["Format Date To Tidak Cocok"]], 422);
       
       $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
     }
@@ -279,7 +309,7 @@ class TrxTrpController extends Controller
         $model_query->ticket_a_no =  $get_data_ticket->TicketNo;
         $model_query->ticket_a_bruto =  $get_data_ticket->Bruto;
         $model_query->ticket_a_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_a_netto =  $get_data_ticket->Netto;
+        $model_query->ticket_a_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
         $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
         $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
@@ -304,7 +334,7 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_no =  $get_data_ticket->TicketNo;
         $model_query->ticket_b_bruto =  $get_data_ticket->Bruto;
         $model_query->ticket_b_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_b_netto =  $get_data_ticket->Netto;
+        $model_query->ticket_b_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
         $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
         $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
@@ -312,7 +342,7 @@ class TrxTrpController extends Controller
       }else{
         $model_query->ticket_b_bruto =  $request->ticket_b_bruto;
         $model_query->ticket_b_tara =  $request->ticket_b_tara;
-        $model_query->ticket_b_netto =  $request->ticket_b_netto;
+        $model_query->ticket_b_netto =  $request->ticket_b_bruto - $request->ticket_b_tara;
         $model_query->ticket_b_in_at =  $request->ticket_b_in_at;
         $model_query->ticket_b_out_at =  $request->ticket_b_out_at;
       }
@@ -429,7 +459,7 @@ class TrxTrpController extends Controller
         $model_query->ticket_a_no =  $get_data_ticket->TicketNo;
         $model_query->ticket_a_bruto =  $get_data_ticket->Bruto;
         $model_query->ticket_a_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_a_netto =  $get_data_ticket->Netto;
+        $model_query->ticket_a_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
         $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
         $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
@@ -455,7 +485,7 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_no =  $get_data_ticket->TicketNo;
         $model_query->ticket_b_bruto =  $get_data_ticket->Bruto;
         $model_query->ticket_b_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_b_netto =  $get_data_ticket->Netto;
+        $model_query->ticket_b_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
         $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
         $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
         $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
@@ -463,7 +493,7 @@ class TrxTrpController extends Controller
       }else{
         $model_query->ticket_b_bruto =  $request->ticket_b_bruto;
         $model_query->ticket_b_tara =  $request->ticket_b_tara;
-        $model_query->ticket_b_netto =  $request->ticket_b_netto;
+        $model_query->ticket_b_netto =  $request->ticket_b_bruto - $request->ticket_b_tara;
         $model_query->ticket_b_in_at =  $request->ticket_b_in_at;
         $model_query->ticket_b_out_at =  $request->ticket_b_out_at;
       }
@@ -550,7 +580,46 @@ class TrxTrpController extends Controller
     }
   }
 
-function previewFile(Request $request){
+  function previewFile(Request $request){
+    set_time_limit(0);
+
+    $trx_trp = TrxTrp::find($request->id);
+    $details = \App\Models\MySql\UjalanDetail::where("id_uj",$trx_trp->id_uj)->orderBy("ordinal","asc")->get();
+    $total = 0;
+
+    foreach ($details as $key => $value) {
+      $total += $value["qty"] * $value["harga"];
+    }
+
+    $sendData = [
+      "no_pol"=>$trx_trp->no_pol,
+      "supir"=>$trx_trp->supir,
+      "asal"=>"KPN",
+      "xto"=>$trx_trp->xto,
+      "jenis"=>$trx_trp->jenis,
+      "details"=>$details,
+      "total"=>$total,
+    ];   
+    
+    $date = new \DateTime();
+    $filename = $date->format("YmdHis");
+    Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+    $pdf = PDF::loadView('pdf.trx_trp_ujalan', $sendData)->setPaper('a4', 'portrait');
+  
+  
+    $mime = MyLib::mime("pdf");
+    $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+  
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
+function previewFiles(Request $request){
   // set_time_limit(0);
 
   // $rules = [
