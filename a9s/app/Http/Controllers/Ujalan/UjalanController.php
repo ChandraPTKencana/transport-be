@@ -32,10 +32,13 @@ class UjalanController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
+    $this->role = $this->admin->the_user->hak_akses;
+
   }
 
   public function index(Request $request)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -184,6 +187,7 @@ class UjalanController extends Controller
 
   public function show(UjalanRequest $request)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
 
     // return response()->json([
     //   "message" => "Hanya yang membuat transaksi yang boleh melakukan pergantian atau konfirmasi data",
@@ -272,6 +276,7 @@ class UjalanController extends Controller
   public function store(UjalanRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
 
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
@@ -355,6 +360,7 @@ class UjalanController extends Controller
   public function update(UjalanRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
     
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
@@ -629,6 +635,7 @@ class UjalanController extends Controller
   public function delete(UjalanRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
 
     DB::beginTransaction();
 

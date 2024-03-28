@@ -30,7 +30,9 @@ class TrxLoadDataController extends Controller
 
   public function __construct(Request $request)
   {
-    // $this->admin = MyAdmin::user();
+    $this->admin = MyAdmin::user();
+    $this->role = $this->admin->the_user->hak_akses;
+    $this->admin_id = $this->admin->the_user->id;
   }
 
   // public function cpo(Request $request)
@@ -109,6 +111,9 @@ class TrxLoadDataController extends Controller
 
   public function trp(Request $request)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+
+
     $connectionDB = DB::connection('sqlsrv');
 
     $list_ticket=[];

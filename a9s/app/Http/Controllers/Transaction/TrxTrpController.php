@@ -33,6 +33,8 @@ class TrxTrpController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
+    $this->role = $this->admin->the_user->hak_akses;
+
   }
 
   public function index(Request $request, $download = false)
@@ -233,6 +235,8 @@ class TrxTrpController extends Controller
 
   public function show(TrxTrpRequest $request)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+
     $model_query = TrxTrp::where("deleted",0)->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
@@ -241,6 +245,7 @@ class TrxTrpController extends Controller
 
   public function store(TrxTrpRequest $request)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
 
     DB::beginTransaction();
@@ -386,6 +391,7 @@ class TrxTrpController extends Controller
   public function update(TrxTrpRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     
     $t_stamp = date("Y-m-d H:i:s");
 
@@ -531,6 +537,7 @@ class TrxTrpController extends Controller
   public function delete(TrxTrpRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
     DB::beginTransaction();
 
@@ -581,6 +588,8 @@ class TrxTrpController extends Controller
   }
 
   function previewFile(Request $request){
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+
     set_time_limit(0);
 
     $trx_trp = TrxTrp::find($request->id);
@@ -622,6 +631,8 @@ class TrxTrpController extends Controller
   }
 
 function previewFiles(Request $request){
+  MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Logistic','MIS']);
+
   // set_time_limit(0);
 
   // $rules = [
