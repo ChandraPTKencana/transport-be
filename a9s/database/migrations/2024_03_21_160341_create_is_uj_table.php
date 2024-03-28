@@ -29,9 +29,9 @@ return new class extends Migration
             $table->foreignId('deleted_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamp('deleted_at')->nullable();
 
-            $table->string('val',1)->default("N");
+            $table->boolean('val',1)->default(0);
             $table->foreignId('val_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
-            $table->timestamp('val_date')->nullable();
+            $table->timestamp('val_at')->nullable();
         });
     }
 

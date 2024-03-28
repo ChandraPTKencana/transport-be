@@ -30,10 +30,17 @@
   <main style="padding:0px 25px 0px 29px;">
     <div style="width:100%;  border:solid 1px #000; font-size:14px;">
       <div style="width:100%; text-align:center;" class="text-center">
+        #{{$id}}
+        <br>
         Perincian U.jalan {{$jenis}} <br>
         {{$asal}} - {{$xto}} 
       </div>
       <table style="font-size: 12px; ">
+        <tr>
+          <td > Ujalan Per </td>
+          <td> : </td>
+          <td> {{date('d-m-Y',strtotime($tanggal))}} </td>
+        </tr>
         <tr>
           <td > No.Polisi </td>
           <td> : </td>
@@ -64,9 +71,29 @@
             <td style="width:50px; text-align: right;">{{ number_format(($v["qty"] * $v["harga"]), 0,',','.') }}</td>
           </tr>
           @endforeach
-          
+
+          <tr>
+            <td colspan="4" style="text-align: right;">
+                Dibuat tanggal:{{ date('d-m-Y H:i:s',strtotime($created_at)) }} ({{$id_uj}})
+            </td>
+          </tr>
         </tbody>
       </table>
+
+      <table style="width:100%; font-size: 12px; ">
+        <tr>
+          <td style="text-align: center; width:50%;"> Diserahkan Oleh :</td>
+          <td style="text-align: center; width:50%;"> Diterima Oleh :</td>
+        </tr>
+        <tr>
+          <td style="height:50px;"><td>
+        </tr>
+        <tr>
+          <td style="text-align: center;"> ({{$user_1}}) </td>
+          <td style="text-align: center;"> (____________________) </td>
+        </tr>
+      </table>
+
     </div>
   </main>
 

@@ -603,13 +603,18 @@ class TrxTrpController extends Controller
     }
 
     $sendData = [
+      "id"=>$trx_trp->id,
+      "id_uj"=>$trx_trp->id_uj,
       "no_pol"=>$trx_trp->no_pol,
       "supir"=>$trx_trp->supir,
+      "tanggal"=>$trx_trp->tanggal,
+      "created_at"=>$trx_trp->created_at,
       "asal"=>"KAS",
       "xto"=>$trx_trp->xto,
       "jenis"=>$trx_trp->jenis,
       "details"=>$details,
       "total"=>$total,
+      "user_1"=>$this->admin->the_user->username,
     ];   
     
     // $date = new \DateTime();

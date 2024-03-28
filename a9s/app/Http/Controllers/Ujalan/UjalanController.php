@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Image;
 use File;
 use App\Http\Resources\IsUserResource;
+use App\Models\MySql\IsUser;
 
 class UjalanController extends Controller
 {

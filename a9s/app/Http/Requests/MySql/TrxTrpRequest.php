@@ -44,12 +44,15 @@ class TrxTrpRequest extends FormRequest
     public function messages()
     {
         return [
+            
+            'tanggal.required' => 'U.Jalan Per tidak boleh kosong',
+            'tanggal.date_format' => 'Format U.Jalan Per Tidak sesuai',
 
             'id.required' => 'ID tidak boleh kosong',
             'id.exists' => 'ID tidak terdaftar',
 
-            'xto.required' => 'To tidak boleh kosong',
-            'xto.max' => 'To tidak boleh melebihi 50 karakter',
+            'xto.required' => 'Tujuan tidak boleh kosong',
+            'xto.max' => 'Tujuan tidak boleh melebihi 50 karakter',
 
             'tipe.required' => 'Tipe tidak boleh kosong',
             'tipe.max' => 'Tipe tidak boleh melebihi 50 karakter',
