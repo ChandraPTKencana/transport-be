@@ -48,6 +48,7 @@ return new class extends Migration
             $table->timestamp('ticket_b_out_at')->nullable();
 
             $table->string('supir',255);
+            $table->string('kernet',255);
             $table->string('no_pol',12);
 
             $table->boolean('val',1)->default(0);

@@ -36,6 +36,7 @@ class TrxTrpRequest extends FormRequest
             $rules['tipe'] = 'required|max:50';
             $rules['jenis'] = 'required|in:CPO,TBS';
             $rules['supir'] = 'required|max:255';
+            $rules['kernet'] = 'nullable|max:255';
             $rules['no_pol'] = 'required|max:12';
         }
         return $rules;
@@ -61,10 +62,12 @@ class TrxTrpRequest extends FormRequest
             'jenis.in' => 'Jenis harus dipilih',
 
             'supir.required' => 'Supir tidak boleh kosong',
-            'supir.max' => 'Supir tidak boleh melebihi 50 karakter',
+            'supir.max' => 'Supir tidak boleh melebihi 255 karakter',
+
+            'kernet.max' => 'kernet tidak boleh melebihi 255 karakter',
 
             'no_pol.required' => 'No Pol tidak boleh kosong',
-            'no_pol.max' => 'No Pol tidak boleh melebihi 50 karakter',
+            'no_pol.max' => 'No Pol tidak boleh melebihi 12 karakter',
 
         ];
     }

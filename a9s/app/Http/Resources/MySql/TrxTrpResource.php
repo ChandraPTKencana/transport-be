@@ -51,6 +51,7 @@ class TrxTrpResource extends JsonResource
             'ticket_b_out_at'        => $this->ticket_b_out_at,
 
             'supir'             => $this->supir,
+            'kernet'             => $this->kernet,
             'no_pol'            => $this->no_pol,
 
             'val'               => $this->val,

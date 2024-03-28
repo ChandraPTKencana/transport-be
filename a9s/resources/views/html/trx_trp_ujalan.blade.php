@@ -51,6 +51,14 @@
           <td> : </td>
           <td> {{$supir}} </td>
         </tr>
+
+        @if($kernet)
+        <tr>
+          <td> Nama Kernet </td>
+          <td> : </td>
+          <td> {{$kernet}} </td>
+        </tr>
+        @endif
       </table>
 
       <table style="font-size: 12px; width:100%;">

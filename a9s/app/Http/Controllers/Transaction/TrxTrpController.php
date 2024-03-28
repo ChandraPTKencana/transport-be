@@ -355,6 +355,7 @@ class TrxTrpController extends Controller
       }
 
       $model_query->supir=$request->supir;
+      $model_query->kernet=$request->kernet;
       $model_query->no_pol=$request->no_pol;
       
       $model_query->created_at      = $t_stamp;
@@ -441,8 +442,6 @@ class TrxTrpController extends Controller
         $model_query->pv_total =  $get_data_pv->total_amount;
       }
 
-      $supir="";
-      $no_pol="";
       if($request->ticket_a_id){
 
         $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
@@ -507,6 +506,7 @@ class TrxTrpController extends Controller
       }
 
       $model_query->supir=$request->supir;
+      $model_query->kernet=$request->kernet;
       $model_query->no_pol=$request->no_pol;
 
       $model_query->updated_at      = $t_stamp;
@@ -607,6 +607,7 @@ class TrxTrpController extends Controller
       "id_uj"=>$trx_trp->id_uj,
       "no_pol"=>$trx_trp->no_pol,
       "supir"=>$trx_trp->supir,
+      "kernet"=>$trx_trp->kernet,
       "tanggal"=>$trx_trp->tanggal,
       "created_at"=>$trx_trp->created_at,
       "asal"=>"KAS",
