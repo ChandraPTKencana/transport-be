@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('password',255);
             $table->string('hak_akses',50);
             $table->boolean('is_active',1)->default(1);
-            $table->foreignId('created_by')->nullable()->references('id')->on('is_users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('updated_by')->nullable()->references('id')->on('is_users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('created_user')->nullable()->references('id')->on('is_users')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('updated_user')->nullable()->references('id')->on('is_users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
     }

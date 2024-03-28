@@ -238,9 +238,9 @@ class UserController extends Controller
       $model_query->hak_akses  = $request->hak_akses;
       $model_query->is_active  = $request->is_active;
       $model_query->created_at = $t_stamp;
-      $model_query->created_by = $this->admin_id;
+      $model_query->created_user = $this->admin_id;
       $model_query->updated_at = $t_stamp;
-      $model_query->updated_by = $this->admin_id;
+      $model_query->updated_user = $this->admin_id;
       $model_query->save();
       // if($request->employee_no){
       //   $employee = Employee::where("no",$request->employee_no)->first();
@@ -297,7 +297,7 @@ class UserController extends Controller
       $model_query->hak_akses    = $request->hak_akses;
       $model_query->is_active   = $request->is_active;
       $model_query->updated_at  = $t_stamp;
-      $model_query->updated_by  = $this->admin_id;
+      $model_query->updated_user  = $this->admin_id;
       $model_query->save();
 
 
@@ -340,9 +340,9 @@ class UserController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      // return response()->json([
-      //   "message" => $e->getMessage(),
-      // ], 400);
+      return response()->json([
+        "message" => $e->getMessage(),
+      ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal"
       ], 400);

@@ -28,6 +28,11 @@ class UjalanResource extends JsonResource
             'created_user'      => $this->created_user,
             'created_user'      => $this->created_user,
             'details'           => UjalanDetailResource::collection($this->whenLoaded('details')),
+
+            'val'               => $this->val,
+            'val_user'          => $this->val_user,
+            'val_by'             => new IsUserResource($this->whenLoaded('val_by')),
+            'val_at'          => $this->val_at,
         ];
     }
 }

@@ -47,6 +47,7 @@ Route::get('/', function () {
     Route::post('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'store']);
     Route::put('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'update']);
     Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
+    Route::put('/ujalan_validasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'validasi']);
 
 
     Route::get('/trx_trps', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'index']);
@@ -56,6 +57,8 @@ Route::get('/', function () {
     Route::delete('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete']);
     Route::get('/trx_trps_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFiles']);
     Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFile']);
+    Route::put('/trx_trp_validasi', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'validasi']);
+    
     Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'trp']);
 
     Route::get('/users', [\App\Http\Controllers\User\UserController::class, 'index']);

@@ -22,7 +22,9 @@ use Image;
 use File;
 use PDF;
 
-use App\Http\Resources\IsUserResource;
+use App\Http\Resources\MySql\IsUserResource;
+use App\Models\MySql\IsUser;
+
 class TrxTrpController extends Controller
 {
   private $admin;
@@ -226,7 +228,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
     }
 
-    $model_query = $model_query->where("deleted",0)->get();
+    $model_query = $model_query->where("deleted",0)->with(['val_by','val1_by'])->get();
 
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),
@@ -237,7 +239,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
-    $model_query = TrxTrp::where("deleted",0)->find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -398,7 +400,7 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
-      if($model_query->val==1 || $model_query->deleted==1) 
+      if($model_query->val==1 || $model_query->val1==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
       $model_query->tanggal         = $request->tanggal;
@@ -550,7 +552,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if($model_query->val==1 || $model_query->deleted==1) 
+      if($model_query->val==1 || $model_query->val1==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
 
@@ -603,7 +605,7 @@ class TrxTrpController extends Controller
     $sendData = [
       "no_pol"=>$trx_trp->no_pol,
       "supir"=>$trx_trp->supir,
-      "asal"=>"KPN",
+      "asal"=>"KAS",
       "xto"=>$trx_trp->xto,
       "jenis"=>$trx_trp->jenis,
       "details"=>$details,
@@ -630,92 +632,164 @@ class TrxTrpController extends Controller
     return $result;
   }
 
-function previewFiles(Request $request){
-  MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Logistic','MIS']);
+  function previewFiles(Request $request){
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Logistic','MIS']);
 
-  // set_time_limit(0);
+    // set_time_limit(0);
 
-  // $rules = [
-  //   'date_from' => "required|date_format:Y-m-d H:i:s",
-  // ];
+    // $rules = [
+    //   'date_from' => "required|date_format:Y-m-d H:i:s",
+    // ];
 
-  // $messages = [
-  //   'date_from.required' => 'Date From is required',
-  //   'date_from.date_format' => 'Please Select Date From',
-  // ];
+    // $messages = [
+    //   'date_from.required' => 'Date From is required',
+    //   'date_from.date_format' => 'Please Select Date From',
+    // ];
 
-  // $validator = \Validator::make($request->all(), $rules, $messages);
+    // $validator = \Validator::make($request->all(), $rules, $messages);
 
-  // if ($validator->fails()) {
-  //   throw new ValidationException($validator);
-  // }
+    // if ($validator->fails()) {
+    //   throw new ValidationException($validator);
+    // }
 
 
-  // // Change some request value
-  // $request['period'] = "Daily";
+    // // Change some request value
+    // $request['period'] = "Daily";
 
-  // $date_from = $request->date_from;
-  // $d_from = date("Y-m", MyLib::manualMillis($date_from) / 1000) . "-01 00:00:00";
-  // $date_f = new \DateTime($d_from);
+    // $date_from = $request->date_from;
+    // $d_from = date("Y-m", MyLib::manualMillis($date_from) / 1000) . "-01 00:00:00";
+    // $date_f = new \DateTime($d_from);
 
-  // $start = clone $date_f;
-  // $start->add(new \DateInterval('P1M'));
-  // $start->sub(new \DateInterval('P1D'));
-  // $x = $start->format("Y-m-d H:i:s");
+    // $start = clone $date_f;
+    // $start->add(new \DateInterval('P1M'));
+    // $start->sub(new \DateInterval('P1D'));
+    // $x = $start->format("Y-m-d H:i:s");
 
-  // $request['date_from'] = $d_from;
-  // $request['date_to'] = $x;
-  // return response()->json(["data"=>[$d_from,$x]],200);
+    // $request['date_from'] = $d_from;
+    // $request['date_to'] = $x;
+    // return response()->json(["data"=>[$d_from,$x]],200);
 
-  set_time_limit(0);
-  $callGet = $this->index($request, true);
-  if ($callGet->getStatusCode() != 200) return $callGet;
-  $ori = json_decode(json_encode($callGet), true)["original"];
-  $data = $ori["data"];
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    $data = $ori["data"];
+    
+    // $additional = $ori["additional"];
+
+
+    // $date = new \DateTime();
+    // $filename = $date->format("YmdHis") . "-" . $additional["company_name"] . "[" . $additional["date_from"] . "-" . $additional["date_to"] . "]";
+    // // $filename=$date->format("YmdHis");
+
+    // // return response()->json(["message"=>$filename],200);
+
+    // $mime = MyLib::mime("csv");
+    // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.sensor_get_data_by_location'), $mime["exportType"]));
+    // $mime = MyLib::mime("xlsx");
+    // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.tracking_info2'), $mime["exportType"]));
+
+    
+
+    // $sendData = [
+    //   'pag_no'  => $pag->no,
+    //   'created_at'    => $pag->created_at,
+    //   'updated_at'    => $pag->updated_at,
+    //   'proyek'  => $pag->project ?? "",
+    //   'need'    => $pag->need,
+    //   'part'    => $pag->part,
+    //   'datas'   => $pag->pag_details,
+    //   'title'   => "PENGAMBILAN BARANG GUDANG (PAG)"
+    // ];
+    // dd($sendData);
+    $date = new \DateTime();
+    $filename = $date->format("YmdHis");
+    Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+    $pdf = PDF::loadView('pdf.trx_trp', $ori)->setPaper('a4', 'landscape');
+
+
+    $mime = MyLib::mime("pdf");
+    $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
+
+  function validasi(Request $request){
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = \Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = TrxTrp::find($request->id);
+      if($model_query->val && $model_query->val1){
+        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      }
   
-  // $additional = $ori["additional"];
-
-
-  // $date = new \DateTime();
-  // $filename = $date->format("YmdHis") . "-" . $additional["company_name"] . "[" . $additional["date_from"] . "-" . $additional["date_to"] . "]";
-  // // $filename=$date->format("YmdHis");
-
-  // // return response()->json(["message"=>$filename],200);
-
-  // $mime = MyLib::mime("csv");
-  // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.sensor_get_data_by_location'), $mime["exportType"]));
-  // $mime = MyLib::mime("xlsx");
-  // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.tracking_info2'), $mime["exportType"]));
-
+      $index_item = array_search($this->role, ["SuperAdmin","Logistic"]);    
+      if ($index_item !== false){
+        if(!$model_query->val1){
+          $model_query->val1 = 1;
+          $model_query->val1_user = $this->admin_id;
+          $model_query->val1_at = $t_stamp;
+        }
+      }
   
+      if(!$model_query->val && $model_query->created_user == $this->admin_id){
+        $model_query->val = 1;
+        $model_query->val_user = $this->admin_id;
+        $model_query->val_at = $t_stamp;
+      }
+      $model_query->save();
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val"=>$model_query->val,
+        "val_user"=>$model_query->val_user,
+        "val_at"=>$model_query->val_at,
+        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,        
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
 
-  // $sendData = [
-  //   'pag_no'  => $pag->no,
-  //   'created_at'    => $pag->created_at,
-  //   'updated_at'    => $pag->updated_at,
-  //   'proyek'  => $pag->project ?? "",
-  //   'need'    => $pag->need,
-  //   'part'    => $pag->part,
-  //   'datas'   => $pag->pag_details,
-  //   'title'   => "PENGAMBILAN BARANG GUDANG (PAG)"
-  // ];
-  // dd($sendData);
-  $date = new \DateTime();
-  $filename = $date->format("YmdHis");
-  Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
-  $pdf = PDF::loadView('pdf.trx_trp', $ori)->setPaper('a4', 'landscape');
-
-
-  $mime = MyLib::mime("pdf");
-  $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
-
-  $result = [
-    "contentType" => $mime["contentType"],
-    "data" => $bs64,
-    "dataBase64" => $mime["dataBase64"] . $bs64,
-    "filename" => $filename . "." . $mime["ext"],
-  ];
-  return $result;
-}
-
+  }
 }

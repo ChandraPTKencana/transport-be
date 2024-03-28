@@ -32,6 +32,11 @@ class Ujalan extends Model
         return $this->hasMany(UjalanDetail::class, 'id_uj', 'id');
     }
 
+    public function val_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val_user");
+    }
+
     // public function requester()
     // {
     //     return $this->hasOne(\App\Models\IsUser::class, 'id_user', "requested_by");

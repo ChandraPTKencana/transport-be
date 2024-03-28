@@ -52,11 +52,11 @@ return new class extends Migration
 
             $table->boolean('val',1)->default(0);
             $table->foreignId('val_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
-            $table->timestamp('val_date')->nullable();
+            $table->timestamp('val_at')->nullable();
 
             $table->boolean('val1',1)->default(0);
             $table->foreignId('val1_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
-            $table->timestamp('val1_date')->nullable();
+            $table->timestamp('val1_at')->nullable();
 
             $table->bigInteger('print')->default(0);
             
