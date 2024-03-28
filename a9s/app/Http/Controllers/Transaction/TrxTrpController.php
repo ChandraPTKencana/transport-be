@@ -347,15 +347,15 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
         $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
       }else{
-        $model_query->ticket_b_bruto =  $request->ticket_b_bruto;
-        $model_query->ticket_b_tara =  $request->ticket_b_tara;
-        $model_query->ticket_b_netto =  $request->ticket_b_bruto - $request->ticket_b_tara;
-        $model_query->ticket_b_in_at =  $request->ticket_b_in_at;
-        $model_query->ticket_b_out_at =  $request->ticket_b_out_at;
+        $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
+        $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
+        $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
+        $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
+        $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
       }
 
       $model_query->supir=$request->supir;
-      $model_query->kernet=$request->kernet;
+      $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
       
       $model_query->created_at      = $t_stamp;
@@ -498,15 +498,15 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
         $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
       }else{
-        $model_query->ticket_b_bruto =  $request->ticket_b_bruto;
-        $model_query->ticket_b_tara =  $request->ticket_b_tara;
-        $model_query->ticket_b_netto =  $request->ticket_b_bruto - $request->ticket_b_tara;
-        $model_query->ticket_b_in_at =  $request->ticket_b_in_at;
-        $model_query->ticket_b_out_at =  $request->ticket_b_out_at;
+        $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
+        $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
+        $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
+        $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
+        $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
       }
 
       $model_query->supir=$request->supir;
-      $model_query->kernet=$request->kernet;
+      $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
 
       $model_query->updated_at      = $t_stamp;

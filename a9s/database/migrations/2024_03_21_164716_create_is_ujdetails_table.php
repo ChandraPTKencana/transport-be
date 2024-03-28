@@ -25,8 +25,6 @@ return new class extends Migration
             $table->foreignId('updated_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
 
-            $table->string('status',1)->default("Y");
-
             $table->integer("ordinal");
             $table->boolean('p_change')->default(false);
         });
