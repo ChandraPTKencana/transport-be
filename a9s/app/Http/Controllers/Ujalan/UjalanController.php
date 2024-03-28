@@ -279,7 +279,7 @@ class UjalanController extends Controller
     DB::beginTransaction();
     try {
       $t_stamp = date("Y-m-d H:i:s");
-      if(Ujalan::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->where("harga",$request->harga)->first())
+      if(Ujalan::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       throw new \Exception("List sudah terdaftar",1);
 
       $model_query                  = new Ujalan();      
@@ -363,7 +363,7 @@ class UjalanController extends Controller
 
     DB::beginTransaction();
     try {
-      if(Ujalan::where("id","!=",$request->id)->where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->where("harga",$request->harga)->first())
+      if(Ujalan::where("id","!=",$request->id)->where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       throw new \Exception("List sudah terdaftar",1);
 
       $model_query             = Ujalan::where("id",$request->id)->lockForUpdate()->first();

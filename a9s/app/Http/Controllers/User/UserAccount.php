@@ -46,7 +46,7 @@ class UserAccount extends Controller
 
     $admin = IsUser::where("username", $username)->first();
     
-    if ($admin && $admin->status == 'N') {
+    if ($admin && $admin->is_active == 0) {
       return response()->json([
         "message" => "Izin Masuk Tidak Diberikan"
       ], 403);

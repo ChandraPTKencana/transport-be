@@ -20,8 +20,8 @@ class MyAdmin
     if (!$model_query) {
       throw new MyException(["message" => "Unauthenticate"], 401);
     }
-    if ($model_query->the_user->status == "N") {
-      throw new MyException(["message" => "Izin Masuk Tidak Diberikan"], 400);
+    if ($model_query->the_user->is_active == 0) {
+      throw new MyException(["message" => "Izin Masuk Tidak Diberikan"], 403);
     }
 
     return $model_query;

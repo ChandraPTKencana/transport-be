@@ -58,6 +58,13 @@ Route::get('/', function () {
     Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFile']);
     Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'trp']);
 
+    Route::get('/users', [\App\Http\Controllers\User\UserController::class, 'index']);
+    Route::get('/user', [\App\Http\Controllers\User\UserController::class, 'show']);
+    Route::post('/user', [\App\Http\Controllers\User\UserController::class, 'store']);
+    Route::put('/user', [\App\Http\Controllers\User\UserController::class, 'update']);
+    Route::delete('/user', [\App\Http\Controllers\User\UserController::class, 'delete']);
+
+    
     // Route::prefix("stok/api")->group(function(){
 
 //     // Route::post('login', function () {
@@ -98,11 +105,7 @@ Route::get('/', function () {
 
 //     Route::get('/hrm_revisi_lokasis', [\App\Http\Controllers\HrmRevisiLokasiController::class, 'index']);
     
-//     // Route::get('/users', [\App\Http\Controllers\Internal\User\UserController::class, 'index']);
-//     // Route::get('/user', [\App\Http\Controllers\Internal\User\UserController::class, 'show']);
-//     // Route::post('/user', [\App\Http\Controllers\Internal\User\UserController::class, 'store']);
-//     // Route::put('/user', [\App\Http\Controllers\Internal\User\UserController::class, 'update']);
-//     // Route::delete('/user', [\App\Http\Controllers\Internal\User\UserController::class, 'delete']);
+
   
 //     // Route::get('/action_permissions', [\App\Http\Controllers\Internal\User\UserPermissionController::class, 'getActionPermissions']);
 //     // Route::get('/data_permissions', [\App\Http\Controllers\Internal\User\UserPermissionController::class, 'getDataPermissions']);

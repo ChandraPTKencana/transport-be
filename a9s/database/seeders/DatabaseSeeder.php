@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
         \App\Models\MySql\IsUser::create([
             "username"=>"Yoseph",
             "password"=>bcrypt("1234"),
-            "hak_akses"=>"Admin",
-            "status"=>"Y",
+            "hak_akses"=>"SuperAdmin",
+            "is_active"=>1,
             'created_at'=>date("Y-m-d H:i:s"),
             'updated_at'=>date("Y-m-d H:i:s"),
         ]);
