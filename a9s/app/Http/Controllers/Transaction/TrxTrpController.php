@@ -262,6 +262,7 @@ class TrxTrpController extends Controller
       $ujalan = \App\Models\MySql\Ujalan::where("jenis",$request->jenis)
       ->where("xto",$request->xto)
       ->where("tipe",$request->tipe)
+      ->lockForUpdate()
       ->first();
 
       if(!$ujalan) 
@@ -300,7 +301,9 @@ class TrxTrpController extends Controller
         ->where("TicketID",$request->ticket_a_id);
 
         if($request->jenis=="CPO"){
-          $get_data_ticket =$get_data_ticket->whereIn('ProductName',["CPO","PK"]);
+          $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
+        }else if($request->jenis=="PK"){
+          $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
         }else{ 
           $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
         }
@@ -409,6 +412,7 @@ class TrxTrpController extends Controller
       $ujalan = \App\Models\MySql\Ujalan::where("jenis",$request->jenis)
       ->where("xto",$request->xto)
       ->where("tipe",$request->tipe)
+      ->lockForUpdate()
       ->first();
 
       if(!$ujalan) 
@@ -448,7 +452,9 @@ class TrxTrpController extends Controller
         ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
         ->where("TicketID",$request->ticket_a_id);
         if($request->jenis=="CPO"){
-          $get_data_ticket =$get_data_ticket->whereIn('ProductName',["CPO","PK"]);
+          $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
+        }else if($request->jenis=="PK"){
+          $get_data_ticket =$get_data_ticket->whereIn('ProductName',"KERNEL");
         }else{ 
           $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
         }

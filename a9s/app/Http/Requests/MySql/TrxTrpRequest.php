@@ -34,7 +34,7 @@ class TrxTrpRequest extends FormRequest
             $rules['tanggal'] = 'required|date_format:Y-m-d';
             $rules['xto'] = 'required|max:50';
             $rules['tipe'] = 'required|max:50';
-            $rules['jenis'] = 'required|in:CPO,TBS';
+            $rules['jenis'] = 'required|in:CPO,TBS,PK';
             $rules['supir'] = 'required|max:255';
             $rules['kernet'] = 'nullable|max:255';
             $rules['no_pol'] = 'required|max:12';

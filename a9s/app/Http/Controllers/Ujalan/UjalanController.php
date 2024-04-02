@@ -118,6 +118,13 @@ class UjalanController extends Controller
           $model_query = $model_query->where("jenis",$sort_symbol,$first_row["jenis"]);
         }
       }
+
+      if (isset($sort_lists["harga"])) {
+        $model_query = $model_query->orderBy("harga", $sort_lists["harga"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("harga",$sort_symbol,$first_row["harga"]);
+        }
+      }
       
 
     } else {
@@ -154,6 +161,9 @@ class UjalanController extends Controller
 
           if (isset($like_lists["jenis"])) {
             $q->orWhere("jenis", "like", $like_lists["jenis"]);
+          }
+          if (isset($like_lists["harga"])) {
+            $q->orWhere("harga", "like", $like_lists["harga"]);
           }
     
           // if (isset($like_lists["requested_name"])) {
@@ -293,7 +303,7 @@ class UjalanController extends Controller
       $model_query->tipe            = $request->tipe;
       $model_query->jenis           = $request->jenis;
       // $model_query->status          = $request->status;
-      $model_query->harga          = $request->harga;
+      $model_query->harga          = 0;
       
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
@@ -313,7 +323,7 @@ class UjalanController extends Controller
         }
         array_push($unique_items, strtolower($unique_data));
       }
-     
+      
       foreach ($details_in as $key => $value) {
         $ordinal = $key + 1;
         $detail                     = new UjalanDetail();
@@ -323,6 +333,7 @@ class UjalanController extends Controller
         $detail->qty                = $value['qty'];
         $detail->harga              = $value['harga'];
 
+        $model_query->harga +=  ($value["qty"] * $value["harga"]);
         $detail->created_at      = $t_stamp;
         $detail->created_user    = $this->admin_id;
   
@@ -330,6 +341,8 @@ class UjalanController extends Controller
         $detail->updated_user    = $this->admin_id;  
         $detail->save();
       }
+      $model_query->save();
+
       DB::commit();
       return response()->json([
         "message" => "Proses tambah data berhasil",
@@ -402,7 +415,6 @@ class UjalanController extends Controller
       $model_query->tipe            = $request->tipe;
       $model_query->jenis           = $request->jenis;
       // $model_query->status          = $request->status;
-      $model_query->harga          = $request->harga;
   
       // $model_query->created_at      = $t_stamp;
       // $model_query->created_user    = $this->admin_id;
@@ -412,7 +424,7 @@ class UjalanController extends Controller
 
 
       $data_from_db = UjalanDetail::where('id_uj', $model_query->id)
-      ->orderBy("ordinal", "asc")
+      ->orderBy("ordinal", "asc")->lockForUpdate()
       ->get()->toArray();
       
 
@@ -567,6 +579,7 @@ class UjalanController extends Controller
                 // }
              
 
+              $model_query->harga          += ($v["qty"] * $v["harga"]);
 
               UjalanDetail::where("id_uj", $model_query->id)
               ->where("ordinal", $v["key"])->where("p_change",false)->update([
@@ -590,7 +603,7 @@ class UjalanController extends Controller
 
             // if (!count(array_intersect(['dp-project_material-manage-item_code'], $scopes))  && $v["item_code"] != "")
             //     throw new Exception('Tidak ada izin mengelola Kode item');
-
+            $model_query->harga          += ($v["qty"] * $v["harga"]);
             UjalanDetail::insert([
                 'id_uj'             => $model_query->id,
                 'ordinal'           => $v["ordinal"],
