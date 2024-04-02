@@ -45,7 +45,7 @@ class UjalanController extends Controller
     // Pembatasan Data hanya memerlukan limit dan offset
     //======================================================================================================
 
-    $limit = 10; // Limit +> Much Data
+    $limit = 50; // Limit +> Much Data
     if (isset($request->limit)) {
       if ($request->limit <= 250) {
         $limit = $request->limit;
@@ -414,6 +414,7 @@ class UjalanController extends Controller
       $model_query->xto             = $request->xto;
       $model_query->tipe            = $request->tipe;
       $model_query->jenis           = $request->jenis;
+      $model_query->harga           = 0;
       // $model_query->status          = $request->status;
   
       // $model_query->created_at      = $t_stamp;
