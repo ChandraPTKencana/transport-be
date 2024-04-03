@@ -82,7 +82,7 @@
 
           <tr>
             <td colspan="4" style="text-align: right;">
-                Dibuat tanggal:{{ date('d-m-Y H:i:s',strtotime($created_at)) }} ({{$id_uj}})
+                Dibuat tanggal:{{ date('d-m-Y H:i:s',strtotime($created_at)) }} (#{{$id_uj}})
             </td>
           </tr>
         </tbody>

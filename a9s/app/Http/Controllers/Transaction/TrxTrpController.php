@@ -616,7 +616,7 @@ class TrxTrpController extends Controller
       "kernet"=>$trx_trp->kernet,
       "tanggal"=>$trx_trp->tanggal,
       "created_at"=>$trx_trp->created_at,
-      "asal"=>"KAS",
+      "asal"=>env("app_name"),
       "xto"=>$trx_trp->xto,
       "jenis"=>$trx_trp->jenis,
       "details"=>$details,
