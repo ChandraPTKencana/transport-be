@@ -120,18 +120,18 @@
             <td>{{ $v["xto"] }}</td>
             <td>{{ date("d-m-Y H:i",strtotime($v["ticket_a_out_at"])) }}</td>
             <td>{{ date("d-m-Y H:i",strtotime($v["ticket_b_in_at"])) }}</td>
-            <td>{{ number_format($v["ticket_a_bruto"], 0,',','.') }}</td>
-            <td>{{ number_format($v["ticket_b_bruto"], 0,',','.') }}</td>
-            <td>{{ block_negative($v["ticket_b_bruto"] - $v["ticket_a_bruto"])  }}</td>
-            <td>{{ number_format($v["ticket_a_tara"], 0,',','.') }}</td>
-            <td>{{ number_format($v["ticket_b_tara"], 0,',','.') }}</td>
-            <td>{{ block_negative($v["ticket_b_tara"] - $v["ticket_a_tara"]) }}</td>
-            <td>{{ number_format($v["ticket_a_netto"], 0,',','.') }}</td>
-            <td>{{ number_format($v["ticket_b_netto"], 0,',','.') }}</td>
-            <td>{{ block_negative($v["ticket_b_netto"] - $v["ticket_a_netto"]) }}</td>
-            <td>{{ number_format(($v["ticket_b_netto"] - $v["ticket_a_netto"])/$v["ticket_a_bruto"] * 100, 2,',','.') }}</td>
-            <td>{{ number_format($v["amount"], 0,',','.') }}</td>
-            <td>{{ number_format($v["pv_total"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["ticket_a_bruto"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["ticket_b_bruto"], 0,',','.') }}</td>
+            <td>{{ block_negative((float)$v["ticket_b_bruto"] - (float)$v["ticket_a_bruto"])  }}</td>
+            <td>{{ number_format((float)$v["ticket_a_tara"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["ticket_b_tara"], 0,',','.') }}</td>
+            <td>{{ block_negative((float)$v["ticket_b_tara"] - (float)$v["ticket_a_tara"]) }}</td>
+            <td>{{ number_format((float)$v["ticket_a_netto"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["ticket_b_netto"], 0,',','.') }}</td>
+            <td>{{ block_negative((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"]) }}</td>
+            <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+            <td>{{ number_format((float)$v["amount"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["pv_total"], 0,',','.') }}</td>
           </tr>
           
           @endforeach
