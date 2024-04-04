@@ -41,6 +41,10 @@
       page-break-inside: avoid !important;
     }
 
+    table tr:nth-child(even) td{
+      background-color: #eeeeee;
+    }
+
     .pagenum:before {
       content: counter(page);
     }
