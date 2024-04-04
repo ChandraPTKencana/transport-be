@@ -79,7 +79,15 @@
             <td style="width:50px; text-align: right;">{{ number_format(($v["qty"] * $v["harga"]), 0,',','.') }}</td>
           </tr>
           @endforeach
-
+          <tr>
+            <td colspan="2" style="font-weight: bold;">
+                Total
+            </td>
+            <td style="font-weight: bold;">Rp. </td>
+            <td style="font-weight: bold;">
+              {{ number_format($total, 0,',','.') }}
+            </td>
+          </tr>
           <tr>
             <td colspan="4" style="text-align: right;">
                 Dibuat tanggal:{{ date('d-m-Y H:i:s',strtotime($created_at)) }} (#{{$id_uj}})

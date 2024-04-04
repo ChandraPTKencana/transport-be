@@ -601,12 +601,13 @@ class TrxTrpController extends Controller
     set_time_limit(0);
 
     $trx_trp = TrxTrp::find($request->id);
+    $ujalan = \App\Models\MySql\Ujalan::where("id",$trx_trp->id_uj)->first();
     $details = \App\Models\MySql\UjalanDetail::where("id_uj",$trx_trp->id_uj)->orderBy("ordinal","asc")->get();
-    $total = 0;
+    // $total = 0;
 
-    foreach ($details as $key => $value) {
-      $total += $value["qty"] * $value["harga"];
-    }
+    // foreach ($details as $key => $value) {
+    //   $total += $value["qty"] * $value["harga"];
+    // }
 
     $sendData = [
       "id"=>$trx_trp->id,
@@ -620,7 +621,7 @@ class TrxTrpController extends Controller
       "xto"=>$trx_trp->xto,
       "jenis"=>$trx_trp->jenis,
       "details"=>$details,
-      "total"=>$total,
+      "total"=>$ujalan->harga,
       "user_1"=>$this->admin->the_user->username,
     ];   
     
