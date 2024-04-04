@@ -46,7 +46,7 @@ class TrxTrpController extends Controller
     // Pembatasan Data hanya memerlukan limit dan offset
     //======================================================================================================
 
-    $limit = 10; // Limit +> Much Data
+    $limit = 100; // Limit +> Much Data
     if (isset($request->limit)) {
       if ($request->limit <= 250) {
         $limit = $request->limit;
