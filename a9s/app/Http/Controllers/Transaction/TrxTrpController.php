@@ -137,6 +137,26 @@ class TrxTrpController extends Controller
         }
       }
 
+      if (isset($sort_lists["supir"])) {
+        $model_query = $model_query->orderBy("supir", $sort_lists["supir"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("supir",$sort_symbol,$first_row["supir"]);
+        }
+      }
+
+      if (isset($sort_lists["kernet"])) {
+        $model_query = $model_query->orderBy("kernet", $sort_lists["kernet"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("kernet",$sort_symbol,$first_row["kernet"]);
+        }
+      }
+
+      if (isset($sort_lists["nopol"])) {
+        $model_query = $model_query->orderBy("nopol", $sort_lists["nopol"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("nopol",$sort_symbol,$first_row["nopol"]);
+        }
+      }
       // if (isset($sort_lists["tipe"])) {
       //   $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
       //   if (count($first_row) > 0) {
@@ -169,40 +189,62 @@ class TrxTrpController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      // if(count($like_lists) > 0){
-      //   $model_query = $model_query->where(function ($q)use($like_lists){
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){
             
-      //     if (isset($like_lists["id"])) {
-      //       $q->orWhere("id", "like", $like_lists["id"]);
-      //     }
+          if (isset($like_lists["id"])) {
+            $q->orWhere("id", "like", $like_lists["id"]);
+          }
     
-      //     if (isset($like_lists["xto"])) {
-      //       $q->orWhere("xto", "like", $like_lists["xto"]);
-      //     }
+          if (isset($like_lists["xto"])) {
+            $q->orWhere("xto", "like", $like_lists["xto"]);
+          }
     
-      //     if (isset($like_lists["tipe"])) {
-      //       $q->orWhere("tipe", "like", $like_lists["tipe"]);
-      //     }
+          if (isset($like_lists["tipe"])) {
+            $q->orWhere("tipe", "like", $like_lists["tipe"]);
+          }
 
-      //     if (isset($like_lists["jenis"])) {
-      //       $q->orWhere("jenis", "like", $like_lists["jenis"]);
-      //     }
+          if (isset($like_lists["jenis"])) {
+            $q->orWhere("jenis", "like", $like_lists["jenis"]);
+          }
+
+          if (isset($like_lists["pv_no"])) {
+            $q->orWhere("pv_no", "like", $like_lists["pv_no"]);
+          }
+
+          if (isset($like_lists["ticket_a_no"])) {
+            $q->orWhere("ticket_a_no", "like", $like_lists["ticket_a_no"]);
+          }
+
+          if (isset($like_lists["ticket_b_no"])) {
+            $q->orWhere("ticket_b_no", "like", $like_lists["ticket_b_no"]);
+          }
+
+          if (isset($like_lists["supir"])) {
+            $q->orWhere("supir", "like", $like_lists["supir"]);
+          }
+          if (isset($like_lists["kernet"])) {
+            $q->orWhere("kernet", "like", $like_lists["kernet"]);
+          }
+          if (isset($like_lists["nopol"])) {
+            $q->orWhere("nopol", "like", $like_lists["nopol"]);
+          }
     
-      //     // if (isset($like_lists["requested_name"])) {
-      //     //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
-      //     //     $q2->from('is_users')
-      //     //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
-      //     //   });
-      //     // }
+          // if (isset($like_lists["requested_name"])) {
+          //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+          //     $q2->from('is_users')
+          //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+          //   });
+          // }
     
-      //     // if (isset($like_lists["confirmed_name"])) {
-      //     //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
-      //     //     $q2->from('is_users')
-      //     //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
-      //     //   });
-      //     // }
-      //   });        
-      // }
+          // if (isset($like_lists["confirmed_name"])) {
+          //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+          //     $q2->from('is_users')
+          //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+          //   });
+          // }
+        });        
+      }
 
       
     }
