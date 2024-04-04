@@ -295,8 +295,8 @@ class UjalanController extends Controller
     DB::beginTransaction();
     try {
       $t_stamp = date("Y-m-d H:i:s");
-      if(Ujalan::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
-      throw new \Exception("List sudah terdaftar",1);
+      // if(Ujalan::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
+      // throw new \Exception("List sudah terdaftar",1);
 
       $model_query                  = new Ujalan();      
       $model_query->xto             = $request->xto;
@@ -383,8 +383,8 @@ class UjalanController extends Controller
 
     DB::beginTransaction();
     try {
-      if(Ujalan::where("id","!=",$request->id)->where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
-      throw new \Exception("List sudah terdaftar",1);
+      // if(Ujalan::where("id","!=",$request->id)->where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
+      // throw new \Exception("List sudah terdaftar",1);
 
       $model_query             = Ujalan::where("id",$request->id)->lockForUpdate()->first();
       if($model_query->val==1 || $model_query->deleted==1) 
@@ -666,8 +666,8 @@ class UjalanController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
 
-      if($model_query->val==1 || $model_query->deleted==1) 
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+      // if($model_query->val==1 || $model_query->deleted==1) 
+      // throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
 
       // if($model_query->ref_id != null){

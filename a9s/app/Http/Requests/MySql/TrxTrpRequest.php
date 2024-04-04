@@ -33,7 +33,8 @@ class TrxTrpRequest extends FormRequest
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['tanggal'] = 'required|date_format:Y-m-d';
             $rules['xto'] = 'required|max:50';
-            $rules['tipe'] = 'required|max:50';
+            $rules['id_uj'] = 'required|exists:App\Models\MySql\Ujalan,id';
+            // $rules['tipe'] = 'required|max:50';
             $rules['jenis'] = 'required|in:CPO,TBS,PK';
             $rules['supir'] = 'required|max:255';
             $rules['kernet'] = 'nullable|max:255';
@@ -52,11 +53,14 @@ class TrxTrpRequest extends FormRequest
             'id.required' => 'ID tidak boleh kosong',
             'id.exists' => 'ID tidak terdaftar',
 
+            'id_uj.required' => 'Tipe tidak boleh kosong',
+            'id_uj.exists' => 'Tipe tidak terdaftar',
+
             'xto.required' => 'Tujuan tidak boleh kosong',
             'xto.max' => 'Tujuan tidak boleh melebihi 50 karakter',
 
-            'tipe.required' => 'Tipe tidak boleh kosong',
-            'tipe.max' => 'Tipe tidak boleh melebihi 50 karakter',
+            // 'tipe.required' => 'Tipe tidak boleh kosong',
+            // 'tipe.max' => 'Tipe tidak boleh melebihi 50 karakter',
 
             'jenis.required' => 'Jenis tidak boleh kosong',
             'jenis.in' => 'Jenis harus dipilih',

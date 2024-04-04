@@ -119,7 +119,7 @@ class TrxLoadDataController extends Controller
     $list_ticket=[];
     $list_pv=[];
 
-    $list_ujalan = \App\Models\MySql\Ujalan::get();
+    $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->get();
 
     if($connectionDB->getPdo()){
 

@@ -301,14 +301,13 @@ class TrxTrpController extends Controller
       $model_query                  = new TrxTrp();      
       $model_query->tanggal         = $request->tanggal;
 
-      $ujalan = \App\Models\MySql\Ujalan::where("jenis",$request->jenis)
-      ->where("xto",$request->xto)
-      ->where("tipe",$request->tipe)
+      $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
+      ->where("deleted",0)
       ->lockForUpdate()
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Silahkan pilih To atau Tipe yang telah di sediakan",1);
+      throw new \Exception("Silahkan Tekan Load Data Yang Disediakan",1);
 
       $model_query->id_uj           = $ujalan->id;
       $model_query->jenis           = $ujalan->jenis;
@@ -451,14 +450,13 @@ class TrxTrpController extends Controller
 
       $model_query->tanggal         = $request->tanggal;
 
-      $ujalan = \App\Models\MySql\Ujalan::where("jenis",$request->jenis)
-      ->where("xto",$request->xto)
-      ->where("tipe",$request->tipe)
+      $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
+      ->where("deleted",0)
       ->lockForUpdate()
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Silahkan pilih To atau Tipe yang telah di sediakan",1);
+      throw new \Exception("Silahkan Tekan Load Data Yang Disediakan",1);
 
       $model_query->id_uj           = $ujalan->id;
       $model_query->jenis           = $ujalan->jenis;
