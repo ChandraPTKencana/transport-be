@@ -118,8 +118,8 @@
             <td>{{ $v["no_pol"] }}</td>
             <td>{{ $v["jenis"] }}</td>
             <td>{{ $v["xto"] }}</td>
-            <td>{{ date("d-m-Y H:i",strtotime($v["ticket_a_out_at"])) }}</td>
-            <td>{{ date("d-m-Y H:i",strtotime($v["ticket_b_in_at"])) }}</td>
+            <td>{{ $v["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($v["ticket_a_out_at"])) : "" }}</td>
+            <td>{{ $v["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($v["ticket_b_in_at"])) : "" }}</td>
             <td>{{ number_format((float)$v["ticket_a_bruto"], 0,',','.') }}</td>
             <td>{{ number_format((float)$v["ticket_b_bruto"], 0,',','.') }}</td>
             <td>{{ block_negative((float)$v["ticket_b_bruto"] - (float)$v["ticket_a_bruto"])  }}</td>
