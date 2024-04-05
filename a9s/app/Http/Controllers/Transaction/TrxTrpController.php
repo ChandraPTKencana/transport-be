@@ -173,7 +173,7 @@ class TrxTrpController extends Controller
       
 
     } else {
-      $model_query = $model_query->orderBy('updated_at', 'DESC');
+      $model_query = $model_query->orderBy('tanggal', 'DESC')->orderBy('id','DESC');
     }
     //======================================================================================================
     // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
