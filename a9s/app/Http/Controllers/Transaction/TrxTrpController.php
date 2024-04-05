@@ -301,16 +301,18 @@ class TrxTrpController extends Controller
       $model_query                  = new TrxTrp();      
       $model_query->tanggal         = $request->tanggal;
 
+      $rejenis = ($request->jenis=="TBSK" ? "TBS" : $request->jenis );
       $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
+      ->where("jenis",$rejenis)
       ->where("deleted",0)
       ->lockForUpdate()
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Silahkan Tekan Load Data Yang Disediakan",1);
+      throw new \Exception("Silahkan Isi Data Ujalan Dengan Benar",1);
 
       $model_query->id_uj           = $ujalan->id;
-      $model_query->jenis           = $ujalan->jenis;
+      $model_query->jenis           = $request->jenis;
       $model_query->xto             = $ujalan->xto;
       $model_query->tipe            = $ujalan->tipe;
       $model_query->amount          = $ujalan->harga;
@@ -450,16 +452,18 @@ class TrxTrpController extends Controller
 
       $model_query->tanggal         = $request->tanggal;
 
+      $rejenis = ($request->jenis=="TBSK" ? "TBS" : $request->jenis );
       $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
+      ->where("jenis",$rejenis)
       ->where("deleted",0)
       ->lockForUpdate()
       ->first();
 
       if(!$ujalan) 
-      throw new \Exception("Silahkan Tekan Load Data Yang Disediakan",1);
+      throw new \Exception("Silahkan Isi Data Ujalan Dengan Benar",1);
 
       $model_query->id_uj           = $ujalan->id;
-      $model_query->jenis           = $ujalan->jenis;
+      $model_query->jenis           = $request->jenis;
       $model_query->xto             = $ujalan->xto;
       $model_query->tipe            = $ujalan->tipe;
       $model_query->amount          = $ujalan->harga;
