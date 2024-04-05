@@ -151,10 +151,10 @@ class TrxTrpController extends Controller
         }
       }
 
-      if (isset($sort_lists["nopol"])) {
-        $model_query = $model_query->orderBy("nopol", $sort_lists["nopol"]);
+      if (isset($sort_lists["no_pol"])) {
+        $model_query = $model_query->orderBy("no_pol", $sort_lists["no_pol"]);
         if (count($first_row) > 0) {
-          $model_query = $model_query->where("nopol",$sort_symbol,$first_row["nopol"]);
+          $model_query = $model_query->where("no_pol",$sort_symbol,$first_row["no_pol"]);
         }
       }
       // if (isset($sort_lists["tipe"])) {
@@ -226,8 +226,8 @@ class TrxTrpController extends Controller
           if (isset($like_lists["kernet"])) {
             $q->orWhere("kernet", "like", $like_lists["kernet"]);
           }
-          if (isset($like_lists["nopol"])) {
-            $q->orWhere("nopol", "like", $like_lists["nopol"]);
+          if (isset($like_lists["no_pol"])) {
+            $q->orWhere("no_pol", "like", $like_lists["no_pol"]);
           }
     
           // if (isset($like_lists["requested_name"])) {
@@ -517,6 +517,16 @@ class TrxTrpController extends Controller
         $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
         $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
         $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;       
+      }else{
+        $model_query->ticket_a_id =  null;
+        $model_query->ticket_a_no =  null;
+        $model_query->ticket_a_bruto =  null;
+        $model_query->ticket_a_tara =  null;
+        $model_query->ticket_a_netto =  null;
+        $model_query->ticket_a_supir =  null;
+        $model_query->ticket_a_no_pol =  null;
+        $model_query->ticket_a_in_at =  null;
+        $model_query->ticket_a_out_at =  null;
       }
 
       if($request->ticket_b_id){
@@ -544,9 +554,13 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
         $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
       }else{
+        $model_query->ticket_b_id =  null;
+        $model_query->ticket_b_no =  null;
         $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
         $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
         $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
+        $model_query->ticket_b_supir =  null;
+        $model_query->ticket_b_no_pol =  null;
         $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
         $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
       }
