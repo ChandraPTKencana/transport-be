@@ -19,9 +19,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    // 'allowed_origins' => ['*'],
+    'allowed_origins' => ['*'],
     // 'allowed_origins' => ['https://genkagromas.com','http://127.0.0.1:8010','http://127.0.0.1:8020','http://192.168.1.122:8020'],
-    'allowed_origins' => ['https://genkagromas.com','http://localhost:3000','http://'.env('app_url'),'http://'.env('app_url').":3000"],
+    // 'allowed_origins' => ['https://genkagromas.com','http://localhost:3000','http://'.env('app_url'),'http://'.env('app_url').":3000"],
 
     'allowed_origins_patterns' => [],
 
