@@ -603,7 +603,7 @@ class TrxTrpController extends Controller
   public function delete(TrxTrpRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
 
     DB::beginTransaction();
 
