@@ -117,9 +117,8 @@
           
           @foreach($data as $k=>$v)
           <tr>
-            <!-- <td>{{json_encode($v)}}</td> -->
             <td>{{$loop->iteration}}</td>
-            <td>{{ date("d-m-Y",strtotime($v["tanggal"])) }}</td>
+            <td>{{ $v["tanggal"] }}</td>
             <td>{{ $v["no_pol"] }}</td>
             <td>{{ $v["jenis"] }}</td>
             <td>{{ $v["xto"] }}</td>

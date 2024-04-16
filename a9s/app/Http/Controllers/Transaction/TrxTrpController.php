@@ -21,9 +21,11 @@ use Illuminate\Support\Facades\DB;
 use Image;
 use File;
 use PDF;
+use Excel;
 
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\IsUser;
+use App\Exports\MyReport;
 
 class TrxTrpController extends Controller
 {
@@ -836,6 +838,67 @@ class TrxTrpController extends Controller
 
     $mime = MyLib::mime("pdf");
     $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
+  function downloadExcel(Request $request){
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Logistic','MIS']);
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    $data = $ori["data"];
+    
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
+      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
+      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
+      $ticket_a_tara = (float)$value["ticket_a_tara"];
+      $ticket_b_tara = (float)$value["ticket_b_tara"];
+      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
+      $ticket_a_netto = (float)$value["ticket_a_netto"];
+      $ticket_b_netto = (float)$value["ticket_b_netto"];
+      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
+
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
+      $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
+      $value['ticket_a_bruto']=number_format((float)$ticket_a_bruto, 0,',','.');
+      $value['ticket_b_bruto']=number_format((float)$ticket_b_bruto, 0,',','.');
+      $value['ticket_b_a_bruto']=block_negative(number_format((float)$ticket_b_a_bruto, 0,',','.'));
+      $value['ticket_b_a_bruto_persen']=number_format((float)$ticket_b_a_bruto_persen, 2,',','.');
+      $value['ticket_a_tara']=number_format((float)$ticket_a_tara, 0,',','.');
+      $value['ticket_b_tara']=number_format((float)$ticket_b_tara, 0,',','.');
+      $value['ticket_b_a_tara']=block_negative(number_format((float)$ticket_b_a_tara, 0,',','.'));
+      $value['ticket_b_a_tara_persen']=number_format((float)$ticket_b_a_tara_persen, 2,',','.');
+      $value['ticket_a_netto']=number_format((float)$ticket_a_netto, 0,',','.');
+      $value['ticket_b_netto']=number_format((float)$ticket_b_netto, 0,',','.');
+      $value['ticket_b_a_netto']=block_negative(number_format((float)$ticket_b_a_netto, 0,',','.'));
+      $value['ticket_b_a_netto_persen']=number_format((float)$ticket_b_a_netto_persen, 2,',','.');
+      $value['amount']=number_format((float)$value["amount"], 0,',','.');
+      $value['pv_total']=number_format((float)$value["pv_total"], 0,',','.');
+      array_push($newDetails,$value);
+    }
+
+    // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-trx_trp'."[".$request["date_from"]."-".$request["date_to"]."]";
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport($newDetails,'excel.trx_trp'), $mime["exportType"]));
+
 
     $result = [
       "contentType" => $mime["contentType"],
