@@ -139,12 +139,31 @@ class TrxLoadDataController extends Controller
           array_push($arr_tickets,$val->ticket_b_no);
         }
       }
+      $jenis = $request->jenis;
+      $product_names = [];
 
+      switch ($jenis) {
+        case 'TBSK':
+          $product_names = ["TBS"];
+          break;
+        case 'TBS':
+          $product_names = ["RTBS","MTBS"];
+          break;
+        case 'CPO':
+          $product_names = ["CPO"];
+          break;
+        case 'PK':
+          $product_names = ["KERNEL"];
+          break;
+        default:
+          # code...
+          break;
+      }
       $list_ticket = $connectionDB->table("palm_tickets")
       // ->select('*')
       ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
       ->whereDate('Date','>=', $date)
-      ->whereIn('ProductName',["RTBS","MTBS","CPO","KERNEL"]) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+      ->whereIn('ProductName',$product_names) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
       ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
       // ->limit(1)
       ->get();

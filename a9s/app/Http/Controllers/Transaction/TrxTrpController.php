@@ -157,6 +157,13 @@ class TrxTrpController extends Controller
           $model_query = $model_query->where("no_pol",$sort_symbol,$first_row["no_pol"]);
         }
       }
+
+      if (isset($sort_lists["tanggal"])) {
+        $model_query = $model_query->orderBy("tanggal", $sort_lists["tanggal"])->orderBy('id','DESC');
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("tanggal",$sort_symbol,$first_row["tanggal"])->orderBy('id','DESC');
+        }
+      }
       // if (isset($sort_lists["tipe"])) {
       //   $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
       //   if (count($first_row) > 0) {
