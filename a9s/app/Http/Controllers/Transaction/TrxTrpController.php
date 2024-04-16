@@ -380,9 +380,15 @@ class TrxTrpController extends Controller
 
         $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
         ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-        ->where("TicketID",$request->ticket_b_id)
-        ->where('ProductName',"RTBS")
-        ->first();
+        ->where("TicketID",$request->ticket_b_id);
+        
+        if($request->jenis=="TBS"){
+          $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
+        }else {
+          $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
+        }
+
+        $get_data_ticket=$get_data_ticket->first();
 
         if(!$get_data_ticket) 
         throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -544,9 +550,15 @@ class TrxTrpController extends Controller
 
         $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
         ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-        ->where("TicketID",$request->ticket_b_id)
-        ->where('ProductName',"RTBS")
-        ->first();
+        ->where("TicketID",$request->ticket_b_id);
+        
+        if($request->jenis=="TBS"){
+          $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
+        }else {
+          $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
+        }
+
+        $get_data_ticket=$get_data_ticket->first();
 
         if(!$get_data_ticket) 
         throw new \Exception("Data Ticket tidak terdaftar",1);
