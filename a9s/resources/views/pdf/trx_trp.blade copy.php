@@ -91,24 +91,23 @@
             <th rowspan="2" style="border: 1px solid black;">Tujuan</th>
             <th rowspan="2" style="border: 1px solid black;">Berangkat</th>
             <th rowspan="2" style="border: 1px solid black;">Kembali</th>
-            <th colspan="4" style="border: 1px solid black;">Bruto</th>
-            <th colspan="4" style="border: 1px solid black;">Tara</th>
-            <th colspan="4" style="border: 1px solid black;">Netto</th>
+            <th colspan="3" style="border: 1px solid black;">Bruto</th>
+            <th colspan="3" style="border: 1px solid black;">Tara</th>
+            <th colspan="3" style="border: 1px solid black;">Netto</th>
+
+            <th rowspan="2" style="border: 1px solid black;">% Susut</th>
             <th colspan="2" style="border: 1px solid black;">Biaya</th>
           </tr>
           <tr>
             <th>Kirim</th>
             <th>Terima</th>
             <th>Selisih</th>
-            <th>% Selisih</th>
             <th>Kirim</th>
             <th>Terima</th>
             <th>Selisih</th>
-            <th>% Selisih</th>
             <th>Kirim</th>
             <th>Terima</th>
             <th>Selisih</th>
-            <th>% Selisih</th>
             <th>Ujalan</th>
             <th>PV</th>
           </tr>
@@ -123,24 +122,24 @@
             <td>{{ $v["no_pol"] }}</td>
             <td>{{ $v["jenis"] }}</td>
             <td>{{ $v["xto"] }}</td>
-            <td>{{ $v["ticket_a_out_at"] }}</td>
-            <td>{{ $v["ticket_b_in_at"] }}</td>
-            <td>{{ $v["ticket_a_bruto"] }}</td>
-            <td>{{ $v["ticket_b_bruto"] }}</td>
-            <td>{{ $v["ticket_b_a_bruto"] }}</td>
-            <td>{{ $v["ticket_b_a_bruto_persen"] }}</td>
-            <td>{{ $v["ticket_a_tara"] }}</td>
-            <td>{{ $v["ticket_b_tara"] }}</td>
-            <td>{{ $v["ticket_b_a_tara"] }}</td>
-            <td>{{ $v["ticket_b_a_tara_persen"] }}</td>
-            <td>{{ $v["ticket_a_netto"] }}</td>
-            <td>{{ $v["ticket_b_netto"] }}</td>
-            <td>{{ $v["ticket_b_a_netto"] }}</td>
-            <td>{{ $v["ticket_b_a_netto_persen"] }}</td>
-            <td>{{ $v["amount"] }}</td>
-            <td>{{ $v["pv_total"] }}</td>
+            <td>{{ $v["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($v["ticket_a_out_at"])) : "" }}</td>
+            <td>{{ $v["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($v["ticket_b_in_at"])) : "" }}</td>
+            <td>{{ number_format((float)$v["ticket_a_bruto"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["ticket_b_bruto"], 0,',','.') }}</td>
+            <td>{{ block_negative((float)$v["ticket_b_bruto"] - (float)$v["ticket_a_bruto"])  }}</td>
+            <td>{{ number_format((float)$v["ticket_a_tara"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["ticket_b_tara"], 0,',','.') }}</td>
+            <td>{{ block_negative((float)$v["ticket_b_tara"] - (float)$v["ticket_a_tara"]) }}</td>
+            <td>{{ number_format((float)$v["ticket_a_netto"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["ticket_b_netto"], 0,',','.') }}</td>
+            <td>{{ block_negative((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"]) }}</td>
+            <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+            <td>{{ number_format((float)$v["amount"], 0,',','.') }}</td>
+            <td>{{ number_format((float)$v["pv_total"], 0,',','.') }}</td>
           </tr>
+          
           @endforeach
+          
         </tbody>
       </table>
     
