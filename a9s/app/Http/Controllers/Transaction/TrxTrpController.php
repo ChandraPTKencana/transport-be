@@ -498,7 +498,7 @@ class TrxTrpController extends Controller
         if($request->jenis=="CPO"){
           $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
         }else if($request->jenis=="PK"){
-          $get_data_ticket =$get_data_ticket->whereIn('ProductName',"KERNEL");
+          $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
         }else{ 
           $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
         }
