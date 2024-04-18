@@ -42,7 +42,7 @@
     }
 
     table tr:nth-child(even) td{
-      background-color: #eeeeee;
+      background-color: #dddddd;
     }
 
     .pagenum:before {
