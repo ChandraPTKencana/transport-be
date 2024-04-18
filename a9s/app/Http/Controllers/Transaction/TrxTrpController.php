@@ -795,6 +795,15 @@ class TrxTrpController extends Controller
     // ];
     // dd($sendData);
 
+    $shows=["tanggal","no_pol","jenis","xto","amount","pv_total"];
+    if($this->role != "Finance"){
+      $shows = array_merge($shows,[
+        'ticket_a_out_at','ticket_b_in_at',
+        'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
+        'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
+        'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
+      ]);
+    }
     $newDetails = [];
 
     foreach ($ori["data"] as $key => $value) {
@@ -833,7 +842,7 @@ class TrxTrpController extends Controller
     $date = new \DateTime();
     $filename = $date->format("YmdHis");
     Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
-    $pdf = PDF::loadView('pdf.trx_trp', ["data"=>$newDetails])->setPaper('a4', 'landscape');
+    $pdf = PDF::loadView('pdf.trx_trp', ["data"=>$newDetails,"shows"=>$shows])->setPaper('a4', 'landscape');
 
 
     $mime = MyLib::mime("pdf");
@@ -857,6 +866,16 @@ class TrxTrpController extends Controller
     $ori = json_decode(json_encode($callGet), true)["original"];
     $data = $ori["data"];
     
+    $shows=["tanggal","no_pol","jenis","xto","amount","pv_total"];
+    if($this->role != "Finance"){
+      $shows = array_merge($shows,[
+        'ticket_a_out_at','ticket_b_in_at',
+        'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
+        'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
+        'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
+      ]);
+    }
+
     $newDetails = [];
 
     foreach ($ori["data"] as $key => $value) {
@@ -897,7 +916,7 @@ class TrxTrpController extends Controller
 
     $mime=MyLib::mime("xlsx");
     // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
-    $bs64=base64_encode(Excel::raw(new MyReport($newDetails,'excel.trx_trp'), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails,"shows"=>$shows],'excel.trx_trp'), $mime["exportType"]));
 
 
     $result = [
