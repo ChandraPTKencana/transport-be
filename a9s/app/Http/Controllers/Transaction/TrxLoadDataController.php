@@ -113,7 +113,7 @@ class TrxLoadDataController extends Controller
   {
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
-
+    $online_status = $request->online_status;
     $connectionDB = DB::connection('sqlsrv');
 
     $list_ticket=[];
@@ -121,72 +121,76 @@ class TrxLoadDataController extends Controller
 
     $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->get();
     $date = now()->subDays(3);
-
-    if($connectionDB->getPdo()){
-      $arr_tickets = [];
-      $arr_pvs = [];
-      $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date)->get();
-      foreach ($used_ticket_pvs as $key=>$val){
-        if($val->pv_no){
-          array_push($arr_pvs,$val->pv_no);
+    try {
+      if($online_status=="true"){
+        $arr_tickets = [];
+        $arr_pvs = [];
+        $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date)->get();
+        foreach ($used_ticket_pvs as $key=>$val){
+          if($val->pv_no){
+            array_push($arr_pvs,$val->pv_no);
+          }
+    
+          if($val->ticket_a_no){
+            array_push($arr_tickets,$val->ticket_a_no);
+          }
+    
+          if($val->ticket_b_no){
+            array_push($arr_tickets,$val->ticket_b_no);
+          }
         }
+        $jenis = $request->jenis;
+        $product_names = [];
   
-        if($val->ticket_a_no){
-          array_push($arr_tickets,$val->ticket_a_no);
+        switch ($jenis) {
+          case 'TBSK':
+            $product_names = ["TBS"];
+            break;
+          case 'TBS':
+            $product_names = ["RTBS","MTBS"];
+            break;
+          case 'CPO':
+            $product_names = ["CPO"];
+            break;
+          case 'PK':
+            $product_names = ["KERNEL"];
+            break;
+          default:
+            # code...
+            break;
         }
+        $list_ticket = $connectionDB->table("palm_tickets")
+        // ->select('*')
+        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
+        ->whereDate('Date','>=', $date)
+        ->whereIn('ProductName',$product_names) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+        ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+        // ->limit(1)
+        ->get();
   
-        if($val->ticket_b_no){
-          array_push($arr_tickets,$val->ticket_b_no);
-        }
+        $list_ticket= $list_ticket->map(function ($item) {
+          return array_map('utf8_encode', (array)$item);
+        })->toArray();
+  
+        $list_pv = $connectionDB->table("fi_arap")
+        // ->select('*')
+        ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
+        ->whereDate('VoucherDate','>=', $date)
+        ->where('VoucherType',"TRP")
+        ->where("IsAR",0)
+        ->whereNotIn('VoucherNo',$arr_pvs) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+        ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
+        ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
+        ->get();
+  
+        $list_pv= $list_pv->map(function ($item) {
+          return array_map('utf8_encode', (array)$item);
+        })->toArray();     
       }
-      $jenis = $request->jenis;
-      $product_names = [];
-
-      switch ($jenis) {
-        case 'TBSK':
-          $product_names = ["TBS"];
-          break;
-        case 'TBS':
-          $product_names = ["RTBS","MTBS"];
-          break;
-        case 'CPO':
-          $product_names = ["CPO"];
-          break;
-        case 'PK':
-          $product_names = ["KERNEL"];
-          break;
-        default:
-          # code...
-          break;
-      }
-      $list_ticket = $connectionDB->table("palm_tickets")
-      // ->select('*')
-      ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
-      ->whereDate('Date','>=', $date)
-      ->whereIn('ProductName',$product_names) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-      ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-      // ->limit(1)
-      ->get();
-
-      $list_ticket= $list_ticket->map(function ($item) {
-        return array_map('utf8_encode', (array)$item);
-      })->toArray();
-
-      $list_pv = $connectionDB->table("fi_arap")
-      // ->select('*')
-      ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-      ->whereDate('VoucherDate','>=', $date)
-      ->where('VoucherType',"TRP")
-      ->where("IsAR",0)
-      ->whereNotIn('VoucherNo',$arr_pvs) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-      ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-      ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
-      ->get();
-
-      $list_pv= $list_pv->map(function ($item) {
-        return array_map('utf8_encode', (array)$item);
-      })->toArray();     
+    } catch (\Throwable $th) {
+      //throw $th;
     }
+    
     return response()->json([
       "list_ujalan" => $list_ujalan,
       "list_ticket" => $list_ticket,
