@@ -48,6 +48,7 @@ Route::get('/', function () {
     Route::put('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'update']);
     Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
     Route::put('/ujalan_validasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'validasi']);
+    Route::get('/ujalan/ac_accounts', [\App\Http\Controllers\Ujalan\UjalanController::class, 'ac_accounts']);
 
 
     Route::get('/trx_trps', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'index']);

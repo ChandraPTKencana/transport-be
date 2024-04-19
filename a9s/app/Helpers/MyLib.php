@@ -79,6 +79,12 @@ class MyLib
     return $var;
   }
 
+  public static function objsToArray($objs){
+    return $objs->map(function ($item) {
+      return array_map('utf8_encode', (array)$item);
+    })->toArray();
+  }
+
 
   // public static function visitor()
   // {

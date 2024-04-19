@@ -5,11 +5,11 @@ namespace App\Models\MySql;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ujalan extends Model
+class UjalanDetail2 extends Model
 {
     use HasFactory;
 
-    protected $table = 'is_uj';  
+    protected $table = 'is_ujdetails2';  
     // public $timestamps = false;
 
     // public function warehouse()
@@ -27,20 +27,10 @@ class Ujalan extends Model
     //     return $this->belongsTo(\App\Models\HrmRevisiLokasi::class, "hrm_revisi_lokasi_target_id", 'id');
     // }
 
-    public function details()
-    {
-        return $this->hasMany(UjalanDetail::class, 'id_uj', 'id');
-    }
-
-    public function details2()
-    {
-        return $this->hasMany(UjalanDetail2::class, 'id_uj', 'id');
-    }
-
-    public function val_by()
-    {
-        return $this->hasOne(IsUser::class, 'id', "val_user");
-    }
+    // public function details()
+    // {
+    //     return $this->hasMany(TransactionDetail::class, 'st_transaction_id', 'id');
+    // }
 
     // public function requester()
     // {
