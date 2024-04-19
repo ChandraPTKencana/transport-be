@@ -294,14 +294,16 @@ class UjalanController extends Controller
   //start for details2
   public function validateItems2($details_in2){
     $rules = [
+      
       // 'details'                          => 'required|array',
       // 'details.*.id_uj'               => 'required|exists:\App\Models\MySql\Ujalan',
-      'details.*.ac_account_id'          => 'required',
-      'details.*.ac_account_code'        => 'required',
-      'details.*.ac_account_name'        => 'required',
-      'details.*.qty'                    => 'required|numeric',
-      'details.*.amount'                 => 'required|numeric',
-      'details.*.description'            => 'required',
+      'details.*.p_status'               => 'required|in:Remove,Add,Edit',
+      'details.*.ac_account_id'          => 'required_if:details.*.p_status,Add,Edit',
+      'details.*.ac_account_code'        => 'required_if:details.*.p_status,Add,Edit',
+      'details.*.ac_account_name'        => 'required_if:details.*.p_status,Add,Edit',
+      'details.*.qty'                    => 'required_if:details.*.p_status,Add,Edit|numeric',
+      'details.*.amount'                 => 'required_if:details.*.p_status,Add,Edit|numeric',
+      'details.*.description'            => 'required_if:details.*.p_status,Add,Edit',
       // 'details.*.status'              => 'required|in:Y,N',
     ];
 
@@ -315,18 +317,18 @@ class UjalanController extends Controller
       // $messages["details.{$index}.id_uj.required"]          = "Baris #" . ($index + 1) . ". ID Ujalan yang diminta tidak boleh kosong.";
       // $messages["details.{$index}.id_uj.exists"]            = "Baris #" . ($index + 1) . ". ID Ujalan yang diminta harus dipilih";
 
-      $messages["details.{$index}.ac_account_id.required"]          = "Baris #" . ($index + 1) . ". Acc ID yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_code.required"]          = "Baris #" . ($index + 1) . ". Acc Code yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_name.required"]          = "Baris #" . ($index + 1) . ". Acc Name yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_id.required_if"]          = "Baris #" . ($index + 1) . ". Acc ID yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_code.required_if"]          = "Baris #" . ($index + 1) . ". Acc Code yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_name.required_if"]          = "Baris #" . ($index + 1) . ". Acc Name yang diminta tidak boleh kosong.";
       $messages["details.{$index}.ac_account_code.max"]              = "Baris #" . ($index + 1) . ". Acc Code Maksimal 255 Karakter";
 
-      $messages["details.{$index}.qty.required"]            = "Baris #" . ($index + 1) . ". Qty harus di isi";
+      $messages["details.{$index}.qty.required_if"]            = "Baris #" . ($index + 1) . ". Qty harus di isi";
       $messages["details.{$index}.qty.numeric"]              = "Baris #" . ($index + 1) . ". Qty harus berupa angka";
 
-      $messages["details.{$index}.amount.required"]            = "Baris #" . ($index + 1) . ". Amount harus di isi";
+      $messages["details.{$index}.amount.required_if"]            = "Baris #" . ($index + 1) . ". Amount harus di isi";
       $messages["details.{$index}.amount.numeric"]              = "Baris #" . ($index + 1) . ". Amount harus berupa angka";
 
-      $messages["details.{$index}.description.required"]            = "Baris #" . ($index + 1) . ". Description harus di isi";
+      $messages["details.{$index}.description.required_if"]            = "Baris #" . ($index + 1) . ". Description harus di isi";
       // $messages["details.{$index}.status.required"]            = "Baris #" . ($index + 1) . ". Status harus di isi";
       // $messages["details.{$index}.status.in"]                   = "Baris #" . ($index + 1) . ". Status tidak sesuai format";
       // $messages["details.{$index}.item.required"]                 = "Baris #" . ($index + 1) . ". Item di Form Pengambilan Barang Gudang harus di isi";
@@ -377,6 +379,7 @@ class UjalanController extends Controller
           throw new \Exception("Maaf terdapat Item yang sama",1);
         }
         array_push($unique_items2, $unique_data2);
+        if($value["p_status"]!="Remove")
         array_push($unique_acc_code,$value['ac_account_code']);
       }
       $unique_acc_code = array_unique($unique_acc_code);
@@ -538,6 +541,7 @@ class UjalanController extends Controller
           throw new \Exception("Maaf terdapat Item yang sama",1);
         }
         array_push($unique_items2, $unique_data2);
+        if($value["p_status"]!="Remove")
         array_push($unique_acc_code,$value['ac_account_code']);
       }
       $unique_acc_code = array_unique($unique_acc_code);
@@ -853,9 +857,9 @@ class UjalanController extends Controller
             array_push($for_deletes2, $details_in2[$k]);
       }
 
-      if(count($details_in2) > 0 && count($for_adds2)==0 && count($for_edits2)==0){
-        throw new \Exception("Item harus Diisi",1);
-      }
+      // if(count($details_in2) > 0 && count($for_adds2)==0 && count($for_edits2)==0){
+      //   throw new \Exception("Item harus Diisi",1);
+      // }
 
       $data_to_processes2 = array_merge($for_deletes2, $for_edits2, $for_adds2);
       
