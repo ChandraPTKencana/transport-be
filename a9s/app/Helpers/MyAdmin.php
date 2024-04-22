@@ -27,8 +27,10 @@ class MyAdmin
     return $model_query;
   }
 
-  public static function checkRole($role, $allowed_roles = [], $msg = "Forbidden", $return = false)
+  public static function checkRole($role, $allowed_roles = [], $msg = null, $return = false)
   {
+    $msg = is_null($msg) ? 'Forbidden' : $msg;
+    
     $has_value = in_array($role,$allowed_roles);
     if ($return) {
       return $has_value;

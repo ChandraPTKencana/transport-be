@@ -41,7 +41,7 @@ class UjalanController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -200,7 +200,7 @@ class UjalanController extends Controller
 
   public function show(UjalanRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
 
     // return response()->json([
     //   "message" => "Hanya yang membuat transaksi yang boleh melakukan pergantian atau konfirmasi data",
@@ -216,7 +216,7 @@ class UjalanController extends Controller
       $q->orderBy("ordinal","asc");
     }
     //end for details2
-    ])->where("deleted",0)->find($request->id);
+    ])->with(['val_by','val1_by'])->where("deleted",0)->find($request->id);
 
     // if($model_query->requested_by != $this->admin_id){
     //   return response()->json([
@@ -519,19 +519,25 @@ class UjalanController extends Controller
   public function update(UjalanRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
-    
-    $details_in = json_decode($request->details, true);
-    $this->validateItems($details_in);
-    //start for details2
-    $details_in2 = json_decode($request->details2, true);
-    $this->validateItems2($details_in2);   
-    //end for details2
-    
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
     $t_stamp = date("Y-m-d H:i:s");
 
     DB::beginTransaction();
     try {
+
+      $model_query             = Ujalan::where("id",$request->id)->lockForUpdate()->first();
+      if($model_query->val==1 || $model_query->deleted==1) 
+      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
+
+      if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
+        $details_in = json_decode($request->details, true);
+        $this->validateItems($details_in);
+      }
+      //start for details2
+      $details_in2 = json_decode($request->details2, true);
+      $this->validateItems2($details_in2);   
+      //end for details2
+      
       //start for details2
       $unique_items2 = [];
       $unique_acc_code=[];
@@ -571,10 +577,6 @@ class UjalanController extends Controller
       // if(Ujalan::where("id","!=",$request->id)->where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       // throw new \Exception("List sudah terdaftar",1);
 
-      $model_query             = Ujalan::where("id",$request->id)->lockForUpdate()->first();
-      if($model_query->val==1 || $model_query->deleted==1) 
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
-
       // if($model_query->requested_by != $this->admin_id){
       //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan pergantian data",1);
       // }
@@ -595,217 +597,218 @@ class UjalanController extends Controller
       // if($dt_before && $dt_before->id != $model_query->id){
       //   throw new \Exception("Ubah ditolak. Hanya data terbaru yang bisa diubah.",1);
       // }
-      
-      $model_query->xto             = $request->xto;
-      $model_query->tipe            = $request->tipe;
-      $model_query->jenis           = $request->jenis;
-      $model_query->harga           = 0;
-      // $model_query->status          = $request->status;
-  
-      // $model_query->created_at      = $t_stamp;
-      // $model_query->created_user    = $this->admin_id;
+      if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
+        $model_query->xto             = $request->xto;
+        $model_query->tipe            = $request->tipe;
+        $model_query->jenis           = $request->jenis;
+        $model_query->harga           = 0;
+        // $model_query->status          = $request->status;
+    
+        // $model_query->created_at      = $t_stamp;
+        // $model_query->created_user    = $this->admin_id;
 
-      $model_query->updated_at      = $t_stamp;
-      $model_query->updated_user    = $this->admin_id;  
+        $model_query->updated_at      = $t_stamp;
+        $model_query->updated_user    = $this->admin_id;  
 
 
-      $data_from_db = UjalanDetail::where('id_uj', $model_query->id)
-      ->orderBy("ordinal", "asc")->lockForUpdate()
-      ->get()->toArray();
-      
-
-      $in_keys = array_filter($details_in, function ($x) {
-          return isset($x["key"]);
-      });
-
-      $in_keys = array_map(function ($x) {
-          return $x["key"];
-      }, $in_keys);
-
-      $am_ordinal_db = array_map(function ($x) {
-          return $x["ordinal"];
-      }, $data_from_db);
-
-      if (count(array_diff($in_keys, $am_ordinal_db)) > 0 || count(array_diff($am_ordinal_db, $in_keys)) > 0) {
-          throw new Exception('Ada ketidak sesuaian data, harap hubungi staff IT atau refresh browser anda',1);
-      }
-
-      $id_items = [];
-      $ordinal = 0;
-      $for_deletes = [];
-      $for_edits = [];
-      $for_adds = [];
-      $data_to_processes = [];
-      foreach ($details_in as $k => $v) {
-        // $xdesc = $v['xdesc'] ? $v['xdesc'] : "";
+        $data_from_db = UjalanDetail::where('id_uj', $model_query->id)
+        ->orderBy("ordinal", "asc")->lockForUpdate()
+        ->get()->toArray();
         
-        if (in_array($v["p_status"], ["Add", "Edit"])) {
-          if (in_array(strtolower($v['xdesc']), $id_items) == 1) {
-              throw new \Exception("Maaf terdapat Nama Item yang sama",1);
+
+        $in_keys = array_filter($details_in, function ($x) {
+            return isset($x["key"]);
+        });
+
+        $in_keys = array_map(function ($x) {
+            return $x["key"];
+        }, $in_keys);
+
+        $am_ordinal_db = array_map(function ($x) {
+            return $x["ordinal"];
+        }, $data_from_db);
+
+        if (count(array_diff($in_keys, $am_ordinal_db)) > 0 || count(array_diff($am_ordinal_db, $in_keys)) > 0) {
+            throw new Exception('Ada ketidak sesuaian data, harap hubungi staff IT atau refresh browser anda',1);
+        }
+
+        $id_items = [];
+        $ordinal = 0;
+        $for_deletes = [];
+        $for_edits = [];
+        $for_adds = [];
+        $data_to_processes = [];
+        foreach ($details_in as $k => $v) {
+          // $xdesc = $v['xdesc'] ? $v['xdesc'] : "";
+          
+          if (in_array($v["p_status"], ["Add", "Edit"])) {
+            if (in_array(strtolower($v['xdesc']), $id_items) == 1) {
+                throw new \Exception("Maaf terdapat Nama Item yang sama",1);
+            }
+            array_push($id_items, strtolower($v['xdesc']));
           }
-          array_push($id_items, strtolower($v['xdesc']));
+
+          if ($v["p_status"] !== "Remove") {
+            $ordinal++;
+            $details_in[$k]["ordinal"] = $ordinal;
+            if ($v["p_status"] == "Edit")
+                array_unshift($for_edits, $details_in[$k]);
+            elseif ($v["p_status"] == "Add")
+                array_push($for_adds, $details_in[$k]);
+          } else
+              array_push($for_deletes, $details_in[$k]);
         }
 
-        if ($v["p_status"] !== "Remove") {
-          $ordinal++;
-          $details_in[$k]["ordinal"] = $ordinal;
-          if ($v["p_status"] == "Edit")
-              array_unshift($for_edits, $details_in[$k]);
-          elseif ($v["p_status"] == "Add")
-              array_push($for_adds, $details_in[$k]);
-        } else
-            array_push($for_deletes, $details_in[$k]);
-      }
-
-      if(count($for_adds)==0 && count($for_edits)==0){
-        throw new \Exception("Item harus Diisi",1);
-      }
-
-      $data_to_processes = array_merge($for_deletes, $for_edits, $for_adds);
-      // $ordinal = 0;
-      // MyLog::logging([
-      //   "data_to_processes"=>$data_to_processes,
-      //   "data_from_db"=>$data_from_db,
-      // ]);
-
-      // return response()->json([
-      //   "message" => "test",
-      // ], 400);
-
-      foreach ($data_to_processes as $k => $v) {
-        $index = false;
-
-        if (isset($v["key"])) {
-            $index = array_search($v["key"], $am_ordinal_db);
-        }
-        
-        //         if($k==2)
-        // {        MyLog::logging([
-        //           "item_name"=>$v["item"]["name"],
-        //           "key"=>$v["key"],
-        //           "index"=>$index,
-        //           "ordinal_arr"=>$am_ordinal_db,
-        //           "v"=>$v,
-        //           "w"=>$data_from_db,
-        //         ]);
-
-        //         return response()->json([
-        //           "message" => "test",
-        //         ], 400);
-        // }
-
-
-        if(in_array($v["p_status"],["Add","Edit"])){
-          // $ordinal++;
-
-          // if(($type=="transfer" || $type=="used")){
-          //   $v['qty_in']=null;
-          //   if($v['qty_out']==0) 
-          //     throw new \Exception("Baris #" .$ordinal." Qty Out Tidak Boleh 0",1);
-          // }
-
-          // if($type=="in"){
-          //   $v['qty_out']=null;
-          //   if($v['qty_in']==0)
-          //   throw new \Exception("Baris #" .$ordinal.".Qty In Tidak Boleh 0",1);
-          // }
-
-
-          // $indexItem = array_search($v['xdesc'], $items_id);
-          // $qty_reminder = 0;
-
-          // if ($indexItem !== false){
-          //   $qty_reminder = $prev_checks[$indexItem]["qty_reminder"];
-          // }
-  
-          // if(($type=="used" || $type=="transfer") && $qty_reminder - $v['qty_out'] < 0){
-          //   // MyLog::logging($prev_checks);
-
-          //   // throw new \Exception("Baris #" .$ordinal.".Qty melebihi stok : ".$qty_reminder, 1);
-          // }
+        if(count($for_adds)==0 && count($for_edits)==0){
+          throw new \Exception("Item harus Diisi",1);
         }
 
+        $data_to_processes = array_merge($for_deletes, $for_edits, $for_adds);
+        // $ordinal = 0;
+        // MyLog::logging([
+        //   "data_to_processes"=>$data_to_processes,
+        //   "data_from_db"=>$data_from_db,
+        // ]);
 
-        // $v["item_code"] = MyLib::emptyStrToNull($v["item_code"]);
-        // $v["note"] = MyLib::emptyStrToNull($v["note"]);
-        // $v["qty_assumption"] = MyLib::emptyStrToNull($v["qty_assumption"]);
-        // $v["qty_realization"] = MyLib::emptyStrToNull($v["qty_realization"]);
-        // $v["stock"] = MyLib::emptyStrToNull($v["stock"]);
-        // $v["price_assumption"] = MyLib::emptyStrToNull($v["price_assumption"]);
-        // $v["price_realization"] = MyLib::emptyStrToNull($v["price_realization"]);
+        // return response()->json([
+        //   "message" => "test",
+        // ], 400);
 
-        if ($v["p_status"] == "Remove") {
+        foreach ($data_to_processes as $k => $v) {
+          $index = false;
 
-            if ($index === false) {
-                throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
-            } else {
-                $dt = $data_from_db[$index];
-                // $has_permit = count(array_intersect(['ap-project_material_item-remove'], $scopes));
-                // if (!$dt["is_locked"] && $dt["created_by"] == $auth_id && $has_permit) {
-                //     ProjectMaterial::where("project_no", $model_query->no)->where("ordinal", $dt["ordinal"])->delete();
-                // }
-                UjalanDetail::where("id_uj",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
-            }
-        } else if ($v["p_status"] == "Edit") {
+          if (isset($v["key"])) {
+              $index = array_search($v["key"], $am_ordinal_db);
+          }
+          
+          //         if($k==2)
+          // {        MyLog::logging([
+          //           "item_name"=>$v["item"]["name"],
+          //           "key"=>$v["key"],
+          //           "index"=>$index,
+          //           "ordinal_arr"=>$am_ordinal_db,
+          //           "v"=>$v,
+          //           "w"=>$data_from_db,
+          //         ]);
 
-            if ($index === false) {
-                throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k,1);
-            } else {
-                // $dt = $data_from_db[$index];
-                // $has_permit = count(array_intersect(['ap-project_material_item-edit'], $scopes));
-                // if (!$has_permit) {
-                //     throw new Exception('Ubah Project Material Item Tidak diizinkan');
-                // }
+          //         return response()->json([
+          //           "message" => "test",
+          //         ], 400);
+          // }
 
-                // if ($v["qty_assumption"] != $dt['qty_assumption']) {
-                //     $has_value = count(array_intersect(['dp-project_material-manage-qty_assumption'], $scopes));
 
-                //     if ($dt["is_locked"] || !$has_value || $dt["created_by"] != $auth_id)
-                //         throw new Exception('Ubah Jumlah Asumsi Tidak diizinkan');
-                // }
-             
+          if(in_array($v["p_status"],["Add","Edit"])){
+            // $ordinal++;
 
+            // if(($type=="transfer" || $type=="used")){
+            //   $v['qty_in']=null;
+            //   if($v['qty_out']==0) 
+            //     throw new \Exception("Baris #" .$ordinal." Qty Out Tidak Boleh 0",1);
+            // }
+
+            // if($type=="in"){
+            //   $v['qty_out']=null;
+            //   if($v['qty_in']==0)
+            //   throw new \Exception("Baris #" .$ordinal.".Qty In Tidak Boleh 0",1);
+            // }
+
+
+            // $indexItem = array_search($v['xdesc'], $items_id);
+            // $qty_reminder = 0;
+
+            // if ($indexItem !== false){
+            //   $qty_reminder = $prev_checks[$indexItem]["qty_reminder"];
+            // }
+    
+            // if(($type=="used" || $type=="transfer") && $qty_reminder - $v['qty_out'] < 0){
+            //   // MyLog::logging($prev_checks);
+
+            //   // throw new \Exception("Baris #" .$ordinal.".Qty melebihi stok : ".$qty_reminder, 1);
+            // }
+          }
+
+
+          // $v["item_code"] = MyLib::emptyStrToNull($v["item_code"]);
+          // $v["note"] = MyLib::emptyStrToNull($v["note"]);
+          // $v["qty_assumption"] = MyLib::emptyStrToNull($v["qty_assumption"]);
+          // $v["qty_realization"] = MyLib::emptyStrToNull($v["qty_realization"]);
+          // $v["stock"] = MyLib::emptyStrToNull($v["stock"]);
+          // $v["price_assumption"] = MyLib::emptyStrToNull($v["price_assumption"]);
+          // $v["price_realization"] = MyLib::emptyStrToNull($v["price_realization"]);
+
+          if ($v["p_status"] == "Remove") {
+
+              if ($index === false) {
+                  throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
+              } else {
+                  $dt = $data_from_db[$index];
+                  // $has_permit = count(array_intersect(['ap-project_material_item-remove'], $scopes));
+                  // if (!$dt["is_locked"] && $dt["created_by"] == $auth_id && $has_permit) {
+                  //     ProjectMaterial::where("project_no", $model_query->no)->where("ordinal", $dt["ordinal"])->delete();
+                  // }
+                  UjalanDetail::where("id_uj",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
+              }
+          } else if ($v["p_status"] == "Edit") {
+
+              if ($index === false) {
+                  throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k,1);
+              } else {
+                  // $dt = $data_from_db[$index];
+                  // $has_permit = count(array_intersect(['ap-project_material_item-edit'], $scopes));
+                  // if (!$has_permit) {
+                  //     throw new Exception('Ubah Project Material Item Tidak diizinkan');
+                  // }
+
+                  // if ($v["qty_assumption"] != $dt['qty_assumption']) {
+                  //     $has_value = count(array_intersect(['dp-project_material-manage-qty_assumption'], $scopes));
+
+                  //     if ($dt["is_locked"] || !$has_value || $dt["created_by"] != $auth_id)
+                  //         throw new Exception('Ubah Jumlah Asumsi Tidak diizinkan');
+                  // }
+              
+
+                $model_query->harga          += ($v["qty"] * $v["harga"]);
+
+                UjalanDetail::where("id_uj", $model_query->id)
+                ->where("ordinal", $v["key"])->where("p_change",false)->update([
+                    "ordinal"=>$v["ordinal"],
+                    "xdesc" => $v["xdesc"],
+                    "qty" => $v["qty"],
+                    "harga" => $v["harga"],
+                    // "status" => $v["status"],
+                    "p_change"=> true,
+                    "updated_at"=> $t_stamp,
+                    "updated_user"=> $this->admin_id,
+                ]);
+
+              }
+
+              // $ordinal++;
+          } else if ($v["p_status"] == "Add") {
+
+              // if (!count(array_intersect(['ap-project_material_item-add'], $scopes)))
+              //     throw new Exception('Tambah Project Material Item Tidak diizinkan');
+
+              // if (!count(array_intersect(['dp-project_material-manage-item_code'], $scopes))  && $v["item_code"] != "")
+              //     throw new Exception('Tidak ada izin mengelola Kode item');
               $model_query->harga          += ($v["qty"] * $v["harga"]);
-
-              UjalanDetail::where("id_uj", $model_query->id)
-              ->where("ordinal", $v["key"])->where("p_change",false)->update([
-                  "ordinal"=>$v["ordinal"],
-                  "xdesc" => $v["xdesc"],
-                  "qty" => $v["qty"],
-                  "harga" => $v["harga"],
-                  // "status" => $v["status"],
-                  "p_change"=> true,
-                  "updated_at"=> $t_stamp,
-                  "updated_user"=> $this->admin_id,
+              UjalanDetail::insert([
+                  'id_uj'             => $model_query->id,
+                  'ordinal'           => $v["ordinal"],
+                  'xdesc'             => $v['xdesc'],
+                  'qty'               => $v["qty"],
+                  'harga'             => $v['harga'],
+                  // 'status'            => $v['status'],
+                  "p_change"          => true,
+                  'created_at'        => $t_stamp,
+                  'created_user'      => $this->admin_id,
+                  'updated_at'        => $t_stamp,
+                  'updated_user'      => $this->admin_id,
               ]);
-
-            }
-
-            // $ordinal++;
-        } else if ($v["p_status"] == "Add") {
-
-            // if (!count(array_intersect(['ap-project_material_item-add'], $scopes)))
-            //     throw new Exception('Tambah Project Material Item Tidak diizinkan');
-
-            // if (!count(array_intersect(['dp-project_material-manage-item_code'], $scopes))  && $v["item_code"] != "")
-            //     throw new Exception('Tidak ada izin mengelola Kode item');
-            $model_query->harga          += ($v["qty"] * $v["harga"]);
-            UjalanDetail::insert([
-                'id_uj'             => $model_query->id,
-                'ordinal'           => $v["ordinal"],
-                'xdesc'             => $v['xdesc'],
-                'qty'               => $v["qty"],
-                'harga'             => $v['harga'],
-                // 'status'            => $v['status'],
-                "p_change"          => true,
-                'created_at'        => $t_stamp,
-                'created_user'      => $this->admin_id,
-                'updated_at'        => $t_stamp,
-                'updated_user'      => $this->admin_id,
-            ]);
-            // $ordinal++;
+              // $ordinal++;
+          }
         }
-    }
+      }
 
       //start for details2
       $data_from_db2 = UjalanDetail2::where('id_uj', $model_query->id)
@@ -1010,9 +1013,11 @@ class UjalanController extends Controller
         }
       }
     //end for details2
-    $model_query->save();
-    UjalanDetail::where('id_uj',$model_query->id)->update(["p_change"=>false]);
-    //start for details2
+    if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
+      $model_query->save();
+      UjalanDetail::where('id_uj',$model_query->id)->update(["p_change"=>false]);
+    }
+      //start for details2
     UjalanDetail2::where('id_uj',$model_query->id)->update(["p_change"=>false]);
     //end for details2
       DB::commit();
@@ -1105,7 +1110,7 @@ class UjalanController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Ujalan,id",
@@ -1126,14 +1131,24 @@ class UjalanController extends Controller
     DB::beginTransaction();
     try {
       $model_query = Ujalan::find($request->id);
-      if($model_query->val){
-        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      if($this->role == "Logistic" && $model_query->val){
+        throw new \Exception("Data Sudah Tervalidasi",1);
       }
-    
-      if(!$model_query->val && $model_query->created_user == $this->admin_id){
+
+      if($this->role=='PabrikTransport' &&  $model_query->val1){
+        throw new \Exception("Data Sudah Tervalidasi",1);
+      }
+      
+      if(in_array($this->role,["SuperAdmin","Logistic"]) && !$model_query->val && $model_query->created_user == $this->admin_id){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
+      }
+
+      if(in_array($this->role,["SuperAdmin","PabrikTransport"]) && !$model_query->val1){
+        $model_query->val1 = 1;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
       }
       $model_query->save();
       DB::commit();
@@ -1143,6 +1158,10 @@ class UjalanController extends Controller
         "val_user"=>$model_query->val_user,
         "val_at"=>$model_query->val_at,
         "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
