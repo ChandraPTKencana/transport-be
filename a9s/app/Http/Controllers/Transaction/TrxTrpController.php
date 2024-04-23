@@ -26,6 +26,8 @@ use Excel;
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\IsUser;
 use App\Exports\MyReport;
+use App\Models\MySql\Ujalan;
+use App\Models\MySql\UjalanDetail;
 
 class TrxTrpController extends Controller
 {
@@ -325,7 +327,7 @@ class TrxTrpController extends Controller
       $model_query->xto             = $ujalan->xto;
       $model_query->tipe            = $ujalan->tipe;
       $model_query->amount          = $ujalan->harga;
-
+      
       if($request->pv_id){
 
         $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
@@ -415,6 +417,18 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
       }
 
+      if($request->cost_center_code){
+        $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+        ->select('CostCenter','Description')
+        ->where('CostCenter',$request->cost_center_code)
+        ->first();
+        if(!$list_cost_center)
+        throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+      
+        $model_query->cost_center_code = $list_cost_center->CostCenter;
+        $model_query->cost_center_desc = $list_cost_center->Description;
+      }
+
       $model_query->supir=$request->supir;
       $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
@@ -427,24 +441,39 @@ class TrxTrpController extends Controller
 
       $model_query->save();
 
+      $miniError="";
+      try {
+        if($request->cost_center_code)
+        $this->genPVR($model_query->id);
+      } catch (\Exception $e) {
+        if ($e->getCode() == 1) {
+          $miniError=". Namun PVR Batal Tergenerate:".$e->getMessage();
+        }else{
+          $miniError=". Namun PVR Batal Tergenerate. Akses Jaringan Gagal";
+        }
+      }
+
       DB::commit();
       return response()->json([
-        "message" => "Proses tambah data berhasil",
+        "message" => "Proses tambah data berhasil".$miniError,
         "id"=>$model_query->id,
         "created_at" => $t_stamp,
         "updated_at" => $t_stamp,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
-      return response()->json([
-        "message" => $e->getMessage(),
-        "code" => $e->getCode(),
-        "line" => $e->getLine(),
-      ], 400);
+      // return response()->json([
+      //   "message" => $e->getMessage(),
+      //   "code" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      // ], 400);
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
         ], 400);
+      }
+      if ($e->getCode() == 422) {
+        return response()->json(json_decode($e->getMessage()), 422);
       }
       return response()->json([
         "message" => "Proses tambah data gagal",
@@ -476,6 +505,9 @@ class TrxTrpController extends Controller
 
       if(!$ujalan) 
       throw new \Exception("Silahkan Isi Data Ujalan Dengan Benar",1);
+
+      if($ujalan->xto!=$request->xto)
+      throw new \Exception("Silahkan Isi Tipe Ujalan Dengan Benar",1);
 
       $model_query->id_uj           = $ujalan->id;
       $model_query->jenis           = $request->jenis;
@@ -590,6 +622,23 @@ class TrxTrpController extends Controller
         $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
       }
 
+      if($model_query->pvr_number==null){
+        if($request->cost_center_code){  
+          $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+          ->select('CostCenter','Description')
+          ->where('CostCenter',$request->cost_center_code)
+          ->first();
+          if(!$list_cost_center)
+          throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+        
+          $model_query->cost_center_code = $list_cost_center->CostCenter;
+          $model_query->cost_center_desc = $list_cost_center->Description;
+        }else{
+          $model_query->cost_center_code =null;
+          $model_query->cost_center_desc =null;
+        } 
+      }
+
       $model_query->supir=$request->supir;
       $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
@@ -598,23 +647,41 @@ class TrxTrpController extends Controller
       $model_query->updated_user    = $this->admin_id;
       $model_query->save();
 
+      $miniError="";
+      try {
+        if($model_query->cost_center_code && $model_query->pvr_number==null)
+        $this->genPVR($model_query->id);
+      } catch (\Exception $e) {
+        MyLog::logging($e->getMessage(),"PVR LOG");
+
+        if ($e->getCode() == 1) {
+          $miniError=". Namun PVR Batal Tergenerate:".$e->getMessage();
+        }else{
+          $miniError=". Namun PVR Batal Tergenerate. Akses Jaringan Gagal";
+        }
+        //throw $th;
+      }
+
       DB::commit();
       return response()->json([
-        "message" => "Proses ubah data berhasil",
+        "message" => "Proses ubah data berhasil".$miniError,
         "updated_at"=>$t_stamp
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
       // return response()->json([
       //   "getCode" => $e->getCode(),
       //   "line" => $e->getLine(),
       //   "message" => $e->getMessage(),
       // ], 400);
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      if ($e->getCode() == 422) {
+        return response()->json(json_decode($e->getMessage()), 422);
+      }
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);
@@ -1011,5 +1078,138 @@ class TrxTrpController extends Controller
     if($bigger==0) return [$diff,0];
 
     return [$diff , $diff / $bigger * 100];
+  }
+
+
+  public function genPVR($trx_trp_id){
+    $trx_trp = TrxTrp::where("id",$trx_trp_id)->first();
+    $supir = $trx_trp->supir;
+    $no_pol = $trx_trp->no_pol;
+    $kernet = $trx_trp->kernet;
+    $associate_name="TESTING SAJA ".$no_pol."(S)".$supir.($kernet?"(K)".$kernet:"(Tanpa Kernet)"); // max 80char
+
+    $remarks = $associate_name."BIAYA UANG JALAN ".$trx_trp->jenis." ".env("app_name")."-".$trx_trp->xto." P/".date("d-m-y",strtotime($trx_trp->tanggal))." Rincian:";
+    // $ujalan=Ujalan::where("id",$trx_trp->id_uj)->first();
+    $ujalan_detail = UjalanDetail::where("id_uj",$trx_trp->id_uj)->where("ordinal",1)->first();
+    if(!$ujalan_detail)
+    throw new \Exception("Detail Ujalan Harus diisi terlebih dahulu",1);
+    
+    $ujalan_details2 = \App\Models\MySql\UjalanDetail2::where("id_uj",$trx_trp->id_uj)->get();
+    if(count($ujalan_details2)==0)
+    throw new \Exception("Detail PVR Harus diisi terlebih dahulu",1);
+
+    $remarks.=" ".$ujalan_detail->xdesc." ".number_format($ujalan_detail->qty, 0,',','.')."x".number_format($ujalan_detail->harga, 0,',','.')."=".number_format($ujalan_detail->qty*$ujalan_detail->harga, 0,',','.').";";
+
+    if(strlen($associate_name)>80){
+      $associate_name = substr($associate_name,0,80);
+    }
+
+    $bank_account_code="01.100.005";
+    
+    $get_data_pv = DB::connection('sqlsrv')->table('FI_BankAccounts')
+    ->select('BankAccountID')
+    ->where("bankaccountcode",$bank_account_code)
+    ->first();
+
+    $bank_account_id = $get_data_pv->BankAccountID;
+    
+    // @VoucherID INT = 0,
+    $voucher_no = "(AUTO)";
+    $voucher_type = "TRP";
+    $voucher_date = date("Y-m-d");
+
+    $income_or_expense = 1;
+    $currency_id = 1;
+    $payment_method="Cash";
+    $check_no=$bank_name=$account_no= '';
+    $check_due_date= null;
+
+    $sql = \App\Models\MySql\UjalanDetail2::selectRaw('SUM(qty*amount) as total')->where("id_uj",$trx_trp->id_uj)->first();
+    $amount_paid = $sql->total; // call from child
+    $exclude_in_ARAP = 0;
+    $login_name = $this->admin->the_user->username;
+    $expense_or_revenue_type_id=0;
+    $confidential=1;
+    $PVR_source = 'gtsource'; // digenerate melalui program
+    $PVR_source_id = $trx_trp_id; //ambil id trx
+      // DB::select("exec USP_FI_APRequest_Update(0,'(AUTO)','TRP',1,1,1,0,)",array($ts,$param2));
+    $VoucherID = -1;
+    // $myData = DB::connection('sqlsrv')->update("SET NOCOUNT ON;exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
+    $myData = DB::connection('sqlsrv')->update("exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
+    @VoucherDate=:voucher_date,@IncomeOrExpense=:income_or_expense,@CurrencyID=:currency_id,@AssociateName=:associate_name,
+    @BankAccountID=:bank_account_id,@PaymentMethod=:payment_method,@CheckNo=:check_no,@CheckDueDate=:check_due_date,
+    @BankName=:bank_name,@AmountPaid=:amount_paid,@AccountNo=:account_no,@Remarks=:remarks,@ExcludeInARAP=:exclude_in_ARAP,
+    @LoginName=:login_name,@ExpenseOrRevenueTypeID=:expense_or_revenue_type_id,@Confidential=:confidential,
+    @PVRSource=:PVR_source,@PVRSourceID=:PVR_source_id",[
+      ":voucher_no"=>$voucher_no,
+      ":voucher_type"=>$voucher_type,
+      ":voucher_date"=>$voucher_date,
+      ":income_or_expense"=>$income_or_expense,
+      ":currency_id"=>$currency_id,
+      ":associate_name"=>$associate_name,
+      ":bank_account_id"=>$bank_account_id,
+      ":payment_method"=>$payment_method,
+      ":check_no"=>$check_no,
+      ":check_due_date"=>$check_due_date,
+      ":bank_name"=>$bank_name,
+      ":amount_paid"=>$amount_paid,
+      ":account_no"=>$account_no,
+      ":remarks"=>$remarks,
+      ":exclude_in_ARAP"=>$exclude_in_ARAP,
+      ":login_name"=>$login_name,
+      ":expense_or_revenue_type_id"=>$expense_or_revenue_type_id,
+      ":confidential"=>$confidential,
+      ":PVR_source"=>$PVR_source,
+      ":PVR_source_id"=>$PVR_source_id,
+    ]);
+    if(!$myData)
+    throw new \Exception("Data yang diperlukan tidak terpenuhi",1);
+
+    $pvr= DB::connection('sqlsrv')->table('FI_APRequest')
+    ->select('VoucherID','VoucherNo','AmountPaid')
+    ->where("PVRSource",$PVR_source)
+    ->where("PVRSourceID",$trx_trp->id)
+    ->first();
+    if(!$pvr)
+    throw new \Exception("Akses Ke Jaringan Gagal",1);
+
+    $trx_trp->pvr_id = $pvr->VoucherID;
+    $trx_trp->pvr_number = $pvr->VoucherNo;
+    $trx_trp->pvr_amount = $pvr->AmountPaid;
+    $trx_trp->save();
+    
+    $d_voucher_id = $pvr->VoucherID;
+    $d_voucher_extra_item_id = 0;
+    $d_type = 0;
+    foreach ($ujalan_details2 as $key => $v) {
+      $d_description = $v->description;
+      $d_amount = $v->qty * $v->amount;
+      $d_account_id = $v->ac_account_id;
+      $d_dept = $trx_trp->cost_center_code;
+      $d_qty=$v->qty;
+      $d_unit_price=$v->amount;
+      $details = DB::connection('sqlsrv')->update("exec 
+      USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+      @VoucherExtraItemID=:d_voucher_extra_item_id,
+      @Description=:d_description,@Amount=:d_amount,
+      @AccountID=:d_account_id,@TypeID=:d_type,
+      @Department=:d_dept,@LoginName=:login_name,
+      @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+        ":d_voucher_id"=>$d_voucher_id,
+        ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+        ":d_description"=>$d_description,
+        ":d_amount"=>$d_amount,
+        ":d_account_id"=>$d_account_id,
+        ":d_type"=>$d_type,
+        ":d_dept"=>$d_dept,
+        ":login_name"=>$login_name,
+        ":d_qty"=>$d_qty,
+        ":d_unit_price"=>$d_unit_price
+      ]);
+    }
+
+
+    $trx_trp->pvr_had_detail = 1;
+    $trx_trp->save();
   }
 }

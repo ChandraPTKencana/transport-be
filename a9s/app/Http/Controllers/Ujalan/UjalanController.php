@@ -526,7 +526,14 @@ class UjalanController extends Controller
     try {
 
       $model_query             = Ujalan::where("id",$request->id)->lockForUpdate()->first();
-      if($model_query->val==1 || $model_query->deleted==1) 
+      if($model_query->deleted==1)
+      throw new \Exception("Data Sudah Dihapus",1);
+      
+      if(
+        ($model_query->val==1 && $model_query->val1==1) || 
+        ($this->role=="Logistic" && $model_query->val == 1) ||
+        ($this->role=="PabrikTransport" && $model_query->val1 == 1)
+      ) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
       if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
@@ -1184,7 +1191,7 @@ class UjalanController extends Controller
 
   public function ac_accounts(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset

@@ -118,9 +118,9 @@ class TrxLoadDataController extends Controller
 
     $list_ticket=[];
     $list_pv=[];
-
+    $list_cost_center=[];
     $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->get();
-    $date = now()->subDays(3);
+    $date = now()->subDays(5);
     try {
       if($online_status=="true"){
         $arr_tickets = [];
@@ -168,9 +168,10 @@ class TrxLoadDataController extends Controller
         // ->limit(1)
         ->get();
   
-        $list_ticket= $list_ticket->map(function ($item) {
-          return array_map('utf8_encode', (array)$item);
-        })->toArray();
+        // $list_ticket= $list_ticket->map(function ($item) {
+        //   return array_map('utf8_encode', (array)$item);
+        // })->toArray();
+        $list_ticket= MyLib::objsToArray($list_ticket); 
   
         $list_pv = $connectionDB->table("fi_arap")
         // ->select('*')
@@ -183,9 +184,17 @@ class TrxLoadDataController extends Controller
         ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
         ->get();
   
-        $list_pv= $list_pv->map(function ($item) {
-          return array_map('utf8_encode', (array)$item);
-        })->toArray();     
+        // $list_pv= $list_pv->map(function ($item) {
+        //   return array_map('utf8_encode', (array)$item);
+        // })->toArray();    
+        $list_pv= MyLib::objsToArray($list_pv); 
+        
+        $list_cost_center = $connectionDB->table("AC_CostCenterNames")
+        ->select('CostCenter','Description')
+        ->where('CostCenter','like', '112%')
+        ->get();
+  
+        $list_cost_center= MyLib::objsToArray($list_cost_center); 
       }
     } catch (\Throwable $th) {
       //throw $th;
@@ -193,6 +202,7 @@ class TrxLoadDataController extends Controller
     
     return response()->json([
       "list_ujalan" => $list_ujalan,
+      "list_cost_center" => $list_cost_center,
       "list_ticket" => $list_ticket,
       "list_pv" => $list_pv,
     ], 200);

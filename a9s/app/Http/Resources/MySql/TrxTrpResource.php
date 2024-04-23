@@ -74,6 +74,13 @@ class TrxTrpResource extends JsonResource
             'deleted'           => $this->deleted,
             'deleted_user'      => $this->deleted_user ?? "",
             'deleted_at'        => $this->deleted_at ?? "",
+
+            'cost_center_code'        => $this->cost_center_code ?? "",
+            'cost_center_desc'        => $this->cost_center_desc ?? "",
+
+            'pvr_number'        => $this->pvr_number ?? "",
+            'pvr_amount'        => $this->pvr_amount ?? "",
+
         ];
     }
 }
