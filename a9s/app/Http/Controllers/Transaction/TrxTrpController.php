@@ -1150,10 +1150,15 @@ class TrxTrpController extends Controller
 
   public function genPVR($trx_trp_id){
     $t_stamp = date("Y-m-d H:i:s");
-    $trx_trp = TrxTrp::where("id",$trx_trp_id)->where("pvr_had_detail",0)->whereNotNull('cost_center_code')->whereNull("pv_id")->first();
+    $trx_trp = TrxTrp::where("id",$trx_trp_id)->first();
     if(!$trx_trp){
-      throw new \Exception("Karna PVR sudah selesai dibuat atau Cost Center Code belum diisi atau PV sudah diisi",1);
+      throw new \Exception("Karna Transaksi tidak ditemukan",1);
     }
+
+    if($trx_trp->pvr_had_detail==1) throw new \Exception("Karna PVR sudah selesai dibuat",1);
+    if($trx_trp->cost_center_code==null) throw new \Exception("Cost Center Code belum diisi",1);
+    if($trx_trp->pv_id!=null) throw new \Exception("Karna PV sudah diisi",1);
+      
     $supir = $trx_trp->supir;
     $no_pol = $trx_trp->no_pol;
     $kernet = $trx_trp->kernet;
