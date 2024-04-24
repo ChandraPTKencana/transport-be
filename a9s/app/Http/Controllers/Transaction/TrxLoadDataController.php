@@ -120,12 +120,23 @@ class TrxLoadDataController extends Controller
     $list_pv=[];
     $list_cost_center=[];
     $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->get();
-    $date = now()->subDays(5);
+    
+    $date_from = $request->from;
+    $date_to = $request->to;
+
+    if(!$date_from || !$date_to ){
+      throw new MyException(["message" => "Please Set Date For Load Data"]);
+    }
+
+    if(strtotime($date_from) > strtotime($date_to)) {
+      throw new MyException(["message" => "Set Date From Must Before Or Same With Date To."]);
+    }
+
     try {
       if($online_status=="true"){
         $arr_tickets = [];
         $arr_pvs = [];
-        $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date)->get();
+        $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date_from)->get();
         foreach ($used_ticket_pvs as $key=>$val){
           if($val->pv_no){
             array_push($arr_pvs,$val->pv_no);
@@ -162,7 +173,8 @@ class TrxLoadDataController extends Controller
         $list_ticket = $connectionDB->table("palm_tickets")
         // ->select('*')
         ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
-        ->whereDate('Date','>=', $date)
+        ->whereDate('Date','>=', $date_from)
+        ->whereDate('Date','<=', $date_to)
         ->whereIn('ProductName',$product_names) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
         ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
         // ->limit(1)
@@ -176,7 +188,8 @@ class TrxLoadDataController extends Controller
         $list_pv = $connectionDB->table("fi_arap")
         // ->select('*')
         ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-        ->whereDate('VoucherDate','>=', $date)
+        ->whereDate('VoucherDate','>=', $date_from)
+        ->whereDate('VoucherDate','<=', $date_to)
         ->where('VoucherType',"TRP")
         ->where("IsAR",0)
         ->whereNotIn('VoucherNo',$arr_pvs) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
