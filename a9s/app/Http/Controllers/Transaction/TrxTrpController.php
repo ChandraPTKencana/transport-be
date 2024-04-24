@@ -1317,4 +1317,85 @@ class TrxTrpController extends Controller
       "updated_at"=>$t_stamp
     ];
   }
+
+  public function doUpdatePV(Request $request){
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    $rules = [
+      'online_status' => "required",
+    ];
+
+    $messages = [
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = \Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+    $online_status=$request->online_status;
+    if($online_status!="true")
+    return response()->json([
+      "message" => "Mode Harus Online",
+    ], 400);
+
+    $miniError="";
+    try {
+      $t_stamp = date("Y-m-d H:i:s");
+      $trx_trps = TrxTrp::whereNotNull("pvr_id")->whereNull("pv_id")->get();
+      if(count($trx_trps)==0){
+        throw new \Exception("Semua PVR yang ada ,PV ny sudah terisi",1);
+      }
+
+      $pvr_nos=$trx_trps->pluck('pvr_no');
+      // $pvr_nos=['KPN/PV-R/2404/0951','KPN/PV-R/2404/1000'];
+      $get_data_pvs = DB::connection('sqlsrv')->table('FI_ARAPINFO')
+      ->selectRaw('fi_arap.VoucherID,Sources,fi_arap.VoucherNo,FI_APRequest.PVRSourceID,fi_arap.AmountPaid')
+      ->join('fi_arap',function ($join){
+        $join->on("fi_arap.VoucherID","FI_ARAPINFO.VoucherID");        
+      })
+      ->join('FI_APRequest',function ($join){
+        $join->on("FI_APRequest.VoucherNo","FI_ARAPINFO.Sources");        
+      })
+      ->whereIn("sources",$pvr_nos)
+      ->get();
+
+      $get_data_pvs=MyLib::objsToArray($get_data_pvs);
+      $changes=[];
+      foreach ($get_data_pvs as $key => $v) {
+        $ud_trx_trp=TrxTrp::where("id", $v["PVRSourceID"])->where("pvr_no", $v["Sources"])->first();
+        if(!$ud_trx_trp) continue;
+        $ud_trx_trp->pv_id=$v["VoucherID"];
+        $ud_trx_trp->pv_no=$v["VoucherNo"];
+        $ud_trx_trp->pv_total=$v["AmountPaid"];
+        $ud_trx_trp->updated_at=$t_stamp;
+        $ud_trx_trp->save();
+        array_push($changes,[
+          "id"=>$ud_trx_trp->id,
+          "pv_id"=>$ud_trx_trp->pv_id,
+          "pv_no"=>$ud_trx_trp->pv_no,
+          "pv_total"=>$ud_trx_trp->pv_total,
+          "updated_at"=>$t_stamp
+        ]);
+      }
+
+      if(count($changes)==0)
+      throw new \Exception("PV Tidak ada yang di Update",1);
+
+      return response()->json([
+        "message" => "PV Berhasil di Update",
+        "data" => $changes,
+      ], 200);
+      
+    } catch (\Exception $e) {
+      if ($e->getCode() == 1) {
+        $miniError="PV Batal Update: ".$e->getMessage();
+      }else{
+        $miniError="PV Batal Update. Akses Jaringan Gagal";
+      }
+      return response()->json([
+        "message" => $miniError,
+      ], 400);
+    }
+  }
 }
