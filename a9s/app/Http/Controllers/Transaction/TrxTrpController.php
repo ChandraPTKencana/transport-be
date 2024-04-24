@@ -168,6 +168,33 @@ class TrxTrpController extends Controller
           $model_query = $model_query->where("tanggal",$sort_symbol,$first_row["tanggal"])->orderBy('id','DESC');
         }
       }
+
+      if (isset($sort_lists["cost_center_code"])) {
+        $model_query = $model_query->orderBy("cost_center_code", $sort_lists["cost_center_code"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("cost_center_code",$sort_symbol,$first_row["cost_center_code"]);
+        }
+      }
+      if (isset($sort_lists["cost_center_desc"])) {
+        $model_query = $model_query->orderBy("cost_center_desc", $sort_lists["cost_center_desc"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("cost_center_desc",$sort_symbol,$first_row["cost_center_desc"]);
+        }
+      }
+      if (isset($sort_lists["pvr_id"])) {
+        $model_query = $model_query->orderBy("pvr_id", $sort_lists["pvr_id"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("pvr_id",$sort_symbol,$first_row["pvr_id"]);
+        }
+      }
+      if (isset($sort_lists["pvr_no"])) {
+        $model_query = $model_query->orderBy("pvr_no", $sort_lists["pvr_no"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("pvr_no",$sort_symbol,$first_row["pvr_no"]);
+        }
+      }
+
+      
       // if (isset($sort_lists["tipe"])) {
       //   $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
       //   if (count($first_row) > 0) {
@@ -239,6 +266,21 @@ class TrxTrpController extends Controller
           }
           if (isset($like_lists["no_pol"])) {
             $q->orWhere("no_pol", "like", $like_lists["no_pol"]);
+          }
+          if (isset($like_lists["tanggal"])) {
+            $q->orWhere("tanggal", "like", $like_lists["tanggal"]);
+          }
+          if (isset($like_lists["cost_center_code"])) {
+            $q->orWhere("cost_center_code", "like", $like_lists["cost_center_code"]);
+          }
+          if (isset($like_lists["cost_center_desc"])) {
+            $q->orWhere("cost_center_desc", "like", $like_lists["cost_center_desc"]);
+          }
+          if (isset($like_lists["pvr_id"])) {
+            $q->orWhere("pvr_id", "like", $like_lists["pvr_id"]);
+          }
+          if (isset($like_lists["pvr_no"])) {
+            $q->orWhere("pvr_no", "like", $like_lists["pvr_no"]);
           }
     
           // if (isset($like_lists["requested_name"])) {
