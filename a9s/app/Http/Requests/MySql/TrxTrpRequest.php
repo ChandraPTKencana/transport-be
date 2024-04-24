@@ -39,6 +39,7 @@ class TrxTrpRequest extends FormRequest
             $rules['supir'] = 'required|max:255';
             $rules['kernet'] = 'nullable|max:255';
             $rules['no_pol'] = 'required|max:12';
+            $rules['online_status'] = 'required';
         }
         return $rules;
     }

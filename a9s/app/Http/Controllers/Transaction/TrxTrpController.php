@@ -303,9 +303,10 @@ class TrxTrpController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
 
+    $t_stamp = date("Y-m-d H:i:s");
+    $online_status=$request->online_status;
     DB::beginTransaction();
     try {
-      $t_stamp = date("Y-m-d H:i:s");
       // if(TrxTrp::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       // throw new \Exception("List sudah terdaftar");
 
@@ -328,105 +329,107 @@ class TrxTrpController extends Controller
       $model_query->tipe            = $ujalan->tipe;
       $model_query->amount          = $ujalan->harga;
       
-      if($request->pv_id){
+      if($online_status=="true"){
+        if($request->pv_id){
 
-        $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
-        ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-        ->where("fi_arap.VoucherID",$request->pv_id)
-        ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-        ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
-        ->first();
+          $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
+          ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
+          ->where("fi_arap.VoucherID",$request->pv_id)
+          ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
+          ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
+          ->first();
 
-        if(!$get_data_pv) 
-        throw new \Exception("Data PV tidak terdaftar",1);
-        
-        $model_query->pv_id =  $request->pv_id;
-        if(\App\Models\MySql\TrxTrp::where("pv_id",$get_data_pv->VoucherID)->first())
-        throw new \Exception("Data PV telah digunakan",1);
+          if(!$get_data_pv) 
+          throw new \Exception("Data PV tidak terdaftar",1);
+          
+          $model_query->pv_id =  $request->pv_id;
+          if(\App\Models\MySql\TrxTrp::where("pv_id",$get_data_pv->VoucherID)->first())
+          throw new \Exception("Data PV telah digunakan",1);
 
-        $model_query->pv_no =  $get_data_pv->VoucherNo;
-        $model_query->pv_total =  $get_data_pv->total_amount;
-      }
-
-      if($request->ticket_a_id){
-
-        $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-        ->where("TicketID",$request->ticket_a_id);
-
-        if($request->jenis=="CPO"){
-          $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
-        }else if($request->jenis=="PK"){
-          $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
-        }else{ 
-          $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
-        }
-        $get_data_ticket =$get_data_ticket->first();
-
-        if(!$get_data_ticket) 
-        throw new \Exception("Data Ticket tidak terdaftar",1);
-
-        if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)->first())
-        throw new \Exception("Data Ticket telah digunakan",1);
-
-        $model_query->ticket_a_id =  $request->ticket_a_id;
-        $model_query->ticket_a_no =  $get_data_ticket->TicketNo;
-        $model_query->ticket_a_bruto =  $get_data_ticket->Bruto;
-        $model_query->ticket_a_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_a_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
-        $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
-        $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
-        $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
-        $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;
-      }
-
-      if($request->ticket_b_id){
-
-        $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-        ->where("TicketID",$request->ticket_b_id);
-        
-        if($request->jenis=="TBS"){
-          $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
-        }else {
-          $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
+          $model_query->pv_no =  $get_data_pv->VoucherNo;
+          $model_query->pv_total =  $get_data_pv->total_amount;
         }
 
-        $get_data_ticket=$get_data_ticket->first();
+        if($request->ticket_a_id){
 
-        if(!$get_data_ticket) 
-        throw new \Exception("Data Ticket tidak terdaftar",1);
+          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
+          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+          ->where("TicketID",$request->ticket_a_id);
 
-        if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)->first())
-        throw new \Exception("Data Ticket telah digunakan",1);
+          if($request->jenis=="CPO"){
+            $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
+          }else if($request->jenis=="PK"){
+            $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
+          }else{ 
+            $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
+          }
+          $get_data_ticket =$get_data_ticket->first();
 
-        $model_query->ticket_b_id =  $request->ticket_b_id;
-        $model_query->ticket_b_no =  $get_data_ticket->TicketNo;
-        $model_query->ticket_b_bruto =  $get_data_ticket->Bruto;
-        $model_query->ticket_b_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_b_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
-        $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
-        $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
-        $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
-        $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
-      }else{
-        $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
-        $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
-        $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
-        $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
-        $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
-      }
+          if(!$get_data_ticket) 
+          throw new \Exception("Data Ticket tidak terdaftar",1);
 
-      if($request->cost_center_code){
-        $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-        ->select('CostCenter','Description')
-        ->where('CostCenter',$request->cost_center_code)
-        ->first();
-        if(!$list_cost_center)
-        throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
-      
-        $model_query->cost_center_code = $list_cost_center->CostCenter;
-        $model_query->cost_center_desc = $list_cost_center->Description;
+          if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)->first())
+          throw new \Exception("Data Ticket telah digunakan",1);
+
+          $model_query->ticket_a_id =  $request->ticket_a_id;
+          $model_query->ticket_a_no =  $get_data_ticket->TicketNo;
+          $model_query->ticket_a_bruto =  $get_data_ticket->Bruto;
+          $model_query->ticket_a_tara =  $get_data_ticket->Tara;
+          $model_query->ticket_a_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
+          $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
+          $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
+          $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
+          $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;
+        }
+
+        if($request->ticket_b_id){
+
+          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
+          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+          ->where("TicketID",$request->ticket_b_id);
+          
+          if($request->jenis=="TBS"){
+            $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
+          }else {
+            $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
+          }
+
+          $get_data_ticket=$get_data_ticket->first();
+
+          if(!$get_data_ticket) 
+          throw new \Exception("Data Ticket tidak terdaftar",1);
+
+          if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)->first())
+          throw new \Exception("Data Ticket telah digunakan",1);
+
+          $model_query->ticket_b_id =  $request->ticket_b_id;
+          $model_query->ticket_b_no =  $get_data_ticket->TicketNo;
+          $model_query->ticket_b_bruto =  $get_data_ticket->Bruto;
+          $model_query->ticket_b_tara =  $get_data_ticket->Tara;
+          $model_query->ticket_b_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
+          $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
+          $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
+          $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
+          $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
+        }else{
+          $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
+          $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
+          $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
+          $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
+          $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
+        }
+
+        if($request->cost_center_code){
+          $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+          ->select('CostCenter','Description')
+          ->where('CostCenter',$request->cost_center_code)
+          ->first();
+          if(!$list_cost_center)
+          throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+        
+          $model_query->cost_center_code = $list_cost_center->CostCenter;
+          $model_query->cost_center_desc = $list_cost_center->Description;
+        }
       }
 
       $model_query->supir=$request->supir;
@@ -442,14 +445,23 @@ class TrxTrpController extends Controller
       $model_query->save();
 
       $miniError="";
+      $callGet=[
+        "pvr_id" => "",
+        "pvr_no" => "",
+        "pvr_total" => 0,
+        "pvr_had_detail" => "",
+        "updated_at"=>$t_stamp
+      ];
       try {
-        if($request->cost_center_code)
-        $this->genPVR($model_query->id);
+        if($request->cost_center_code && $online_status=="true"){
+          $callGet=$this->genPVR($model_query->id);
+          $miniError="PVR Berhasil Dibuat.";
+        }
       } catch (\Exception $e) {
         if ($e->getCode() == 1) {
-          $miniError=". Namun PVR Batal Tergenerate:".$e->getMessage();
+          $miniError=". Namun PVR Batal Dibuat: ".$e->getMessage();
         }else{
-          $miniError=". Namun PVR Batal Tergenerate. Akses Jaringan Gagal";
+          $miniError=". Namun PVR Batal Dibuat. Akses Jaringan Gagal";
         }
       }
 
@@ -458,7 +470,11 @@ class TrxTrpController extends Controller
         "message" => "Proses tambah data berhasil".$miniError,
         "id"=>$model_query->id,
         "created_at" => $t_stamp,
-        "updated_at" => $t_stamp,
+        "pvr_id" => $callGet["pvr_id"],
+        "pvr_no" => $callGet["pvr_no"],
+        "pvr_total" => $callGet["pvr_total"],
+        "pvr_had_detail" => $callGet["pvr_had_detail"],
+        "updated_at"=>$callGet["updated_at"]
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -487,6 +503,7 @@ class TrxTrpController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     
     $t_stamp = date("Y-m-d H:i:s");
+    $online_status=$request->online_status;
 
     DB::beginTransaction();
     try {
@@ -514,129 +531,130 @@ class TrxTrpController extends Controller
       $model_query->xto             = $ujalan->xto;
       $model_query->tipe            = $ujalan->tipe;
       $model_query->amount          = $ujalan->harga;
+      if($online_status=="true"){
+        if($request->pv_id && $model_query->pvr_id==null){
 
-      if($request->pv_id){
-
-        $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
-        ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-        ->where("fi_arap.VoucherID",$request->pv_id)
-        ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-        ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
-        ->first();
-
-        if(!$get_data_pv) 
-        throw new \Exception("Data PV tidak terdaftar",1);
-        
-        if(\App\Models\MySql\TrxTrp::where("pv_id",$get_data_pv->VoucherID)
-        ->where("id","!=",$model_query->id)->first())
-        throw new \Exception("Data PV telah digunakan",1);
-
-
-        $model_query->pv_id =  $request->pv_id;
-        $model_query->pv_no =  $get_data_pv->VoucherNo;
-        $model_query->pv_total =  $get_data_pv->total_amount;
-      }
-
-      if($request->ticket_a_id){
-
-        $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-        ->where("TicketID",$request->ticket_a_id);
-        if($request->jenis=="CPO"){
-          $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
-        }else if($request->jenis=="PK"){
-          $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
-        }else{ 
-          $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
-        }
-        $get_data_ticket =$get_data_ticket->first();
-
-
-        if(!$get_data_ticket) 
-        throw new \Exception("Data Ticket tidak terdaftar",1);
-
-        if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)
-        ->where("id","!=",$model_query->id)->first())
-        throw new \Exception("Data Ticket telah digunakan",1);
-
-        $model_query->ticket_a_id =  $request->ticket_a_id;
-        $model_query->ticket_a_no =  $get_data_ticket->TicketNo;
-        $model_query->ticket_a_bruto =  $get_data_ticket->Bruto;
-        $model_query->ticket_a_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_a_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
-        $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
-        $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
-        $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
-        $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;       
-      }else{
-        $model_query->ticket_a_id =  null;
-        $model_query->ticket_a_no =  null;
-        $model_query->ticket_a_bruto =  null;
-        $model_query->ticket_a_tara =  null;
-        $model_query->ticket_a_netto =  null;
-        $model_query->ticket_a_supir =  null;
-        $model_query->ticket_a_no_pol =  null;
-        $model_query->ticket_a_in_at =  null;
-        $model_query->ticket_a_out_at =  null;
-      }
-
-      if($request->ticket_b_id){
-
-        $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-        ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-        ->where("TicketID",$request->ticket_b_id);
-        
-        if($request->jenis=="TBS"){
-          $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
-        }else {
-          $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
-        }
-
-        $get_data_ticket=$get_data_ticket->first();
-
-        if(!$get_data_ticket) 
-        throw new \Exception("Data Ticket tidak terdaftar",1);
-
-        if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)
-        ->where("id","!=",$model_query->id)->first())
-        throw new \Exception("Data Ticket telah digunakan",1);
-
-        $model_query->ticket_b_id =  $request->ticket_b_id;
-        $model_query->ticket_b_no =  $get_data_ticket->TicketNo;
-        $model_query->ticket_b_bruto =  $get_data_ticket->Bruto;
-        $model_query->ticket_b_tara =  $get_data_ticket->Tara;
-        $model_query->ticket_b_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
-        $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
-        $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
-        $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
-        $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
-      }else{
-        $model_query->ticket_b_id =  null;
-        $model_query->ticket_b_no =  null;
-        $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
-        $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
-        $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
-        $model_query->ticket_b_supir =  null;
-        $model_query->ticket_b_no_pol =  null;
-        $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
-        $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
-      }
-
-      if($model_query->pvr_number==null){
-        if($request->cost_center_code){  
-          $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-          ->select('CostCenter','Description')
-          ->where('CostCenter',$request->cost_center_code)
+          $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
+          ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
+          ->where("fi_arap.VoucherID",$request->pv_id)
+          ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
+          ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
           ->first();
-          if(!$list_cost_center)
-          throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
-        
-          $model_query->cost_center_code = $list_cost_center->CostCenter;
-          $model_query->cost_center_desc = $list_cost_center->Description;
+
+          if(!$get_data_pv) 
+          throw new \Exception("Data PV tidak terdaftar",1);
+          
+          if(\App\Models\MySql\TrxTrp::where("pv_id",$get_data_pv->VoucherID)
+          ->where("id","!=",$model_query->id)->first())
+          throw new \Exception("Data PV telah digunakan",1);
+
+
+          $model_query->pv_id =  $request->pv_id;
+          $model_query->pv_no =  $get_data_pv->VoucherNo;
+          $model_query->pv_total =  $get_data_pv->total_amount;
+        }
+
+        if($request->ticket_a_id){
+
+          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
+          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+          ->where("TicketID",$request->ticket_a_id);
+          if($request->jenis=="CPO"){
+            $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
+          }else if($request->jenis=="PK"){
+            $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
+          }else{ 
+            $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
+          }
+          $get_data_ticket =$get_data_ticket->first();
+
+
+          if(!$get_data_ticket) 
+          throw new \Exception("Data Ticket tidak terdaftar",1);
+
+          if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)
+          ->where("id","!=",$model_query->id)->first())
+          throw new \Exception("Data Ticket telah digunakan",1);
+
+          $model_query->ticket_a_id =  $request->ticket_a_id;
+          $model_query->ticket_a_no =  $get_data_ticket->TicketNo;
+          $model_query->ticket_a_bruto =  $get_data_ticket->Bruto;
+          $model_query->ticket_a_tara =  $get_data_ticket->Tara;
+          $model_query->ticket_a_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
+          $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
+          $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
+          $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
+          $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;       
         }else{
-          $model_query->cost_center_code =null;
-          $model_query->cost_center_desc =null;
-        } 
+          $model_query->ticket_a_id =  null;
+          $model_query->ticket_a_no =  null;
+          $model_query->ticket_a_bruto =  null;
+          $model_query->ticket_a_tara =  null;
+          $model_query->ticket_a_netto =  null;
+          $model_query->ticket_a_supir =  null;
+          $model_query->ticket_a_no_pol =  null;
+          $model_query->ticket_a_in_at =  null;
+          $model_query->ticket_a_out_at =  null;
+        }
+
+        if($request->ticket_b_id){
+
+          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
+          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+          ->where("TicketID",$request->ticket_b_id);
+          
+          if($request->jenis=="TBS"){
+            $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
+          }else {
+            $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
+          }
+
+          $get_data_ticket=$get_data_ticket->first();
+
+          if(!$get_data_ticket) 
+          throw new \Exception("Data Ticket tidak terdaftar",1);
+
+          if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)
+          ->where("id","!=",$model_query->id)->first())
+          throw new \Exception("Data Ticket telah digunakan",1);
+
+          $model_query->ticket_b_id =  $request->ticket_b_id;
+          $model_query->ticket_b_no =  $get_data_ticket->TicketNo;
+          $model_query->ticket_b_bruto =  $get_data_ticket->Bruto;
+          $model_query->ticket_b_tara =  $get_data_ticket->Tara;
+          $model_query->ticket_b_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
+          $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
+          $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
+          $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
+          $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
+        }else{
+          $model_query->ticket_b_id =  null;
+          $model_query->ticket_b_no =  null;
+          $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
+          $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
+          $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
+          $model_query->ticket_b_supir =  null;
+          $model_query->ticket_b_no_pol =  null;
+          $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
+          $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
+        }
+
+        if($model_query->pvr_id==null){
+          if($request->cost_center_code){  
+            $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+            ->select('CostCenter','Description')
+            ->where('CostCenter',$request->cost_center_code)
+            ->first();
+            if(!$list_cost_center)
+            throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+          
+            $model_query->cost_center_code = $list_cost_center->CostCenter;
+            $model_query->cost_center_desc = $list_cost_center->Description;
+          }else{
+            $model_query->cost_center_code =null;
+            $model_query->cost_center_desc =null;
+          } 
+        }
       }
 
       $model_query->supir=$request->supir;
@@ -648,16 +666,23 @@ class TrxTrpController extends Controller
       $model_query->save();
 
       $miniError="";
+      $callGet=[
+        "pvr_id" => "",
+        "pvr_no" => "",
+        "pvr_total" => 0,
+        "pvr_had_detail" => "",
+        "updated_at"=>$t_stamp
+      ];
       try {
-        if($model_query->cost_center_code && $model_query->pvr_number==null)
-        $this->genPVR($model_query->id);
+        if($model_query->cost_center_code && $model_query->pvr_id==null && $online_status=="true"){
+          $callGet=$this->genPVR($model_query->id);
+          $miniError="PVR Berhasil Dibuat.";
+        }
       } catch (\Exception $e) {
-        MyLog::logging($e->getMessage(),"PVR LOG");
-
         if ($e->getCode() == 1) {
-          $miniError=". Namun PVR Batal Tergenerate:".$e->getMessage();
+          $miniError=". Namun PVR Batal Dibuat: ".$e->getMessage();
         }else{
-          $miniError=". Namun PVR Batal Tergenerate. Akses Jaringan Gagal";
+          $miniError=". Namun PVR Batal Dibuat. Akses Jaringan Gagal";
         }
         //throw $th;
       }
@@ -665,7 +690,11 @@ class TrxTrpController extends Controller
       DB::commit();
       return response()->json([
         "message" => "Proses ubah data berhasil".$miniError,
-        "updated_at"=>$t_stamp
+        "pvr_id" => $callGet["pvr_id"],
+        "pvr_no" => $callGet["pvr_no"],
+        "pvr_total" => $callGet["pvr_total"],
+        "pvr_had_detail" => $callGet["pvr_had_detail"],
+        "updated_at"=>$callGet["updated_at"]
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -1080,9 +1109,51 @@ class TrxTrpController extends Controller
     return [$diff , $diff / $bigger * 100];
   }
 
+  public function doGenPVR(Request $request){
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+      'online_status' => "required",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = \Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+    $online_status=$request->online_status;
+    if($online_status!="true")
+    return response()->json([
+      "message" => "Mode Harus Online",
+    ], 400);
+
+    $miniError="";
+    try {
+      $callGet = $this->genPVR($request->id);
+      return response()->json($callGet, 200);
+    } catch (\Exception $e) {
+      if ($e->getCode() == 1) {
+        $miniError="PVR Batal Dibuat: ".$e->getMessage();
+      }else{
+        $miniError="PVR Batal Dibuat. Akses Jaringan Gagal";
+      }
+      return response()->json([
+        "message" => $miniError,
+      ], 400);
+    }
+  }
 
   public function genPVR($trx_trp_id){
-    $trx_trp = TrxTrp::where("id",$trx_trp_id)->first();
+    $t_stamp = date("Y-m-d H:i:s");
+    $trx_trp = TrxTrp::where("id",$trx_trp_id)->where("pvr_had_detail",0)->whereNotNull('cost_center_code')->whereNull("pv_id")->first();
+    if(!$trx_trp){
+      throw new \Exception("Karna PVR sudah selesai dibuat atau Cost Center Code belum diisi atau PV sudah diisi",1);
+    }
     $supir = $trx_trp->supir;
     $no_pol = $trx_trp->no_pol;
     $kernet = $trx_trp->kernet;
@@ -1134,82 +1205,111 @@ class TrxTrpController extends Controller
     $PVR_source_id = $trx_trp_id; //ambil id trx
       // DB::select("exec USP_FI_APRequest_Update(0,'(AUTO)','TRP',1,1,1,0,)",array($ts,$param2));
     $VoucherID = -1;
-    // $myData = DB::connection('sqlsrv')->update("SET NOCOUNT ON;exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
-    $myData = DB::connection('sqlsrv')->update("exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
-    @VoucherDate=:voucher_date,@IncomeOrExpense=:income_or_expense,@CurrencyID=:currency_id,@AssociateName=:associate_name,
-    @BankAccountID=:bank_account_id,@PaymentMethod=:payment_method,@CheckNo=:check_no,@CheckDueDate=:check_due_date,
-    @BankName=:bank_name,@AmountPaid=:amount_paid,@AccountNo=:account_no,@Remarks=:remarks,@ExcludeInARAP=:exclude_in_ARAP,
-    @LoginName=:login_name,@ExpenseOrRevenueTypeID=:expense_or_revenue_type_id,@Confidential=:confidential,
-    @PVRSource=:PVR_source,@PVRSourceID=:PVR_source_id",[
-      ":voucher_no"=>$voucher_no,
-      ":voucher_type"=>$voucher_type,
-      ":voucher_date"=>$voucher_date,
-      ":income_or_expense"=>$income_or_expense,
-      ":currency_id"=>$currency_id,
-      ":associate_name"=>$associate_name,
-      ":bank_account_id"=>$bank_account_id,
-      ":payment_method"=>$payment_method,
-      ":check_no"=>$check_no,
-      ":check_due_date"=>$check_due_date,
-      ":bank_name"=>$bank_name,
-      ":amount_paid"=>$amount_paid,
-      ":account_no"=>$account_no,
-      ":remarks"=>$remarks,
-      ":exclude_in_ARAP"=>$exclude_in_ARAP,
-      ":login_name"=>$login_name,
-      ":expense_or_revenue_type_id"=>$expense_or_revenue_type_id,
-      ":confidential"=>$confidential,
-      ":PVR_source"=>$PVR_source,
-      ":PVR_source_id"=>$PVR_source_id,
-    ]);
-    if(!$myData)
-    throw new \Exception("Data yang diperlukan tidak terpenuhi",1);
 
     $pvr= DB::connection('sqlsrv')->table('FI_APRequest')
     ->select('VoucherID','VoucherNo','AmountPaid')
     ->where("PVRSource",$PVR_source)
     ->where("PVRSourceID",$trx_trp->id)
+    ->where("Void",0)
     ->first();
-    if(!$pvr)
-    throw new \Exception("Akses Ke Jaringan Gagal",1);
+
+    if(!$pvr){
+      // $myData = DB::connection('sqlsrv')->update("SET NOCOUNT ON;exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
+      $myData = DB::connection('sqlsrv')->update("exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
+      @VoucherDate=:voucher_date,@IncomeOrExpense=:income_or_expense,@CurrencyID=:currency_id,@AssociateName=:associate_name,
+      @BankAccountID=:bank_account_id,@PaymentMethod=:payment_method,@CheckNo=:check_no,@CheckDueDate=:check_due_date,
+      @BankName=:bank_name,@AmountPaid=:amount_paid,@AccountNo=:account_no,@Remarks=:remarks,@ExcludeInARAP=:exclude_in_ARAP,
+      @LoginName=:login_name,@ExpenseOrRevenueTypeID=:expense_or_revenue_type_id,@Confidential=:confidential,
+      @PVRSource=:PVR_source,@PVRSourceID=:PVR_source_id",[
+        ":voucher_no"=>$voucher_no,
+        ":voucher_type"=>$voucher_type,
+        ":voucher_date"=>$voucher_date,
+        ":income_or_expense"=>$income_or_expense,
+        ":currency_id"=>$currency_id,
+        ":associate_name"=>$associate_name,
+        ":bank_account_id"=>$bank_account_id,
+        ":payment_method"=>$payment_method,
+        ":check_no"=>$check_no,
+        ":check_due_date"=>$check_due_date,
+        ":bank_name"=>$bank_name,
+        ":amount_paid"=>$amount_paid,
+        ":account_no"=>$account_no,
+        ":remarks"=>$remarks,
+        ":exclude_in_ARAP"=>$exclude_in_ARAP,
+        ":login_name"=>$login_name,
+        ":expense_or_revenue_type_id"=>$expense_or_revenue_type_id,
+        ":confidential"=>$confidential,
+        ":PVR_source"=>$PVR_source,
+        ":PVR_source_id"=>$PVR_source_id,
+      ]);
+      if(!$myData)
+      throw new \Exception("Data yang diperlukan tidak terpenuhi",1);
+    
+      $pvr= DB::connection('sqlsrv')->table('FI_APRequest')
+      ->select('VoucherID','VoucherNo','AmountPaid')
+      ->where("PVRSource",$PVR_source)
+      ->where("PVRSourceID",$trx_trp->id)
+      ->where("Void",0)
+      ->first();
+      if(!$pvr)
+      throw new \Exception("Akses Ke Jaringan Gagal",1);
+    }
 
     $trx_trp->pvr_id = $pvr->VoucherID;
-    $trx_trp->pvr_number = $pvr->VoucherNo;
-    $trx_trp->pvr_amount = $pvr->AmountPaid;
+    $trx_trp->pvr_no = $pvr->VoucherNo;
+    $trx_trp->pvr_total = $pvr->AmountPaid;
     $trx_trp->save();
     
     $d_voucher_id = $pvr->VoucherID;
     $d_voucher_extra_item_id = 0;
     $d_type = 0;
-    foreach ($ujalan_details2 as $key => $v) {
-      $d_description = $v->description;
-      $d_amount = $v->qty * $v->amount;
-      $d_account_id = $v->ac_account_id;
-      $d_dept = $trx_trp->cost_center_code;
-      $d_qty=$v->qty;
-      $d_unit_price=$v->amount;
-      $details = DB::connection('sqlsrv')->update("exec 
-      USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
-      @VoucherExtraItemID=:d_voucher_extra_item_id,
-      @Description=:d_description,@Amount=:d_amount,
-      @AccountID=:d_account_id,@TypeID=:d_type,
-      @Department=:d_dept,@LoginName=:login_name,
-      @Qty=:d_qty,@UnitPrice=:d_unit_price",[
-        ":d_voucher_id"=>$d_voucher_id,
-        ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
-        ":d_description"=>$d_description,
-        ":d_amount"=>$d_amount,
-        ":d_account_id"=>$d_account_id,
-        ":d_type"=>$d_type,
-        ":d_dept"=>$d_dept,
-        ":login_name"=>$login_name,
-        ":d_qty"=>$d_qty,
-        ":d_unit_price"=>$d_unit_price
-      ]);
-    }
 
+    $pvr_detail= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+    ->select('VoucherID')
+    ->where("VoucherID",$d_voucher_id)
+    ->get();
+
+    if(count($pvr_detail)==0 || count($pvr_detail) < count($ujalan_details2)){
+      $start = count($pvr_detail);
+      foreach ($ujalan_details2 as $key => $v) {
+        if($key < $start){ continue; }
+        $d_description = $v->description;
+        $d_amount = $v->qty * $v->amount;
+        $d_account_id = $v->ac_account_id;
+        $d_dept = $trx_trp->cost_center_code;
+        $d_qty=$v->qty;
+        $d_unit_price=$v->amount;
+        $details = DB::connection('sqlsrv')->update("exec 
+        USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+        @VoucherExtraItemID=:d_voucher_extra_item_id,
+        @Description=:d_description,@Amount=:d_amount,
+        @AccountID=:d_account_id,@TypeID=:d_type,
+        @Department=:d_dept,@LoginName=:login_name,
+        @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+          ":d_voucher_id"=>$d_voucher_id,
+          ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+          ":d_description"=>$d_description,
+          ":d_amount"=>$d_amount,
+          ":d_account_id"=>$d_account_id,
+          ":d_type"=>$d_type,
+          ":d_dept"=>$d_dept,
+          ":login_name"=>$login_name,
+          ":d_qty"=>$d_qty,
+          ":d_unit_price"=>$d_unit_price
+        ]);
+      }
+    }
 
     $trx_trp->pvr_had_detail = 1;
     $trx_trp->save();
+
+    return [
+      "message" => "PVR berhasil dibuat",
+      "pvr_id" => $trx_trp->pvr_id,
+      "pvr_no" => $trx_trp->pvr_no,
+      "pvr_total" => $trx_trp->pvr_total,
+      "pvr_had_detail" => $trx_trp->pvr_had_detail,
+      "updated_at"=>$t_stamp
+    ];
   }
 }

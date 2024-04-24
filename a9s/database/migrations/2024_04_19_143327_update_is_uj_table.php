@@ -24,9 +24,9 @@ return new class extends Migration
         Schema::table('trx_trp', function (Blueprint $table) { 
             $table->string('cost_center_code',255)->nullable();
             $table->string('cost_center_desc',255)->nullable();
-            $table->string('pvr_id',50)->nullable();
-            $table->string('pvr_number',50)->nullable();
-            $table->decimal('pvr_amount',18)->nullable();
+            $table->bigInteger('pvr_id')->nullable();
+            $table->string('pvr_no',50)->nullable();
+            $table->decimal('pvr_total',18)->nullable();
             $table->boolean('pvr_had_detail')->default(0);
         });
     }
@@ -51,8 +51,8 @@ return new class extends Migration
             $table->dropColumn('cost_center_code');
             $table->dropColumn('cost_center_desc');
             $table->dropColumn('pvr_id');
-            $table->dropColumn('pvr_number');
-            $table->dropColumn('pvr_amount');
+            $table->dropColumn('pvr_no');
+            $table->dropColumn('pvr_total');
             $table->dropColumn('pvr_had_detail');
         });
     }
