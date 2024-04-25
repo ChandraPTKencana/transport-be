@@ -215,6 +215,10 @@ class TrxLoadDataController extends Controller
         $list_cost_center= MyLib::objsToArray($list_cost_center); 
 
         if($transition_to!=""){
+          if($jenis=="TBS" && $transition_to!=""){
+            $product_names = ["MTBS","TBS"];
+          }
+          
           $ad_list_ticket = DB::connection($transition_to)->table("palm_tickets")
           // ->select('*')
           ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
