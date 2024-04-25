@@ -1233,15 +1233,23 @@ class TrxTrpController extends Controller
 
     $remarks = $associate_name."BIAYA UANG JALAN ".$trx_trp->jenis." ".env("app_name")."-".$trx_trp->xto." P/".date("d-m-y",strtotime($trx_trp->tanggal))." Rincian:";
     // $ujalan=Ujalan::where("id",$trx_trp->id_uj)->first();
-    $ujalan_detail = UjalanDetail::where("id_uj",$trx_trp->id_uj)->where("ordinal",1)->first();
-    if(!$ujalan_detail)
+
+    $arr=[1];
+    
+    if($trx_trp->jenis=="PK" && env("app_name")!="SMP")
+    $arr=[1,2];
+    
+    $ujalan_details = UjalanDetail::where("id_uj",$trx_trp->id_uj)->whereIn("ordinal",$arr)->orderBy("ordinal","asc")->get();
+    if(count($ujalan_details)==0)
     throw new \Exception("Detail Ujalan Harus diisi terlebih dahulu",1);
     
+    foreach ($ujalan_details as $key => $v) {
+      $remarks.=" ".$v->xdesc." ".number_format($v->qty, 0,',','.')."LTRx".number_format($v->harga, 0,',','.')."=".number_format($v->qty*$v->harga, 0,',','.').";";
+    }
+
     $ujalan_details2 = \App\Models\MySql\UjalanDetail2::where("id_uj",$trx_trp->id_uj)->get();
     if(count($ujalan_details2)==0)
     throw new \Exception("Detail PVR Harus diisi terlebih dahulu",1);
-
-    $remarks.=" ".$ujalan_detail->xdesc." ".number_format($ujalan_detail->qty, 0,',','.')."LTRx".number_format($ujalan_detail->harga, 0,',','.')."=".number_format($ujalan_detail->qty*$ujalan_detail->harga, 0,',','.').";";
 
     if(strlen($associate_name)>80){
       $associate_name = substr($associate_name,0,80);
