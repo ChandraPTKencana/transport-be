@@ -82,7 +82,7 @@ class TrxTrpResource extends JsonResource
             'pvr_no'        => $this->pvr_no ?? "",
             'pvr_total'        => $this->pvr_total ?? "",
             'pvr_had_detail'    => $this->pvr_had_detail ?? "",
-
+            'transition_to'    => $this->transition_to ?? "",
         ];
     }
 }

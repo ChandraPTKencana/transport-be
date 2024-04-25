@@ -347,6 +347,12 @@ class TrxTrpController extends Controller
 
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
+    
+    $transition_to = $request->transition_to;
+    if($transition_to==env("app_name") || !in_array($transition_to,["KPN","KAS","KUS","ARP","KAP","SMP"])){
+      $transition_to="";
+    }
+
     DB::beginTransaction();
     try {
       // if(TrxTrp::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
@@ -394,23 +400,16 @@ class TrxTrpController extends Controller
 
         if($request->ticket_a_id){
 
-          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-          ->where("TicketID",$request->ticket_a_id);
+          $get_data_ticket = $this->getTicketA("sqlsrv",$request);
 
-          if($request->jenis=="CPO"){
-            $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
-          }else if($request->jenis=="PK"){
-            $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
-          }else{ 
-            $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
-          }
-          $get_data_ticket =$get_data_ticket->first();
+          if(!$get_data_ticket && $transition_to!="") 
+          $get_data_ticket = $this->getTicketA($transition_to,$request);
 
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
 
-          if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)->first())
+          if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)
+          ->where("ticket_a_no",$get_data_ticket->TicketNo)->first());
           throw new \Exception("Data Ticket telah digunakan",1);
 
           $model_query->ticket_a_id =  $request->ticket_a_id;
@@ -426,22 +425,16 @@ class TrxTrpController extends Controller
 
         if($request->ticket_b_id){
 
-          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-          ->where("TicketID",$request->ticket_b_id);
-          
-          if($request->jenis=="TBS"){
-            $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
-          }else {
-            $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
-          }
+          $get_data_ticket = $this->getTicketB('sqlsrv',$request);
 
-          $get_data_ticket=$get_data_ticket->first();
+          if(!$get_data_ticket && $transition_to!="")
+          $get_data_ticket = $this->getTicketB($transition_to,$request);
 
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
 
-          if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)->first())
+          if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)
+          ->where("ticket_b_no",$get_data_ticket->TicketNo)->first());
           throw new \Exception("Data Ticket telah digunakan",1);
 
           $model_query->ticket_b_id =  $request->ticket_b_id;
@@ -474,6 +467,7 @@ class TrxTrpController extends Controller
         }
       }
 
+      $model_query->transition_to=$request->transition_to;
       $model_query->supir=$request->supir;
       $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
@@ -547,6 +541,11 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
 
+    $transition_to = $request->transition_to;
+    if($transition_to==env("app_name") || !in_array($transition_to,["KPN","KAS","KUS","ARP","KAP","SMP"])){
+      $transition_to="";
+    }
+
     DB::beginTransaction();
     try {
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
@@ -598,23 +597,16 @@ class TrxTrpController extends Controller
 
         if($request->ticket_a_id){
 
-          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-          ->where("TicketID",$request->ticket_a_id);
-          if($request->jenis=="CPO"){
-            $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
-          }else if($request->jenis=="PK"){
-            $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
-          }else{ 
-            $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
-          }
-          $get_data_ticket =$get_data_ticket->first();
+          $get_data_ticket = $this->getTicketA("sqlsrv",$request);
 
-
+          if(!$get_data_ticket && $transition_to!="") 
+          $get_data_ticket = $this->getTicketA($transition_to,$request);            
+          
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
 
           if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)
+          ->where("ticket_a_no",$get_data_ticket->TicketNo)
           ->where("id","!=",$model_query->id)->first())
           throw new \Exception("Data Ticket telah digunakan",1);
 
@@ -641,22 +633,16 @@ class TrxTrpController extends Controller
 
         if($request->ticket_b_id){
 
-          $get_data_ticket = DB::connection('sqlsrv')->table('palm_tickets')
-          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
-          ->where("TicketID",$request->ticket_b_id);
-          
-          if($request->jenis=="TBS"){
-            $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
-          }else {
-            $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
-          }
+          $get_data_ticket = $this->getTicketB('sqlsrv',$request);
 
-          $get_data_ticket=$get_data_ticket->first();
+          if(!$get_data_ticket && $transition_to!="")
+          $get_data_ticket = $this->getTicketB($transition_to,$request);
 
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
 
           if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)
+          ->where("ticket_b_no",$get_data_ticket->TicketNo)
           ->where("id","!=",$model_query->id)->first())
           throw new \Exception("Data Ticket telah digunakan",1);
 
@@ -700,6 +686,7 @@ class TrxTrpController extends Controller
       }
 
       $model_query->supir=$request->supir;
+      $model_query->transition_to=$request->transition_to;
       $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
 
@@ -812,7 +799,42 @@ class TrxTrpController extends Controller
     }
   }
 
-  function previewFile(Request $request){
+
+  public function getTicketA($connection_name,$request){
+    $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
+    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+    ->where("TicketID",$request->ticket_a_id)
+    ->where("TicketNo",$request->ticket_a_no);
+    if($request->jenis=="CPO"){
+      $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
+    }else if($request->jenis=="PK"){
+      $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
+    }else{ 
+      $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
+    }
+    $get_data_ticket =$get_data_ticket->first();
+    
+    return $get_data_ticket;
+  }
+
+  public function getTicketB($connection_name,$request){
+    $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
+    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+    ->where("TicketID",$request->ticket_b_id)
+    ->where("TicketNo",$request->ticket_b_no);
+
+    if($request->jenis=="TBS"){
+      $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
+    }else {
+      $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
+    }
+
+    $get_data_ticket=$get_data_ticket->first();
+    
+    return $get_data_ticket;
+  }
+
+  public function previewFile(Request $request){
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
     set_time_limit(0);
@@ -862,7 +884,7 @@ class TrxTrpController extends Controller
     return $result;
   }
 
-  function previewFiles(Request $request){
+  public function previewFiles(Request $request){
     MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS']);
 
     // set_time_limit(0);
@@ -995,7 +1017,7 @@ class TrxTrpController extends Controller
     return $result;
   }
 
-  function downloadExcel(Request $request){
+  public function downloadExcel(Request $request){
     MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS']);
 
     set_time_limit(0);
@@ -1067,7 +1089,7 @@ class TrxTrpController extends Controller
   }
 
 
-  function validasi(Request $request){
+  public function validasi(Request $request){
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
     $rules = [
@@ -1139,7 +1161,7 @@ class TrxTrpController extends Controller
 
   }
 
-  function genPersen($a,$b){
+  public function genPersen($a,$b){
     $a = (float)$a;
     $b = (float)$b;
     

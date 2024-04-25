@@ -114,6 +114,11 @@ class TrxLoadDataController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
     $online_status = $request->online_status;
+    $transition_to = $request->transition_to;
+    if($transition_to==env("app_name") || !in_array($transition_to,["KPN","KAS","KUS","ARP","KAP","SMP"])){
+      $transition_to="";
+    }
+
     $connectionDB = DB::connection('sqlsrv');
 
     $list_ticket=[];
@@ -208,9 +213,24 @@ class TrxLoadDataController extends Controller
         ->get();
   
         $list_cost_center= MyLib::objsToArray($list_cost_center); 
+
+        if($transition_to!=""){
+          $ad_list_ticket = DB::connection($transition_to)->table("palm_tickets")
+          // ->select('*')
+          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
+          ->whereDate('Date','>=', $date_from)
+          ->whereDate('Date','<=', $date_to)
+          ->whereIn('ProductName',$product_names) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+          ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+          // ->limit(1)
+          ->get();
+          $ad_list_ticket= MyLib::objsToArray($ad_list_ticket);
+          $list_ticket = array_merge($list_ticket, $ad_list_ticket);
+        }
+
       }
-    } catch (\Throwable $th) {
-      //throw $th;
+    } catch (\Exception $e) {
+      // return response()->json($e->getMessage(), 400);
     }
     
     return response()->json([
