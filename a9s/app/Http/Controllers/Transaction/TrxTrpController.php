@@ -1204,7 +1204,7 @@ class TrxTrpController extends Controller
     $supir = $trx_trp->supir;
     $no_pol = $trx_trp->no_pol;
     $kernet = $trx_trp->kernet;
-    $associate_name="TESTING SAJA ".$no_pol."(S)".$supir.($kernet?"(K)".$kernet:"(Tanpa Kernet)"); // max 80char
+    $associate_name=$no_pol."(S)".$supir.($kernet?"(K)".$kernet:"(Tanpa Kernet)"); // max 80char
 
     $remarks = $associate_name."BIAYA UANG JALAN ".$trx_trp->jenis." ".env("app_name")."-".$trx_trp->xto." P/".date("d-m-y",strtotime($trx_trp->tanggal))." Rincian:";
     // $ujalan=Ujalan::where("id",$trx_trp->id_uj)->first();
