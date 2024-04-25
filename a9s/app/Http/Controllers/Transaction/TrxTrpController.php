@@ -1216,7 +1216,7 @@ class TrxTrpController extends Controller
     if(count($ujalan_details2)==0)
     throw new \Exception("Detail PVR Harus diisi terlebih dahulu",1);
 
-    $remarks.=" ".$ujalan_detail->xdesc." ".number_format($ujalan_detail->qty, 0,',','.')."x".number_format($ujalan_detail->harga, 0,',','.')."=".number_format($ujalan_detail->qty*$ujalan_detail->harga, 0,',','.').";";
+    $remarks.=" ".$ujalan_detail->xdesc." ".number_format($ujalan_detail->qty, 0,',','.')."LTRx".number_format($ujalan_detail->harga, 0,',','.')."=".number_format($ujalan_detail->qty*$ujalan_detail->harga, 0,',','.').";";
 
     if(strlen($associate_name)>80){
       $associate_name = substr($associate_name,0,80);

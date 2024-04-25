@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('pvr_no',50)->nullable();
             $table->decimal('pvr_total',18)->nullable();
             $table->boolean('pvr_had_detail')->default(0);
+            $table->string('transition_to',10)->nullable();
         });
     }
 
@@ -54,6 +55,7 @@ return new class extends Migration
             $table->dropColumn('pvr_no');
             $table->dropColumn('pvr_total');
             $table->dropColumn('pvr_had_detail');
+            $table->dropColumn('transition_to');
         });
     }
 };
