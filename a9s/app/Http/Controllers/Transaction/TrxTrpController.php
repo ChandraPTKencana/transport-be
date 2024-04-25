@@ -282,6 +282,9 @@ class TrxTrpController extends Controller
           if (isset($like_lists["pvr_no"])) {
             $q->orWhere("pvr_no", "like", $like_lists["pvr_no"]);
           }
+          if (isset($like_lists["transition_to"])) {
+            $q->orWhere("transition_to", "like", $like_lists["transition_to"]);
+          }
     
           // if (isset($like_lists["requested_name"])) {
           //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
