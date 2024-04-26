@@ -30,8 +30,19 @@
       @if(in_array('ticket_a_netto',$shows) || in_array('ticket_b_netto',$shows) || in_array('ticket_b_a_netto',$shows) || in_array('ticket_b_a_netto_persen',$shows) )
       <th colspan="4" style="border: 1px solid black;">Netto</th>
       @endif
-      @if(in_array('amount',$shows) || in_array('pv_total',$shows))
-      <th colspan="2" style="border: 1px solid black;">Biaya</th>
+      @if(in_array('amount',$shows) || in_array('pv_total',$shows) || in_array('pv_no',$shows || in_array('pvr_no',$shows)))
+        @php
+          $x=0;
+          if(in_array('amount',$shows))
+          $x++;
+          if(in_array('pv_total',$shows))
+          $x++;
+          if(in_array('pv_no',$shows))
+          $x++;
+          if(in_array('pvr_no',$shows))
+          $x++;
+       @endphp
+        <th colspan="{{$x}}" style="border: 1px solid black;">Biaya</th>
       @endif
     </tr>
     <tr>
@@ -75,7 +86,13 @@
       <th>Ujalan</th>
       @endif
       @if(in_array('pv_total',$shows))
-      <th>PV</th>
+      <th>PV Total</th>
+      @endif
+      @if(in_array('pv_no',$shows))
+      <th>PV No</th>
+      @endif
+      @if(in_array('pvr_no',$shows))
+      <th>PVR No</th>
       @endif
     </tr>
   </thead>
@@ -142,6 +159,12 @@
       @endif
       @if(in_array('pv_total',$shows))
       <td>{{ $v["pv_total"] }}</td>
+      @endif
+      @if(in_array('pv_no',$shows))
+      <td>{{ $v["pv_no"] }}</td>
+      @endif
+      @if(in_array('pvr_no',$shows))
+      <td>{{ $v["pvr_no"] }}</td>
       @endif
     </tr>
     @endforeach

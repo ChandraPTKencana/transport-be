@@ -967,6 +967,12 @@ class TrxTrpController extends Controller
         'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
       ]);
     }
+
+    if($this->role == "Finance"){
+      $shows = array_merge($shows,[
+        "pv_no","pvr_no"
+      ]);
+    }
     $newDetails = [];
 
     foreach ($ori["data"] as $key => $value) {
@@ -1036,6 +1042,12 @@ class TrxTrpController extends Controller
         'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
         'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
         'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
+      ]);
+    }
+    
+    if($this->role == "Finance"){
+      $shows = array_merge($shows,[
+        "pv_no","pvr_no"
       ]);
     }
 
@@ -1417,7 +1429,7 @@ class TrxTrpController extends Controller
     $miniError="";
     try {
       $t_stamp = date("Y-m-d H:i:s");
-      $trx_trps = TrxTrp::whereNotNull("pvr_id")->whereNull("pv_id")->get();
+      $trx_trps = TrxTrp::whereNotNull("pvr_id")->whereNull("pv_id")->where("deleted",0)->get();
       if(count($trx_trps)==0){
         throw new \Exception("Semua PVR yang ada ,PV ny sudah terisi",1);
       }
