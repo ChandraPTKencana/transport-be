@@ -1011,7 +1011,11 @@ class TrxTrpController extends Controller
     $date = new \DateTime();
     $filename = $date->format("YmdHis");
     Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
-    $pdf = PDF::loadView('pdf.trx_trp', ["data"=>$newDetails,"shows"=>$shows])->setPaper('a4', 'landscape');
+    $pdf = PDF::loadView('pdf.trx_trp', ["data"=>$newDetails,"shows"=>$shows,"info"=>[
+      "from"=>date("d-m-Y",strtotime($request->date_from)),
+      "to"=>date("d-m-Y",strtotime($request->date_to)),
+      "now"=>date("d-m-Y H:i:s"),
+    ]])->setPaper('a4', 'landscape');
 
 
     $mime = MyLib::mime("pdf");

@@ -38,7 +38,7 @@
     }
 
     table {
-      page-break-inside: avoid !important;
+      /* page-break-inside: avoid !important; */
     }
 
     table tr:nth-child(even) td{
@@ -79,7 +79,14 @@
   <!-- Wrap the content of your PDF inside a main tag -->
   <main>
     <div>
-
+    <table style="width: 100%; table-layout:fixed;">
+      <thead >
+        <tr >
+          <th style="border:none;"> Laporan dari tanggal {{$info["from"]}} s/d  {{$info["to"]}} </th>
+          <th style="border:none;" class="text-right"> Tanggal Cetak {{$info["now"]}} </th>
+        </tr>
+      </thead>
+    </table>
     <table class="line borderless text-center mt-2" style="font-size: x-small;">
         <thead class="text-center" style="background-color: #B0A4A4;">
           <tr>
