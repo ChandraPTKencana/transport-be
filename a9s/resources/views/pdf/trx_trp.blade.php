@@ -217,7 +217,7 @@
             <td>{{ $v["ticket_b_a_bruto"] }}</td>
             @endif
             @if(in_array('ticket_b_a_bruto_persen',$shows))
-            <td>{{ $v["ticket_b_a_bruto_persen"] }}</td>
+            <td style="<?= $v['ticket_b_a_bruto_persen_red']; ?>">{{ $v["ticket_b_a_bruto_persen"] }}</td>
             @endif
             @if(in_array('ticket_a_tara',$shows))
             <td>{{ $v["ticket_a_tara"] }}</td>
@@ -229,7 +229,7 @@
             <td>{{ $v["ticket_b_a_tara"] }}</td>
             @endif
             @if(in_array('ticket_b_a_tara_persen',$shows))
-            <td>{{ $v["ticket_b_a_tara_persen"] }}</td>
+            <td style="<?= $v['ticket_b_a_tara_persen_red']; ?>">{{ $v["ticket_b_a_tara_persen"] }}</td>
             @endif
             @if(in_array('ticket_a_netto',$shows))
             <td>{{ $v["ticket_a_netto"] }}</td>
@@ -241,7 +241,7 @@
             <td>{{ $v["ticket_b_a_netto"] }}</td>
             @endif
             @if(in_array('ticket_b_a_netto_persen',$shows))
-            <td>{{ $v["ticket_b_a_netto_persen"] }}</td>
+            <td style="<?= $v['ticket_b_a_netto_persen_red']; ?>">{{ $v["ticket_b_a_netto_persen"] }}</td>
             @endif
             @if(in_array('amount',$shows))
             <td>{{ $v["amount"] }}</td>
@@ -257,6 +257,46 @@
             @endif
           </tr>
           @endforeach
+          <tr>
+            <td colspan="7" style="border:none;"></td>
+            @if(in_array('ticket_a_bruto',$shows))
+            <td>{{ $info["ttl_a_bruto"] }}</td>
+            @endif
+            @if(in_array('ticket_b_bruto',$shows))
+            <td>{{ $info["ttl_b_bruto"] }}</td>
+            @endif
+            @if(in_array('ticket_b_a_bruto',$shows))
+            <td>{{ $info["ttl_b_a_bruto"] }}</td>
+            @endif
+            @if(in_array('ticket_b_a_bruto_persen',$shows))
+            <td style="border:none;"></td>
+
+            @endif
+            @if(in_array('ticket_a_tara',$shows))
+            <td>{{ $info["ttl_a_tara"] }}</td>
+            @endif
+            @if(in_array('ticket_b_tara',$shows))
+            <td>{{ $info["ttl_b_tara"] }}</td>
+            @endif
+            @if(in_array('ticket_b_a_tara',$shows))
+            <td>{{ $info["ttl_b_a_tara"] }}</td>
+            @endif
+            @if(in_array('ticket_b_a_tara_persen',$shows))
+            <td style="border:none;"></td>
+            @endif
+            @if(in_array('ticket_a_netto',$shows))
+            <td>{{ $info["ttl_a_netto"] }}</td>
+            @endif
+            @if(in_array('ticket_b_netto',$shows))
+            <td>{{ $info["ttl_b_netto"] }}</td>
+            @endif
+            @if(in_array('ticket_b_a_netto',$shows))
+            <td>{{ $info["ttl_b_a_netto"] }}</td>
+            @endif
+            @if(in_array('ticket_b_a_netto_persen',$shows))
+            <td style="border: none;"></td>
+            @endif
+          </tr>
         </tbody>
       </table>
     

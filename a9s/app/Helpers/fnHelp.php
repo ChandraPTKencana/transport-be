@@ -104,11 +104,11 @@ if (!function_exists('mct')) {
 
 
 if (!function_exists('block_negative')) {
-    function block_negative($realnumber)
+    function block_negative($realnumber,$decimal)
     {
         if($realnumber<0) 
-            return "(".number_format($realnumber*-1, 0,',','.').")";
+            return "(".number_format($realnumber*-1, $decimal,',','.').")";
         else
-            return number_format($realnumber, 0,',','.');
+            return number_format($realnumber, $decimal,',','.');
     }
 }

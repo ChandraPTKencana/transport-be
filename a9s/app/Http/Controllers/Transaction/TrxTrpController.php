@@ -862,6 +862,7 @@ class TrxTrpController extends Controller
       "asal"=>env("app_name"),
       "xto"=>$trx_trp->xto,
       "jenis"=>$trx_trp->jenis,
+      "tipe"=>$trx_trp->tipe,
       "details"=>$details,
       "total"=>$ujalan->harga,
       "user_1"=>$this->admin->the_user->username,
@@ -974,7 +975,15 @@ class TrxTrpController extends Controller
       ]);
     }
     $newDetails = [];
-
+    $total_a_bruto = 0;
+    $total_a_tara = 0;
+    $total_a_netto = 0;
+    $total_b_bruto = 0;
+    $total_b_tara = 0;
+    $total_b_netto = 0;
+    $total_b_a_bruto = 0;
+    $total_b_a_tara = 0;
+    $total_b_a_netto = 0;
     foreach ($ori["data"] as $key => $value) {
       $ticket_a_bruto = (float)$value["ticket_a_bruto"];
       $ticket_b_bruto = (float)$value["ticket_b_bruto"];
@@ -986,25 +995,60 @@ class TrxTrpController extends Controller
       $ticket_b_netto = (float)$value["ticket_b_netto"];
       list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
 
+      $total_a_bruto+=$ticket_a_bruto;
+      $total_a_tara+=$ticket_a_tara;
+      $total_a_netto+=$ticket_a_netto;
+
+      $total_b_bruto+=$ticket_b_bruto;
+      $total_b_tara+=$ticket_b_tara;
+      $total_b_netto+=$ticket_b_netto;
+
+      $limitSusut = 0.4;
+
       $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
       $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
       $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
       $value['ticket_a_bruto']=number_format($ticket_a_bruto, 0,',','.');
       $value['ticket_b_bruto']=number_format($ticket_b_bruto, 0,',','.');
-      $value['ticket_b_a_bruto']=block_negative(number_format($ticket_b_a_bruto, 0,',','.'));
-      $value['ticket_b_a_bruto_persen']=number_format($ticket_b_a_bruto_persen, 2,',','.');
+      $value['ticket_b_a_bruto']=block_negative($ticket_b_a_bruto, 0);
+      $value['ticket_b_a_bruto_persen_red']=abs($ticket_b_a_bruto_persen) >= $limitSusut ? 'color:red;' : '';
+      $value['ticket_b_a_bruto_persen']=block_negative($ticket_b_a_bruto_persen, 2);
       $value['ticket_a_tara']=number_format($ticket_a_tara, 0,',','.');
       $value['ticket_b_tara']=number_format($ticket_b_tara, 0,',','.');
-      $value['ticket_b_a_tara']=block_negative(number_format($ticket_b_a_tara, 0,',','.'));
-      $value['ticket_b_a_tara_persen']=number_format($ticket_b_a_tara_persen, 2,',','.');
+      $value['ticket_b_a_tara']=block_negative($ticket_b_a_tara, 0);
+      $value['ticket_b_a_tara_persen_red']=abs($ticket_b_a_tara_persen) >= $limitSusut ? 'color:red;' : '';
+      $value['ticket_b_a_tara_persen']=block_negative($ticket_b_a_tara_persen, 2);
       $value['ticket_a_netto']=number_format($ticket_a_netto, 0,',','.');
       $value['ticket_b_netto']=number_format($ticket_b_netto, 0,',','.');
-      $value['ticket_b_a_netto']=block_negative(number_format($ticket_b_a_netto, 0,',','.'));
-      $value['ticket_b_a_netto_persen']=number_format($ticket_b_a_netto_persen, 2,',','.');
+      $value['ticket_b_a_netto']=block_negative($ticket_b_a_netto, 0);
+      $value['ticket_b_a_netto_persen_red']=abs($ticket_b_a_netto_persen) >= $limitSusut ? 'color:red;' : '';
+      $value['ticket_b_a_netto_persen']=block_negative($ticket_b_a_netto_persen, 2);
       $value['amount']=number_format((float)$value["amount"], 0,',','.');
       $value['pv_total']=number_format((float)$value["pv_total"], 0,',','.');
       array_push($newDetails,$value);
     }
+
+    list($total_b_a_bruto, $total_b_a_bruto_persen) =  $this->genPersen($total_a_bruto,$total_b_bruto);
+    list($total_b_a_tara, $total_b_a_tara_persen) =  $this->genPersen($total_a_tara,$total_b_tara);
+    list($total_b_a_netto, $total_b_a_netto_persen) =  $this->genPersen($total_a_netto,$total_b_netto);
+    
+
+    $ttl_a_tara=number_format($total_a_tara, 0,',','.');
+    $ttl_a_bruto=number_format($total_a_bruto, 0,',','.');
+    $ttl_a_netto=number_format($total_a_netto, 0,',','.');
+
+    $ttl_b_tara=number_format($total_b_tara, 0,',','.');
+    $ttl_b_bruto=number_format($total_b_bruto, 0,',','.');
+    $ttl_b_netto=number_format($total_b_netto, 0,',','.');
+
+
+    $ttl_b_a_tara=block_negative($total_b_a_tara, 0);
+    $ttl_b_a_bruto=block_negative($total_b_a_bruto, 0);
+    $ttl_b_a_netto=block_negative($total_b_a_netto, 0);
+    
+    $ttl_b_a_bruto_persen=block_negative($total_b_a_bruto_persen, 2);
+    $ttl_b_a_tara_persen=block_negative($total_b_a_tara_persen, 2);
+    $ttl_b_a_netto_persen=block_negative($total_b_a_netto_persen, 2);
 
     // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
 
@@ -1015,6 +1059,18 @@ class TrxTrpController extends Controller
       "from"=>date("d-m-Y",strtotime($request->date_from)),
       "to"=>date("d-m-Y",strtotime($request->date_to)),
       "now"=>date("d-m-Y H:i:s"),
+      "ttl_a_bruto"=>$ttl_a_bruto,
+      "ttl_a_tara"=>$ttl_a_tara,
+      "ttl_a_netto"=>$ttl_a_netto,
+      "ttl_b_bruto"=>$ttl_b_bruto,
+      "ttl_b_tara"=>$ttl_b_tara,
+      "ttl_b_netto"=>$ttl_b_netto,
+      "ttl_b_a_bruto"=>$ttl_b_a_bruto,
+      "ttl_b_a_tara"=>$ttl_b_a_tara,
+      "ttl_b_a_netto"=>$ttl_b_a_netto,
+      // "ttl_b_a_bruto_persen"=>$ttl_b_a_bruto_persen,
+      // "ttl_b_a_tara_persen"=>$ttl_b_a_tara_persen,
+      // "ttl_b_a_netto_persen"=>$ttl_b_a_netto_persen,
     ]])->setPaper('a4', 'landscape');
 
 
