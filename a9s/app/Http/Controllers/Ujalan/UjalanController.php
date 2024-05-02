@@ -245,6 +245,7 @@ class UjalanController extends Controller
       'details.*.xdesc'                  => 'required|max:50',
       'details.*.qty'                    => 'required|numeric',
       'details.*.harga'                 => 'required|numeric',
+      'details.*.for_remarks'           => 'required|in:0,1',
       // 'details.*.status'                => 'required|in:Y,N',
     ];
 
@@ -266,6 +267,9 @@ class UjalanController extends Controller
 
       $messages["details.{$index}.harga.required"]            = "Baris #" . ($index + 1) . ". Harga harus di isi";
       $messages["details.{$index}.harga.numeric"]              = "Baris #" . ($index + 1) . ". Harga harus berupa angka";
+
+      $messages["details.{$index}.for_remarks.required"]            = "Baris #" . ($index + 1) . ". Untuk Remarks harus di isi";
+      $messages["details.{$index}.for_remarks.in"]              = "Baris #" . ($index + 1) . ". Untuk Remarks harus dipilih";
 
       // $messages["details.{$index}.status.required"]            = "Baris #" . ($index + 1) . ". Status harus di isi";
       // $messages["details.{$index}.status.in"]                   = "Baris #" . ($index + 1) . ". Status tidak sesuai format";
@@ -445,6 +449,7 @@ class UjalanController extends Controller
         $detail->xdesc              = $value['xdesc'];
         $detail->qty                = $value['qty'];
         $detail->harga              = $value['harga'];
+        $detail->for_remarks        = $value['for_remarks'];
 
         $model_query->harga +=  ($value["qty"] * $value["harga"]);
         $detail->created_at      = $t_stamp;
@@ -782,6 +787,7 @@ class UjalanController extends Controller
                     "xdesc" => $v["xdesc"],
                     "qty" => $v["qty"],
                     "harga" => $v["harga"],
+                    "for_remarks" => $v["for_remarks"],
                     // "status" => $v["status"],
                     "p_change"=> true,
                     "updated_at"=> $t_stamp,
@@ -805,6 +811,7 @@ class UjalanController extends Controller
                   'xdesc'             => $v['xdesc'],
                   'qty'               => $v["qty"],
                   'harga'             => $v['harga'],
+                  "for_remarks"       => $v["for_remarks"],
                   // 'status'            => $v['status'],
                   "p_change"          => true,
                   'created_at'        => $t_stamp,
@@ -1034,16 +1041,18 @@ class UjalanController extends Controller
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
       // return response()->json([
       //   "getCode" => $e->getCode(),
       //   "line" => $e->getLine(),
       //   "message" => $e->getMessage(),
       // ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);

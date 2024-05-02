@@ -21,6 +21,7 @@ class UjalanDetailResource extends JsonResource
             'xdesc'       => $this->xdesc,
             'qty'         => $this->qty,
             'harga'       => $this->harga,
+            'for_remarks' => $this->for_remarks ? 1 : 0,
         ];
     }
 }
