@@ -28,7 +28,7 @@ class UserAccount extends Controller
     ];
 
     $messages = [
-      'username.required' => 'Nama Pengguna tidak boleh kosonmg',
+      'username.required' => 'Nama Pengguna tidak boleh kosong',
       'username.exists' => 'Nama Pengguna tidak terdaftar',
       'password.required' => 'Kata Sandi tidak boleh kosong',
       'password.min' => 'Kata Sandi minimal 8 Karakter',
