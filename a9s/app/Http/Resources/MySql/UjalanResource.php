@@ -23,6 +23,7 @@ class UjalanResource extends JsonResource
             // 'status'            => $this->status,
             'jenis'             => $this->jenis,
             'harga'             => $this->harga,
+            'note_for_remarks'  => $this->note_for_remarks ? $this->note_for_remarks : '' ,
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
             'created_user'      => $this->created_user,

@@ -421,6 +421,7 @@ class UjalanController extends Controller
       $model_query->jenis           = $request->jenis;
       // $model_query->status          = $request->status;
       $model_query->harga          = 0;
+      $model_query->note_for_remarks= MyLib::emptyStrToNull($request->note_for_remarks);
       
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
@@ -614,6 +615,8 @@ class UjalanController extends Controller
         $model_query->tipe            = $request->tipe;
         $model_query->jenis           = $request->jenis;
         $model_query->harga           = 0;
+        $model_query->note_for_remarks= MyLib::emptyStrToNull($request->note_for_remarks);
+
         // $model_query->status          = $request->status;
     
         // $model_query->created_at      = $t_stamp;

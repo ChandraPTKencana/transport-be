@@ -1301,23 +1301,33 @@ class TrxTrpController extends Controller
     $supir = $trx_trp->supir;
     $no_pol = $trx_trp->no_pol;
     $kernet = $trx_trp->kernet;
-    $associate_name=$no_pol."(S)".$supir.($kernet?"(K)".$kernet:"(Tanpa Kernet)"); // max 80char
+    $associate_name=$no_pol." (S) ".$supir.($kernet?" (K) ".$kernet:" (Tanpa Kernet) "); // max 80char
 
-    $remarks = $associate_name."BIAYA UANG JALAN ".$trx_trp->jenis." ".env("app_name")."-".$trx_trp->xto." P/".date("d-m-y",strtotime($trx_trp->tanggal))." Rincian:";
-    // $ujalan=Ujalan::where("id",$trx_trp->id_uj)->first();
+    $arrRemarks = [];
+    array_push($arrRemarks,"#".$trx_trp->id." ".$associate_name.".");
+    array_push($arrRemarks,"BIAYA UANG JALAN ".$trx_trp->jenis." ".env("app_name")."-".$trx_trp->xto." P/".date("d-m-y",strtotime($trx_trp->tanggal))).".";
 
-    $arr=[1];
+    $ujalan=Ujalan::where("id",$trx_trp->id_uj)->first();
+
+    // $arr=[1];
     
-    if($trx_trp->jenis=="PK" && env("app_name")!="SMP")
-    $arr=[1,2];
+    // if($trx_trp->jenis=="PK" && env("app_name")!="SMP")
+    // $arr=[1,2];
     
-    $ujalan_details = UjalanDetail::where("id_uj",$trx_trp->id_uj)->whereIn("ordinal",$arr)->orderBy("ordinal","asc")->get();
+
+    $ujalan_details = UjalanDetail::where("id_uj",$trx_trp->id_uj)->where("for_remarks",1)->orderBy("ordinal","asc")->get();
     if(count($ujalan_details)==0)
     throw new \Exception("Detail Ujalan Harus diisi terlebih dahulu",1);
     
     foreach ($ujalan_details as $key => $v) {
-      $remarks.=" ".$v->xdesc." ".number_format($v->qty, 0,',','.')."LTRx".number_format($v->harga, 0,',','.')."=".number_format($v->qty*$v->harga, 0,',','.').";";
+      array_push($arrRemarks,$v->xdesc." ".number_format($v->qty, 0,',','.')."x".number_format($v->harga, 0,',','.')."=".number_format($v->qty*$v->harga, 0,',','.').";");
     }
+
+    $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $ujalan->note_for_remarks);
+
+    $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
+    
+    $remarks = implode(chr(10),$arrRemarks);
 
     $ujalan_details2 = \App\Models\MySql\UjalanDetail2::where("id_uj",$trx_trp->id_uj)->get();
     if(count($ujalan_details2)==0)
