@@ -1323,9 +1323,10 @@ class TrxTrpController extends Controller
       array_push($arrRemarks,$v->xdesc." ".number_format($v->qty, 0,',','.')."x".number_format($v->harga, 0,',','.')."=".number_format($v->qty*$v->harga, 0,',','.').";");
     }
 
-    $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $ujalan->note_for_remarks);
-
-    $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
+    if($ujalan->note_for_remarks!=null){
+      $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $ujalan->note_for_remarks);
+      $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
+    }
     
     $remarks = implode(chr(10),$arrRemarks);
 
