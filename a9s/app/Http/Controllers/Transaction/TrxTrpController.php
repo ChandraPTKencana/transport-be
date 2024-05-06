@@ -1301,7 +1301,7 @@ class TrxTrpController extends Controller
     $supir = $trx_trp->supir;
     $no_pol = $trx_trp->no_pol;
     $kernet = $trx_trp->kernet;
-    $associate_name=$no_pol." (S) ".$supir.($kernet?" (K) ".$kernet:" (Tanpa Kernet) "); // max 80char
+    $associate_name="(S) ".$supir.($kernet?" (K) ".$kernet:" (Tanpa Kernet) ").$no_pol; // max 80char
 
     $arrRemarks = [];
     array_push($arrRemarks,"#".$trx_trp->id." ".$associate_name.".");
