@@ -64,7 +64,9 @@ Route::get('/', function () {
     Route::post('/trx_trp_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
     
     Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'trp']);
+    Route::delete('/trx_trp_absen', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete_absen']);
 
+    
     Route::get('/users', [\App\Http\Controllers\User\UserController::class, 'index']);
     Route::get('/user', [\App\Http\Controllers\User\UserController::class, 'show']);
     Route::post('/user', [\App\Http\Controllers\User\UserController::class, 'store']);

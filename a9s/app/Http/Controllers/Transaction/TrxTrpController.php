@@ -26,6 +26,7 @@ use Excel;
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\IsUser;
 use App\Exports\MyReport;
+use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\Ujalan;
 use App\Models\MySql\UjalanDetail;
 
@@ -326,7 +327,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
     }
 
-    $model_query = $model_query->where("deleted",0)->with(['val_by','val1_by'])->get();
+    $model_query = $model_query->where("deleted",0)->with(['val_by','val1_by','trx_absens'])->get();
 
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),
@@ -337,7 +338,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by'])->find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','trx_absens'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -1554,6 +1555,90 @@ class TrxTrpController extends Controller
       return response()->json([
         "message" => $miniError,
       ], 400);
+    }
+  }
+
+  public function delete_absen(Request $request)
+  {
+    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+
+    $ids = json_decode($request->ids, true);
+
+
+    $rules = [
+      
+      // 'details'                          => 'required|array',
+      'details.*.id'               => 'required|exists:\App\Models\MySql\TrxAbsen,id',
+    ];
+
+    $messages = [
+      'details.required' => 'Item harus di isi',
+      'details.array' => 'Format Pengambilan Barang Salah',
+    ];
+
+    // // Replace :index with the actual index value in the custom error messages
+    foreach ($ids as $k => $v) {
+      $messages["details.{$k}.id_uj.required"]          = "Baris #" . ($k + 1) . ". ID tidak boleh kosong.";
+      $messages["details.{$k}.id_uj.exists"]            = "Baris #" . ($k + 1) . ". ID harus diisi";
+    }
+
+    $validator = \Validator::make(['details' => $ids], $rules, $messages);
+
+    // Check if validation fails
+    if ($validator->fails()) {
+      foreach ($validator->messages()->all() as $k => $v) {
+        throw new MyException(["message" => $v], 400);
+      }
+    }
+
+
+    DB::beginTransaction();
+
+    try {
+      $all_id = array_map(function ($x){
+        return $x['id'];
+      },$ids);
+
+      $model_query = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
+      // if($model_query->requested_by != $this->admin_id){
+      //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
+      // }
+      if (!$model_query) {
+        throw new \Exception("Data tidak terdaftar", 1);
+      }
+      
+      if($model_query->val==1 || $model_query->val1==1 || $model_query->deleted==1) 
+      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+
+      $model_query = TrxAbsen::whereIn("id",$all_id)->lockForUpdate()->delete();
+
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses Hapus data berhasil",
+      ], 200);
+    } catch (\Exception  $e) {
+      DB::rollback();
+      if ($e->getCode() == "23000")
+        return response()->json([
+          "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
+        ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses hapus data gagal",
+      ], 400);
+      //throw $th;
     }
   }
 }

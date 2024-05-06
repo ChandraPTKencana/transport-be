@@ -5,11 +5,11 @@ namespace App\Models\MySql;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TrxTrp extends Model
+class TrxAbsen extends Model
 {
     use HasFactory;
 
-    protected $table = 'trx_trp';
+    protected $table = 'trx_absen';
     // public $timestamps = false;
 
     // public function warehouse()
@@ -37,18 +37,13 @@ class TrxTrp extends Model
     //     return $this->hasOne(\App\Models\IsUser::class, 'id_user', "requested_by");
     // }
 
-    public function val_by()
-    {
-        return $this->hasOne(IsUser::class, 'id', "val_user");
-    }
+    // public function val_by()
+    // {
+    //     return $this->hasOne(IsUser::class, 'id', "val_user");
+    // }
 
-    public function val1_by()
-    {
-        return $this->hasOne(IsUser::class, 'id', "val1_user");
-    }
-
-    public function trx_absens()
-    {
-        return $this->hasMany(TrxAbsen::class, 'trx_trp_id', 'id');
-    }
+    // public function val1_by()
+    // {
+    //     return $this->hasOne(IsUser::class, 'id', "val1_user");
+    // }
 }
