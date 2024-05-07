@@ -91,6 +91,9 @@
         <thead class="text-center" style="background-color: #B0A4A4;">
           <tr>
             <th rowspan="2" style="border: 1px solid black;">No</th>
+            @if(in_array('id',$shows))
+            <th rowspan="2" style="border: 1px solid black;">ID</th>
+            @endif
             @if(in_array('tanggal',$shows))
             <th rowspan="2" style="border: 1px solid black;">Tanggal</th>
             @endif
@@ -189,6 +192,9 @@
           @foreach($data as $k=>$v)
           <tr>
             <td>{{$loop->iteration}}</td>
+            @if(in_array('id',$shows))
+            <td>{{ $v["id"] }}</td>
+            @endif
             @if(in_array('tanggal',$shows))
             <td>{{ $v["tanggal"] }}</td>
             @endif

@@ -960,7 +960,7 @@ class TrxTrpController extends Controller
     // ];
     // dd($sendData);
 
-    $shows=["tanggal","no_pol","jenis","xto","amount","pv_total"];
+    $shows=["id","tanggal","no_pol","jenis","xto","amount","pv_total"];
     if($this->role != "Finance"){
       $shows = array_merge($shows,[
         'ticket_a_out_at','ticket_b_in_at',
@@ -1096,7 +1096,7 @@ class TrxTrpController extends Controller
     $ori = json_decode(json_encode($callGet), true)["original"];
     $data = $ori["data"];
     
-    $shows=["tanggal","no_pol","jenis","xto","amount","pv_total"];
+    $shows=["id","tanggal","no_pol","jenis","xto","amount","pv_total"];
     if($this->role != "Finance"){
       $shows = array_merge($shows,[
         'ticket_a_out_at','ticket_b_in_at',
