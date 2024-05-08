@@ -702,10 +702,10 @@ class TrxTrpController extends Controller
 
       $miniError="";
       $callGet=[
-        "pvr_id" => "",
-        "pvr_no" => "",
-        "pvr_total" => 0,
-        "pvr_had_detail" => "",
+        "pvr_id" => $model_query->pvr_id ?? "",
+        "pvr_no" => $model_query->pvr_no ?? "",
+        "pvr_total" => $model_query->pvr_total ?? 0,
+        "pvr_had_detail" => $model_query->pvr_had_detail ?? "",
         "updated_at"=>$t_stamp
       ];
       try {
