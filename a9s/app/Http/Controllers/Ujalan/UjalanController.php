@@ -1062,7 +1062,7 @@ class UjalanController extends Controller
     }
   }
 
-  public function delete(UjalanRequest $request)
+  public function delete(Request $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
     MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
@@ -1070,6 +1070,10 @@ class UjalanController extends Controller
     DB::beginTransaction();
 
     try {
+      $deleted_reason = $request->deleted_reason;
+      if(!$deleted_reason)
+      throw new \Exception("Sertakan Alasan Penghapusan",1);
+    
       $model_query = Ujalan::where("id",$request->id)->lockForUpdate()->first();
       // if($model_query->requested_by != $this->admin_id){
       //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
@@ -1099,6 +1103,7 @@ class UjalanController extends Controller
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
       $model_query->deleted_at = date("Y-m-d H:i:s");
+      $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
 
       // UjalanDetail::where("id_uj",$model_query->id)->delete();
