@@ -29,6 +29,7 @@ class TrxTrpResource extends JsonResource
             'pv_id'             => $this->pv_id ?? "",
             'pv_no'             => $this->pv_no ?? "",
             'pv_total'          => $this->pv_total ?? "",
+            'pv_datetime'       => $this->pv_datetime ?? "",
 
             'ticket_a_id'           => $this->ticket_a_id ?? "",
             'ticket_a_no'           => $this->ticket_a_no ?? "",

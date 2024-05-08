@@ -965,7 +965,7 @@ class TrxTrpController extends Controller
     // ];
     // dd($sendData);
 
-    $shows=["id","tanggal","no_pol","jenis","xto","amount","pv_total"];
+    $shows=["id","tanggal","no_pol","jenis","xto","amount","pv_total","pv_datetime"];
     if($this->role != "Finance"){
       $shows = array_merge($shows,[
         'ticket_a_out_at','ticket_b_in_at',
@@ -1031,6 +1031,7 @@ class TrxTrpController extends Controller
       $value['ticket_b_a_netto_persen']=block_negative($ticket_b_a_netto_persen, 2);
       $value['amount']=number_format((float)$value["amount"], 0,',','.');
       $value['pv_total']=number_format((float)$value["pv_total"], 0,',','.');
+      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
       array_push($newDetails,$value);
     }
 
@@ -1101,7 +1102,7 @@ class TrxTrpController extends Controller
     $ori = json_decode(json_encode($callGet), true)["original"];
     $data = $ori["data"];
     
-    $shows=["id","tanggal","no_pol","jenis","xto","amount","pv_total"];
+    $shows=["id","tanggal","no_pol","jenis","xto","amount","pv_total","pv_datetime"];
     if($this->role != "Finance"){
       $shows = array_merge($shows,[
         'ticket_a_out_at','ticket_b_in_at',
@@ -1147,6 +1148,7 @@ class TrxTrpController extends Controller
       $value['ticket_b_a_netto_persen']=$ticket_b_a_netto_persen;
       $value['amount']=$value["amount"];
       $value['pv_total']=$value["pv_total"];
+      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
       array_push($newDetails,$value);
     }
 
@@ -1514,7 +1516,7 @@ class TrxTrpController extends Controller
       $pvr_nos=$trx_trps->pluck('pvr_no');
       // $pvr_nos=['KPN/PV-R/2404/0951','KPN/PV-R/2404/1000'];
       $get_data_pvs = DB::connection('sqlsrv')->table('FI_ARAPINFO')
-      ->selectRaw('fi_arap.VoucherID,Sources,fi_arap.VoucherNo,FI_APRequest.PVRSourceID,fi_arap.AmountPaid')
+      ->selectRaw('fi_arap.VoucherID,fi_arap.VoucherDate,Sources,fi_arap.VoucherNo,FI_APRequest.PVRSourceID,fi_arap.AmountPaid')
       ->join('fi_arap',function ($join){
         $join->on("fi_arap.VoucherID","FI_ARAPINFO.VoucherID");        
       })
@@ -1532,6 +1534,7 @@ class TrxTrpController extends Controller
         $ud_trx_trp->pv_id=$v["VoucherID"];
         $ud_trx_trp->pv_no=$v["VoucherNo"];
         $ud_trx_trp->pv_total=$v["AmountPaid"];
+        $ud_trx_trp->pv_datetime=$v["VoucherDate"];
         $ud_trx_trp->updated_at=$t_stamp;
         $ud_trx_trp->save();
         array_push($changes,[
@@ -1539,6 +1542,7 @@ class TrxTrpController extends Controller
           "pv_id"=>$ud_trx_trp->pv_id,
           "pv_no"=>$ud_trx_trp->pv_no,
           "pv_total"=>$ud_trx_trp->pv_total,
+          "pv_datetime"=>$ud_trx_trp->pv_datetime,
           "updated_at"=>$t_stamp
         ]);
       }

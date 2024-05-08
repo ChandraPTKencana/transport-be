@@ -13,14 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('is_uj', function (Blueprint $table) {
-            $table->text('delete_reason')->nullable();
+        DB::statement('ALTER TABLE trx_trp ADD COLUMN pv_datetime timestamp(3) NULL');
+        Schema::table('trx_trp', function (Blueprint $table) { 
+            $table->text('deleted_reason')->nullable();
         });
 
-        Schema::table('trx_trp', function (Blueprint $table) { 
-            $table->date('pv_date')->nullable();
-            $table->text('delete_reason')->nullable();
+        Schema::table('is_uj', function (Blueprint $table) {
+            $table->text('deleted_reason')->nullable();
         });
+
     }
 
     /**
@@ -31,12 +32,12 @@ return new class extends Migration
     public function down()
     {
         Schema::table('is_uj', function (Blueprint $table) { 
-            $table->dropColumn('delete_reason');
+            $table->dropColumn('deleted_reason');
         });
 
         Schema::table('trx_trp', function (Blueprint $table) { 
-            $table->dropColumn('pv_date');
-            $table->dropColumn('delete_reason');
+            $table->dropColumn('pv_datetime');
+            $table->dropColumn('deleted_reason');
         });
     }
 };
