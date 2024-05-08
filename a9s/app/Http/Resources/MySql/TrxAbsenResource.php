@@ -20,7 +20,7 @@ class TrxAbsenResource extends JsonResource
         return [
             'id'                => $this->id,
             'trx_trp_id'        => $this->trx_trp_id,
-            'gambar'            => "data:image/png;base64,{$imageData}",
+            'gambar'            => $this->gambar ? "data:image/png;base64,{$imageData}" : "",
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
         ];

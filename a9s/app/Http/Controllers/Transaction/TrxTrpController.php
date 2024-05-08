@@ -327,7 +327,9 @@ class TrxTrpController extends Controller
       $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
     }
 
-    $model_query = $model_query->where("deleted",0)->with(['val_by','val1_by','trx_absens'])->get();
+    $model_query = $model_query->where("deleted",0)->with(['val_by','val1_by','trx_absens'=>function($q) {
+      $q->select('id','trx_trp_id','created_at','updated_at');
+    }])->get();
 
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),
