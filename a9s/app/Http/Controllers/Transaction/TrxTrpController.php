@@ -1348,14 +1348,15 @@ class TrxTrpController extends Controller
       $associate_name = substr($associate_name,0,80);
     }
 
-    $bank_account_code="01.100.005";
+    $bank_account_code=env("PVR_BANK_ACCOUNT_CODE");
     
-    $get_data_pv = DB::connection('sqlsrv')->table('FI_BankAccounts')
+    $bank_acccount_db = DB::connection('sqlsrv')->table('FI_BankAccounts')
     ->select('BankAccountID')
     ->where("bankaccountcode",$bank_account_code)
     ->first();
+    if(!$bank_acccount_db) throw new \Exception("Bank account code tidak terdaftar ,segera infokan ke tim IT",1);
 
-    $bank_account_id = $get_data_pv->BankAccountID;
+    $bank_account_id = $bank_acccount_db->BankAccountID;
     
     // @VoucherID INT = 0,
     $voucher_no = "(AUTO)";
