@@ -85,6 +85,9 @@
           <th style="border:none;"> Laporan dari tanggal {{$info["from"]}} s/d  {{$info["to"]}} </th>
           <th style="border:none;" class="text-right"> Tanggal Cetak {{$info["now"]}} </th>
         </tr>
+        <tr>
+          <th colspan="2" style="border:none;" class="text-right"> Note : Angka Merah apabila sama dengan atau lebih maupun kurang dari 0.4</th>
+        </tr>
       </thead>
     </table>
     <table class="line borderless text-center mt-2" style="font-size: x-small;">

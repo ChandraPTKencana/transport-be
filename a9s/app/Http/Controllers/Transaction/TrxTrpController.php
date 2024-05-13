@@ -897,7 +897,7 @@ class TrxTrpController extends Controller
   }
 
   public function previewFiles(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS','Accounting']);
 
     // set_time_limit(0);
 
@@ -1096,7 +1096,7 @@ class TrxTrpController extends Controller
   }
 
   public function downloadExcel(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS','Accounting']);
 
     set_time_limit(0);
     $callGet = $this->index($request, true);
