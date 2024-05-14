@@ -1163,7 +1163,7 @@ class UjalanController extends Controller
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
       
-      if(in_array($this->role,["SuperAdmin","Logistic"]) && !$model_query->val && $model_query->created_user == $this->admin_id){
+      if(in_array($this->role,["SuperAdmin","Logistic"]) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
