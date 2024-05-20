@@ -27,7 +27,7 @@ class UjalanResource extends JsonResource
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
             'created_user'      => $this->created_user,
-            'created_user'      => $this->created_user,
+            'updated_user'      => $this->updated_user,
             'details'           => UjalanDetailResource::collection($this->whenLoaded('details')),
             'details2'          => UjalanDetail2Resource::collection($this->whenLoaded('details2')),
 

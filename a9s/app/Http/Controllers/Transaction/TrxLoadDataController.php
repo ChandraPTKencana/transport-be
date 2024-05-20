@@ -124,7 +124,6 @@ class TrxLoadDataController extends Controller
     $list_ticket=[];
     $list_pv=[];
     $list_cost_center=[];
-    $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->get();
     
     $date_from = $request->from;
     $date_to = $request->to;
@@ -238,10 +237,25 @@ class TrxLoadDataController extends Controller
     }
     
     return response()->json([
-      "list_ujalan" => $list_ujalan,
       "list_cost_center" => $list_cost_center,
       "list_ticket" => $list_ticket,
       "list_pv" => $list_pv,
+    ], 200);
+  }
+
+
+  public function local(Request $request)
+  {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+
+    $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->get();
+    $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
+    $list_employee = \App\Models\MySql\Employee::where("deleted",0)->whereIn("role",['Supir','Kernet'])->get();
+       
+    return response()->json([
+      "list_ujalan" => $list_ujalan,
+      "list_vehicle" => $list_vehicle,
+      "list_employee" => $list_employee,
     ], 200);
   }
 }

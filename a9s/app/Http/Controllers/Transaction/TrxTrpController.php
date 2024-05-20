@@ -361,6 +361,16 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
+      if(!\App\Models\MySql\Vehicle::where("no_pol",$request->no_pol)->first())
+      throw new \Exception("Plat mobil tidak terdaftar",1);
+
+      if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
+      throw new \Exception("Supir tidak terdaftar",1);
+
+      if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
+      throw new \Exception("Kernet tidak terdaftar",1);
+
+
       // if(TrxTrp::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       // throw new \Exception("List sudah terdaftar");
 
@@ -554,6 +564,15 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
+      if(!\App\Models\MySql\Vehicle::where("no_pol",$request->no_pol)->first())
+      throw new \Exception("Plat mobil tidak terdaftar",1);
+
+      if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
+      throw new \Exception("Supir tidak terdaftar",1);
+
+      if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
+      throw new \Exception("Kernet tidak terdaftar",1);
+
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
       if($model_query->val==1 || $model_query->val1==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);

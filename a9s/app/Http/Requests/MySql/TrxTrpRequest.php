@@ -38,7 +38,7 @@ class TrxTrpRequest extends FormRequest
             $rules['jenis'] = 'required|in:CPO,TBS,PK,TBSK';
             $rules['supir'] = 'required|max:255';
             $rules['kernet'] = 'nullable|max:255';
-            $rules['no_pol'] = 'required|max:12';
+            $rules['no_pol'] = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/';
             $rules['online_status'] = 'required';
         }
         return $rules;
@@ -73,6 +73,7 @@ class TrxTrpRequest extends FormRequest
 
             'no_pol.required' => 'No Pol tidak boleh kosong',
             'no_pol.max' => 'No Pol tidak boleh melebihi 12 karakter',
+            'no_pol.regex' => 'Format No Pol salah',
 
         ];
     }
