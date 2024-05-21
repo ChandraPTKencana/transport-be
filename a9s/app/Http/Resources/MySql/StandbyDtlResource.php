@@ -5,7 +5,7 @@ namespace App\Http\Resources\MySql;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\IsUserResource;
 
-class UjalanAcAccountResource extends JsonResource
+class StandbyDtlResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,9 +17,12 @@ class UjalanAcAccountResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'ac_account_id'                => $this['AccountID'],
-            'ac_account_code'              => $this['AccountCode'],
-            'ac_account_name'              => $this['AccountName'],
+            'ordinal'           => $this->ordinal,
+            'ac_account_id'     => $this->ac_account_id,
+            'ac_account_code'   => $this->ac_account_code,
+            'ac_account_name'   => $this->ac_account_name,
+            'amount'            => $this->amount,
+            'description'       => $this->description,
         ];
     }
 }

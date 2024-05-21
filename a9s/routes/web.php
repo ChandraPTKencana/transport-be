@@ -48,7 +48,6 @@ Route::get('/', function () {
     Route::put('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'update']);
     Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
     Route::put('/ujalan_validasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'validasi']);
-    Route::get('/ujalan/ac_accounts', [\App\Http\Controllers\Ujalan\UjalanController::class, 'ac_accounts']);
 
 
     Route::get('/trx_trps', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'index']);
@@ -86,6 +85,15 @@ Route::get('/', function () {
     Route::put('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'update']);
     Route::delete('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'delete']);
 
+
+    Route::get('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'index']);
+    Route::get('/standby_mst_', [\App\Http\Controllers\StandBy\StandByMstController::class, 'show']);
+    Route::post('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'store']);
+    Route::put('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'update']);
+    Route::delete('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'delete']);
+    Route::put('/standby_mst_validasi', [\App\Http\Controllers\StandBy\StandByMstController::class, 'validasi']);
+
+    Route::get('/ac_accounts', [\App\Http\Controllers\AcAccountController::class, 'index']);
 
     
     // Route::prefix("stok/api")->group(function(){
