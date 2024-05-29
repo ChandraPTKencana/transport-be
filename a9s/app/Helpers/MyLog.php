@@ -29,4 +29,16 @@ class MyLog {
       $content="[".$timestamp."] ".json_encode($msg,JSON_PRETTY_PRINT).PHP_EOL;
       File::append(storage_path($filename),$content);
     }
+
+    public static function history($msg)
+    {
+      $date=new \DateTime();
+      $timestamp=$date->format("Y-m-d H:i:s.v");
+      $today=date("Y-m-d");
+      $filename="/logs/data_history".$today.".log";
+
+      $content="[".$timestamp."] ".getRealIpAddress()." ".json_encode($msg,JSON_PRETTY_PRINT).PHP_EOL;
+      
+      File::append(storage_path($filename),$content);
+    }
 }

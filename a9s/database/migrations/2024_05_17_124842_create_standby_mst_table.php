@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('standby_mst', function (Blueprint $table) {
             $table->id();
             $table->string("name",30);
+            $table->string('tipe',50);
             $table->decimal('amount',18);
 
             $table->foreignId('created_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');

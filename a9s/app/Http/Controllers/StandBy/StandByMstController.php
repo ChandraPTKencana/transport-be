@@ -165,7 +165,7 @@ class StandByMstController extends Controller
   public function validateItems($details_in){
     $rules = [
       
-      // 'details'                          => 'required|array',
+      'details'                          => 'required|array',
       // 'details.*.id_uj'               => 'required|exists:\App\Models\MySql\StandByMst',
       'details.*.p_status'               => 'required|in:Remove,Add,Edit',
       'details.*.ac_account_id'          => 'required_if:details.*.p_status,Add,Edit',
@@ -177,7 +177,7 @@ class StandByMstController extends Controller
     ];
 
     $messages = [
-      'details.required' => 'Item harus di isi',
+      'details.required' => 'List Item harus di isi',
       'details.array' => 'Format Pengambilan Barang Salah',
     ];
 
@@ -261,6 +261,7 @@ class StandByMstController extends Controller
 
       $model_query                  = new StandByMst();      
       $model_query->name            = $request->name;
+      $model_query->tipe            = $request->tipe;
       $model_query->amount          = 0;
 
       $model_query->created_at      = $t_stamp;
@@ -334,6 +335,11 @@ class StandByMstController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
     $t_stamp = date("Y-m-d H:i:s");
 
+    //start for details2
+    $details_in = json_decode($request->details, true);
+    $this->validateItems($details_in);
+    //end for details2
+
     DB::beginTransaction();
     try {
 
@@ -347,11 +353,6 @@ class StandByMstController extends Controller
         ($this->role=="Logistic" && $model_query->val1 == 1)
       ) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
-
-      //start for details2
-      $details_in = json_decode($request->details, true);
-      $this->validateItems($details_in);   
-      //end for details2
       
       //start for details2
       $unique_items = [];
@@ -389,12 +390,12 @@ class StandByMstController extends Controller
       }
       //end for details2
 
-      
       $model_query->name            = $request->name;
+      $model_query->tipe            = $request->tipe;
       $model_query->amount          = 0;
 
       $model_query->updated_at      = $t_stamp;
-      $model_query->updated_user    = $this->admin_id;  
+      $model_query->updated_user    = $this->admin_id;
 
       //start for details2
       $data_from_db = StandbyDtl::where('standby_mst_id', $model_query->id)
@@ -481,7 +482,7 @@ class StandByMstController extends Controller
 
               StandbyDtl::where("standby_mst_id", $model_query->id)
               ->where("ordinal", $v["key"])->where("p_change",false)->update([
-                  "ordinal"         =>$v["ordinal"],
+                  "ordinal"         => $v["ordinal"],
                   "amount"          => $v["amount"],
                   "ac_account_id"   => $ac_account_id,
                   "ac_account_name" => $ac_account_name,
@@ -527,13 +528,9 @@ class StandByMstController extends Controller
             // $ordinal++;
         }
       }
-    //end for details2
-    if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
       $model_query->save();
+        //start for details2
       StandbyDtl::where('standby_mst_id',$model_query->id)->update(["p_change"=>false]);
-    }
-      //start for details2
-    StandbyDtl::where('standby_mst_id',$model_query->id)->update(["p_change"=>false]);
     //end for details2
       DB::commit();
       return response()->json([

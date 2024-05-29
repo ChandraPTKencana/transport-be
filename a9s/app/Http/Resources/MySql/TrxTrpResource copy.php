@@ -70,6 +70,8 @@ class TrxTrpResource extends JsonResource
             'val2_by'           => new IsUserResource($this->whenLoaded('val2_by')),
             'val2_at'           => $this->val2_at ?? "",
 
+            'print'             => $this->print,
+
             'created_user'      => $this->created_user,
             'updated_user'      => $this->updated_user,
             'created_at'        => $this->created_at,
@@ -78,14 +80,6 @@ class TrxTrpResource extends JsonResource
             'deleted'           => $this->deleted,
             'deleted_user'      => $this->deleted_user ?? "",
             'deleted_at'        => $this->deleted_at ?? "",
-            'deleted_by'        => new IsUserResource($this->whenLoaded('deleted_by')),
-            'deleted_reason'    => $this->deleted_reason ?? "",
-
-            'req_deleted'       => $this->req_deleted,
-            'req_deleted_user'  => $this->req_deleted_user ?? "",
-            'req_deleted_at'    => $this->req_deleted_at ?? "",
-            'req_deleted_by'    => new IsUserResource($this->whenLoaded('req_deleted_by')),
-            'req_deleted_reason'=> $this->req_deleted_reason ?? "",
 
             'cost_center_code'  => $this->cost_center_code ?? "",
             'cost_center_desc'  => $this->cost_center_desc ?? "",
@@ -96,26 +90,6 @@ class TrxTrpResource extends JsonResource
             'pvr_had_detail'    => $this->pvr_had_detail ?? "",
             'transition_to'     => $this->transition_to ?? "",
             'trx_absens'        => TrxAbsenResource::collection($this->whenLoaded('trx_absens')),
-
-            'ritase_leave_at'   => $this->ritase_leave_at ?? "",
-            'ritase_arrive_at'  => $this->ritase_arrive_at ?? "",
-            'ritase_return_at'  => $this->ritase_return_at ?? "",
-            'ritase_till_at'    => $this->ritase_till_at ?? "",
-            'ritase_note'       => $this->ritase_note ?? "",
-            
-            'ritase_val'        => $this->ritase_val,
-            'ritase_val_user'   => $this->ritase_val_user ?? "",
-            'ritase_val_by'     => new IsUserResource($this->whenLoaded('ritase_val_by')),
-            'ritase_val_at'     => $this->ritase_val_at ?? "",
-
-            'ritase_val1'       => $this->ritase_val1,
-            'ritase_val1_user'  => $this->ritase_val1_user ?? "",
-            'ritase_val1_by'    => new IsUserResource($this->whenLoaded('ritase_val1_by')),
-            'ritase_val1_at'    => $this->ritase_val1_at ?? "",
-
-
-            'details_uj'        => UjalanDetailResource::collection($this->whenLoaded('uj_details')),
-
         ];
     }
 }

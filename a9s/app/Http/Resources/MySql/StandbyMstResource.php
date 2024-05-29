@@ -20,6 +20,7 @@ class StandbyMstResource extends JsonResource
         return [
             'id'          => $this->id,
             'name'        => $this->name,
+            'tipe'        => $this->tipe,
             'amount'      => $this->amount,
             'details'     => StandbyDtlResource::collection($this->whenLoaded('details')),
             'created_at'  => $this->created_at,

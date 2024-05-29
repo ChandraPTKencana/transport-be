@@ -32,6 +32,7 @@ class StandByMstRequest extends FormRequest
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['name'] = 'required|max:30';
+            $rules['tipe'] = 'required|max:50';
         }
         return $rules;
     }
@@ -45,6 +46,9 @@ class StandByMstRequest extends FormRequest
 
             'name.required' => 'Name tidak boleh kosong',
             'name.max' => 'Name Maksimal 30 Karakter',
+
+            'tipe.required' => 'Tipe tidak boleh kosong',
+            'tipe.max' => 'Tipe Maksimal 50 Karakter',
         ];
     }
 
