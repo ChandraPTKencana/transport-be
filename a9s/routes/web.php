@@ -91,16 +91,38 @@ Route::get('/', function () {
     Route::delete('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'delete']);
 
 
-    Route::get('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'index']);
-    Route::get('/standby_mst_', [\App\Http\Controllers\StandBy\StandByMstController::class, 'show']);
-    Route::post('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'store']);
-    Route::put('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'update']);
-    Route::delete('/standby_mst', [\App\Http\Controllers\StandBy\StandByMstController::class, 'delete']);
-    Route::put('/standby_mst_validasi', [\App\Http\Controllers\StandBy\StandByMstController::class, 'validasi']);
+    Route::get('/standby_msts', [\App\Http\Controllers\Standby\StandbyMstController::class, 'index']);
+    Route::get('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController::class, 'show']);
+    Route::post('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController::class, 'store']);
+    Route::put('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController::class, 'update']);
+    Route::delete('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController::class, 'delete']);
+    Route::put('/standby_mst_validasi', [\App\Http\Controllers\Standby\StandbyMstController::class, 'validasi']);
 
     Route::get('/ac_accounts', [\App\Http\Controllers\AcAccountController::class, 'index']);
 
     
+
+    Route::get('/standby_trxs', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'index']);
+    Route::get('/standby_trx_load_local', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'loadLocal']);
+    Route::get('/standby_trx_load_sqlsrv', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'loadSqlSrv']);
+
+
+    Route::get('/standby_trx', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'show']);
+    // Route::get('/standby_trx/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'mandorGetVerifyTrx']);
+    Route::post('/standby_trx', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'store']);
+    Route::put('/standby_trx', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'update']);
+    // Route::put('/standby_trx/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'mandorGetVerifySet']);
+    // Route::put('/standby_trx_ticket', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'updateTicket']);
+    Route::delete('/standby_trx', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'delete']);
+    Route::delete('/standby_trx_req_delete', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'reqDelete']);
+    Route::delete('/standby_trx_approve_req_delete', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'approveReqDelete']);
+    // Route::get('/standby_trxs_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFiles']);
+    // Route::get('/standby_trxs_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
+    Route::get('/standby_trx_preview_file', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'previewFile']);
+    Route::put('/standby_trx_validasi', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'validasi']);
+    // Route::post('/standby_trx_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);
+    // Route::post('/standby_trx_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
+
     // Route::prefix("stok/api")->group(function(){
 
 //     // Route::post('login', function () {

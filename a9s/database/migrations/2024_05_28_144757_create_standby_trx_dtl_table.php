@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('standby_trx_detail', function (Blueprint $table) {
+        Schema::create('standby_trx_dtl', function (Blueprint $table) {
             $table->id();
             $table->foreignId('standby_trx_id')->references('id')->on('standby_trx')->onDelete('restrict')->onUpdate('cascade');
             $table->date("tanggal");
-            $table->text('keterangan',12);
+            $table->text('note');
 
             $table->foreignId('created_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->foreignId('updated_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('standby_trx_detail');
+        Schema::dropIfExists('standby_trx_dtl');
     }
 };

@@ -1038,7 +1038,7 @@ class TrxTrpController extends Controller
           "VoidReason" => $deleted_reason
         ]);
       }
-      $model_query->req_deleted_succeed_at=$t_stamp_ms;
+      
       $model_query->save();
 
       DB::commit();

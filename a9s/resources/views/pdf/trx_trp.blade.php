@@ -85,9 +85,11 @@
           <th style="border:none;"> Laporan dari tanggal {{$info["from"]}} s/d  {{$info["to"]}} </th>
           <th style="border:none;" class="text-right"> Tanggal Cetak {{$info["now"]}} </th>
         </tr>
+        @if(in_array('ticket_a_netto',$shows))
         <tr>
           <th colspan="2" style="border:none;" class="text-right"> Note : Angka Merah apabila sama dengan atau lebih maupun kurang dari 0.4</th>
         </tr>
+        @endif
       </thead>
     </table>
     <table class="line borderless text-center mt-2" style="font-size: x-small;">
@@ -274,6 +276,7 @@
             @endif
           </tr>
           @endforeach
+          @if(in_array('ticket_a_netto',$shows))
           <tr>
             <td colspan="7" style="border:none;"></td>
             @if(in_array('ticket_a_bruto',$shows))
@@ -311,9 +314,10 @@
             <td>{{ $info["ttl_b_a_netto"] }}</td>
             @endif
             @if(in_array('ticket_b_a_netto_persen',$shows))
-            <td style="border: none;"></td>
+            <td colspan="3" style="border: none;"></td>
             @endif
           </tr>
+          @endif
         </tbody>
       </table>
     

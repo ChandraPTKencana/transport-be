@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\StandBy;
+namespace App\Http\Controllers\Standby;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -8,11 +8,11 @@ use Illuminate\Http\Request;
 use App\Helpers\MyLib;
 use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
-use App\Models\MySql\StandByMst;
+use App\Models\MySql\StandbyMst;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Http\Requests\MySql\StandByMstRequest;
-use App\Http\Resources\MySql\StandByMstResource;
+use App\Http\Requests\MySql\StandbyMstRequest;
+use App\Http\Resources\MySql\StandbyMstResource;
 use App\Models\MySql\StandbyDtl;
 use App\Http\Resources\IsUserResource;
 use App\Models\MySql\IsUser;
@@ -20,7 +20,7 @@ use App\Models\MySql\IsUser;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-class StandByMstController extends Controller
+class StandbyMstController extends Controller
 {
   private $admin;
   private $role;
@@ -65,7 +65,7 @@ class StandByMstController extends Controller
     //======================================================================================================
     // Init Model
     //======================================================================================================
-    $model_query = StandByMst::offset($offset)->limit($limit);
+    $model_query = StandbyMst::offset($offset)->limit($limit);
 
     $first_row=[];
     if($request->first_row){
@@ -143,22 +143,22 @@ class StandByMstController extends Controller
     $model_query = $model_query->where("deleted",0)->get();
 
     return response()->json([
-      "data" => StandByMstResource::collection($model_query),
+      "data" => StandbyMstResource::collection($model_query),
     ], 200);
   }
 
-  public function show(StandByMstRequest $request)
+  public function show(StandbyMstRequest $request)
   {
     MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
 
-    $model_query = StandByMst::with([
+    $model_query = StandbyMst::with([
     'details'=>function($q){
       $q->orderBy("ordinal","asc");
     },
     ])->with(['val_by','val1_by'])->where("deleted",0)->find($request->id);
 
     return response()->json([
-      "data" => new StandByMstResource($model_query),
+      "data" => new StandbyMstResource($model_query),
     ], 200);
   }
 
@@ -166,7 +166,7 @@ class StandByMstController extends Controller
     $rules = [
       
       'details'                          => 'required|array',
-      // 'details.*.id_uj'               => 'required|exists:\App\Models\MySql\StandByMst',
+      // 'details.*.id_uj'               => 'required|exists:\App\Models\MySql\StandbyMst',
       'details.*.p_status'               => 'required|in:Remove,Add,Edit',
       'details.*.ac_account_id'          => 'required_if:details.*.p_status,Add,Edit',
       'details.*.ac_account_code'        => 'required_if:details.*.p_status,Add,Edit',
@@ -183,8 +183,8 @@ class StandByMstController extends Controller
 
     // // Replace :index with the actual index value in the custom error messages
     foreach ($details_in as $index => $msg) {
-      // $messages["details.{$index}.id_uj.required"]          = "Baris #" . ($index + 1) . ". ID StandByMst yang diminta tidak boleh kosong.";
-      // $messages["details.{$index}.id_uj.exists"]            = "Baris #" . ($index + 1) . ". ID StandByMst yang diminta harus dipilih";
+      // $messages["details.{$index}.id_uj.required"]          = "Baris #" . ($index + 1) . ". ID StandbyMst yang diminta tidak boleh kosong.";
+      // $messages["details.{$index}.id_uj.exists"]            = "Baris #" . ($index + 1) . ". ID StandbyMst yang diminta harus dipilih";
 
       $messages["details.{$index}.ac_account_id.required_if"]          = "Baris #" . ($index + 1) . ". Acc ID yang diminta tidak boleh kosong.";
       $messages["details.{$index}.ac_account_code.required_if"]          = "Baris #" . ($index + 1) . ". Acc Code yang diminta tidak boleh kosong.";
@@ -210,7 +210,7 @@ class StandByMstController extends Controller
     }
   }
 
-  public function store(StandByMstRequest $request)
+  public function store(StandbyMstRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
@@ -259,7 +259,7 @@ class StandByMstController extends Controller
 
       $t_stamp = date("Y-m-d H:i:s");
 
-      $model_query                  = new StandByMst();      
+      $model_query                  = new StandbyMst();      
       $model_query->name            = $request->name;
       $model_query->tipe            = $request->tipe;
       $model_query->amount          = 0;
@@ -330,7 +330,7 @@ class StandByMstController extends Controller
     }
   }
 
-  public function update(StandByMstRequest $request)
+  public function update(StandbyMstRequest $request)
   {
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
     $t_stamp = date("Y-m-d H:i:s");
@@ -343,7 +343,7 @@ class StandByMstController extends Controller
     DB::beginTransaction();
     try {
 
-      $model_query = StandByMst::where("id",$request->id)->lockForUpdate()->first();
+      $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
       if($model_query->deleted==1)
       throw new \Exception("Data Sudah Dihapus",1);
       
@@ -447,6 +447,10 @@ class StandByMstController extends Controller
 
       $data_to_processes = array_merge($for_deletes, $for_edits, $for_adds);
       
+      if(count($for_edits)==0 && count($for_adds)==0){
+        throw new \Exception("Data List Harus Diisi",1);
+      }
+
       foreach ($data_to_processes as $k => $v) {
         $index = false;
 
@@ -569,7 +573,7 @@ class StandByMstController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
     
-      $model_query = StandByMst::where("id",$request->id)->lockForUpdate()->first();
+      $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
 
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
@@ -609,7 +613,7 @@ class StandByMstController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
 
     $rules = [
-      'id' => "required|exists:\App\Models\MySql\StandByMst,id",
+      'id' => "required|exists:\App\Models\MySql\StandbyMst,id",
     ];
 
     $messages = [
@@ -626,7 +630,7 @@ class StandByMstController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = StandByMst::find($request->id);
+      $model_query = StandbyMst::find($request->id);
       if($this->role=='PabrikTransport' &&  $model_query->val){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }

@@ -26,8 +26,6 @@ return new class extends Migration
             $table->timestamp('req_deleted_at')->nullable();
             $table->text('req_deleted_reason')->nullable();
 
-            $table->timestamp('req_deleted_succeed_at')->nullable();
-
             $table->boolean('standby_is_open')->default(0);
 
             $table->timestamp('ritase_leave_at')->nullable();
@@ -78,8 +76,6 @@ return new class extends Migration
             $table->dropColumn('req_deleted_user');
             $table->dropColumn('req_deleted_at');
             $table->dropColumn('req_deleted_reason');
-
-            $table->dropColumn('req_deleted_succeed_at');
 
             $table->dropColumn('standby_is_open');
 
