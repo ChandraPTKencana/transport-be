@@ -439,6 +439,10 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
+      if($model_query->cost_center_code==""){
+        throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
+      }
+
       if($model_query->val==0){
         throw new \Exception("Data Perlu Divalidasi oleh kasir terlebih dahulu",1);
       }
@@ -489,9 +493,6 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
-      if(!\App\Models\MySql\Vehicle::where("no_pol",$request->no_pol)->first())
-      throw new \Exception("Plat mobil tidak terdaftar",1);
-
       if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
       throw new \Exception("Supir tidak terdaftar",1);
 
@@ -524,26 +525,6 @@ class TrxTrpController extends Controller
       $model_query->amount          = $ujalan->harga;
       
       if($online_status=="true"){
-        if($request->pv_id){
-
-          $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
-          ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-          ->where("fi_arap.VoucherID",$request->pv_id)
-          ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-          ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
-          ->first();
-
-          if(!$get_data_pv) 
-          throw new \Exception("Data PV tidak terdaftar",1);
-          
-          $model_query->pv_id =  $request->pv_id;
-          if(\App\Models\MySql\TrxTrp::where("pv_id",$get_data_pv->VoucherID)->first())
-          throw new \Exception("Data PV telah digunakan",1);
-
-          $model_query->pv_no =  $get_data_pv->VoucherNo;
-          $model_query->pv_total =  $get_data_pv->total_amount;
-        }
-
         if($request->cost_center_code){
           $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
           ->select('CostCenter','Description')
@@ -607,9 +588,6 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
-      if(!\App\Models\MySql\Vehicle::where("no_pol",$request->no_pol)->first())
-      throw new \Exception("Plat mobil tidak terdaftar",1);
-
       if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
       throw new \Exception("Supir tidak terdaftar",1);
 
@@ -619,52 +597,37 @@ class TrxTrpController extends Controller
       }
 
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
-      if($model_query->val==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
+      if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
-      $model_query->tanggal         = $request->tanggal;
 
-      $rejenis = ($request->jenis=="TBSK" ? "TBS" : $request->jenis );
-      $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
-      ->where("jenis",$rejenis)
-      ->where("deleted",0)
-      ->lockForUpdate()
-      ->first();
-
-      if(!$ujalan) 
-      throw new \Exception("Silahkan Isi Data Ujalan Dengan Benar",1);
-
-      if($ujalan->xto!=$request->xto)
-      throw new \Exception("Silahkan Isi Tipe Ujalan Dengan Benar",1);
-
-      $model_query->id_uj           = $ujalan->id;
-      $model_query->jenis           = $request->jenis;
-      $model_query->xto             = $ujalan->xto;
-      $model_query->tipe            = $ujalan->tipe;
-      $model_query->amount          = $ujalan->harga;
+      if($model_query->val==0){
+        
+        $model_query->tanggal         = $request->tanggal;
+  
+        $rejenis = ($request->jenis=="TBSK" ? "TBS" : $request->jenis );
+        $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
+        ->where("jenis",$rejenis)
+        ->where("deleted",0)
+        ->lockForUpdate()
+        ->first();
+  
+        if(!$ujalan) 
+        throw new \Exception("Silahkan Isi Data Ujalan Dengan Benar",1);
+  
+        if($ujalan->xto!=$request->xto)
+        throw new \Exception("Silahkan Isi Tipe Ujalan Dengan Benar",1);
+  
+        $model_query->id_uj           = $ujalan->id;
+        $model_query->jenis           = $request->jenis;
+        $model_query->xto             = $ujalan->xto;
+        $model_query->tipe            = $ujalan->tipe;
+        $model_query->amount          = $ujalan->harga;
+        $model_query->supir           = $request->supir;
+        $model_query->kernet          = MyLib::emptyStrToNull($request->kernet);
+        $model_query->no_pol          = $request->no_pol;
+      }
       if($online_status=="true"){
-        if($request->pv_id && $model_query->pvr_id==null){
-
-          $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
-          ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-          ->where("fi_arap.VoucherID",$request->pv_id)
-          ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-          ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
-          ->first();
-
-          if(!$get_data_pv) 
-          throw new \Exception("Data PV tidak terdaftar",1);
-          
-          if(\App\Models\MySql\TrxTrp::where("pv_id",$get_data_pv->VoucherID)
-          ->where("id","!=",$model_query->id)->first())
-          throw new \Exception("Data PV telah digunakan",1);
-
-
-          $model_query->pv_id =  $request->pv_id;
-          $model_query->pv_no =  $get_data_pv->VoucherNo;
-          $model_query->pv_total =  $get_data_pv->total_amount;
-        }
-
         if($model_query->pvr_id==null){
           if($request->cost_center_code){  
             $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
@@ -685,10 +648,6 @@ class TrxTrpController extends Controller
         if($request->cost_center_code)
         throw new \Exception("Pengisian cost center harus dalam mode online", 1);
       }
-
-      $model_query->supir=$request->supir;
-      $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
-      $model_query->no_pol=$request->no_pol;
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;

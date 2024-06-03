@@ -385,25 +385,6 @@ class StandbyTrxController extends Controller
           $model_query->cost_center_code = $list_cost_center->CostCenter;
           $model_query->cost_center_desc = $list_cost_center->Description;
         }
-
-        if($request->pv_id){
-          $get_data_pv = DB::connection('sqlsrv')->table('fi_arap')
-          ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-          ->where("fi_arap.VoucherID",$request->pv_id)
-          ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-          ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid'])
-          ->first();
-
-          if(!$get_data_pv) 
-          throw new \Exception("Data PV tidak terdaftar",1);
-          
-          $model_query->pv_id       =  $request->pv_id;
-          if(\App\Models\MySql\StandbyTrx::where("pv_id",$get_data_pv->VoucherID)->first())
-          throw new \Exception("Data PV telah digunakan",1);
-
-          $model_query->pv_no       =  $get_data_pv->VoucherNo;
-          $model_query->pv_total    =  $get_data_pv->total_amount;
-        }
       }
       
       $model_query->created_at      = $t_stamp;

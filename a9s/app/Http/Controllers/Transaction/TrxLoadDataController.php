@@ -108,7 +108,33 @@ class TrxLoadDataController extends Controller
   //   ], 200);
   // }
 
+  public function cost_center(Request $request)
+  {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
+    $online_status = $request->online_status;
+
+    $connectionDB = DB::connection('sqlsrv');
+
+    $list_cost_center=[];
+    
+    try {
+      if($online_status=="true"){
+        $list_cost_center = $connectionDB->table("AC_CostCenterNames")
+        ->select('CostCenter','Description')
+        ->where('CostCenter','like', '112%')
+        ->get();
+  
+        $list_cost_center= MyLib::objsToArray($list_cost_center); 
+      }
+    } catch (\Exception $e) {
+      // return response()->json($e->getMessage(), 400);
+    }
+    
+    return response()->json([
+      "list_cost_center" => $list_cost_center,
+    ], 200);
+  }
   public function trp(Request $request)
   {
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
@@ -122,8 +148,6 @@ class TrxLoadDataController extends Controller
     $connectionDB = DB::connection('sqlsrv');
 
     $list_ticket=[];
-    $list_pv=[];
-    $list_cost_center=[];
     
     $date_from = $request->from;
     $date_to = $request->to;
@@ -139,13 +163,8 @@ class TrxLoadDataController extends Controller
     try {
       if($online_status=="true"){
         $arr_tickets = [];
-        $arr_pvs = [];
         $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date_from)->get();
-        foreach ($used_ticket_pvs as $key=>$val){
-          if($val->pv_no){
-            array_push($arr_pvs,$val->pv_no);
-          }
-    
+        foreach ($used_ticket_pvs as $key=>$val){    
           if($val->ticket_a_no){
             array_push($arr_tickets,$val->ticket_a_no);
           }
@@ -189,29 +208,20 @@ class TrxLoadDataController extends Controller
         // })->toArray();
         $list_ticket= MyLib::objsToArray($list_ticket); 
   
-        $list_pv = $connectionDB->table("fi_arap")
-        // ->select('*')
-        ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-        ->whereDate('VoucherDate','>=', $date_from)
-        ->whereDate('VoucherDate','<=', $date_to)
-        ->where('VoucherType',"TRP")
-        ->where("IsAR",0)
-        ->whereNotIn('VoucherNo',$arr_pvs) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-        ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-        ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
-        ->get();
+        // $list_pv = $connectionDB->table("fi_arap")
+        // // ->select('*')
+        // ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
+        // ->whereDate('VoucherDate','>=', $date_from)
+        // ->whereDate('VoucherDate','<=', $date_to)
+        // ->where('VoucherType',"TRP")
+        // ->where("IsAR",0)
+        // ->whereNotIn('VoucherNo',$arr_pvs) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+        // ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
+        // ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
+        // ->get();
   
-        // $list_pv= $list_pv->map(function ($item) {
-        //   return array_map('utf8_encode', (array)$item);
-        // })->toArray();    
-        $list_pv= MyLib::objsToArray($list_pv); 
-        
-        $list_cost_center = $connectionDB->table("AC_CostCenterNames")
-        ->select('CostCenter','Description')
-        ->where('CostCenter','like', '112%')
-        ->get();
-  
-        $list_cost_center= MyLib::objsToArray($list_cost_center); 
+        // $list_pv= MyLib::objsToArray($list_pv); 
+
 
         if($transition_to!=""){
           if($jenis=="TBS" && $transition_to!=""){
@@ -237,9 +247,7 @@ class TrxLoadDataController extends Controller
     }
     
     return response()->json([
-      "list_cost_center" => $list_cost_center,
       "list_ticket" => $list_ticket,
-      "list_pv" => $list_pv,
     ], 200);
   }
 
@@ -248,7 +256,7 @@ class TrxLoadDataController extends Controller
   {
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
-    $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->get();
+    $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
     $list_employee = \App\Models\MySql\Employee::where("deleted",0)->whereIn("role",['Supir','Kernet'])->get();
        
