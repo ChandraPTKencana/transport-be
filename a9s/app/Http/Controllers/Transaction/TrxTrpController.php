@@ -1525,7 +1525,7 @@ class TrxTrpController extends Controller
     $miniError="";
     $id="";
     try {
-      $trx_trps = TrxTrp::whereNull("pvr_id")->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val1',1)->get();
+      $trx_trps = TrxTrp::whereNull("pvr_id")->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val',1)->where('val1',1)->get();
       if(count($trx_trps)==0){
         throw new \Exception("Semua PVR sudah terisi",1);
       }
