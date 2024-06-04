@@ -1075,10 +1075,10 @@ class TrxTrpController extends Controller
 
     $trx_trp = TrxTrp::find($request->id);
 
-    if($trx_trp->val==0)
-    return response()->json([
-      "message" => "Harap Di Validasi Terlebih Dahulu",
-    ], 400);
+    // if($trx_trp->val==0)
+    // return response()->json([
+    //   "message" => "Harap Di Validasi Terlebih Dahulu",
+    // ], 400);
 
     $ujalan = \App\Models\MySql\Ujalan::where("id",$trx_trp->id_uj)->first();
     $details = \App\Models\MySql\UjalanDetail::where("id_uj",$trx_trp->id_uj)->orderBy("ordinal","asc")->get();
