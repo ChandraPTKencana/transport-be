@@ -307,6 +307,7 @@ class UjalanController extends Controller
       'details.*.qty'                    => 'required_if:details.*.p_status,Add,Edit|numeric',
       'details.*.amount'                 => 'required_if:details.*.p_status,Add,Edit|numeric',
       'details.*.description'            => 'required_if:details.*.p_status,Add,Edit',
+      'details.*.xfor'                   => 'nullable|in:Supir,Kernet',
       // 'details.*.status'              => 'required|in:Y,N',
     ];
 
@@ -320,18 +321,19 @@ class UjalanController extends Controller
       // $messages["details.{$index}.id_uj.required"]          = "Baris #" . ($index + 1) . ". ID Ujalan yang diminta tidak boleh kosong.";
       // $messages["details.{$index}.id_uj.exists"]            = "Baris #" . ($index + 1) . ". ID Ujalan yang diminta harus dipilih";
 
-      $messages["details.{$index}.ac_account_id.required_if"]          = "Baris #" . ($index + 1) . ". Acc ID yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_code.required_if"]          = "Baris #" . ($index + 1) . ". Acc Code yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_name.required_if"]          = "Baris #" . ($index + 1) . ". Acc Name yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_code.max"]              = "Baris #" . ($index + 1) . ". Acc Code Maksimal 255 Karakter";
+      $messages["details.{$index}.ac_account_id.required_if"]   = "Baris #" . ($index + 1) . ". Acc ID yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_code.required_if"] = "Baris #" . ($index + 1) . ". Acc Code yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_name.required_if"] = "Baris #" . ($index + 1) . ". Acc Name yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_code.max"]         = "Baris #" . ($index + 1) . ". Acc Code Maksimal 255 Karakter";
 
-      $messages["details.{$index}.qty.required_if"]            = "Baris #" . ($index + 1) . ". Qty harus di isi";
-      $messages["details.{$index}.qty.numeric"]              = "Baris #" . ($index + 1) . ". Qty harus berupa angka";
+      $messages["details.{$index}.qty.required_if"]             = "Baris #" . ($index + 1) . ". Qty harus di isi";
+      $messages["details.{$index}.qty.numeric"]                 = "Baris #" . ($index + 1) . ". Qty harus berupa angka";
 
-      $messages["details.{$index}.amount.required_if"]            = "Baris #" . ($index + 1) . ". Amount harus di isi";
+      $messages["details.{$index}.amount.required_if"]          = "Baris #" . ($index + 1) . ". Amount harus di isi";
       $messages["details.{$index}.amount.numeric"]              = "Baris #" . ($index + 1) . ". Amount harus berupa angka";
 
-      $messages["details.{$index}.description.required_if"]            = "Baris #" . ($index + 1) . ". Description harus di isi";
+      $messages["details.{$index}.description.required_if"]     = "Baris #" . ($index + 1) . ". Description harus di isi";
+      $messages["details.{$index}.xfor.in"]                     = "Baris #" . ($index + 1) . ". Xfor harus di pilih";
       // $messages["details.{$index}.status.required"]            = "Baris #" . ($index + 1) . ". Status harus di isi";
       // $messages["details.{$index}.status.in"]                   = "Baris #" . ($index + 1) . ". Status tidak sesuai format";
       // $messages["details.{$index}.item.required"]                 = "Baris #" . ($index + 1) . ". Item di Form Pengambilan Barang Gudang harus di isi";
@@ -441,6 +443,7 @@ class UjalanController extends Controller
         array_push($unique_items, strtolower($unique_data));
       }
       
+      $remarksign=0;
       foreach ($details_in as $key => $value) {
         $ordinal = $key + 1;
         $detail                     = new UjalanDetail();
@@ -450,7 +453,9 @@ class UjalanController extends Controller
         $detail->qty                = $value['qty'];
         $detail->harga              = $value['harga'];
         $detail->for_remarks        = $value['for_remarks'];
-
+        if($value['for_remarks']){
+          $remarksign++;
+        }
         $model_query->harga +=  ($value["qty"] * $value["harga"]);
         $detail->created_at      = $t_stamp;
         $detail->created_user    = $this->admin_id;
@@ -459,7 +464,10 @@ class UjalanController extends Controller
         $detail->updated_user    = $this->admin_id;  
         $detail->save();
       }
+      if($remarksign == 0)
+      throw new \Exception("Minimal Harus Memiliki 1 For Remarks Di Detail",1);
 
+      
       //start for details2      
       $temp_amount_details2=0;
       $ordinal2=0;
@@ -480,6 +488,7 @@ class UjalanController extends Controller
         $detail2->qty                = $value['qty'];
         $detail2->amount             = $value['amount'];
         $detail2->description        = $value['description'];
+        $detail2->xfor               = $value['xfor'];
 
         $temp_amount_details2 +=  ($value["qty"] * $value["amount"]);
         $detail2->created_at      = $t_stamp;
@@ -490,6 +499,8 @@ class UjalanController extends Controller
         $detail2->save();
       }
       //end for details2
+      if($ordinal2 > 0 && $model_query->harga!=$temp_amount_details2)
+      throw new \Exception("Total Tidak Cocok harap Periksa Kembali",1);
 
       $model_query->save();
       MyLog::sys("ujalan_mst",$model_query->id,"insert");
@@ -692,6 +703,7 @@ class UjalanController extends Controller
         // return response()->json([
         //   "message" => "test",
         // ], 400);
+        $remarksign=0;
 
         foreach ($data_to_processes as $k => $v) {
           $index = false;
@@ -807,6 +819,9 @@ class UjalanController extends Controller
                 $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
                 array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
 
+                if($v['for_remarks']){
+                  $remarksign++;
+                }
                 // UjalanDetail::where("id_uj", $model_query->id)
                 // ->where("ordinal", $v["key"])->where("p_change",false)->update([
                 //     "ordinal"=>$v["ordinal"],
@@ -847,12 +862,18 @@ class UjalanController extends Controller
                   'updated_at'        => $t_stamp,
                   'updated_user'      => $this->admin_id,
               ]);
+
+              if($v['for_remarks']){
+                $remarksign++;
+              }
               // $ordinal++;
           }
         }
       }
 
-      
+      if($remarksign == 0)
+      throw new \Exception("Minimal Harus Memiliki 1 For Remarks Di Detail",1);
+
       //start for details2
       array_push( $SYSNOTES ,"Details PVR: \n");
 
@@ -1015,6 +1036,7 @@ class UjalanController extends Controller
               $mq->ac_account_name    = $ac_account_name;
               $mq->ac_account_code    = $ac_account_code;
               $mq->description        = $v["description"];
+              $mq->xfor               = $v["xfor"];
               $mq->p_change           = true;
               $mq->updated_at         = $t_stamp;
               $mq->updated_user       = $this->admin_id;
@@ -1065,12 +1087,13 @@ class UjalanController extends Controller
             UjalanDetail2::insert([
                 'id_uj'             => $model_query->id,
                 'ordinal'           => $v["ordinal"],
-                "qty" => $v["qty"],
-                "amount" => $v["amount"],
-                "ac_account_id" => $ac_account_id,
-                "ac_account_name" => $ac_account_name,
-                "ac_account_code" => $ac_account_code,
-                "description" => $v["description"],
+                "qty"               => $v["qty"],
+                "amount"            => $v["amount"],
+                "ac_account_id"     => $ac_account_id,
+                "ac_account_name"   => $ac_account_name,
+                "ac_account_code"   => $ac_account_code,
+                "description"       => $v["description"],
+                "xfor"              => $v["xfor"],
                 // 'status'            => $v['status'],
                 "p_change"          => true,
                 'created_at'        => $t_stamp,
@@ -1081,6 +1104,10 @@ class UjalanController extends Controller
             // $ordinal++;
         }
       }
+
+      if($temp_amount_details2 > 0 && $model_query->harga!=$temp_amount_details2)
+      throw new \Exception("Total Tidak Cocok harap Periksa Kembali",1);
+
     //end for details2
     if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
       $model_query->save();

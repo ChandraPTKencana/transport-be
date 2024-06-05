@@ -24,6 +24,7 @@ class UjalanDetail2Resource extends JsonResource
             'qty'               => $this->qty,
             'amount'            => $this->amount,
             'description'       => $this->description,
+            'xfor'              => $this->xfor ?? "",
         ];
     }
 }

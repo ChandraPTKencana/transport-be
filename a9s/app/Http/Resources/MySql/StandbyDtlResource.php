@@ -23,6 +23,7 @@ class StandbyDtlResource extends JsonResource
             'ac_account_name'   => $this->ac_account_name,
             'amount'            => $this->amount,
             'description'       => $this->description,
+            'xfor'              => $this->xfor ?? "",
         ];
     }
 }

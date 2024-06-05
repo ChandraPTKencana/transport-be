@@ -173,6 +173,7 @@ class StandbyMstController extends Controller
       'details.*.ac_account_name'        => 'required_if:details.*.p_status,Add,Edit',
       'details.*.amount'                 => 'required_if:details.*.p_status,Add,Edit|numeric',
       'details.*.description'            => 'required_if:details.*.p_status,Add,Edit',
+      'details.*.xfor'                   => 'nullable|in:Supir,Kernet',
       // 'details.*.status'              => 'required|in:Y,N',
     ];
 
@@ -183,21 +184,23 @@ class StandbyMstController extends Controller
 
     // // Replace :index with the actual index value in the custom error messages
     foreach ($details_in as $index => $msg) {
-      // $messages["details.{$index}.id_uj.required"]          = "Baris #" . ($index + 1) . ". ID StandbyMst yang diminta tidak boleh kosong.";
-      // $messages["details.{$index}.id_uj.exists"]            = "Baris #" . ($index + 1) . ". ID StandbyMst yang diminta harus dipilih";
+      // $messages["details.{$index}.id_uj.required"]            = "Baris #" . ($index + 1) . ". ID StandbyMst yang diminta tidak boleh kosong.";
+      // $messages["details.{$index}.id_uj.exists"]              = "Baris #" . ($index + 1) . ". ID StandbyMst yang diminta harus dipilih";
 
-      $messages["details.{$index}.ac_account_id.required_if"]          = "Baris #" . ($index + 1) . ". Acc ID yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_code.required_if"]          = "Baris #" . ($index + 1) . ". Acc Code yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_name.required_if"]          = "Baris #" . ($index + 1) . ". Acc Name yang diminta tidak boleh kosong.";
-      $messages["details.{$index}.ac_account_code.max"]              = "Baris #" . ($index + 1) . ". Acc Code Maksimal 255 Karakter";
+      $messages["details.{$index}.ac_account_id.required_if"]    = "Baris #" . ($index + 1) . ". Acc ID yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_code.required_if"]  = "Baris #" . ($index + 1) . ". Acc Code yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_name.required_if"]  = "Baris #" . ($index + 1) . ". Acc Name yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.ac_account_code.max"]          = "Baris #" . ($index + 1) . ". Acc Code Maksimal 255 Karakter";
 
-      // $messages["details.{$index}.qty.required_if"]            = "Baris #" . ($index + 1) . ". Qty harus di isi";
-      // $messages["details.{$index}.qty.numeric"]              = "Baris #" . ($index + 1) . ". Qty harus berupa angka";
+      // $messages["details.{$index}.qty.required_if"]           = "Baris #" . ($index + 1) . ". Qty harus di isi";
+      // $messages["details.{$index}.qty.numeric"]               = "Baris #" . ($index + 1) . ". Qty harus berupa angka";
 
-      $messages["details.{$index}.amount.required_if"]            = "Baris #" . ($index + 1) . ". Amount harus di isi";
-      $messages["details.{$index}.amount.numeric"]              = "Baris #" . ($index + 1) . ". Amount harus berupa angka";
+      $messages["details.{$index}.amount.required_if"]           = "Baris #" . ($index + 1) . ". Amount harus di isi";
+      $messages["details.{$index}.amount.numeric"]               = "Baris #" . ($index + 1) . ". Amount harus berupa angka";
 
-      $messages["details.{$index}.description.required_if"]            = "Baris #" . ($index + 1) . ". Description harus di isi";
+      $messages["details.{$index}.description.required_if"]      = "Baris #" . ($index + 1) . ". Description harus di isi";
+      $messages["details.{$index}.xfor.in"]                      = "Baris #" . ($index + 1) . ". harus di pilih";
+      
     }
 
     $validator = \Validator::make(['details' => $details_in], $rules, $messages);
@@ -290,6 +293,7 @@ class StandbyMstController extends Controller
 
         $detail->amount             = $value['amount'];
         $detail->description        = $value['description'];
+        $detail->xfor               = $value['xfor'];
         $model_query->amount        +=  $value["amount"];
         $detail->created_at         = $t_stamp;
         $detail->created_user       = $this->admin_id;
@@ -500,6 +504,7 @@ class StandbyMstController extends Controller
               $mq->ac_account_name = $ac_account_name;
               $mq->ac_account_code = $ac_account_code;
               $mq->description     = $v["description"];
+              $mq->xfor            = $v["xfor"];
               $mq->p_change        = true;
               $mq->updated_at      = $t_stamp;
               $mq->updated_user    = $this->admin_id;
@@ -547,6 +552,7 @@ class StandbyMstController extends Controller
                 "ac_account_name" => $ac_account_name,
                 "ac_account_code" => $ac_account_code,
                 "description"     => $v["description"],
+                "xfor"            => $v["xfor"],
                 // 'status'            => $v['status'],
                 "p_change"        => true,
                 'created_at'      => $t_stamp,
