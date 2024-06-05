@@ -1746,17 +1746,17 @@ class TrxTrpController extends Controller
     if(!$checked2)
     throw new \Exception("User Tidak terdaftar",1);
 
-    $checkIt = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->update([
-      "Checked"=>'1',
-      "CheckedBy"=>$login_name,
-      "CheckedDateTime"=>$t_stamp_ms,
-      "Checked2"=>'1',
-      "Checked2By"=>$checked2->username,
-      "Checked2DateTime"=>$t_stamp_ms,
+    DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoCheck @VoucherID=:voucher_no,
+    @CheckedBy=:login_name",[
+      ":voucher_no"=>$d_voucher_id,
+      ":login_name"=>$login_name,
     ]);
 
-    if(!$checkIt)
-    throw new \Exception("Check Gagal",1);
+    DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoApprove @VoucherID=:voucher_no,
+    @ApprovedBy=:login_name",[
+      ":voucher_no"=>$d_voucher_id,
+      ":login_name"=>$checked2->username,
+    ]);
 
     $trx_trp->pvr_had_detail = 1;
     $trx_trp->save();
