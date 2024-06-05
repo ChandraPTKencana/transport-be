@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\MySql\IsUser;
 use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
+use App\Helpers\MyLog;
 use App\Models\HrmRevisiLokasi;
 use Illuminate\Support\Facades\Log;
 use DB;
@@ -54,6 +55,7 @@ class UserAccount extends Controller
 
     if (Hash::check($password,$admin->password)) {
       $token = $admin->generateToken();
+      MyLog::sys("user_activity",$admin->id,"login");
 
       return response()->json([
         "message"=>"Berhasil login",
@@ -93,6 +95,7 @@ class UserAccount extends Controller
   public function logout(Request $request)
   {
     $admin = MyAdmin::user();
+    MyLog::sys("user_activity",$admin->the_user->id,"logout");
     \App\Models\MySql\Session::where("token",$admin->token)->delete();
 
     return response()->json([
@@ -170,6 +173,7 @@ class UserAccount extends Controller
     $admin->the_user->password = bcrypt($request->password);
     $admin->the_user->updated_at = date("Y-m-d H:i:s");
     $admin->the_user->save();
+    MyLog::sys("user_activity",$admin->the_user->id,"change_password");
 
     return response()->json([
       "message" => "Kata sandi berhasil diubah",
@@ -226,6 +230,8 @@ class UserAccount extends Controller
       $new_image = $request->file('photo');
       $filePath = "ho/images/user/";
       $model_query                      = IsUser::find($admin->the_user->id_user);
+      $SYSOLD                     = clone($model_query);
+
       $location = $model_query->foto;
 
       if ($new_image != null) {
@@ -259,6 +265,8 @@ class UserAccount extends Controller
 
       $model_query->updated_at = date("Y-m-d H:i:s");
       $model_query->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("user_activity",$model_query->id,"update",$SYSNOTE);
 
       DB::commit();
       return response()->json([

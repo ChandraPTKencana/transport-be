@@ -85,6 +85,20 @@ class MyLib
     })->toArray();
   }
 
+  public static function compareChange($old,$new){
+    $note="";
+    $o = $old->toArray();
+    $n = $new->toArray();
+    foreach ($o as $k => $v) {
+      if($n[$k]!=$v){
+        if($note==""){
+          $note.="Data yang berubah: \n";
+        }
+        $note.="[".$k."] ".$v." => ".$n[$k]."\n";
+      }
+    }
+    return $note;
+  }
 
   // public static function visitor()
   // {

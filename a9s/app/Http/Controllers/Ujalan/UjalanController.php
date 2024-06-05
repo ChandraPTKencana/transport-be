@@ -492,6 +492,7 @@ class UjalanController extends Controller
       //end for details2
 
       $model_query->save();
+      MyLog::sys("ujalan_mst",$model_query->id,"insert");
 
       DB::commit();
       return response()->json([
@@ -529,8 +530,10 @@ class UjalanController extends Controller
 
     DB::beginTransaction();
     try {
-
+      $SYSNOTES=[];
       $model_query             = Ujalan::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD      = clone($model_query);
+
       if($model_query->deleted==1)
       throw new \Exception("Data Sudah Dihapus",1);
       
@@ -610,6 +613,8 @@ class UjalanController extends Controller
       //   throw new \Exception("Ubah ditolak. Hanya data terbaru yang bisa diubah.",1);
       // }
       if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
+        array_push( $SYSNOTES ,"Details: \n");
+
         $model_query->xto             = $request->xto;
         $model_query->tipe            = $request->tipe;
         $model_query->jenis           = $request->jenis;
@@ -760,6 +765,7 @@ class UjalanController extends Controller
                   // if (!$dt["is_locked"] && $dt["created_by"] == $auth_id && $has_permit) {
                   //     ProjectMaterial::where("project_no", $model_query->no)->where("ordinal", $dt["ordinal"])->delete();
                   // }
+                  array_push( $SYSNOTES ,"Ordinal ".$dt["ordinal"]." [Deleted]");
                   UjalanDetail::where("id_uj",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
               }
           } else if ($v["p_status"] == "Edit") {
@@ -783,18 +789,36 @@ class UjalanController extends Controller
 
                 $model_query->harga          += ($v["qty"] * $v["harga"]);
 
-                UjalanDetail::where("id_uj", $model_query->id)
-                ->where("ordinal", $v["key"])->where("p_change",false)->update([
-                    "ordinal"=>$v["ordinal"],
-                    "xdesc" => $v["xdesc"],
-                    "qty" => $v["qty"],
-                    "harga" => $v["harga"],
-                    "for_remarks" => $v["for_remarks"],
-                    // "status" => $v["status"],
-                    "p_change"=> true,
-                    "updated_at"=> $t_stamp,
-                    "updated_user"=> $this->admin_id,
-                ]);
+                $mq=UjalanDetail::where("id_uj", $model_query->id)
+                ->where("ordinal", $v["key"])->where("p_change",false)->lockForUpdate()->first();
+                
+                $mqToCom = clone($mq);
+
+                $mq->ordinal      = $v["ordinal"];
+                $mq->xdesc        = $v["xdesc"];
+                $mq->qty          = $v["qty"];
+                $mq->harga        = $v["harga"];
+                $mq->for_remarks  = $v["for_remarks"];
+                $mq->p_change     = true;
+                $mq->updated_at   = $t_stamp;
+                $mq->updated_user = $this->admin_id;
+                $mq->save();
+
+                $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
+                array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
+
+                // UjalanDetail::where("id_uj", $model_query->id)
+                // ->where("ordinal", $v["key"])->where("p_change",false)->update([
+                //     "ordinal"=>$v["ordinal"],
+                //     "xdesc" => $v["xdesc"],
+                //     "qty" => $v["qty"],
+                //     "harga" => $v["harga"],
+                //     "for_remarks" => $v["for_remarks"],
+                //     // "status" => $v["status"],
+                //     "p_change"=> true,
+                //     "updated_at"=> $t_stamp,
+                //     "updated_user"=> $this->admin_id,
+                // ]);
 
               }
 
@@ -806,6 +830,8 @@ class UjalanController extends Controller
 
               // if (!count(array_intersect(['dp-project_material-manage-item_code'], $scopes))  && $v["item_code"] != "")
               //     throw new Exception('Tidak ada izin mengelola Kode item');
+              array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
+              
               $model_query->harga          += ($v["qty"] * $v["harga"]);
               UjalanDetail::insert([
                   'id_uj'             => $model_query->id,
@@ -826,7 +852,10 @@ class UjalanController extends Controller
         }
       }
 
+      
       //start for details2
+      array_push( $SYSNOTES ,"Details PVR: \n");
+
       $data_from_db2 = UjalanDetail2::where('id_uj', $model_query->id)
       ->orderBy("ordinal", "asc")->lockForUpdate()
       ->get()->toArray();
@@ -940,6 +969,7 @@ class UjalanController extends Controller
                 // if (!$dt["is_locked"] && $dt["created_by"] == $auth_id && $has_permit) {
                 //     ProjectMaterial::where("project_no", $model_query->no)->where("ordinal", $dt["ordinal"])->delete();
                 // }
+                array_push( $SYSNOTES ,"Ordinal ".$dt2["ordinal"]." [Deleted]");
                 UjalanDetail2::where("id_uj",$model_query->id)->where("ordinal",$dt2["ordinal"])->delete();
             }
         } else if ($v["p_status"] == "Edit") {
@@ -972,20 +1002,41 @@ class UjalanController extends Controller
                 $ac_account_code    = $temp_ac_accounts[$index_item]['AccountCode'];
               }
 
-              UjalanDetail2::where("id_uj", $model_query->id)
-              ->where("ordinal", $v["key"])->where("p_change",false)->update([
-                  "ordinal"=>$v["ordinal"],
-                  "qty" => $v["qty"],
-                  "amount" => $v["amount"],
-                  "ac_account_id" => $ac_account_id,
-                  "ac_account_name" => $ac_account_name,
-                  "ac_account_code" => $ac_account_code,
-                  "description" => $v["description"],
-                  // "status" => $v["status"],
-                  "p_change"=> true,
-                  "updated_at"=> $t_stamp,
-                  "updated_user"=> $this->admin_id,
-              ]);
+
+              $mq=UjalanDetail2::where("id_uj", $model_query->id)
+              ->where("ordinal", $v["key"])->where("p_change",false)->lockForUpdate()->first();
+              
+              $mqToCom = clone($mq);
+
+              $mq->ordinal            = $v["ordinal"];
+              $mq->qty                = $v["qty"];
+              $mq->amount             = $v["amount"];
+              $mq->ac_account_id      = $ac_account_id;
+              $mq->ac_account_name    = $ac_account_name;
+              $mq->ac_account_code    = $ac_account_code;
+              $mq->description        = $v["description"];
+              $mq->p_change           = true;
+              $mq->updated_at         = $t_stamp;
+              $mq->updated_user       = $this->admin_id;
+              $mq->save();
+
+              $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
+              array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
+
+              // UjalanDetail2::where("id_uj", $model_query->id)
+              // ->where("ordinal", $v["key"])->where("p_change",false)->update([
+              //     "ordinal"=>$v["ordinal"],
+              //     "qty" => $v["qty"],
+              //     "amount" => $v["amount"],
+              //     "ac_account_id" => $ac_account_id,
+              //     "ac_account_name" => $ac_account_name,
+              //     "ac_account_code" => $ac_account_code,
+              //     "description" => $v["description"],
+              //     // "status" => $v["status"],
+              //     "p_change"=> true,
+              //     "updated_at"=> $t_stamp,
+              //     "updated_user"=> $this->admin_id,
+              // ]);
 
             }
 
@@ -1009,6 +1060,8 @@ class UjalanController extends Controller
               $ac_account_code    = $temp_ac_accounts[$index_item]['AccountCode'];
             }
             
+            array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
+
             UjalanDetail2::insert([
                 'id_uj'             => $model_query->id,
                 'ordinal'           => $v["ordinal"],
@@ -1036,6 +1089,11 @@ class UjalanController extends Controller
       //start for details2
     UjalanDetail2::where('id_uj',$model_query->id)->update(["p_change"=>false]);
     //end for details2
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      array_unshift( $SYSNOTES , $SYSNOTE );            
+      MyLog::sys("ujalan_mst",$request->id,"update",implode("\n",$SYSNOTES));
+
       DB::commit();
       return response()->json([
         "message" => "Proses ubah data berhasil",
@@ -1104,6 +1162,7 @@ class UjalanController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
+      MyLog::sys("ujalan_mst",$request->id,"delete");
 
       // UjalanDetail::where("id_uj",$model_query->id)->delete();
       // $model_query->delete();
@@ -1174,6 +1233,9 @@ class UjalanController extends Controller
         $model_query->val1_at = $t_stamp;
       }
       $model_query->save();
+
+      MyLog::sys("ujalan_mst",$request->id,"approve");
+
       DB::commit();
       return response()->json([
         "message" => "Proses validasi data berhasil",
@@ -1193,11 +1255,11 @@ class UjalanController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);

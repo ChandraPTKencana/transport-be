@@ -14,6 +14,7 @@ use App\Http\Requests\MySql\EmployeeRequest;
 
 use Illuminate\Support\Facades\DB;
 use App\Helpers\MyAdmin;
+use App\Helpers\MyLog;
 
 class EmployeeController extends Controller
 {
@@ -192,6 +193,7 @@ class EmployeeController extends Controller
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
 
+      MyLog::sys("employee_mst",$model_query->id,"insert");
       DB::commit();
       return response()->json([
         "message" => "Proses tambah data berhasil",
@@ -225,12 +227,17 @@ class EmployeeController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query                = Employee::find($request->id);
+      $model_query                = Employee::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD                     = clone($model_query);
+
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
+      
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("employee_mst",$request->id,"update",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -276,6 +283,8 @@ class EmployeeController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
+
+      MyLog::sys("employee_mst",$request->id,"delete");
 
       DB::commit();
       return response()->json([

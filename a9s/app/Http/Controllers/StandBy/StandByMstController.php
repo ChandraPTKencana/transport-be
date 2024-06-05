@@ -301,6 +301,7 @@ class StandbyMstController extends Controller
       //end for details2
 
       $model_query->save();
+      MyLog::sys("standby_mst",$model_query->id,"insert");
 
       DB::commit();
       return response()->json([
@@ -342,8 +343,10 @@ class StandbyMstController extends Controller
 
     DB::beginTransaction();
     try {
-
+      $SYSNOTES=[];
       $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD      = clone($model_query);
+      array_push( $SYSNOTES ,"Details: \n");
       if($model_query->deleted==1)
       throw new \Exception("Data Sudah Dihapus",1);
       
@@ -464,6 +467,7 @@ class StandbyMstController extends Controller
                 throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
             } else {
                 $dt = $data_from_db[$index];
+                array_push( $SYSNOTES ,"Ordinal ".$dt["ordinal"]." [Deleted]");
                 StandbyDtl::where("standby_mst_id",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
             }
         } else if ($v["p_status"] == "Edit") {
@@ -484,23 +488,42 @@ class StandbyMstController extends Controller
                 $ac_account_code    = $temp_ac_accounts[$index_item]['AccountCode'];
               }
 
-              StandbyDtl::where("standby_mst_id", $model_query->id)
-              ->where("ordinal", $v["key"])->where("p_change",false)->update([
-                  "ordinal"         => $v["ordinal"],
-                  "amount"          => $v["amount"],
-                  "ac_account_id"   => $ac_account_id,
-                  "ac_account_name" => $ac_account_name,
-                  "ac_account_code" => $ac_account_code,
-                  "description"     => $v["description"],
-                  // "status" => $v["status"],
-                  "p_change"        => true,
-                  "updated_at"      => $t_stamp,
-                  "updated_user"    => $this->admin_id,
-              ]);
+              
+              $mq=StandbyDtl::where("standby_mst_id", $model_query->id)
+              ->where("ordinal", $v["key"])->where("p_change",false)->lockForUpdate()->first();
+
+              $mqToCom = clone($mq);
+
+              $mq->ordinal         = $v["ordinal"];
+              $mq->amount          = $v["amount"];
+              $mq->ac_account_id   = $ac_account_id;
+              $mq->ac_account_name = $ac_account_name;
+              $mq->ac_account_code = $ac_account_code;
+              $mq->description     = $v["description"];
+              $mq->p_change        = true;
+              $mq->updated_at      = $t_stamp;
+              $mq->updated_user    = $this->admin_id;
+              $mq->save();
+
+              
+              $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
+              array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
+
+              // StandbyDtl::where("standby_mst_id", $model_query->id)
+              // ->where("ordinal", $v["key"])->where("p_change",false)->update([
+              //     "ordinal"         => $v["ordinal"],
+              //     "amount"          => $v["amount"],
+              //     "ac_account_id"   => $ac_account_id,
+              //     "ac_account_name" => $ac_account_name,
+              //     "ac_account_code" => $ac_account_code,
+              //     "description"     => $v["description"],
+              //     // "status" => $v["status"],
+              //     "p_change"        => true,
+              //     "updated_at"      => $t_stamp,
+              //     "updated_user"    => $this->admin_id,
+              // ]);
 
             }
-
-            // $ordinal++;
         } else if ($v["p_status"] == "Add") {
             $model_query->amount += $v["amount"];
 
@@ -513,7 +536,9 @@ class StandbyMstController extends Controller
               $ac_account_name  = $temp_ac_accounts[$index_item]['AccountName'];
               $ac_account_code  = $temp_ac_accounts[$index_item]['AccountCode'];
             }
-            
+
+            array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
+
             StandbyDtl::insert([
                 'standby_mst_id'  => $model_query->id,
                 'ordinal'         => $v["ordinal"],
@@ -529,12 +554,16 @@ class StandbyMstController extends Controller
                 'updated_at'      => $t_stamp,
                 'updated_user'    => $this->admin_id,
             ]);
-            // $ordinal++;
         }
       }
       $model_query->save();
         //start for details2
       StandbyDtl::where('standby_mst_id',$model_query->id)->update(["p_change"=>false]);
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      array_unshift( $SYSNOTES , $SYSNOTE );            
+      MyLog::sys("standby_mst",$request->id,"update",implode("\n",$SYSNOTES));
+
     //end for details2
       DB::commit();
       return response()->json([
@@ -585,6 +614,8 @@ class StandbyMstController extends Controller
       $model_query->deleted_reason  = $deleted_reason;
       $model_query->save();
 
+      MyLog::sys("standby_mst",$request->id,"delete");
+
       DB::commit();
       return response()->json([
         "message" => "Proses Hapus data berhasil",
@@ -630,7 +661,7 @@ class StandbyMstController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = StandbyMst::find($request->id);
+      $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
       if($this->role=='PabrikTransport' &&  $model_query->val){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
@@ -652,6 +683,9 @@ class StandbyMstController extends Controller
         $model_query->val1_at = $t_stamp;
       }
       $model_query->save();
+
+      MyLog::sys("standby_mst",$request->id,"approve");
+
       DB::commit();
       return response()->json([
         "message" => "Proses validasi data berhasil",
@@ -671,11 +705,11 @@ class StandbyMstController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);

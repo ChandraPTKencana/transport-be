@@ -414,6 +414,8 @@ class StandbyTrxController extends Controller
         $detail->save();
       }
 
+      MyLog::sys("standby_trx",$model_query->id,"insert");
+
       DB::commit();
       return response()->json([
         "message"     => "Proses tambah data berhasil",
@@ -467,7 +469,11 @@ class StandbyTrxController extends Controller
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
-      $model_query             = StandbyTrx::where("id",$request->id)->lockForUpdate()->first();
+      $SYSNOTES=[];
+      $model_query = StandbyTrx::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD      = clone($model_query);
+      array_push( $SYSNOTES ,"Details: \n");
+
       if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
       
@@ -589,23 +595,43 @@ class StandbyTrxController extends Controller
               throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
             } else {
               $dt = $data_from_db[$index];
+              array_push( $SYSNOTES ,"Ordinal ".$dt["ordinal"]." [Deleted]");
               StandbyTrxDtl::where("standby_trx_id",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
             }
           } else if ($v["p_status"] == "Edit") {
             if ($index === false) {
               throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k,1);
             } else {
-              StandbyTrxDtl::where("standby_trx_id", $model_query->id)
-              ->where("ordinal", $v["key"])->where("p_change",false)->update([
-                  "ordinal"         => $v["ordinal"],
-                  "tanggal"         => $v["tanggal"],
-                  "note"            => $v["note"],
-                  "p_change"        => true,
-                  "updated_at"      => $t_stamp,
-                  "updated_user"    => $this->admin_id,
-              ]);
+
+              $mq=StandbyTrxDtl::where("standby_trx_id", $model_query->id)
+              ->where("ordinal", $v["key"])->where("p_change",false)->lockForUpdate()->first();
+
+              $mqToCom = clone($mq);
+              
+              $mq->ordinal         = $v["ordinal"];
+              $mq->tanggal         = $v["tanggal"];
+              $mq->note            = $v["note"];
+              $mq->p_change        = true;
+              $mq->updated_at      = $t_stamp;
+              $mq->updated_user    = $this->admin_id;
+              $mq->save();
+
+              $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
+              array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
+
+              // StandbyTrxDtl::where("standby_trx_id", $model_query->id)
+              // ->where("ordinal", $v["key"])->where("p_change",false)->update([
+              //     "ordinal"         => $v["ordinal"],
+              //     "tanggal"         => $v["tanggal"],
+              //     "note"            => $v["note"],
+              //     "p_change"        => true,
+              //     "updated_at"      => $t_stamp,
+              //     "updated_user"    => $this->admin_id,
+              // ]);
             }
-          } else if ($v["p_status"] == "Add") {            
+          } else if ($v["p_status"] == "Add") {     
+            array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
+
             StandbyTrxDtl::insert([
                 'standby_trx_id'  => $model_query->id,
                 'ordinal'         => $v["ordinal"],
@@ -622,6 +648,11 @@ class StandbyTrxController extends Controller
       }
       
       $model_query->save();
+      StandbyTrxDtl::where('standby_trx_id',$model_query->id)->update(["p_change"=>false]);
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      array_unshift( $SYSNOTES , $SYSNOTE);            
+      MyLog::sys("standby_trx",$request->id,"update",implode("\n",$SYSNOTES));
 
       DB::commit();
       return response()->json([
@@ -680,6 +711,8 @@ class StandbyTrxController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
+
+      MyLog::sys("standby_trx",$request->id,"delete");
 
       DB::commit();
       return response()->json([
@@ -748,6 +781,9 @@ class StandbyTrxController extends Controller
       $model_query->req_deleted_at = date("Y-m-d H:i:s");
       $model_query->req_deleted_reason = $req_deleted_reason;
       $model_query->save();
+
+      MyLog::sys("standby_trx",$request->id,"delete","Request Delete (Void)");
+
 
       DB::commit();
       return response()->json([
@@ -841,6 +877,8 @@ class StandbyTrxController extends Controller
       }
       
       $model_query->save();
+
+      MyLog::sys("standby_trx",$request->id,"delete","Approve Request Delete (Void)");
 
       DB::commit();
       return response()->json([
@@ -1249,6 +1287,9 @@ class StandbyTrxController extends Controller
         $model_query->val_at = $t_stamp;
       }
       $model_query->save();
+
+      MyLog::sys("standby_trx",$request->id,"approve");
+
       DB::commit();
       return response()->json([
         "message" => "Proses validasi data berhasil",
@@ -1317,11 +1358,24 @@ class StandbyTrxController extends Controller
       $changes=[];
       foreach ($standby_trxs as $key => $tt) {
         $id=$tt->id;
-        $callGet = $this->genPVR($tt->id);
+        $callGet = $this->genPVR($id);
         array_push($changes,$callGet);
+      }
+      if(count($changes)>0){
+        $ids = array_map(function ($x) {
+          return $x["id"];
+        },$changes);
+        MyLog::sys("standby_trx",null,"generate_pvr",implode(",",$ids));
       }
       return response()->json($changes, 200);
     } catch (\Exception $e) {
+      if(isset($changes) && count($changes)>0){
+        $ids = array_map(function ($x) {
+          return $x["id"];
+        },$changes);
+        MyLog::sys("standby_trx",null,"generate_pvr",implode(",",$ids));
+      }
+
       if ($e->getCode() == 1) {
         if($id!=""){
           $miniError.="Trx-".$id.".";
@@ -1526,17 +1580,17 @@ class StandbyTrxController extends Controller
     if(!$checked2)
     throw new \Exception("User Tidak terdaftar",1);
 
-    $checkIt = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->update([
-      "Checked"=>'1',
-      "CheckedBy"=>$login_name,
-      "CheckedDateTime"=>$t_stamp_ms,
-      "Checked2"=>'1',
-      "Checked2By"=>$checked2->username,
-      "Checked2DateTime"=>$t_stamp_ms,
+    DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoCheck @VoucherID=:voucher_no,
+    @CheckedBy=:login_name",[
+      ":voucher_no"=>$d_voucher_id,
+      ":login_name"=>$login_name,
     ]);
 
-    if(!$checkIt)
-    throw new \Exception("Check Gagal",1);
+    DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoApprove @VoucherID=:voucher_no,
+    @ApprovedBy=:login_name",[
+      ":voucher_no"=>$d_voucher_id,
+      ":login_name"=>$checked2->username,
+    ]);
 
     $standby_trx->pvr_had_detail = 1;
     $standby_trx->save();
@@ -1617,6 +1671,13 @@ class StandbyTrxController extends Controller
 
       if(count($changes)==0)
       throw new \Exception("PV Tidak ada yang di Update",1);
+
+
+      $ids = array_map(function ($x) {
+        return $x["id"];
+      }, $changes);
+
+      MyLog::sys("standby_trx",null,"update_pv",implode(",",$ids));
 
       return response()->json([
         "message" => "PV Berhasil di Update",

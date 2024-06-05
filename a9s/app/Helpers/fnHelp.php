@@ -157,6 +157,10 @@ if (!function_exists('getRealIpAddress')) {
             $ipAddress = $_SERVER["HTTP_FLY_CLIENT_IP"];
         }
 
+        if($ipAddress=="" && !empty($_SERVER["REMOTE_ADDR"]) && validate_ip($_SERVER["REMOTE_ADDR"])){
+            $ipAddress = $_SERVER["REMOTE_ADDR"];
+        }
+
         // Return validated IP
         if (validate_ip($ipAddress)) {
             return $ipAddress;

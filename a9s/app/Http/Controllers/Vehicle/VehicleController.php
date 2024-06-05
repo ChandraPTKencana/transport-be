@@ -14,6 +14,7 @@ use App\Http\Requests\MySql\VehicleRequest;
 
 use Illuminate\Support\Facades\DB;
 use App\Helpers\MyAdmin;
+use App\Helpers\MyLog;
 
 class VehicleController extends Controller
 {
@@ -177,6 +178,7 @@ class VehicleController extends Controller
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
+      MyLog::sys("vechicle_mst",$model_query->id,"insert");
 
       DB::commit();
       return response()->json([
@@ -212,10 +214,15 @@ class VehicleController extends Controller
     DB::beginTransaction();
     try {
       $model_query                = Vehicle::find($request->id);
+      $SYSOLD                     = clone($model_query);
+
       $model_query->no_pol        = $request->no_pol;
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("vehicle_mst",$request->id,"update",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -262,6 +269,8 @@ class VehicleController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
+      MyLog::sys("vehicle_mst",$request->id,"delete");
+
       DB::commit();
       return response()->json([
         "message" => "Proses ubah data berhasil",

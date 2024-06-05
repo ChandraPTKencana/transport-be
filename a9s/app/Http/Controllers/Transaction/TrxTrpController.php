@@ -456,6 +456,9 @@ class TrxTrpController extends Controller
       $model_query->val1_at = $t_stamp;
 
       $model_query->save();
+
+      MyLog::sys("trx_trp",$model_query->id,"approve");
+
       DB::commit();
       return response()->json([
         "message" => "Proses validasi data berhasil",
@@ -550,6 +553,8 @@ class TrxTrpController extends Controller
 
       $model_query->save();
 
+      MyLog::sys("trx_trp",$model_query->id,"insert");
+
       DB::commit();
       return response()->json([
         "message" => "Proses tambah data berhasil",
@@ -597,6 +602,7 @@ class TrxTrpController extends Controller
       }
 
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD      = clone($model_query);
       if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
@@ -653,6 +659,9 @@ class TrxTrpController extends Controller
       $model_query->updated_user    = $this->admin_id;
       $model_query->save();
 
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"update",$SYSNOTE);
+
       DB::commit();
       return response()->json([
         "message" => "Proses ubah data berhasil",
@@ -695,6 +704,8 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD                     = clone($model_query);
+      
       if($model_query->val2==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
@@ -781,6 +792,9 @@ class TrxTrpController extends Controller
       $model_query->updated_user    = $this->admin_id;
       $model_query->save();
 
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"update",$SYSNOTE);
+
       DB::commit();
       return response()->json([
         "message" => "Proses ubah data berhasil",
@@ -838,6 +852,7 @@ class TrxTrpController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
+      MyLog::sys("trx_trp",$request->id,"delete");
 
       DB::commit();
       return response()->json([
@@ -906,6 +921,8 @@ class TrxTrpController extends Controller
       $model_query->req_deleted_at = date("Y-m-d H:i:s");
       $model_query->req_deleted_reason = $req_deleted_reason;
       $model_query->save();
+
+      MyLog::sys("trx_trp",$request->id,"delete","Request Delete (Void)");
 
       DB::commit();
       return response()->json([
@@ -999,6 +1016,7 @@ class TrxTrpController extends Controller
       }
       
       $model_query->save();
+      MyLog::sys("trx_trp",$request->id,"delete","Approve Request Delete (Void)");
 
       DB::commit();
       return response()->json([
@@ -1452,6 +1470,9 @@ class TrxTrpController extends Controller
         $model_query->val_at = $t_stamp;
       }
       $model_query->save();
+
+      MyLog::sys("trx_trp",$request->id,"approve");
+
       DB::commit();
       return response()->json([
         "message" => "Proses validasi data berhasil",
@@ -1532,11 +1553,24 @@ class TrxTrpController extends Controller
       $changes=[];
       foreach ($trx_trps as $key => $tt) {
         $id=$tt->id;
-        $callGet = $this->genPVR($tt->id);
+        $callGet = $this->genPVR($id);
         array_push($changes,$callGet);
+      }
+      if(count($changes)>0){
+        $ids = array_map(function ($x) {
+          return $x["id"];
+        },$changes);
+        MyLog::sys("trx_trp",null,"generate_pvr",implode(",",$ids));
       }
       return response()->json($changes, 200);
     } catch (\Exception $e) {
+      if(isset($changes) && count($changes)>0){
+        $ids = array_map(function ($x) {
+          return $x["id"];
+        },$changes);
+        MyLog::sys("trx_trp",null,"generate_pvr",implode(",",$ids));
+      }
+
       if ($e->getCode() == 1) {
         if($id!=""){
           $miniError.="Trx-".$id.".";
@@ -1838,6 +1872,11 @@ class TrxTrpController extends Controller
       if(count($changes)==0)
       throw new \Exception("PV Tidak ada yang di Update",1);
 
+      $ids = array_map(function ($x) {
+        return $x["id"];
+      }, $changes);
+      MyLog::sys("trx_trp",null,"update_pv",implode(",",$ids));
+
       return response()->json([
         "message" => "PV Berhasil di Update",
         "data" => $changes,
@@ -1910,6 +1949,7 @@ class TrxTrpController extends Controller
 
       $model_query = TrxAbsen::whereIn("id",$all_id)->lockForUpdate()->delete();
 
+      MyLog::sys("trx_absen",null,"delete",implode(",",$all_id));
 
       DB::commit();
       return response()->json([
