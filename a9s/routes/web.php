@@ -121,8 +121,8 @@ Route::get('/', function () {
     // Route::get('/standby_trxs_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
     Route::get('/standby_trx_preview_file', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'previewFile']);
     Route::put('/standby_trx_validasi', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'validasi']);
-    // Route::post('/standby_trx_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);
-    // Route::post('/standby_trx_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
+    Route::post('/standby_trx_do_gen_pvr', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doGenPVR']);
+    Route::post('/standby_trx_do_update_pv', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doUpdatePV']);
 
     // Route::prefix("stok/api")->group(function(){
 
