@@ -1426,7 +1426,7 @@ class StandbyTrxController extends Controller
 
     $arrRemarks = [];
     array_push($arrRemarks,"#".$standby_trx->id." ".$associate_name.".");
-    array_push($arrRemarks,$standby_mst->name." ".($standby_trx->xto ? env("app_name")."-".$standby_trx->xto : "")." P/".date("d-m-y",strtotime($standby_trx->tanggal))).".";
+    array_push($arrRemarks,$standby_mst->name." ".($standby_trx->xto ? env("app_name")."-".$standby_trx->xto : "")).".";
     foreach ($standby_trx_dtl as $key => $value) {
       if($key > 0)
       array_push($arrRemarks,","." P/".date("d-m-y",strtotime($value->tanggal)));
