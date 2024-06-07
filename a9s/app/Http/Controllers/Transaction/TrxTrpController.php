@@ -46,7 +46,7 @@ class TrxTrpController extends Controller
 
   public function index(Request $request, $download = false)
   {
- 
+
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
     //======================================================================================================
@@ -326,6 +326,131 @@ class TrxTrpController extends Controller
       
       $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
     }
+
+
+    // if($request->filter_model){
+    //   $filter_model = json_decode($request->filter_model,true);
+  
+    //   $fm_sorts=[];
+    //   foreach ($filter_model as $key => $value) {
+    //     if($value["sort_priority"] && $value["sort_type"]){
+    //       array_push($fm_sorts,[
+    //         "key"    =>$key,
+    //         "priority"=>$value["sort_priority"],
+    //       ]);
+    //     }
+    //   }
+    //   if(count($fm_sorts)>0){
+    //     usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
+    //     foreach ($fm_sorts as $key => $value) {
+    //       $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+    //       if (count($first_row) > 0) {
+    //         $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+    //         $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+    //       }
+    //     }
+    //   }else {
+    //     $model_query = $model_query->orderBy('tanggal', 'DESC')->orderBy('id','DESC');
+    //   }
+
+    //   $model_query = $model_query->where(function ($q)use($filter_model){
+
+    //     foreach ($filter_model as $key => $value) {
+    //       if(array_search($value['type'],['string','number'])!==false && $value['value_1']){
+
+    //         if($value["exactly_same"]){
+    //           $q->Where($key, $value["value_1"]);
+    //         }
+
+    //         if($value["exactly_not_same"]){
+    //           $q->Where($key,"!=", $value["value_1"]);
+    //         }
+
+    //         if($value["same"]){
+    //           $v_val1=explode(",",$value["value_1"]);
+    //           $q->where(function ($q1)use($filter_model,$v_val1,$key){
+    //             foreach ($v_val1 as $k1 => $v1) {
+    //               $q1->orwhere($key,"like", '%'.$v1.'%');
+    //             }
+    //           });
+    //         }
+
+    //         if($value["not_same"]){
+    //           $v_val1=explode(",",$value["value_1"]);
+    //           $q->where(function ($q1)use($filter_model,$v_val1,$key){
+    //             foreach ($v_val1 as $k1 => $v1) {
+    //               $q1->orwhere($key,"not like", '%'.$v1.'%');
+    //             }
+    //           });
+    //         }
+
+    //         if($value["more_then"]){
+    //           $q->Where($key,">", $value["value_1"]);
+    //         }
+            
+    //         if($value["more_and"]){
+    //           $q->Where($key,">=", $value["value_1"]);
+    //         }
+
+    //         if($value["less_then"]){
+    //           $q->Where($key,"<", $value["value_1"]);
+    //         }
+
+    //         if($value["less_and"]){
+    //           $q->Where($key,"<=", $value["value_1"]);
+    //         }
+    //       }
+
+    //       if(array_search($value['type'],['select'])!==false && $value['value_1']){
+    //         if($value["exactly_same"]){
+    //           $q->Where($key, $value["value_1"]);
+    //         }
+
+    //         if($value["exactly_not_same"]){
+    //           $q->Where($key,"!=", $value["value_1"]);
+    //         }
+    //       }
+
+    //       if(array_search($value['type'],['date','datetime'])!==false){
+    //         if($value['value_1'] || $value['value_2']){
+    //           $date_from = $value['value_1'];
+    //           if(!$date_from)
+    //           throw new MyException([ "message" => "Date From pada ".$value['label']." harus diisi" ], 400);
+        
+    //           if(!strtotime($date_from))
+    //           throw new MyException(["message"=>"Format Date pada ".$value['label']." From Tidak Cocok"], 400);
+              
+    //           $date_to = $value['value_2'];
+    //           if(!$date_to)
+    //           throw new MyException([ "message" => "Date To pada ".$value['label']." harus diisi" ], 400);
+        
+    //           if(!strtotime($date_to))
+    //           throw new MyException(["message"=>"Format Date To pada ".$value['label']." Tidak Cocok"], 400);
+              
+    //           $q->whereBetween($key,[$date_from,$date_to]);
+    //         }
+    //       }
+    //     }
+            
+       
+    //     // if (isset($like_lists["requested_name"])) {
+    //     //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+    //     //     $q2->from('is_users')
+    //     //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+    //     //   });
+    //     // }
+  
+    //     // if (isset($like_lists["confirmed_name"])) {
+    //     //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+    //     //     $q2->from('is_users')
+    //     //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+    //     //   });
+    //     // }
+    //   });  
+  
+
+    // }
+
     $filter_status = $request->filter_status;
     
     if(in_array($this->role,["Finance","Accounting"])){
@@ -691,7 +816,7 @@ class TrxTrpController extends Controller
   public function updateTicket(TrxTrpRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
     
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
