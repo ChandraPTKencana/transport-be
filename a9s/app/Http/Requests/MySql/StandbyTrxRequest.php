@@ -39,8 +39,8 @@ class StandbyTrxRequest extends FormRequest
             $rules['standby_mst_id'] = 'required|exists:App\Models\MySql\StandbyMst,id';
             // $rules['cost_center_code'] = 'required';
             
-            $rules['supir'] = 'required|max:255';
-            $rules['kernet'] = 'nullable|max:255';
+            $rules['supir'] = 'required_without:kernet|max:255';
+            $rules['kernet'] = 'required_without:supir|max:255';
             $rules['no_pol'] = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';
             $rules['xto'] = 'nullable|max:50|exists:App\Models\MySql\Ujalan,xto';
 
@@ -62,9 +62,10 @@ class StandbyTrxRequest extends FormRequest
             'jenis.required'                => 'Jenis tidak boleh kosong',
             'jenis.in'                      => 'Jenis harus dipilih',
 
-            'supir.required'                => 'Supir tidak boleh kosong',
+            'supir.required_without'        => 'Supir tidak boleh kosong Kalau Kernet Kosong',
             'supir.max'                     => 'Supir tidak boleh melebihi 255 karakter',
 
+            'kernet.required_without'       => 'Kernet tidak boleh kosong Kalau Supir Kosong',
             'kernet.max'                    => 'Kernet tidak boleh melebihi 255 karakter',
 
             'no_pol.required'               => 'No Pol tidak boleh kosong',

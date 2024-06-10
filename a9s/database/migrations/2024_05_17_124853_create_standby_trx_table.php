@@ -22,7 +22,7 @@ return new class extends Migration
             
             $table->foreignId('standby_mst_id')->references('id')->on('standby_mst')->onDelete('restrict')->onUpdate('cascade');
 
-            $table->string('supir',255);
+            $table->string('supir',255)->nullable();
             $table->string('kernet',255)->nullable();
             $table->string('no_pol',12);
             $table->string('xto',50)->nullable();

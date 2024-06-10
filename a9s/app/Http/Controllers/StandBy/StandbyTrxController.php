@@ -329,8 +329,10 @@ class StandbyTrxController extends Controller
     DB::beginTransaction();
     try {
 
-      if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
-      throw new \Exception("Supir tidak terdaftar",1);
+      if($request->supir){
+        if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
+        throw new \Exception("Supir tidak terdaftar",1);
+      }
 
       if($request->kernet){
         if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
@@ -461,8 +463,10 @@ class StandbyTrxController extends Controller
     DB::beginTransaction();
     try {
 
-      if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
-      throw new \Exception("Supir tidak terdaftar",1);
+      if($request->supir){
+        if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
+        throw new \Exception("Supir tidak terdaftar",1);
+      }
 
       if($request->kernet){
         if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
@@ -1413,7 +1417,7 @@ class StandbyTrxController extends Controller
     $supir = $standby_trx->supir;
     $no_pol = $standby_trx->no_pol;
     $kernet = $standby_trx->kernet;
-    $associate_name="(S) ".$supir.($kernet?" (K) ".$kernet." ":" (Tanpa Kernet) ").$no_pol; // max 80char
+    $associate_name=($supir?"(S) ".$supir." ":"(Tanpa Supir) ").($kernet?"(K) ".$kernet." ":"(Tanpa Kernet) ").$no_pol; // max 80char
 
     $standby_mst = StandbyMst::where("id",$standby_trx->standby_mst_id)->first();
     $standby_mst_dtl = StandbyDtl::where("standby_mst_id",$standby_mst->id)->get();
