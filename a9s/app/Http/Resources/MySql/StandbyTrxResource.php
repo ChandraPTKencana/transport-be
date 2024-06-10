@@ -29,7 +29,7 @@ class StandbyTrxResource extends JsonResource
             'standby_mst_'       => new StandbyMstResource($this->whenLoaded('standby_mst')),
 
 
-            'supir'             => $this->supir,
+            'supir'             => $this->supir ?? "",
             'kernet'            => $this->kernet ?? "",
             'no_pol'            => $this->no_pol,
             'xto'               => $this->xto ?? "",
