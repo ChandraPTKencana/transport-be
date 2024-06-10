@@ -85,381 +85,185 @@ class TrxTrpController extends Controller
     }
 
     //======================================================================================================
-    // Model Sorting | Example $request->sort = "username:desc,role:desc";
+    // Model Sorting And Filtering
     //======================================================================================================
+
+    $fm_sorts=[];
+    if($request->filter_model){
+      $filter_model = json_decode($request->filter_model,true);
+  
+      foreach ($filter_model as $key => $value) {
+        if($value["sort_priority"] && $value["sort_type"]){
+          array_push($fm_sorts,[
+            "key"    =>$key,
+            "priority"=>$value["sort_priority"],
+          ]);
+        }
+      }
+
+      if(count($fm_sorts)>0){
+        usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
+        foreach ($fm_sorts as $key => $value) {
+          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+          if (count($first_row) > 0) {
+            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+          }
+        }
+      }
+
+      $model_query = $model_query->where(function ($q)use($filter_model,$request){
+
+        foreach ($filter_model as $key => $value) {
+          if(!isset($value['type'])) continue;
+
+          if(array_search($key,['status'])!==false){
+            // if(array_search($value['type'],['string','number'])!==false && $value['value_1']){
+
+            //   if($value["operator"]=='exactly_same'){
+            //     $q->Where($key, $value["value_1"]);
+            //   }
+  
+            //   if($value["operator"]=='exactly_not_same'){
+            //     $q->Where($key,"!=", $value["value_1"]);
+            //   }
+  
+            //   if($value["operator"]=='same'){
+            //     $v_val1=explode(",",$value["value_1"]);
+            //     $q->where(function ($q1)use($filter_model,$v_val1,$key){
+            //       foreach ($v_val1 as $k1 => $v1) {
+            //         $q1->orwhere($key,"like", '%'.$v1.'%');
+            //       }
+            //     });
+            //   }
+  
+            //   if($value["operator"]=='not_same'){
+            //     $v_val1=explode(",",$value["value_1"]);
+            //     $q->where(function ($q1)use($filter_model,$v_val1,$key){
+            //       foreach ($v_val1 as $k1 => $v1) {
+            //         $q1->orwhere($key,"not like", '%'.$v1.'%');
+            //       }
+            //     });
+            //   }
+  
+            //   if($value["operator"]=='more_then'){
+            //     $q->Where($key,">", $value["value_1"]);
+            //   }
+              
+            //   if($value["operator"]=='more_and'){
+            //     $q->Where($key,">=", $value["value_1"]);
+            //   }
+  
+            //   if($value["operator"]=='less_then'){
+            //     $q->Where($key,"<", $value["value_1"]);
+            //   }
+  
+            //   if($value["operator"]=='less_and'){
+            //     $q->Where($key,"<=", $value["value_1"]);
+            //   }
+            // }
+  
+            // if(array_search($value['type'],['date','datetime'])!==false){
+            //   if($value['value_1'] || $value['value_2']){
+            //     $date_from = $value['value_1'];
+            //     if(!$date_from)
+            //     throw new MyException([ "message" => "Date From pada ".$value['label']." harus diisi" ], 400);
+          
+            //     if(!strtotime($date_from))
+            //     throw new MyException(["message"=>"Format Date pada ".$value['label']." From Tidak Cocok"], 400);
+
+              
+            //     $date_to = $value['value_2'];                
+            //     if(!$date_to)
+            //     throw new MyException([ "message" => "Date To pada ".$value['label']." harus diisi" ], 400);
+              
+            //     if(!strtotime($date_to))
+            //     throw new MyException(["message"=>"Format Date To pada ".$value['label']." Tidak Cocok"], 400);
+            
+            //     $date_from = date($value['type']=='datetime'?"Y-m-d H:i:s.v" :"Y-m-d",strtotime($date_from));
+            //     $date_to = date($value['type']=='datetime'?"Y-m-d H:i:s.v" :"Y-m-d",strtotime($date_to));
+            //     // throw new MyException(["message"=>"Format Date To pada ".$date_to." Tidak Cocok".$request->_TimeZoneOffset], 400);
+
+            //     $q->whereBetween($key,[$date_from,$date_to]);
+            //   }
+            // }
+
+            if(array_search($value['type'],['select'])!==false && $value['value_1']){
+
+              if(array_search($key,['status'])!==false){
+                $r_val = $value['value_1'];
+                if($value["operator"]=='exactly_same'){
+                }else {
+                  if($r_val=='Undone'){
+                    $r_val='Done';
+                  }else{
+                    $r_val='Undone';
+                  };
+                }
+
+                if($r_val=='Done'){
+                  $q->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no")->Where(function ($q1){
+                      $q1->orWhere(function ($q2){
+                        $q2->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
+                      });
+                      $q1->orWhere(function ($q2){
+                        $q2->where("jenis","TBSK")->whereNotNull("ticket_b_no");
+                      });
+                      $q1->orWhere(function ($q2){
+                        $q2->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
+                      });
+                  });
+                }else{
+                  $q->where("deleted",0)->where("req_deleted",0)->whereNull("pv_no")->Where(function ($q1){
+                      $q1->orWhere(function ($q2){
+                        $q2->where("jenis","TBS")->whereNull("ticket_a_no")->whereNull("ticket_b_no");
+                      });
+                      $q1->orWhere(function ($q2){
+                        $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
+                      });
+                      $q1->orWhere(function ($q2){
+                        $q2->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->where("ticket_b_bruto","<",1)->where("ticket_b_tara","<",1)->where("ticket_b_netto","<",1);
+                      });
+                  });
+                }
+              }
+            }
+          }else{
+            MyLib::queryCheck($value,$key,$q);
+          }
+        }
+        
+         
+       
+        // if (isset($like_lists["requested_name"])) {
+        //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+        //   });
+        // }
+  
+        // if (isset($like_lists["confirmed_name"])) {
+        //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+        //   });
+        // }
+      });  
+    }
     
-
-    if ($request->sort) {
-      $sort_lists = [];
-
-      $sorts = explode(",", $request->sort);
-      foreach ($sorts as $key => $sort) {
-        $side = explode(":", $sort);
-        $side[1] = isset($side[1]) ? $side[1] : 'ASC';
-        $sort_symbol = $side[1] == "desc" ? "<=" : ">=";
-        $sort_lists[$side[0]] = $side[1];
-      }
-
-      if (isset($sort_lists["id"])) {
-        $model_query = $model_query->orderBy("id", $sort_lists["id"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("id",$sort_symbol,$first_row["id"]);
-        }
-      }
-
-      if (isset($sort_lists["xto"])) {
-        $model_query = $model_query->orderBy("xto", $sort_lists["xto"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("xto",$sort_symbol,$first_row["xto"]);
-        }
-      }
-
-      if (isset($sort_lists["tipe"])) {
-        $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("tipe",$sort_symbol,$first_row["tipe"]);
-        }
-      }
-
-      if (isset($sort_lists["pv_no"])) {
-        $model_query = $model_query->orderBy("pv_no", $sort_lists["pv_no"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("pv_no",$sort_symbol,$first_row["pv_no"]);
-        }
-      }
-
-      if (isset($sort_lists["ticket_a_no"])) {
-        $model_query = $model_query->orderBy("ticket_a_no", $sort_lists["ticket_a_no"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("ticket_a_no",$sort_symbol,$first_row["ticket_a_no"]);
-        }
-      }
-
-      if (isset($sort_lists["ticket_b_no"])) {
-        $model_query = $model_query->orderBy("ticket_b_no", $sort_lists["ticket_b_no"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("ticket_b_no",$sort_symbol,$first_row["ticket_b_no"]);
-        }
-      }
-
-      if (isset($sort_lists["supir"])) {
-        $model_query = $model_query->orderBy("supir", $sort_lists["supir"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("supir",$sort_symbol,$first_row["supir"]);
-        }
-      }
-
-      if (isset($sort_lists["kernet"])) {
-        $model_query = $model_query->orderBy("kernet", $sort_lists["kernet"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("kernet",$sort_symbol,$first_row["kernet"]);
-        }
-      }
-
-      if (isset($sort_lists["no_pol"])) {
-        $model_query = $model_query->orderBy("no_pol", $sort_lists["no_pol"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("no_pol",$sort_symbol,$first_row["no_pol"]);
-        }
-      }
-
-      if (isset($sort_lists["tanggal"])) {
-        $model_query = $model_query->orderBy("tanggal", $sort_lists["tanggal"])->orderBy('id','DESC');
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("tanggal",$sort_symbol,$first_row["tanggal"])->orderBy('id','DESC');
-        }
-      }
-
-      if (isset($sort_lists["cost_center_code"])) {
-        $model_query = $model_query->orderBy("cost_center_code", $sort_lists["cost_center_code"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("cost_center_code",$sort_symbol,$first_row["cost_center_code"]);
-        }
-      }
-      if (isset($sort_lists["cost_center_desc"])) {
-        $model_query = $model_query->orderBy("cost_center_desc", $sort_lists["cost_center_desc"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("cost_center_desc",$sort_symbol,$first_row["cost_center_desc"]);
-        }
-      }
-      if (isset($sort_lists["pvr_id"])) {
-        $model_query = $model_query->orderBy("pvr_id", $sort_lists["pvr_id"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("pvr_id",$sort_symbol,$first_row["pvr_id"]);
-        }
-      }
-      if (isset($sort_lists["pvr_no"])) {
-        $model_query = $model_query->orderBy("pvr_no", $sort_lists["pvr_no"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("pvr_no",$sort_symbol,$first_row["pvr_no"]);
-        }
-      }
-
-      
-      // if (isset($sort_lists["tipe"])) {
-      //   $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
-      //   if (count($first_row) > 0) {
-      //     $model_query = $model_query->where("tipe",$sort_symbol,$first_row["tipe"]);
-      //   }
-      // }
-
-      // if (isset($sort_lists["jenis"])) {
-      //   $model_query = $model_query->orderBy("jenis", $sort_lists["jenis"]);
-      //   if (count($first_row) > 0) {
-      //     $model_query = $model_query->where("jenis",$sort_symbol,$first_row["jenis"]);
-      //   }
-      // }
-      
-
-    } else {
+    if(!$request->filter_model || count($fm_sorts)==0){
       $model_query = $model_query->orderBy('tanggal', 'DESC')->orderBy('id','DESC');
     }
-    //======================================================================================================
-    // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
-    //======================================================================================================
-
-    if ($request->like) {
-      $like_lists = [];
-
-      $likes = explode(",", $request->like);
-      foreach ($likes as $key => $like) {
-        $side = explode(":", $like);
-        $side[1] = isset($side[1]) ? $side[1] : '';
-        $like_lists[$side[0]] = $side[1];
-      }
-
-      if(count($like_lists) > 0){
-        $model_query = $model_query->where(function ($q)use($like_lists){
-            
-          if (isset($like_lists["id"])) {
-            $q->orWhere("id", "like", $like_lists["id"]);
-          }
-    
-          if (isset($like_lists["xto"])) {
-            $q->orWhere("xto", "like", $like_lists["xto"]);
-          }
-    
-          if (isset($like_lists["tipe"])) {
-            $q->orWhere("tipe", "like", $like_lists["tipe"]);
-          }
-
-          if (isset($like_lists["jenis"])) {
-            $q->orWhere("jenis", "like", $like_lists["jenis"]);
-          }
-
-          if (isset($like_lists["pv_no"])) {
-            $q->orWhere("pv_no", "like", $like_lists["pv_no"]);
-          }
-
-          if (isset($like_lists["ticket_a_no"])) {
-            $q->orWhere("ticket_a_no", "like", $like_lists["ticket_a_no"]);
-          }
-
-          if (isset($like_lists["ticket_b_no"])) {
-            $q->orWhere("ticket_b_no", "like", $like_lists["ticket_b_no"]);
-          }
-
-          if (isset($like_lists["supir"])) {
-            $q->orWhere("supir", "like", $like_lists["supir"]);
-          }
-          if (isset($like_lists["kernet"])) {
-            $q->orWhere("kernet", "like", $like_lists["kernet"]);
-          }
-          if (isset($like_lists["no_pol"])) {
-            $q->orWhere("no_pol", "like", $like_lists["no_pol"]);
-          }
-          if (isset($like_lists["tanggal"])) {
-            $q->orWhere("tanggal", "like", $like_lists["tanggal"]);
-          }
-          if (isset($like_lists["cost_center_code"])) {
-            $q->orWhere("cost_center_code", "like", $like_lists["cost_center_code"]);
-          }
-          if (isset($like_lists["cost_center_desc"])) {
-            $q->orWhere("cost_center_desc", "like", $like_lists["cost_center_desc"]);
-          }
-          if (isset($like_lists["pvr_id"])) {
-            $q->orWhere("pvr_id", "like", $like_lists["pvr_id"]);
-          }
-          if (isset($like_lists["pvr_no"])) {
-            $q->orWhere("pvr_no", "like", $like_lists["pvr_no"]);
-          }
-          if (isset($like_lists["transition_to"])) {
-            $q->orWhere("transition_to", "like", $like_lists["transition_to"]);
-          }
-    
-          // if (isset($like_lists["requested_name"])) {
-          //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
-          //     $q2->from('is_users')
-          //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
-          //   });
-          // }
-    
-          // if (isset($like_lists["confirmed_name"])) {
-          //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
-          //     $q2->from('is_users')
-          //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
-          //   });
-          // }
-        });        
-      }
-
-      
-    }
-
-    // ==============
-    // Model Filter
-    // ==============
-    if($request->date_from || $request->date_to){
-      $date_from = $request->date_from;
-      if(!$date_from)
-      throw new MyException([ "date_from" => ["Date From harus diisi"] ], 422);
-
-      if(!strtotime($date_from))
-      throw new MyException(["date_from"=>["Format Date From Tidak Cocok"]], 422);
-      
-      $date_to = $request->date_to;
-      if(!$date_to)
-      throw new MyException([ "date_to" => ["Date To harus diisi"] ], 422);
-
-      if(!strtotime($date_to))
-      throw new MyException(["date_to"=>["Format Date To Tidak Cocok"]], 422);
-      
-      $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
-    }
-
-
-    // if($request->filter_model){
-    //   $filter_model = json_decode($request->filter_model,true);
-  
-    //   $fm_sorts=[];
-    //   foreach ($filter_model as $key => $value) {
-    //     if($value["sort_priority"] && $value["sort_type"]){
-    //       array_push($fm_sorts,[
-    //         "key"    =>$key,
-    //         "priority"=>$value["sort_priority"],
-    //       ]);
-    //     }
-    //   }
-    //   if(count($fm_sorts)>0){
-    //     usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
-    //     foreach ($fm_sorts as $key => $value) {
-    //       $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
-    //       if (count($first_row) > 0) {
-    //         $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
-    //         $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
-    //       }
-    //     }
-    //   }else {
-    //     $model_query = $model_query->orderBy('tanggal', 'DESC')->orderBy('id','DESC');
-    //   }
-
-    //   $model_query = $model_query->where(function ($q)use($filter_model){
-
-    //     foreach ($filter_model as $key => $value) {
-    //       if(array_search($value['type'],['string','number'])!==false && $value['value_1']){
-
-    //         if($value["exactly_same"]){
-    //           $q->Where($key, $value["value_1"]);
-    //         }
-
-    //         if($value["exactly_not_same"]){
-    //           $q->Where($key,"!=", $value["value_1"]);
-    //         }
-
-    //         if($value["same"]){
-    //           $v_val1=explode(",",$value["value_1"]);
-    //           $q->where(function ($q1)use($filter_model,$v_val1,$key){
-    //             foreach ($v_val1 as $k1 => $v1) {
-    //               $q1->orwhere($key,"like", '%'.$v1.'%');
-    //             }
-    //           });
-    //         }
-
-    //         if($value["not_same"]){
-    //           $v_val1=explode(",",$value["value_1"]);
-    //           $q->where(function ($q1)use($filter_model,$v_val1,$key){
-    //             foreach ($v_val1 as $k1 => $v1) {
-    //               $q1->orwhere($key,"not like", '%'.$v1.'%');
-    //             }
-    //           });
-    //         }
-
-    //         if($value["more_then"]){
-    //           $q->Where($key,">", $value["value_1"]);
-    //         }
-            
-    //         if($value["more_and"]){
-    //           $q->Where($key,">=", $value["value_1"]);
-    //         }
-
-    //         if($value["less_then"]){
-    //           $q->Where($key,"<", $value["value_1"]);
-    //         }
-
-    //         if($value["less_and"]){
-    //           $q->Where($key,"<=", $value["value_1"]);
-    //         }
-    //       }
-
-    //       if(array_search($value['type'],['select'])!==false && $value['value_1']){
-    //         if($value["exactly_same"]){
-    //           $q->Where($key, $value["value_1"]);
-    //         }
-
-    //         if($value["exactly_not_same"]){
-    //           $q->Where($key,"!=", $value["value_1"]);
-    //         }
-    //       }
-
-    //       if(array_search($value['type'],['date','datetime'])!==false){
-    //         if($value['value_1'] || $value['value_2']){
-    //           $date_from = $value['value_1'];
-    //           if(!$date_from)
-    //           throw new MyException([ "message" => "Date From pada ".$value['label']." harus diisi" ], 400);
-        
-    //           if(!strtotime($date_from))
-    //           throw new MyException(["message"=>"Format Date pada ".$value['label']." From Tidak Cocok"], 400);
-              
-    //           $date_to = $value['value_2'];
-    //           if(!$date_to)
-    //           throw new MyException([ "message" => "Date To pada ".$value['label']." harus diisi" ], 400);
-        
-    //           if(!strtotime($date_to))
-    //           throw new MyException(["message"=>"Format Date To pada ".$value['label']." Tidak Cocok"], 400);
-              
-    //           $q->whereBetween($key,[$date_from,$date_to]);
-    //         }
-    //       }
-    //     }
-            
-       
-    //     // if (isset($like_lists["requested_name"])) {
-    //     //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
-    //     //     $q2->from('is_users')
-    //     //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
-    //     //   });
-    //     // }
-  
-    //     // if (isset($like_lists["confirmed_name"])) {
-    //     //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
-    //     //     $q2->from('is_users')
-    //     //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
-    //     //   });
-    //     // }
-    //   });  
-  
-
-    // }
 
     $filter_status = $request->filter_status;
     
-    if(in_array($this->role,["Finance","Accounting"])){
-      $filter_status = "pv_done";
-    }
+    // if(in_array($this->role,["Finance","Accounting"])){
+    //   $filter_status = "pv_done";
+    // }
 
-    if(in_array($this->role,["Marketing","MIS"])){
-      $filter_status = "ticket_done";
-    }
+    // if(in_array($this->role,["Marketing","MIS"])){
+    //   $filter_status = "ticket_done";
+    // }
 
     if($filter_status=="pv_done"){
       $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no");
@@ -2103,4 +1907,359 @@ class TrxTrpController extends Controller
       //throw $th;
     }
   }
+
+
+  // public function indexold(Request $request, $download = false)
+  // {
+
+  //   //======================================================================================================
+  //   // Pembatasan Data hanya memerlukan limit dan offset
+  //   //======================================================================================================
+
+  //   $limit = 100; // Limit +> Much Data
+  //   if (isset($request->limit)) {
+  //     if ($request->limit <= 250) {
+  //       $limit = $request->limit;
+  //     } else {
+  //       throw new MyException(["message" => "Max Limit 250"]);
+  //     }
+  //   }
+
+  //   $offset = isset($request->offset) ? (int) $request->offset : 0; // example offset 400 start from 401
+
+  //   //======================================================================================================
+  //   // Jika Halaman Ditentutkan maka $offset akan disesuaikan
+  //   //======================================================================================================
+  //   if (isset($request->page)) {
+  //     $page =  (int) $request->page;
+  //     $offset = ($page * $limit) - $limit;
+  //   }
+
+
+  //   //======================================================================================================
+  //   // Init Model
+  //   //======================================================================================================
+  //   $model_query = new TrxTrp();
+  //   if (!$download) {
+  //     $model_query = $model_query->offset($offset)->limit($limit);
+  //   }
+
+  //   $first_row=[];
+  //   if($request->first_row){
+  //     $first_row 	= json_decode($request->first_row, true);
+  //   }
+
+  //   //======================================================================================================
+  //   // Model Sorting | Example $request->sort = "username:desc,role:desc";
+  //   //======================================================================================================
+    
+
+  //   if ($request->sort) {
+  //     $sort_lists = [];
+
+  //     $sorts = explode(",", $request->sort);
+  //     foreach ($sorts as $key => $sort) {
+  //       $side = explode(":", $sort);
+  //       $side[1] = isset($side[1]) ? $side[1] : 'ASC';
+  //       $sort_symbol = $side[1] == "desc" ? "<=" : ">=";
+  //       $sort_lists[$side[0]] = $side[1];
+  //     }
+
+  //     if (isset($sort_lists["id"])) {
+  //       $model_query = $model_query->orderBy("id", $sort_lists["id"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("id",$sort_symbol,$first_row["id"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["xto"])) {
+  //       $model_query = $model_query->orderBy("xto", $sort_lists["xto"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("xto",$sort_symbol,$first_row["xto"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["tipe"])) {
+  //       $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("tipe",$sort_symbol,$first_row["tipe"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["pv_no"])) {
+  //       $model_query = $model_query->orderBy("pv_no", $sort_lists["pv_no"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("pv_no",$sort_symbol,$first_row["pv_no"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["ticket_a_no"])) {
+  //       $model_query = $model_query->orderBy("ticket_a_no", $sort_lists["ticket_a_no"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("ticket_a_no",$sort_symbol,$first_row["ticket_a_no"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["ticket_b_no"])) {
+  //       $model_query = $model_query->orderBy("ticket_b_no", $sort_lists["ticket_b_no"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("ticket_b_no",$sort_symbol,$first_row["ticket_b_no"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["supir"])) {
+  //       $model_query = $model_query->orderBy("supir", $sort_lists["supir"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("supir",$sort_symbol,$first_row["supir"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["kernet"])) {
+  //       $model_query = $model_query->orderBy("kernet", $sort_lists["kernet"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("kernet",$sort_symbol,$first_row["kernet"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["no_pol"])) {
+  //       $model_query = $model_query->orderBy("no_pol", $sort_lists["no_pol"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("no_pol",$sort_symbol,$first_row["no_pol"]);
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["tanggal"])) {
+  //       $model_query = $model_query->orderBy("tanggal", $sort_lists["tanggal"])->orderBy('id','DESC');
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("tanggal",$sort_symbol,$first_row["tanggal"])->orderBy('id','DESC');
+  //       }
+  //     }
+
+  //     if (isset($sort_lists["cost_center_code"])) {
+  //       $model_query = $model_query->orderBy("cost_center_code", $sort_lists["cost_center_code"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("cost_center_code",$sort_symbol,$first_row["cost_center_code"]);
+  //       }
+  //     }
+  //     if (isset($sort_lists["cost_center_desc"])) {
+  //       $model_query = $model_query->orderBy("cost_center_desc", $sort_lists["cost_center_desc"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("cost_center_desc",$sort_symbol,$first_row["cost_center_desc"]);
+  //       }
+  //     }
+  //     if (isset($sort_lists["pvr_id"])) {
+  //       $model_query = $model_query->orderBy("pvr_id", $sort_lists["pvr_id"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("pvr_id",$sort_symbol,$first_row["pvr_id"]);
+  //       }
+  //     }
+  //     if (isset($sort_lists["pvr_no"])) {
+  //       $model_query = $model_query->orderBy("pvr_no", $sort_lists["pvr_no"]);
+  //       if (count($first_row) > 0) {
+  //         $model_query = $model_query->where("pvr_no",$sort_symbol,$first_row["pvr_no"]);
+  //       }
+  //     }
+
+      
+  //     // if (isset($sort_lists["tipe"])) {
+  //     //   $model_query = $model_query->orderBy("tipe", $sort_lists["tipe"]);
+  //     //   if (count($first_row) > 0) {
+  //     //     $model_query = $model_query->where("tipe",$sort_symbol,$first_row["tipe"]);
+  //     //   }
+  //     // }
+
+  //     // if (isset($sort_lists["jenis"])) {
+  //     //   $model_query = $model_query->orderBy("jenis", $sort_lists["jenis"]);
+  //     //   if (count($first_row) > 0) {
+  //     //     $model_query = $model_query->where("jenis",$sort_symbol,$first_row["jenis"]);
+  //     //   }
+  //     // }
+      
+
+  //   } else {
+  //     $model_query = $model_query->orderBy('tanggal', 'DESC')->orderBy('id','DESC');
+  //   }
+  //   //======================================================================================================
+  //   // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
+  //   //======================================================================================================
+
+  //   if ($request->like) {
+  //     $like_lists = [];
+
+  //     $likes = explode(",", $request->like);
+  //     foreach ($likes as $key => $like) {
+  //       $side = explode(":", $like);
+  //       $side[1] = isset($side[1]) ? $side[1] : '';
+  //       $like_lists[$side[0]] = $side[1];
+  //     }
+
+  //     if(count($like_lists) > 0){
+  //       $model_query = $model_query->where(function ($q)use($like_lists){
+            
+  //         if (isset($like_lists["id"])) {
+  //           $q->orWhere("id", "like", $like_lists["id"]);
+  //         }
+    
+  //         if (isset($like_lists["xto"])) {
+  //           $q->orWhere("xto", "like", $like_lists["xto"]);
+  //         }
+    
+  //         if (isset($like_lists["tipe"])) {
+  //           $q->orWhere("tipe", "like", $like_lists["tipe"]);
+  //         }
+
+  //         if (isset($like_lists["jenis"])) {
+  //           $q->orWhere("jenis", "like", $like_lists["jenis"]);
+  //         }
+
+  //         if (isset($like_lists["pv_no"])) {
+  //           $q->orWhere("pv_no", "like", $like_lists["pv_no"]);
+  //         }
+
+  //         if (isset($like_lists["ticket_a_no"])) {
+  //           $q->orWhere("ticket_a_no", "like", $like_lists["ticket_a_no"]);
+  //         }
+
+  //         if (isset($like_lists["ticket_b_no"])) {
+  //           $q->orWhere("ticket_b_no", "like", $like_lists["ticket_b_no"]);
+  //         }
+
+  //         if (isset($like_lists["supir"])) {
+  //           $q->orWhere("supir", "like", $like_lists["supir"]);
+  //         }
+  //         if (isset($like_lists["kernet"])) {
+  //           $q->orWhere("kernet", "like", $like_lists["kernet"]);
+  //         }
+  //         if (isset($like_lists["no_pol"])) {
+  //           $q->orWhere("no_pol", "like", $like_lists["no_pol"]);
+  //         }
+  //         if (isset($like_lists["tanggal"])) {
+  //           $q->orWhere("tanggal", "like", $like_lists["tanggal"]);
+  //         }
+  //         if (isset($like_lists["cost_center_code"])) {
+  //           $q->orWhere("cost_center_code", "like", $like_lists["cost_center_code"]);
+  //         }
+  //         if (isset($like_lists["cost_center_desc"])) {
+  //           $q->orWhere("cost_center_desc", "like", $like_lists["cost_center_desc"]);
+  //         }
+  //         if (isset($like_lists["pvr_id"])) {
+  //           $q->orWhere("pvr_id", "like", $like_lists["pvr_id"]);
+  //         }
+  //         if (isset($like_lists["pvr_no"])) {
+  //           $q->orWhere("pvr_no", "like", $like_lists["pvr_no"]);
+  //         }
+  //         if (isset($like_lists["transition_to"])) {
+  //           $q->orWhere("transition_to", "like", $like_lists["transition_to"]);
+  //         }
+    
+  //         // if (isset($like_lists["requested_name"])) {
+  //         //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+  //         //     $q2->from('is_users')
+  //         //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+  //         //   });
+  //         // }
+    
+  //         // if (isset($like_lists["confirmed_name"])) {
+  //         //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+  //         //     $q2->from('is_users')
+  //         //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+  //         //   });
+  //         // }
+  //       });        
+  //     }
+
+      
+  //   }
+
+  //   // ==============
+  //   // Model Filter
+  //   // ==============
+  //   if($request->date_from || $request->date_to){
+  //     $date_from = $request->date_from;
+  //     if(!$date_from)
+  //     throw new MyException([ "date_from" => ["Date From harus diisi"] ], 422);
+
+  //     if(!strtotime($date_from))
+  //     throw new MyException(["date_from"=>["Format Date From Tidak Cocok"]], 422);
+      
+  //     $date_to = $request->date_to;
+  //     if(!$date_to)
+  //     throw new MyException([ "date_to" => ["Date To harus diisi"] ], 422);
+
+  //     if(!strtotime($date_to))
+  //     throw new MyException(["date_to"=>["Format Date To Tidak Cocok"]], 422);
+      
+  //     $model_query = $model_query->whereBetween("tanggal",[$request->date_from,$request->date_to]);
+  //   }
+
+  //   $filter_status = $request->filter_status;
+    
+  //   // if(in_array($this->role,["Finance","Accounting"])){
+  //   //   $filter_status = "pv_done";
+  //   // }
+
+  //   // if(in_array($this->role,["Marketing","MIS"])){
+  //   //   $filter_status = "ticket_done";
+  //   // }
+
+  //   if($filter_status=="pv_done"){
+  //     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no");
+  //   }
+
+  //   if($filter_status=="ticket_done"){
+  //     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
+  //         $q->orWhere(function ($q1){
+  //           $q1->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
+  //         });
+  //         $q->orWhere(function ($q1){
+  //           $q1->where("jenis","TBSK")->whereNotNull("ticket_b_no");
+  //         });
+  //         $q->orWhere(function ($q1){
+  //           $q1->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
+  //         });
+  //     });
+  //   }
+
+  //   if($filter_status=="ticket_not_done"){
+  //     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
+  //         $q->orWhere(function ($q1){
+  //           $q1->where("jenis","TBS")->whereNull("ticket_a_no")->whereNull("ticket_b_no");
+  //         });
+  //         $q->orWhere(function ($q1){
+  //           $q1->where("jenis","TBSK")->whereNull("ticket_b_no");
+  //         });
+  //         $q->orWhere(function ($q1){
+  //           $q1->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->where("ticket_b_bruto","<",1)->where("ticket_b_tara","<",1)->where("ticket_b_netto","<",1);
+  //         });
+  //     });
+  //   }
+
+  //   if($filter_status=="pv_not_done"){
+  //     $model_query = $model_query->where("deleted",0)->whereNull("pv_no")->where("req_deleted",0);
+  //   }
+
+  //   if($filter_status=="ritase_done"){
+  //     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('ritase_val',1);
+  //   }
+
+  //   if($filter_status=="mandor_trx_unverified"){
+  //     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('val',1)->where('val1',0);
+  //   }
+
+  //   if($filter_status=="deleted"){
+  //     $model_query = $model_query->where("deleted",1);
+  //   }
+
+  //   if($filter_status=="req_deleted"){
+  //     $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
+  //   }
+
+  //   $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
+  //     $q->select('id','trx_trp_id','created_at','updated_at');
+  //   }])->get();
+
+  //   return response()->json([
+  //     "data" => TrxTrpResource::collection($model_query),
+  //   ], 200);
+  // }
 }
