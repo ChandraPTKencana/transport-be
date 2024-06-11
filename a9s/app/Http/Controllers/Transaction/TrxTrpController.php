@@ -85,6 +85,52 @@ class TrxTrpController extends Controller
     }
 
     //======================================================================================================
+    // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
+    //======================================================================================================
+
+    if ($request->like) {
+      $like_lists = [];
+
+      $likes = explode(",", $request->like);
+      foreach ($likes as $key => $like) {
+        $side = explode(":", $like);
+        $side[1] = isset($side[1]) ? $side[1] : '';
+        $like_lists[$side[0]] = $side[1];
+      }
+
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){
+          
+          $list_to_like = ["id","xto","tipe",
+          "jenis","pv_no","ticket_a_no","ticket_b_no","supir","kernet","no_pol","tanggal",
+          "cost_center_code","cost_center_desc","pvr_id","pvr_no","transition_to"];
+    
+          foreach ($list_to_like as $key => $v) {
+            if (isset($like_lists[$v])) {
+              $q->orWhere($v, "like", $like_lists[$v]);
+            }
+          }
+    
+          // if (isset($like_lists["requested_name"])) {
+          //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+          //     $q2->from('is_users')
+          //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+          //   });
+          // }
+    
+          // if (isset($like_lists["confirmed_name"])) {
+          //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+          //     $q2->from('is_users')
+          //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+          //   });
+          // }
+        });        
+      }
+
+      
+    }
+
+    //======================================================================================================
     // Model Sorting And Filtering
     //======================================================================================================
 

@@ -127,6 +127,67 @@ class StandbyTrxController extends Controller
     }
 
     //======================================================================================================
+    // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
+    //======================================================================================================
+
+    if ($request->like) {
+      $like_lists = [];
+
+      $likes = explode(",", $request->like);
+      foreach ($likes as $key => $like) {
+        $side = explode(":", $like);
+        $side[1] = isset($side[1]) ? $side[1] : '';
+        $like_lists[$side[0]] = $side[1];
+      }
+
+      $list_to_like = ["id","transition_target","transition_type",
+      "supir","kernet","no_pol","xto","pvr_id","pvr_no","pv_id","pv_no",
+      "rv_id","rv_no","cost_center_code","cost_center_desc"];
+
+      $list_to_like_user = [
+        ["val_name","val_user"],
+        ["val1_name","val1_user"],
+        ["val2_name","val2_user"],
+        ["req_deleted_name","req_deleted_user"],
+        ["deleted_name","deleted_user"],
+      ];
+
+      $list_to_like_standby_mst = [
+        ["standby_mst_name","name"],
+        ["standby_mst_type","tipe"]
+      ];
+
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists,$list_to_like,$list_to_like_user,$list_to_like_standby_mst){
+          foreach ($list_to_like as $key => $v) {
+            if (isset($like_lists[$v])) {
+              $q->orWhere($v, "like", $like_lists[$v]);
+            }
+          }
+
+          foreach ($list_to_like_user as $key => $v) {
+            if (isset($like_lists[$v[0]])) {
+              $q->orWhereIn($v[1], function($q2)use($like_lists,$v) {
+                $q2->from('is_users')
+                ->select('id')->where("username",'like',$like_lists[$v[0]]);          
+              });
+            }
+          }
+
+          foreach ($list_to_like_standby_mst as $key => $v) {
+            if (isset($like_lists[$v[0]])) {
+              $q->orWhereIn('standby_mst_id', function($q2)use($like_lists,$v) {
+                $q2->from('standby_mst')
+                ->select('id')->where($v[1],'like',$like_lists[$v[0]]);          
+              });
+            }
+          }
+        });        
+      }     
+    }
+    
+
+    //======================================================================================================
     // Model Sorting And Filtering
     //======================================================================================================
 
@@ -160,116 +221,6 @@ class StandbyTrxController extends Controller
           if(!isset($value['type'])) continue;
 
           if(array_search($key,['status'])!==false){
-            // if(array_search($value['type'],['string','number'])!==false && $value['value_1']){
-
-            //   if($value["operator"]=='exactly_same'){
-            //     $q->Where($key, $value["value_1"]);
-            //   }
-  
-            //   if($value["operator"]=='exactly_not_same'){
-            //     $q->Where($key,"!=", $value["value_1"]);
-            //   }
-  
-            //   if($value["operator"]=='same'){
-            //     $v_val1=explode(",",$value["value_1"]);
-            //     $q->where(function ($q1)use($filter_model,$v_val1,$key){
-            //       foreach ($v_val1 as $k1 => $v1) {
-            //         $q1->orwhere($key,"like", '%'.$v1.'%');
-            //       }
-            //     });
-            //   }
-  
-            //   if($value["operator"]=='not_same'){
-            //     $v_val1=explode(",",$value["value_1"]);
-            //     $q->where(function ($q1)use($filter_model,$v_val1,$key){
-            //       foreach ($v_val1 as $k1 => $v1) {
-            //         $q1->orwhere($key,"not like", '%'.$v1.'%');
-            //       }
-            //     });
-            //   }
-  
-            //   if($value["operator"]=='more_then'){
-            //     $q->Where($key,">", $value["value_1"]);
-            //   }
-              
-            //   if($value["operator"]=='more_and'){
-            //     $q->Where($key,">=", $value["value_1"]);
-            //   }
-  
-            //   if($value["operator"]=='less_then'){
-            //     $q->Where($key,"<", $value["value_1"]);
-            //   }
-  
-            //   if($value["operator"]=='less_and'){
-            //     $q->Where($key,"<=", $value["value_1"]);
-            //   }
-            // }
-  
-            // if(array_search($value['type'],['date','datetime'])!==false){
-            //   if($value['value_1'] || $value['value_2']){
-            //     $date_from = $value['value_1'];
-            //     if(!$date_from)
-            //     throw new MyException([ "message" => "Date From pada ".$value['label']." harus diisi" ], 400);
-          
-            //     if(!strtotime($date_from))
-            //     throw new MyException(["message"=>"Format Date pada ".$value['label']." From Tidak Cocok"], 400);
-
-              
-            //     $date_to = $value['value_2'];                
-            //     if(!$date_to)
-            //     throw new MyException([ "message" => "Date To pada ".$value['label']." harus diisi" ], 400);
-              
-            //     if(!strtotime($date_to))
-            //     throw new MyException(["message"=>"Format Date To pada ".$value['label']." Tidak Cocok"], 400);
-            
-            //     $date_from = date($value['type']=='datetime'?"Y-m-d H:i:s.v" :"Y-m-d",strtotime($date_from));
-            //     $date_to = date($value['type']=='datetime'?"Y-m-d H:i:s.v" :"Y-m-d",strtotime($date_to));
-            //     // throw new MyException(["message"=>"Format Date To pada ".$date_to." Tidak Cocok".$request->_TimeZoneOffset], 400);
-
-            //     $q->whereBetween($key,[$date_from,$date_to]);
-            //   }
-            // }
-
-            if(array_search($value['type'],['select'])!==false && $value['value_1']){
-
-              if(array_search($key,['status'])!==false){
-                $r_val = $value['value_1'];
-                if($value["operator"]=='exactly_same'){
-                }else {
-                  if($r_val=='Undone'){
-                    $r_val='Done';
-                  }else{
-                    $r_val='Undone';
-                  };
-                }
-
-                if($r_val=='Done'){
-                  $q->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no")->Where(function ($q1){
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBSK")->whereNotNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
-                      });
-                  });
-                }else{
-                  $q->where("deleted",0)->where("req_deleted",0)->whereNull("pv_no")->Where(function ($q1){
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBS")->whereNull("ticket_a_no")->whereNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->where("ticket_b_bruto","<",1)->where("ticket_b_tara","<",1)->where("ticket_b_netto","<",1);
-                      });
-                  });
-                }
-              }
-            }
           }else{
             MyLib::queryCheck($value,$key,$q);
           }
