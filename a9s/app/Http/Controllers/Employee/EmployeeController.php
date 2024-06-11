@@ -184,6 +184,9 @@ class EmployeeController extends Controller
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
+      $emp = Employee::where("name",$request->name)->where("role",$request->role)->first();
+      if($emp)
+      throw new \Exception("Karyawan Telah Terdaftar",1);
       $model_query                = new Employee();
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
@@ -227,6 +230,10 @@ class EmployeeController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
+      $emp = Employee::where("id","!=",$request->id)->where("name",$request->name)->where("role",$request->role)->first();
+      if($emp)
+      throw new \Exception("Karyawan Telah Terdaftar",1);
+
       $model_query                = Employee::where("id",$request->id)->lockForUpdate()->first();
       $SYSOLD                     = clone($model_query);
 

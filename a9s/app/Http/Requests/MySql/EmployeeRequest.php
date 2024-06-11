@@ -25,16 +25,17 @@ class EmployeeRequest extends FormRequest
     {
         $rules = [];
         if (request()->isMethod('post')) {
-            $rules['name'] = 'required|max:50|unique:App\Models\MySql\Employee,name';
+            // $rules['name'] = 'required|max:50|unique:App\Models\MySql\Employee,name';
         }
         if (request()->isMethod('get')) {
             $rules['id'] = 'required|exists:App\Models\MySql\Employee,id';
         }
         if (request()->isMethod('put')) {
             $rules['id'] = 'required|exists:App\Models\MySql\Employee,id';
-            $rules['name'] = 'required|max:50|unique:App\Models\MySql\Employee,name,' . request()->id;
+            // $rules['name'] = 'required|max:50|unique:App\Models\MySql\Employee,name,' . request()->id;
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
+            $rules['name'] = 'required|max:50';
             $rules['role'] = 'required|in:Supir,Kernet';
         }
         return $rules;
