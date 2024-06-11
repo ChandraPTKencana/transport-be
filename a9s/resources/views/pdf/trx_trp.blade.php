@@ -87,7 +87,7 @@
         </tr>
         @if(in_array('ticket_a_netto',$shows))
         <tr>
-          <th colspan="2" style="border:none;" class="text-right"> Note : Angka Merah apabila sama dengan atau lebih maupun kurang dari 0.4</th>
+          <th colspan="2" style="border:none;" class="text-right"> Note : Angka Merah apabila >= 0.4 atau &lt;= -0.4</th>
         </tr>
         @endif
       </thead>
@@ -278,7 +278,7 @@
           @endforeach
           @if(in_array('ticket_a_netto',$shows))
           <tr>
-            <td colspan="7" style="border:none;"></td>
+            <td colspan="8" style="border:none;"></td>
             @if(in_array('ticket_a_bruto',$shows))
             <td>{{ $info["ttl_a_bruto"] }}</td>
             @endif
@@ -290,7 +290,6 @@
             @endif
             @if(in_array('ticket_b_a_bruto_persen',$shows))
             <td style="border:none;"></td>
-
             @endif
             @if(in_array('ticket_a_tara',$shows))
             <td>{{ $info["ttl_a_tara"] }}</td>
