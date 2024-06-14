@@ -1051,9 +1051,9 @@ class TrxTrpController extends Controller
     ->where("TicketNo",$request->ticket_b_no);
 
     if($request->jenis!=="TBS" || $connection_name!=='sqlsrv'){
-      $get_data_ticket=$get_data_ticket->whereIn('ProductName',["TBS","RTBS"]);
+      $get_data_ticket=$get_data_ticket->where('ProductName',"TBS");
     }else {
-      $get_data_ticket=$get_data_ticket->where('ProductName',"RTBS");
+      $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
     }
 
     $get_data_ticket=$get_data_ticket->first();
