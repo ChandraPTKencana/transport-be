@@ -225,7 +225,7 @@ class TrxLoadDataController extends Controller
 
         if($transition_to!=""){
           if($jenis=="TBS" && $transition_to!=""){
-            $product_names = ["MTBS","TBS"];
+            $product_names = ["MTBS","TBS","RTBS"];
           }
           
           $ad_list_ticket = DB::connection($transition_to)->table("palm_tickets")
