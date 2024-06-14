@@ -128,7 +128,7 @@ return [
             'url' => env('DATABASE_URL_SVR'),
             'host' => env('DB_HOST_SVR', 'localhost'),
             'port' => env('DB_PORT_SVR', '1433'),
-            'database' => 'as_kencana_kprs',
+            'database' => 'as_kencana_kprs2',
             'username' => env('DB_USERNAME_SVR', 'forge'),
             'password' => env('DB_PASSWORD_SVR', ''),
             'charset' => 'utf8',
