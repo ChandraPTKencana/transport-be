@@ -128,6 +128,11 @@ Route::get('/', function () {
     Route::get('/report/ramp/pdf_preview', [\App\Http\Controllers\Report\RampController::class, 'pdfPreview']);
     Route::get('/report/ramp/excel_download', [\App\Http\Controllers\Report\RampController::class, 'excelDownload']);
 
+    Route::get('/report/ast_n_driver/load_data', [\App\Http\Controllers\Report\AstNDriverController::class, 'loadData']);
+    Route::get('/report/ast_n_driver/index', [\App\Http\Controllers\Report\AstNDriverController::class, 'index']);
+    Route::get('/report/ast_n_driver/pdf_preview', [\App\Http\Controllers\Report\AstNDriverController::class, 'pdfPreview']);
+    Route::get('/report/ast_n_driver/excel_download', [\App\Http\Controllers\Report\AstNDriverController::class, 'excelDownload']);
+
     
 
     // Route::prefix("stok/api")->group(function(){

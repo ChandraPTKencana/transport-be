@@ -199,7 +199,7 @@ class UjalanController extends Controller
 
   public function show(UjalanRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport','Finance']);
 
     // return response()->json([
     //   "message" => "Hanya yang membuat transaksi yang boleh melakukan pergantian atau konfirmasi data",
