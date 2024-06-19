@@ -1271,6 +1271,9 @@ class StandbyTrxController extends Controller
       $index_item = array_search($this->role, ["SuperAdmin","PabrikMandor"]);    
       if ($index_item !== false){
         if(!$model_query->val1){
+          if($model_query->val==0){
+            throw new \Exception("Kasir Harus Memvalidasi Terlebih Dahulu",1);
+          }
           $model_query->val1 = 1;
           $model_query->val1_user = $this->admin_id;
           $model_query->val1_at = $t_stamp;
@@ -1280,16 +1283,23 @@ class StandbyTrxController extends Controller
       $index_item = array_search($this->role, ["SuperAdmin","Logistic"]);    
       if ($index_item !== false){
         if(!$model_query->val2){
+          if($model_query->val==1){
+            throw new \Exception("Mandor Harus Memvalidasi Terlebih Dahulu",1);
+          }
           $model_query->val2 = 1;
           $model_query->val2_user = $this->admin_id;
           $model_query->val2_at = $t_stamp;
         }
       }
   
-      if(!$model_query->val && $model_query->created_user == $this->admin_id){
-        $model_query->val = 1;
-        $model_query->val_user = $this->admin_id;
-        $model_query->val_at = $t_stamp;
+
+      $index_item = array_search($this->role, ["SuperAdmin","PabrikTransport"]);    
+      if ($index_item !== false){      
+        if(!$model_query->val){
+          $model_query->val = 1;
+          $model_query->val_user = $this->admin_id;
+          $model_query->val_at = $t_stamp;
+        }
       }
       $model_query->save();
 
