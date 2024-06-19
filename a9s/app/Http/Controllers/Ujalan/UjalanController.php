@@ -869,10 +869,11 @@ class UjalanController extends Controller
               // $ordinal++;
           }
         }
+
+        if($remarksign == 0)
+        throw new \Exception("Minimal Harus Memiliki 1 For Remarks Di Detail",1);
       }
 
-      if($remarksign == 0)
-      throw new \Exception("Minimal Harus Memiliki 1 For Remarks Di Detail",1);
 
       //start for details2
       array_push( $SYSNOTES ,"Details PVR: \n");
