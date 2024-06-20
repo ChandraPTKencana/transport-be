@@ -65,7 +65,8 @@ class AstNDriverController extends Controller
     $list_xto = json_decode($request->list_xto, true);
     $list_employee = json_decode($request->list_employee, true);
     $list_vehicle = json_decode($request->list_vehicle, true);
-    $type= $request->type;
+    $type   = $request->type;
+    $jenis  = $request->jenis;
 
     if($type=='' || array_search($type,["header",'detail'])===false){
       throw new MyException([ "type" => ["Tipe Harus dipilih"] ], 422);
@@ -172,7 +173,7 @@ class AstNDriverController extends Controller
     ->join('is_ujdetails2',function ($join){
       $join->on("is_ujdetails2.id_uj","is_uj.id");   
     })
-    ->groupBy('trx_trp.id','trx_trp.tanggal','trx_trp.pv_datetime','trx_trp.xto','trx_trp.no_pol','trx_trp.supir','trx_trp.kernet')->get();
+    ->groupBy('trx_trp.id','trx_trp.tanggal','trx_trp.pv_datetime','trx_trp.xto','trx_trp.no_pol','trx_trp.supir','trx_trp.kernet');
     
     $standby_trx = $standby_trx->selectRaw("'SB' as tipe,
     standby_trx.id as id,
@@ -196,9 +197,20 @@ class AstNDriverController extends Controller
     ->join('standby_dtl',function ($join){
       $join->on("standby_dtl.standby_mst_id","standby_mst.id");   
     })
-    ->groupBy('standby_trx.id','standby_trx.created_at','standby_trx.pv_datetime','standby_trx.xto','standby_trx.no_pol','standby_trx.supir','standby_trx.kernet')->get();  
+    ->groupBy('standby_trx.id','standby_trx.created_at','standby_trx.pv_datetime','standby_trx.xto','standby_trx.no_pol','standby_trx.supir','standby_trx.kernet');  
 
-  
+    if($jenis=="" || $jenis == "UJ"){
+      $uj_trx = $uj_trx->get();
+    }else{
+      $uj_trx = [];
+    }
+
+    if($jenis=="" || $jenis == "SB"){
+      $standby_trx = $standby_trx->get();
+    }else{
+      $standby_trx = [];
+    }
+
     $data_all = [];
     $info=[];
 
