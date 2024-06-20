@@ -143,8 +143,7 @@ class VehicleController extends Controller
       $model_query = $model_query->where("no_pol", 'like', '%' . $request->no_pol . '%');
     }
 
-
-    $model_query = $model_query->get();
+    $model_query = $model_query->where("deleted",0)->get();
 
     return response()->json([
       // "data"=>EmployeeResource::collection($employees->keyBy->id),

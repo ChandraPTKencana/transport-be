@@ -67,6 +67,11 @@ class TrxTrp extends Model
         return $this->hasMany(TrxAbsen::class, 'trx_trp_id', 'id');
     }
 
+    public function uj()
+    {
+        return $this->belongsTo(Ujalan::class, 'id_uj', 'id');
+    }
+
     public function uj_details()
     {
         return $this->hasMany(UjalanDetail::class, 'id_uj', 'id_uj');

@@ -76,8 +76,8 @@ class AstNDriverController extends Controller
 
     // $model_query = TrxTrp::where('val1',1)->where("deleted",0)->orderBy("xto","asc");
     // // $model_query = TrxTrp::where('val2',1)->where("deleted",0);
-    $date_from="";
-    $date_to="";
+    $date_from = "";
+    $date_to = "";
     if($request->date_from || $request->date_to){
       $date_from = $request->date_from;
       if(!$date_from)
@@ -111,38 +111,38 @@ class AstNDriverController extends Controller
       $standby_trx = $standby_trx->whereIn("xto",$list_xto);
     }
 
+    $supir_list=[];
+    $kernet_list=[];
     if(count($list_employee)>0){
-      $supir=[];
-      $kernet=[];
 
       $employees = Employee::whereIn("id",$list_employee)->get()->toArray();
 
       foreach ($employees as $k => $v) {
         if($v['role']=='Supir'){
-          array_push($supir,$v['name']);
+          array_push($supir_list,$v['name']);
         }
         
         if($v['role']=='Kernet'){
-          array_push($kernet,$v['name']);
+          array_push($kernet_list,$v['name']);
         }  
       }
 
-      if(count($supir) > 0 || count($kernet) > 0){
-        $uj_trx=$uj_trx->where(function ($q)use($supir,$kernet){         
-          if(count($supir) > 0){
-            $q->whereIn("supir",$supir);
+      if(count($supir_list) > 0 || count($kernet_list) > 0){
+        $uj_trx=$uj_trx->where(function ($q)use($supir_list,$kernet_list){         
+          if(count($supir_list) > 0){
+            $q->whereIn("supir",$supir_list);
           }
-          if(count($kernet) > 0){
-            $q->orWhereIn("kernet",$kernet);
+          if(count($kernet_list) > 0){
+            $q->orWhereIn("kernet",$kernet_list);
           }
         });
 
-        $standby_trx=$standby_trx->where(function ($q)use($supir,$kernet){         
-          if(count($supir) > 0){
-            $q->whereIn("supir",$supir);
+        $standby_trx=$standby_trx->where(function ($q)use($supir_list,$kernet_list){         
+          if(count($supir_list) > 0){
+            $q->whereIn("supir",$supir_list);
           }
-          if(count($kernet) > 0){
-            $q->orWhereIn("kernet",$kernet);
+          if(count($kernet_list) > 0){
+            $q->orWhereIn("kernet",$kernet_list);
           }
         });
 
@@ -154,11 +154,11 @@ class AstNDriverController extends Controller
       $standby_trx = $standby_trx->whereIn("xto",$list_vehicle);
     }
 
-
     $uj_trx = $uj_trx->selectRaw("'UJ' as tipe,
     trx_trp.id as id,
     trx_trp.tanggal as tanggal,
     cast(trx_trp.pv_datetime as date) as tanggalpv,
+    trx_trp.xto as xto,
     trx_trp.no_pol as no_pol,
     trx_trp.supir as supir,
     trx_trp.kernet as kernet,
@@ -172,14 +172,14 @@ class AstNDriverController extends Controller
     ->join('is_ujdetails2',function ($join){
       $join->on("is_ujdetails2.id_uj","is_uj.id");   
     })
-    ->groupBy('trx_trp.id','trx_trp.tanggal','trx_trp.pv_datetime','trx_trp.no_pol','trx_trp.supir','trx_trp.kernet')->get();
+    ->groupBy('trx_trp.id','trx_trp.tanggal','trx_trp.pv_datetime','trx_trp.xto','trx_trp.no_pol','trx_trp.supir','trx_trp.kernet')->get();
     
-
-
     $standby_trx = $standby_trx->selectRaw("'SB' as tipe,
     standby_trx.id as id,
-    cast(standby_trx.created_at as date) as tgl,
-    cast(standby_trx.pv_datetime as date) as tglpv,
+    cast(standby_trx.created_at as date) as tanggal,
+    cast(standby_trx.pv_datetime as date) as tanggalpv,
+    standby_trx.xto as xto,
+    standby_trx.no_pol as no_pol,
     standby_trx.supir as supir,
     standby_trx.kernet as kernet,
     sum(if(standby_trx_dtl.standby_trx_id = standby_trx.id, 1, 0)) as qty,
@@ -196,200 +196,205 @@ class AstNDriverController extends Controller
     ->join('standby_dtl',function ($join){
       $join->on("standby_dtl.standby_mst_id","standby_mst.id");   
     })
-    ->groupBy('standby_trx.id','standby_trx.created_at','standby_trx.pv_datetime','standby_trx.no_pol','standby_trx.supir','standby_trx.kernet')->get();  
+    ->groupBy('standby_trx.id','standby_trx.created_at','standby_trx.pv_datetime','standby_trx.xto','standby_trx.no_pol','standby_trx.supir','standby_trx.kernet')->get();  
 
   
+    $data_all = [];
+    $info=[];
 
+    $info["from"]=$request->date_from ? date("d-m-Y",strtotime($request->date_from)) : "";
+    $info["to"]=$request->date_from ? date("d-m-Y",strtotime($request->date_to)) : "";
+    $info["now"]=date("d-m-Y H:i:s");
+    $info["uj_gaji"] = 0;
+    $info["uj_makan"] = 0;
+    $info["sb_gaji"] = 0;
+    $info["sb_makan"] = 0;
+    $info["total"] = 0;
 
-  // // return response()->json([
-    // //   "data" => $model_query->toSql(),
-    // // ], 200);
-    // $model_query = $model_query->get();
-    // $all_id_uj = array_map(function($x){
-    //   return $x["id_uj"];
-    // },$model_query->toArray());
+    foreach ($uj_trx as $k => $v) {      
+      $supir = [
+        "tipe"=>$v->tipe,
+        "id"=>$v->id,
+        "tanggal"=>$v->tanggal,
+        "no_pol"=>$v->no_pol,
+        "lokasi"=>$v->xto,
+        "jabatan"=>"Supir",
+        "nama"=>$v->supir,
+        "gaji"=>$v->gajis,
+        "makan"=>$v->makans,
+        "total"=>(int)$v->gajis + (int)$v->makans,
+      ];
 
-    // $all_uj = UjalanDetail2::whereIn("id_uj",$all_id_uj)->whereIn("xfor",["Supir","Kernet"])->get()->toArray();
+      $kernet = [
+        "tipe"=>$v->tipe,
+        "id"=>$v->id,
+        "tanggal"=>$v->tanggal,
+        "no_pol"=>$v->no_pol,
+        "lokasi"=>$v->xto,
+        "jabatan"=>"Kernet",
+        "nama"=>$v->kernet,
+        "gaji"=>$v->gajik,
+        "makan"=>$v->makank,
+        "total"=>(int)$v->gajik + (int)$v->makank,
+      ];
 
-    // $data=[];
+      if($v->supir && ( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
+        $info['uj_gaji'] += (int)$v->gajis;
+        $info['uj_makan'] += (int)$v->makans;
+      }
 
-    // $acc_ugaji = '01.510.001';
-    // $acc_umakan = '01.510.005';
-    // foreach ($model_query as $k => $v) {
+      if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
+        $info['uj_gaji'] += (int)$v->gajik;
+        $info['uj_makan'] += (int)$v->makank;
+      }
 
-    //   $id_uj = $v->id_uj;
-    //   $xto = $v->xto;
-    //   $supir = $v->supir;
-    //   $kernet = $v->kernet;
-    //   $tonase = 0;
+      if(count($data_all) == 0 )
+      {
 
-    //   switch ($v->jenis) {
-    //     case 'TBS':
-    //       $tonase = $v->ticket_b_netto;
-    //       break;
-    //     case 'TBSK':
-    //       $tonase = $v->ticket_b_netto;
-    //       break;
-    //     case 'CPO':
-    //       $tonase = $v->ticket_a_netto;
-    //       break;
-    //     case 'PK':
-    //       $tonase = $v->ticket_a_netto;
-    //       break;
-    //   }
- 
-    //   $ujalan_pvr_dtls = array_filter($all_uj,function($x)use($id_uj){
-    //     return $x["id_uj"] == $id_uj;
-    //   });
-    //   $u_gaji_supir = 0;
-    //   $u_gaji_kernet = 0;
-    //   $u_makan_supir = 0;
-    //   $u_makan_kernet = 0;
-      
-    //   foreach ($ujalan_pvr_dtls as $uk => $uv) {
-    //     $ttl = $uv['amount'] * $uv['qty'];
-    //     if($uv['xfor']=="Supir" && $uv['ac_account_code']==$acc_ugaji){ $u_gaji_supir = $ttl; }
-    //     if($uv['xfor']=="Supir" &&  $uv['ac_account_code']==$acc_umakan){ $u_makan_supir = $ttl; }
-    //     if($uv['xfor']=="Kernet" && $uv['ac_account_code']==$acc_ugaji){ $u_gaji_kernet = $ttl;}
-    //     if($uv['xfor']=="Kernet" && $uv['ac_account_code']==$acc_umakan){ $u_makan_kernet = $ttl; }
-    //   }
+        if($v->supir &&( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
+          $data_all[$v->supir] = [$supir];
+          
+        }
+        if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
+          $data_all[$v->kernet] = [$kernet];
+          
+        }
+      }else{
+        if($v->supir &&( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
+          if(!isset($data_all[$v->supir])){
+            $data_all[$v->supir] = [$supir];
+          }else{
+            array_push($data_all[$v->supir],$supir);
+          }
+        }
 
-    //   $data_xtos = array_map(function($x){
-    //     return $x["xto"];
-    //   },$data);
+        if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
+          if(!isset($data_all[$v->kernet])){
+            $data_all[$v->kernet] = [$kernet];
+          }else{
+            array_push($data_all[$v->kernet],$kernet);
+          }
+        }
+      }
+    }
 
-    //   $index = array_search($xto,$data_xtos);
-      
-    //   if(count($data)==0 || $index===false){
-    //     $dt =[
-    //       "xto"=>$xto,
-    //       "trip"=>1,
-    //       "tonase"=>$tonase,
-    //       "supirs"=>[
-    //         [
-    //           "name" => $supir,
-    //           "ugaji" => $u_gaji_supir,
-    //           "umakan" => $u_makan_supir,
-    //         ]
-    //       ]
-    //     ];
+    foreach ($standby_trx as $k => $v) {
+      $supir = [
+        "tipe"=>$v->tipe,
+        "id"=>$v->id,
+        "tanggal"=>$v->tanggal,
+        "no_pol"=>$v->no_pol,
+        "lokasi"=>$v->xto,
+        "jabatan"=>"Supir",
+        "nama"=>$v->supir,
+        "gaji"=>$v->gajis,
+        "makan"=>$v->makans,
+        "total"=>(int)$v->gajis + (int)$v->makans,
+      ];
 
-    //     if($kernet){
-    //       $dt["kernets"] =[
-    //         [ 
-    //         "name"=>$kernet,
-    //         "ugaji" => $u_gaji_kernet,
-    //         "umakan" => $u_makan_kernet,
-    //         ]
-    //       ];
-    //     }else{
-    //       $dt["kernets"]=[];
-    //     }
+      $kernet = [
+        "tipe"=>$v->tipe,
+        "id"=>$v->id,
+        "tanggal"=>$v->tanggal,
+        "no_pol"=>$v->no_pol,
+        "lokasi"=>$v->xto,
+        "jabatan"=>"Kernet",
+        "nama"=>$v->kernet,
+        "gaji"=>$v->gajik,
+        "makan"=>$v->makank,
+        "total"=>(int)$v->gajik + (int)$v->makank,
+      ];
 
-    //     array_push($data,$dt);
-    //   }else{
-    //     $data[$index]["trip"]+=1;
-    //     $data[$index]["tonase"]+=$tonase;
+      if($v->supir &&( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
+        $info['sb_gaji'] += (int)$v->gajis;
+        $info['sb_makan'] += (int)$v->makans;
+      }
 
-    //     $supir_names = array_map(function($x){
-    //       return $x["name"];
-    //     },$data[$index]["supirs"]);
+      if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
+        $info['sb_gaji'] += (int)$v->gajik;
+        $info['sb_makan'] += (int)$v->makank;
+      }
 
-    //     $supir_find=array_search($supir,$supir_names);
-    //     if(count($data[$index]['supirs'])==0 || $supir_find===false){
-    //       array_push($data[$index]['supirs'],[
-    //         "name" => $supir,
-    //         "ugaji" => $u_gaji_supir,
-    //         "umakan" => $u_makan_supir,
-    //       ]);
-    //     }else{
-    //       $data[$index]["supirs"][$supir_find]["ugaji"] += $u_gaji_supir;
-    //       $data[$index]["supirs"][$supir_find]["umakan"] += $u_makan_supir;
-    //     }
+      if(count($data_all) == 0 )
+      {
 
-    //     if(!$kernet) continue;
-    //     $kernet_names = array_map(function($x){
-    //       return $x["name"];
-    //     },$data[$index]["kernets"]);
-    //     // try {
-    //     // } catch (\Throwable $th) {
-    //     //   return response()->json([
-    //     //     "kernet" => $data[$index]["kernets"],
-    //     //   ], 200);
-    //     // }
-        
+        if($v->supir &&( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
+          $data_all[$v->supir] = [$supir];
+          
+        }
+        if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
+          $data_all[$v->kernet] = [$kernet];
+          
+        }
+      }else{
+        if($v->supir &&( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
+          if(!isset($data_all[$v->supir])){
+            $data_all[$v->supir] = [$supir];
+          }else{
+            array_push($data_all[$v->supir],$supir);
+          }
+        }
 
-    //     $kernet_find=array_search($kernet,$kernet_names);
-    //     if(count($data[$index]['kernets'])==0 || $kernet_find===false){
-    //       array_push($data[$index]['kernets'],[
-    //         "name" => $kernet,
-    //         "ugaji" => $u_gaji_kernet,
-    //         "umakan" => $u_makan_kernet,
-    //       ]);
-    //     }else{
-    //       $data[$index]["kernets"][$kernet_find]["ugaji"] += $u_gaji_kernet;
-    //       $data[$index]["kernets"][$kernet_find]["umakan"] += $u_makan_kernet;
-    //     }
-    //   }
-    // }
+        if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
+          if(!isset($data_all[$v->kernet])){
+            $data_all[$v->kernet] = [$kernet];
+          }else{
+            array_push($data_all[$v->kernet],$kernet);
+          }
+        }
+      }
+    }
+    $info["total"] = $info['uj_gaji']+$info['uj_makan']+$info['sb_gaji']+$info['sb_makan'];
 
-    // $info=[
-    //   "ttl_supir"=>0,
-    //   "ttl_kernet"=>0,
-    //   "ttl_gaji_supir"=>0,
-    //   "ttl_makan_supir"=>0,
-    //   "ttl_gaji_kernet"=>0,
-    //   "ttl_makan_kernet"=>0,
-    //   "ttl_tonase"=>0,
-    //   "ttl_rt_tonase"=>0,
-    //   "ttl_trip"=>0,
-    //   "from"=>date("d-m-Y",strtotime($request->date_from)),
-    //   "to"=>date("d-m-Y",strtotime($request->date_to)),
-    //   "now"=>date("d-m-Y H:i:s"),
-    // ];
+    ksort($data_all);
+    
+    $data_processed =[];
+    if($type=="detail"){
+      foreach ($data_all as $k => $v) {
+        usort($data_all[$k],function($a, $b){
+          return $a['tanggal'] <=> $a['tanggal'] && $a['id'] <=> $a['id'];
+        });
+        $dt = $data_all[$k];
+        $data_processed=array_merge($data_processed,$dt);
+      }
+    }else if($type=='header'){
+      foreach ($data_all as $k => $v) {
 
-    // $info["from"]=$request->date_from ? date("d-m-Y",strtotime($request->date_from)) : "";
-    // $info["to"]=$request->date_from ? date("d-m-Y",strtotime($request->date_to)) : "";
-    // $info["now"]=date("d-m-Y H:i:s");
+        $dt=[
+          "nama"=>"",
+          "jabatan"=>"",
+          "uj_gaji"=>0,
+          "uj_makan"=>0,
+          "uj_total"=>0,
+          "sb_gaji"=>0,
+          "sb_makan"=>0,          
+          "sb_total"=>0,
+          "total"=>0
+        ];
 
-    // foreach ($data as $k => $v) {
-    //   $data[$k]["z_rt_tonase"] = $data[$k]["tonase"] / $data[$k]["trip"];
-    //   $data[$k]["z_supir"] = count($data[$k]["supirs"]);
-    //   $data[$k]["z_kernet"] = count($data[$k]["kernets"]);
-    //   $data[$k]["z_gaji_supir"] = array_reduce($data[$k]["supirs"],function($res,$dt){
-    //     $res+=$dt["ugaji"];
-    //     return $res;
-    //   },0);
-    //   $data[$k]["z_makan_supir"] = array_reduce($data[$k]["supirs"],function($res,$dt){
-    //     $res+=$dt["umakan"];
-    //     return $res;
-    //   },0);
-    //   $data[$k]["z_gaji_kernet"] = array_reduce($data[$k]["kernets"],function($res,$dt){
-    //     $res+=$dt["ugaji"];
-    //     return $res;
-    //   },0);
-    //   $data[$k]["z_makan_kernet"] = array_reduce($data[$k]["kernets"],function($res,$dt){
-    //     $res+=$dt["umakan"];
-    //     return $res;
-    //   },0);
+        foreach ($data_all[$k] as $k1 => $v1) {
+          if($dt['nama']==""){
+            $dt['nama']=$v1['nama'];
+            $dt['jabatan']=$v1['jabatan']; 
+          }
 
-    //   $info["ttl_supir"]+=$data[$k]["z_supir"];
-    //   $info["ttl_kernet"]+=$data[$k]["z_kernet"];
-    //   $info["ttl_gaji_supir"]+=$data[$k]["z_gaji_supir"];
-    //   $info["ttl_gaji_kernet"]+=$data[$k]["z_gaji_kernet"];
-    //   $info["ttl_makan_supir"]+=$data[$k]["z_makan_supir"];
-    //   $info["ttl_makan_kernet"]+=$data[$k]["z_makan_kernet"];
-    //   $info["ttl_tonase"]+=$data[$k]["tonase"];
-    //   $info["ttl_rt_tonase"]+=$data[$k]["z_rt_tonase"];
-    //   $info["ttl_trip"]+=$data[$k]["trip"];
-    // }
-
+          if($v1['tipe']=='UJ'){
+            $dt['uj_gaji']+=$v1['gaji'];
+            $dt['uj_makan']+=$v1['makan'];
+            $dt['uj_total']+=$v1['gaji']+$v1['makan'];
+          }else{
+            $dt['sb_gaji']+=$v1['gaji'];
+            $dt['sb_makan']+=$v1['makan'];
+            $dt['sb_total']+=$v1['gaji']+$v1['makan'];
+          }
+        }
+        $dt['total'] += $dt['uj_total'] + $dt['sb_total'];
+        array_push($data_processed,$dt);
+      }
+    }
     return response()->json([
-      "data" => $uj_trx->get(),
-      "info" => $standby_trx->get()
-
-      // "data" => $data,
-      // "info" => $info
+      "data" => $data_processed,
+      "info" => $info
     ], 200);
   }
 
@@ -403,36 +408,43 @@ class AstNDriverController extends Controller
     $data = $ori["data"];
     $info = $ori["info"];
     
-    // return response()->json([
-    //   "data" => $data,
-    //   "info" => $info
-    // ], 200);
-    foreach ($data as $k => $v) {
-      $data[$k]["trip"] = number_format($data[$k]["trip"],0,",",".");
-      $data[$k]["tonase"] = number_format($data[$k]["tonase"],0,",",".");
-      $data[$k]["z_rt_tonase"] = number_format($data[$k]["z_rt_tonase"],2,",",".");
-      $data[$k]["z_supir"] = number_format($data[$k]["z_supir"],0,",",".");
-      $data[$k]["z_kernet"] = number_format($data[$k]["z_kernet"],0,",",".");
-      $data[$k]["z_gaji_supir"] = number_format($data[$k]["z_gaji_supir"],0,",",".");
-      $data[$k]["z_makan_supir"] = number_format($data[$k]["z_makan_supir"],0,",",".");
-      $data[$k]["z_gaji_kernet"] = number_format($data[$k]["z_gaji_kernet"],0,",",".");
-      $data[$k]["z_makan_kernet"] = number_format($data[$k]["z_makan_kernet"],0,",",".");
+    $type = $request->type;
+
+    if($type=='detail'){
+      foreach ($data as $k => $v) {
+        $data[$k]["gaji"] = number_format($data[$k]["gaji"],0,",",".");
+        $data[$k]["makan"] = number_format($data[$k]["makan"],0,",",".");
+        $data[$k]["total"] = number_format($data[$k]["total"],2,",",".");
+      }
+  
+    }else{
+      foreach ($data as $k => $v) {
+        $data[$k]["uj_gaji"] = number_format($data[$k]["uj_gaji"],0,",",".");
+        $data[$k]["uj_makan"] = number_format($data[$k]["uj_makan"],0,",",".");
+        $data[$k]["uj_total"] = number_format($data[$k]["uj_total"],2,",",".");
+        $data[$k]["sb_gaji"] = number_format($data[$k]["sb_gaji"],0,",",".");
+        $data[$k]["sb_makan"] = number_format($data[$k]["sb_makan"],0,",",".");
+        $data[$k]["sb_total"] = number_format($data[$k]["sb_total"],0,",",".");
+        $data[$k]["total"] = number_format($data[$k]["total"],0,",",".");
+      }
     }
 
-    $info["ttl_gaji_supir"]=number_format($info["ttl_gaji_supir"],0,",",".");
-    $info["ttl_gaji_kernet"]=number_format($info["ttl_gaji_kernet"],0,",",".");
-    $info["ttl_makan_supir"]=number_format($info["ttl_makan_supir"],0,",",".");
-    $info["ttl_makan_kernet"]=number_format($info["ttl_makan_kernet"],0,",",".");
-    $info["ttl_tonase"]=number_format($info["ttl_tonase"],0,",",".");
-    $info["ttl_rt_tonase"]=number_format($info["ttl_rt_tonase"],2,",",".");
-    $info["ttl_trip"]=number_format($info["ttl_trip"],0,",",".");
+    $info["uj_gaji"]=number_format($info["uj_gaji"],0,",",".");
+    $info["uj_makan"]=number_format($info["uj_makan"],0,",",".");
+    $info["sb_gaji"]=number_format($info["sb_gaji"],0,",",".");
+    $info["sb_makan"]=number_format($info["sb_makan"],0,",",".");
+    $info["total"]=number_format($info["total"],0,",",".");
+
+    $blade= ($request->type=='detail'?'pdf.asnd_detail':'pdf.asnd_header');
+
+    
 
 
 
     $date = new \DateTime();
     $filename = $date->format("YmdHis");
     Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
-    $pdf = PDF::loadView('pdf.ramp_info', ["data"=>$data,"info"=>$info])->setPaper('a4', 'portrait');
+    $pdf = PDF::loadView($blade, ["data"=>$data,"info"=>$info])->setPaper('a4', 'portrait');
 
 
     $mime = MyLib::mime("pdf");
@@ -462,8 +474,10 @@ class AstNDriverController extends Controller
     $filename=$date->format("YmdHis").'-ramp_info'."[".$info["from"]."-".$info["to"]."]";
 
     $mime=MyLib::mime("xlsx");
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data],'excel.ramp_info'), $mime["exportType"]));
 
+    $blade= ($request->type=='detail'?'excel.asnd_detail':'excel.asnd_header');
+
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade), $mime["exportType"]));
 
     $result = [
       "contentType" => $mime["contentType"],

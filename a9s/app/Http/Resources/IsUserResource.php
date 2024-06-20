@@ -16,9 +16,9 @@ class IsUserResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'id_user'             => $this->id_user,
+            'id'                  => $this->id,
             'username'            => $this->username,
-            'nama_user'           => $this->nama_user,
+            // 'nama_user'           => $this->nama_user,
         ];
     }
 }
