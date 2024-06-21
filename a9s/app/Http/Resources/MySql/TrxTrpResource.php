@@ -94,7 +94,8 @@ class TrxTrpResource extends JsonResource
             'pvr_no'            => $this->pvr_no ?? "",
             'pvr_total'         => $this->pvr_total ?? "",
             'pvr_had_detail'    => $this->pvr_had_detail ?? "",
-            'transition_to'     => $this->transition_to ?? "",
+            'transition_target' => $this->transition_target ?? "",
+            'transition_type'   => $this->transition_type ?? "",
             'trx_absens'        => TrxAbsenResource::collection($this->whenLoaded('trx_absens')),
 
             'ritase_leave_at'   => $this->ritase_leave_at ?? "",

@@ -103,7 +103,7 @@ class TrxTrpController extends Controller
           
           $list_to_like = ["id","xto","tipe",
           "jenis","pv_no","ticket_a_no","ticket_b_no","supir","kernet","no_pol","tanggal",
-          "cost_center_code","cost_center_desc","pvr_id","pvr_no","transition_to"];
+          "cost_center_code","cost_center_desc","pvr_id","pvr_no","transition_target"];
     
           foreach ($list_to_like as $key => $v) {
             if (isset($like_lists[$v])) {
@@ -268,7 +268,7 @@ class TrxTrpController extends Controller
                         $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
                       });
                       $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->where("ticket_b_bruto","<",1)->where("ticket_b_tara","<",1)->where("ticket_b_netto","<",1);
+                        $q2->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->whereNull("ticket_b_bruto")->whereNull("ticket_b_tara")->whereNull("ticket_b_netto");
                       });
                   });
                 }
@@ -338,7 +338,7 @@ class TrxTrpController extends Controller
             $q1->where("jenis","TBSK")->whereNull("ticket_b_no");
           });
           $q->orWhere(function ($q1){
-            $q1->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->where("ticket_b_bruto","<",1)->where("ticket_b_tara","<",1)->where("ticket_b_netto","<",1);
+            $q1->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->whereNull("ticket_b_bruto")->whereNull("ticket_b_tara")->whereNull("ticket_b_netto");
           });
       });
     }
@@ -496,11 +496,16 @@ class TrxTrpController extends Controller
       if(!$ujalan) 
       throw new \Exception("Silahkan Isi Data Ujalan Dengan Benar",1);
 
-      $model_query->id_uj           = $ujalan->id;
-      $model_query->jenis           = $request->jenis;
-      $model_query->xto             = $ujalan->xto;
-      $model_query->tipe            = $ujalan->tipe;
-      $model_query->amount          = $ujalan->harga;
+      $model_query->id_uj               = $ujalan->id;
+      $model_query->jenis               = $request->jenis;
+      $model_query->xto                 = $ujalan->xto;
+      $model_query->tipe                = $ujalan->tipe;
+      $model_query->amount              = $ujalan->harga;
+
+      if($ujalan->transition_from){
+        $model_query->transition_target = $ujalan->transition_from;
+        $model_query->transition_type   = "From";
+      }
       
       if($online_status=="true"){
         if($request->cost_center_code){
@@ -604,6 +609,15 @@ class TrxTrpController extends Controller
         $model_query->xto             = $ujalan->xto;
         $model_query->tipe            = $ujalan->tipe;
         $model_query->amount          = $ujalan->harga;
+
+        if($ujalan->transition_from){
+          $model_query->transition_target = $ujalan->transition_from;
+          $model_query->transition_type   = "From";
+        }else{
+          $model_query->transition_target = null;
+          $model_query->transition_type   = null;
+        }
+        
         $model_query->supir           = $request->supir;
         $model_query->kernet          = MyLib::emptyStrToNull($request->kernet);
         $model_query->no_pol          = $request->no_pol;
@@ -671,9 +685,9 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
 
-    $transition_to = $request->transition_to;
-    if($transition_to==env("app_name") || !in_array($transition_to,["KPN","KAS","KUS","ARP","KAP","SMP"])){
-      $transition_to="";
+    $transition_target = $request->transition_target;
+    if($transition_target==env("app_name") || !in_array($transition_target,MyLib::$list_pabrik)){
+      $transition_target="";
     }
 
     DB::beginTransaction();
@@ -691,8 +705,8 @@ class TrxTrpController extends Controller
 
           $get_data_ticket = $this->getTicketA("sqlsrv",$request);
 
-          if(!$get_data_ticket && $transition_to!="") 
-          $get_data_ticket = $this->getTicketA($transition_to,$request);            
+          if(!$get_data_ticket && $transition_target!="") 
+          $get_data_ticket = $this->getTicketA($transition_target,$request);            
           
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -727,8 +741,8 @@ class TrxTrpController extends Controller
 
           $get_data_ticket = $this->getTicketB('sqlsrv',$request);
 
-          if(!$get_data_ticket && $transition_to!="")
-          $get_data_ticket = $this->getTicketB($transition_to,$request);
+          if(!$get_data_ticket && $transition_target!="")
+          $get_data_ticket = $this->getTicketB($transition_target,$request);
 
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -761,7 +775,20 @@ class TrxTrpController extends Controller
 
       }
 
-      $model_query->transition_to=$request->transition_to;
+      if($request->transition_target){
+        if($model_query->transition_type=="From" && $model_query->transition_target !== $request->transition_target){
+          throw new \Exception("Peralihan Sudah Terkunci",1);
+        }else if($model_query->transition_type=="From" && $model_query->transition_target == $request->transition_target){
+
+        }else{
+          $model_query->transition_target = $request->transition_target;
+          $model_query->transition_type   = "To";
+        }
+      }else{
+        $model_query->transition_target   = null;
+        $model_query->transition_type     = null;
+      }
+
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
@@ -1585,11 +1612,12 @@ class TrxTrpController extends Controller
     $kernet = $trx_trp->kernet;
     $associate_name="(S) ".$supir.($kernet?" (K) ".$kernet." ":" (Tanpa Kernet) ").$no_pol; // max 80char
 
+    $ujalan=Ujalan::where("id",$trx_trp->id_uj)->first();
+
     $arrRemarks = [];
-    array_push($arrRemarks,"#".$trx_trp->id." ".$associate_name.".");
+    array_push($arrRemarks,"#".$trx_trp->id.($trx_trp->transition_type=="From" ?" (P) " : " ").$associate_name.".");
     array_push($arrRemarks,"BIAYA UANG JALAN ".$trx_trp->jenis." ".env("app_name")."-".$trx_trp->xto." P/".date("d-m-y",strtotime($trx_trp->tanggal))).".";
 
-    $ujalan=Ujalan::where("id",$trx_trp->id_uj)->first();
 
     // $arr=[1];
     
@@ -2194,8 +2222,8 @@ class TrxTrpController extends Controller
   //         if (isset($like_lists["pvr_no"])) {
   //           $q->orWhere("pvr_no", "like", $like_lists["pvr_no"]);
   //         }
-  //         if (isset($like_lists["transition_to"])) {
-  //           $q->orWhere("transition_to", "like", $like_lists["transition_to"]);
+  //         if (isset($like_lists["transition_target"])) {
+  //           $q->orWhere("transition_target", "like", $like_lists["transition_target"]);
   //         }
     
   //         // if (isset($like_lists["requested_name"])) {
@@ -2275,7 +2303,7 @@ class TrxTrpController extends Controller
   //           $q1->where("jenis","TBSK")->whereNull("ticket_b_no");
   //         });
   //         $q->orWhere(function ($q1){
-  //           $q1->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->where("ticket_b_bruto","<",1)->where("ticket_b_tara","<",1)->where("ticket_b_netto","<",1);
+  //           $q1->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->whereNull("ticket_b_bruto")->whereNull("ticket_b_tara")->whereNull("ticket_b_netto");
   //         });
   //     });
   //   }

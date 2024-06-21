@@ -15,7 +15,7 @@ class SupirAndKernet extends Command
      *
      * @var string
      */
-    protected $signature = 'snk';
+    protected $signature = 'snkxxxxxx';
 
     /**
      * The console command description.

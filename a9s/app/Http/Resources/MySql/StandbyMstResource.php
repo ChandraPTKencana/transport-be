@@ -18,23 +18,25 @@ class StandbyMstResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'id'          => $this->id,
-            'name'        => $this->name,
-            'tipe'        => $this->tipe,
-            'amount'      => $this->amount,
-            'details'     => StandbyDtlResource::collection($this->whenLoaded('details')),
-            'created_at'  => $this->created_at,
-            'updated_at'  => $this->updated_at,
+            'id'            => $this->id,
+            'name'          => $this->name,
+            'tipe'          => $this->tipe,
+            'amount'        => $this->amount,
+            'details'       => StandbyDtlResource::collection($this->whenLoaded('details')),
+            'created_at'    => $this->created_at,
+            'updated_at'    => $this->updated_at,
+            'is_transition' => $this->is_transition ? 1 : 0,
 
-            'val'         => $this->val,
-            'val_user'    => $this->val_user ?? "",
-            'val_by'      => new IsUserResource($this->whenLoaded('val_by')),
-            'val_at'      => $this->val_at ?? "",
 
-            'val1'        => $this->val1,
-            'val1_user'   => $this->val1_user ?? "",
-            'val1_by'     => new IsUserResource($this->whenLoaded('val1_by')),
-            'val1_at'     => $this->val1_at ?? "",
+            'val'           => $this->val,
+            'val_user'      => $this->val_user ?? "",
+            'val_by'        => new IsUserResource($this->whenLoaded('val_by')),
+            'val_at'        => $this->val_at ?? "",
+
+            'val1'          => $this->val1,
+            'val1_user'     => $this->val1_user ?? "",
+            'val1_by'       => new IsUserResource($this->whenLoaded('val1_by')),
+            'val1_at'       => $this->val1_at ?? "",
         ];
     }
 }

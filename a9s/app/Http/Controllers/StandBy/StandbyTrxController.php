@@ -270,7 +270,8 @@ class StandbyTrxController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst'])->get();
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst'])
+    ->withCount('details')->get();
 
     return response()->json([
       "data" => StandbyTrxResource::collection($model_query),
@@ -353,8 +354,6 @@ class StandbyTrxController extends Controller
       // throw new \Exception("List sudah terdaftar");
 
       $model_query                      = new StandbyTrx();      
-      $model_query->transition_target   = $request->transition_target;
-      $model_query->transition_type     = $request->transition_type;
       $standby_mst = \App\Models\MySql\StandbyMst::where("id",$request->standby_mst_id)
       ->where("deleted",0)
       ->lockForUpdate()
@@ -363,7 +362,17 @@ class StandbyTrxController extends Controller
       if(!$standby_mst) 
       throw new \Exception("Silahkan Isi Data Standby Dengan Benar",1);
 
+      if($standby_mst->is_transition && ($request->transition_target=='' || $request->transition_type=='')) 
+        throw new \Exception("Info Peralihan Harap Diisi",1);
+
       $model_query->standby_mst_id      = $standby_mst->id;
+      if($standby_mst->is_transition){
+        $model_query->transition_target   = $request->transition_target;
+        $model_query->transition_type     = $request->transition_type;
+      }else{
+        $model_query->transition_target   = null;
+        $model_query->transition_type     = null;
+      }
       // $model_query->standby_mst_name    = $standby_mst->name;
       // $model_query->standby_mst_type    = $standby_mst->tipe;
       // $model_query->standby_mst_amount  = $standby_mst->amount;
@@ -483,8 +492,6 @@ class StandbyTrxController extends Controller
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
       
       if($model_query->val==0){
-        $model_query->transition_target   = $request->transition_target;
-        $model_query->transition_type     = $request->transition_type;
         $standby_mst = \App\Models\MySql\StandbyMst::where("id",$request->standby_mst_id)
         ->where("deleted",0)
         ->lockForUpdate()
@@ -492,8 +499,20 @@ class StandbyTrxController extends Controller
   
         if(!$standby_mst) 
         throw new \Exception("Silahkan Isi Data Standby Dengan Benar",1);
-  
+        
+        if($standby_mst->is_transition && ($request->transition_target=='' || $request->transition_type=='')) 
+        throw new \Exception("Info Peralihan Harap Diisi",1);
+        
         $model_query->standby_mst_id      = $standby_mst->id;
+
+        if($standby_mst->is_transition){
+          $model_query->transition_target   = $request->transition_target;
+          $model_query->transition_type     = $request->transition_type;
+        }else{
+          $model_query->transition_target   = null;
+          $model_query->transition_type     = null;
+        }
+
         // $model_query->standby_mst_name    = $standby_mst->name;
         // $model_query->standby_mst_type    = $standby_mst->tipe;
         // $model_query->standby_mst_amount  = $standby_mst->amount;
@@ -1440,7 +1459,7 @@ class StandbyTrxController extends Controller
     throw new \Exception("Transaksi Standby Detail Harus diisi terlebih dahulu",1);
 
     $arrRemarks = [];
-    array_push($arrRemarks,"#".$standby_trx->id." ".$associate_name.".");
+    array_push($arrRemarks,"#".$standby_trx->id.($standby_trx->transition_type!=''?" (P) " : " ").$associate_name.".");
     array_push($arrRemarks,$standby_mst->name." ".($standby_trx->xto ? env("app_name")."-".$standby_trx->xto : "")).".";
     $pertanggal = "";
     foreach ($standby_trx_dtl as $key => $value) {

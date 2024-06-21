@@ -372,6 +372,11 @@ class UjalanController extends Controller
     $this->validateItems2($details_in2);
     //end for details2
 
+    $transition_from = $request->transition_from;
+    if($transition_from==env("app_name") || !in_array($transition_from,MyLib::$list_pabrik)){
+      $transition_from="";
+    }
+
     $rollback_id = -1;
     DB::beginTransaction();
     try {
@@ -421,8 +426,9 @@ class UjalanController extends Controller
       $model_query->tipe            = $request->tipe;
       $model_query->jenis           = $request->jenis;
       // $model_query->status          = $request->status;
-      $model_query->harga          = 0;
-      $model_query->note_for_remarks= MyLib::emptyStrToNull($request->note_for_remarks);
+      $model_query->harga            = 0;
+      $model_query->note_for_remarks = MyLib::emptyStrToNull($request->note_for_remarks);
+      $model_query->transition_from  = $transition_from;
       
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
@@ -538,7 +544,10 @@ class UjalanController extends Controller
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
     MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
     $t_stamp = date("Y-m-d H:i:s");
-
+    $transition_from = $request->transition_from;
+    if($transition_from==env("app_name") || !in_array($transition_from,MyLib::$list_pabrik)){
+      $transition_from="";
+    }
     DB::beginTransaction();
     try {
       $SYSNOTES=[];
@@ -631,6 +640,7 @@ class UjalanController extends Controller
         $model_query->jenis           = $request->jenis;
         $model_query->harga           = 0;
         $model_query->note_for_remarks= MyLib::emptyStrToNull($request->note_for_remarks);
+        $model_query->transition_from = $transition_from;
 
         // $model_query->status          = $request->status;
     

@@ -140,9 +140,9 @@ class TrxLoadDataController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
     $online_status = $request->online_status;
-    $transition_to = $request->transition_to;
-    if($transition_to==env("app_name") || !in_array($transition_to,["KPN","KAS","KUS","ARP","KAP","SMP"])){
-      $transition_to="";
+    $transition_target = $request->transition_target;
+    if($transition_target==env("app_name") || !in_array($transition_target,MyLib::$list_pabrik)){
+      $transition_target="";
     }
 
     $connectionDB = DB::connection('sqlsrv');
@@ -223,12 +223,12 @@ class TrxLoadDataController extends Controller
         // $list_pv= MyLib::objsToArray($list_pv); 
 
 
-        if($transition_to!=""){
-          if($jenis=="TBS" && $transition_to!=""){
+        if($transition_target!=""){
+          if($jenis=="TBS" && $transition_target!=""){
             $product_names = ["MTBS","TBS","RTBS"];
           }
           
-          $ad_list_ticket = DB::connection($transition_to)->table("palm_tickets")
+          $ad_list_ticket = DB::connection($transition_target)->table("palm_tickets")
           // ->select('*')
           ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
           ->whereDate('Date','>=', $date_from)

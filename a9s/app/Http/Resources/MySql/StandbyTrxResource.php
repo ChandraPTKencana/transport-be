@@ -86,6 +86,7 @@ class StandbyTrxResource extends JsonResource
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
             'details'           => StandbyTrxDtlResource::collection($this->whenLoaded('details')),
+            'details_count'     => $this->details_count,
 
         ];
     }

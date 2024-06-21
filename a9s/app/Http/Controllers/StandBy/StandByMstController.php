@@ -269,6 +269,7 @@ class StandbyMstController extends Controller
 
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
+      $model_query->is_transition   = $request->is_transition=='true' ? 1 : 0; 
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
@@ -400,6 +401,7 @@ class StandbyMstController extends Controller
       $model_query->name            = $request->name;
       $model_query->tipe            = $request->tipe;
       $model_query->amount          = 0;
+      $model_query->is_transition   = $request->is_transition=='true' ? 1 : 0; 
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;

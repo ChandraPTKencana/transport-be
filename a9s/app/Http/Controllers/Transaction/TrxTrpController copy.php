@@ -283,8 +283,8 @@ class TrxTrpController extends Controller
           if (isset($like_lists["pvr_no"])) {
             $q->orWhere("pvr_no", "like", $like_lists["pvr_no"]);
           }
-          if (isset($like_lists["transition_to"])) {
-            $q->orWhere("transition_to", "like", $like_lists["transition_to"]);
+          if (isset($like_lists["transition_target"])) {
+            $q->orWhere("transition_target", "like", $like_lists["transition_target"]);
           }
     
           // if (isset($like_lists["requested_name"])) {
@@ -389,9 +389,9 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
     
-    $transition_to = $request->transition_to;
-    if($transition_to==env("app_name") || !in_array($transition_to,["KPN","KAS","KUS","ARP","KAP","SMP"])){
-      $transition_to="";
+    $transition_target = $request->transition_target;
+    if($transition_target==env("app_name") || !in_array($transition_target,MyLib::$list_pabrik)){
+      $transition_target="";
     }
 
     DB::beginTransaction();
@@ -453,8 +453,8 @@ class TrxTrpController extends Controller
 
           $get_data_ticket = $this->getTicketA("sqlsrv",$request);
 
-          if(!$get_data_ticket && $transition_to!="") 
-          $get_data_ticket = $this->getTicketA($transition_to,$request);
+          if(!$get_data_ticket && $transition_target!="") 
+          $get_data_ticket = $this->getTicketA($transition_target,$request);
 
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -478,8 +478,8 @@ class TrxTrpController extends Controller
 
           $get_data_ticket = $this->getTicketB('sqlsrv',$request);
 
-          if(!$get_data_ticket && $transition_to!="")
-          $get_data_ticket = $this->getTicketB($transition_to,$request);
+          if(!$get_data_ticket && $transition_target!="")
+          $get_data_ticket = $this->getTicketB($transition_target,$request);
 
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -518,7 +518,7 @@ class TrxTrpController extends Controller
         }
       }
 
-      $model_query->transition_to=$request->transition_to;
+      $model_query->transition_target=$request->transition_target;
       $model_query->supir=$request->supir;
       $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
@@ -592,9 +592,9 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
 
-    $transition_to = $request->transition_to;
-    if($transition_to==env("app_name") || !in_array($transition_to,["KPN","KAS","KUS","ARP","KAP","SMP"])){
-      $transition_to="";
+    $transition_target = $request->transition_target;
+    if($transition_target==env("app_name") || !in_array($transition_target,MyLib::$list_pabrik)){
+      $transition_target="";
     }
 
     DB::beginTransaction();
@@ -659,8 +659,8 @@ class TrxTrpController extends Controller
 
           $get_data_ticket = $this->getTicketA("sqlsrv",$request);
 
-          if(!$get_data_ticket && $transition_to!="") 
-          $get_data_ticket = $this->getTicketA($transition_to,$request);            
+          if(!$get_data_ticket && $transition_target!="") 
+          $get_data_ticket = $this->getTicketA($transition_target,$request);            
           
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -695,8 +695,8 @@ class TrxTrpController extends Controller
 
           $get_data_ticket = $this->getTicketB('sqlsrv',$request);
 
-          if(!$get_data_ticket && $transition_to!="")
-          $get_data_ticket = $this->getTicketB($transition_to,$request);
+          if(!$get_data_ticket && $transition_target!="")
+          $get_data_ticket = $this->getTicketB($transition_target,$request);
 
           if(!$get_data_ticket) 
           throw new \Exception("Data Ticket tidak terdaftar",1);
@@ -746,7 +746,7 @@ class TrxTrpController extends Controller
       }
 
       $model_query->supir=$request->supir;
-      $model_query->transition_to=$request->transition_to;
+      $model_query->transition_target=$request->transition_target;
       $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
       $model_query->no_pol=$request->no_pol;
 
