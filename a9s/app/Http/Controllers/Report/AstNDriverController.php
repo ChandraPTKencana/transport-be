@@ -32,6 +32,7 @@ use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\Ujalan;
 use App\Models\MySql\UjalanDetail;
 use App\Models\MySql\UjalanDetail2;
+use App\Models\MySql\Vehicle;
 
 class AstNDriverController extends Controller
 {
@@ -108,8 +109,8 @@ class AstNDriverController extends Controller
     }
 
     if(count($list_xto)>0){
-      $uj_trx = $uj_trx->whereIn("xto",$list_xto);
-      $standby_trx = $standby_trx->whereIn("xto",$list_xto);
+      $uj_trx = $uj_trx->whereIn("trx_trp.xto",$list_xto);
+      $standby_trx = $standby_trx->whereIn("standby_trx.xto",$list_xto);
     }
 
     $supir_list=[];
@@ -151,8 +152,10 @@ class AstNDriverController extends Controller
     }
 
     if(count($list_vehicle)>0){
-      $uj_trx = $uj_trx->whereIn("xto",$list_vehicle);
-      $standby_trx = $standby_trx->whereIn("xto",$list_vehicle);
+      $list_no_pol = Vehicle::whereIn("id",$list_vehicle)->get()->pluck("no_pol");
+
+      $uj_trx = $uj_trx->whereIn("no_pol",$list_no_pol);
+      $standby_trx = $standby_trx->whereIn("no_pol",$list_no_pol);
     }
 
     $uj_trx = $uj_trx->selectRaw("'UJ' as tipe,
@@ -200,13 +203,13 @@ class AstNDriverController extends Controller
     ->groupBy('standby_trx.id','standby_trx.created_at','standby_trx.pv_datetime','standby_trx.xto','standby_trx.no_pol','standby_trx.supir','standby_trx.kernet');  
 
     if($jenis=="" || $jenis == "UJ"){
-      $uj_trx = $uj_trx->get();
+      $uj_trx = $uj_trx->where('trx_trp.val2',1)->get();
     }else{
       $uj_trx = [];
     }
 
     if($jenis=="" || $jenis == "SB"){
-      $standby_trx = $standby_trx->get();
+      $standby_trx = $standby_trx->where('standby_trx.val2',1)->get();
     }else{
       $standby_trx = [];
     }

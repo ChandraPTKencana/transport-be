@@ -56,8 +56,7 @@ class RampController extends Controller
 
   public function index(Request $request)
   {
-    $model_query = TrxTrp::where('val1',1)->where("deleted",0)->orderBy("xto","asc");
-    // $model_query = TrxTrp::where('val2',1)->where("deleted",0);
+    $model_query = TrxTrp::where('val2',1)->where("deleted",0)->orderBy("xto","asc");
     $date_from="";
     $date_to="";
     if($request->date_from || $request->date_to){
