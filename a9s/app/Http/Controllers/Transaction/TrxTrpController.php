@@ -262,13 +262,17 @@ class TrxTrpController extends Controller
                 }else{
                   $q->where("deleted",0)->where("req_deleted",0)->whereNull("pv_no")->Where(function ($q1){
                       $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBS")->whereNull("ticket_a_no")->whereNull("ticket_b_no");
+                        $q2->where("jenis","TBS")->where(function($q2){
+                          $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
+                        });
                       });
                       $q1->orWhere(function ($q2){
                         $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
                       });
                       $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->whereNull("ticket_b_bruto")->whereNull("ticket_b_tara")->whereNull("ticket_b_netto");
+                        $q2->whereIn("jenis",["CPO","PK"])->where(function($q2){
+                          $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
+                        });
                       });
                   });
                 }
@@ -332,13 +336,17 @@ class TrxTrpController extends Controller
     if($filter_status=="ticket_not_done"){
       $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
           $q->orWhere(function ($q1){
-            $q1->where("jenis","TBS")->whereNull("ticket_a_no")->whereNull("ticket_b_no");
+            $q1->where("jenis","TBS")->where(function($q2){
+              $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
+            });
           });
           $q->orWhere(function ($q1){
             $q1->where("jenis","TBSK")->whereNull("ticket_b_no");
           });
           $q->orWhere(function ($q1){
-            $q1->whereIn("jenis",["CPO","PK"])->whereNull("ticket_a_no")->whereNull("ticket_b_in_at")->whereNull("ticket_b_out_at")->whereNull("ticket_b_bruto")->whereNull("ticket_b_tara")->whereNull("ticket_b_netto");
+            $q1->whereIn("jenis",["CPO","PK"])->where(function($q2){
+              $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
+            });
           });
       });
     }
