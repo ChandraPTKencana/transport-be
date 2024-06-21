@@ -968,6 +968,7 @@ class StandbyTrxController extends Controller
       "standby_details"=>$standby_details,
       "standby_mst"=>$standby_mst,
       "standby_trx_details"=>$standby_trx_details,
+      "is_transition"=>$standby_trx->transition_type,
       "user_1"=>$this->admin->the_user->username,
     ];   
     

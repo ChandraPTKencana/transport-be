@@ -1122,6 +1122,7 @@ class TrxTrpController extends Controller
       "tipe"=>$trx_trp->tipe,
       "details"=>$details,
       "total"=>$ujalan->harga,
+      "is_transition"=>$trx_trp->transition_type=='From',
       "user_1"=>$this->admin->the_user->username,
     ];   
     

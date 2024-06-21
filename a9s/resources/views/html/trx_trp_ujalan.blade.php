@@ -30,7 +30,7 @@
   <main style="padding:0px 25px 0px 29px;">
     <div style="width:100%;  border:solid 1px #000; font-size:14px;">
       <div style="width:100%; text-align:center;" class="text-center">
-        #{{$id}}
+        #{{$id}} {{$is_transition ? '(P)' : ''}}
         <br>
         Perincian U.jalan {{$jenis}} <br>
         {{$asal}} - {{$xto}} 
