@@ -49,7 +49,7 @@ class StandbyTrxController extends Controller
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');
 
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
-    $list_employee = \App\Models\MySql\Employee::where("deleted",0)->whereIn("role",['Supir','Kernet'])->get();
+    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet'])->get();
     
     return response()->json([
       "list_standby_mst" => $list_standby_mst,
@@ -331,13 +331,13 @@ class StandbyTrxController extends Controller
     DB::beginTransaction();
     try {
 
-      if($request->supir){
-        if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
-        throw new \Exception("Supir tidak terdaftar",1);
-      }
+      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+      if(!$supir_dt)
+      throw new \Exception("Supir tidak terdaftar",1);
 
-      if($request->kernet){
-        if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
+      if($request->kernet_id){
+        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
@@ -377,8 +377,17 @@ class StandbyTrxController extends Controller
       // $model_query->standby_mst_type    = $standby_mst->tipe;
       // $model_query->standby_mst_amount  = $standby_mst->amount;
 
-      $model_query->supir               = $request->supir;
-      $model_query->kernet              = MyLib::emptyStrToNull($request->kernet);
+      $model_query->supir_id          = $supir_dt->id;
+      $model_query->supir             = $supir_dt->name;
+      $model_query->supir_rek_no      = $supir_dt->rek_no;
+      $model_query->supir_rek_name    = $supir_dt->rek_name;
+
+      if(isset($kernet_dt)){
+        $model_query->kernet_id       = $kernet_dt->id;
+        $model_query->kernet          = $kernet_dt->name;
+        $model_query->kernet_rek_no   = $kernet_dt->rek_no;
+        $model_query->kernet_rek_name = $kernet_dt->rek_name;  
+      }
       $model_query->no_pol              = $request->no_pol;
 
       $model_query->xto                 = $request->xto;
@@ -473,13 +482,13 @@ class StandbyTrxController extends Controller
     DB::beginTransaction();
     try {
 
-      if($request->supir){
-        if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
-        throw new \Exception("Supir tidak terdaftar",1);
-      }
+      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+      if(!$supir_dt)
+      throw new \Exception("Supir tidak terdaftar",1);
 
-      if($request->kernet){
-        if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
+      if($request->kernet_id){
+        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
@@ -517,8 +526,22 @@ class StandbyTrxController extends Controller
         // $model_query->standby_mst_type    = $standby_mst->tipe;
         // $model_query->standby_mst_amount  = $standby_mst->amount;
   
-        $model_query->supir               = $request->supir;
-        $model_query->kernet              = MyLib::emptyStrToNull($request->kernet);
+        $model_query->supir_id          = $supir_dt->id;
+        $model_query->supir             = $supir_dt->name;
+        $model_query->supir_rek_no      = $supir_dt->rek_no;
+        $model_query->supir_rek_name    = $supir_dt->rek_name;
+  
+        if(isset($kernet_dt)){
+          $model_query->kernet_id       = $kernet_dt->id;
+          $model_query->kernet          = $kernet_dt->name;
+          $model_query->kernet_rek_no   = $kernet_dt->rek_no;
+          $model_query->kernet_rek_name = $kernet_dt->rek_name;  
+        }else{
+          $model_query->kernet_id       = null;
+          $model_query->kernet          = null;
+          $model_query->kernet_rek_no   = null;
+          $model_query->kernet_rek_name = null;  
+        }
         $model_query->no_pol              = $request->no_pol;
   
         $model_query->xto                 = $request->xto;
@@ -1303,7 +1326,7 @@ class StandbyTrxController extends Controller
       $index_item = array_search($this->role, ["SuperAdmin","Logistic"]);    
       if ($index_item !== false){
         if(!$model_query->val2){
-          if($model_query->val==1){
+          if($model_query->val1==0){
             throw new \Exception("Mandor Harus Memvalidasi Terlebih Dahulu",1);
           }
           $model_query->val2 = 1;

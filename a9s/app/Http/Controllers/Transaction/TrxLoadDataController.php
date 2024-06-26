@@ -258,7 +258,7 @@ class TrxLoadDataController extends Controller
 
     $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
-    $list_employee = \App\Models\MySql\Employee::where("deleted",0)->whereIn("role",['Supir','Kernet'])->get();
+    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet'])->get();
        
     return response()->json([
       "list_ujalan" => $list_ujalan,

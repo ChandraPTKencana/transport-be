@@ -8,21 +8,26 @@ use Illuminate\Http\Request;
 use App\Helpers\MyLib;
 use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
-use App\Models\MySql\Ujalan;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+
+use Exception;
+use Image;
+use File;
+
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Http\Requests\MySql\UjalanRequest;
-use App\Http\Resources\MySql\UjalanResource;
+
+use App\Models\MySql\Ujalan;
 use App\Models\HrmRevisiLokasi;
 use App\Models\Stok\Item;
 use App\Models\MySql\UjalanDetail;
 use App\Models\MySql\UjalanDetail2;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Image;
-use File;
-use App\Http\Resources\IsUserResource;
 use App\Models\MySql\IsUser;
+
+use App\Http\Resources\IsUserResource;
+use App\Http\Requests\MySql\UjalanRequest;
+use App\Http\Resources\MySql\UjalanResource;
 
 class UjalanController extends Controller
 {
@@ -284,7 +289,7 @@ class UjalanController extends Controller
 
     }
 
-    $validator = \Validator::make(['details' => $details_in], $rules, $messages);
+    $validator = Validator::make(['details' => $details_in], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {
@@ -348,7 +353,7 @@ class UjalanController extends Controller
 
     }
 
-    $validator = \Validator::make(['details' => $details_in2], $rules, $messages);
+    $validator = Validator::make(['details' => $details_in2], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {
@@ -1241,7 +1246,7 @@ class UjalanController extends Controller
       'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);

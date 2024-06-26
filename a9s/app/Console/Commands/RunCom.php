@@ -3,11 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Helpers\MyLog;
+use App\Models\MySql\Employee;
 use Illuminate\Console\Command;
 
 use Illuminate\Support\Facades\Validator;
 use App\Models\Stok\Transaction;
-
+use DB;
 class RunCom extends Command
 {
     /**
@@ -34,11 +35,31 @@ class RunCom extends Command
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
         
-        $this->info("=====Begin Trx Trp Transition type To=====\n ");
-        $sds = \App\Models\MySql\TrxTrp::whereNotNull("transition_target")->update([
-            "transition_type"=>"To"
-        ]);         
-        $this->info("=====End Trx Trp Transition type To=====\n ");
+        if(!Employee::where('name','BLANK')->first()){
+            $this->info("=====Begin Employee=====\n ");
+            $sds = Employee::orderBy("id","desc")->get();         
+            foreach ($sds as $k => $v) {
+                $newId= $v->id+1;
+                if($k==0){
+                    DB::statement("ALTER TABLE fin_payment_req AUTO_INCREMENT = $newId");
+                }
+                $v->id = $newId;
+                $v->save();
+            }
+    
+            Employee::insert([
+                "id"=>1,
+                "name"=>"BLANK",
+                "role"=>"BLANK",
+                "val"=>1,
+                "val_user"=>1,
+                "val_at"=>date("Y-m-d H:i:s")
+            ]);    
+            $this->info("=====End Employee=====\n ");
+        } else{
+            $this->info("=====Abort Employee=====\n ");
+        }
+
        
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");

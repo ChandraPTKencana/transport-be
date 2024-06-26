@@ -90,6 +90,7 @@ Route::get('/', function () {
     Route::post('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'store']);
     Route::put('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'update']);
     Route::delete('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'delete']);
+    Route::put('/employee_validasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'validasi']);
 
 
     Route::get('/standby_msts', [\App\Http\Controllers\Standby\StandbyMstController::class, 'index']);
@@ -134,7 +135,16 @@ Route::get('/', function () {
     Route::get('/report/ast_n_driver/excel_download', [\App\Http\Controllers\Report\AstNDriverController::class, 'excelDownload']);
 
     
+    Route::get('/fin_payment_reqs', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'index']);
+    Route::get('/fin_payment_req', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'show']);
+    Route::post('/fin_payment_req', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'store']);
+    Route::put('/fin_payment_req', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'update']);
+    Route::delete('/fin_payment_req', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'delete']);
+    Route::put('/fin_payment_req_validasi', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'validasi']);
 
+    Route::get('/fin_payment_req/get_trx_trp_unprocessed', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'get_trx_trp_unprocessed']);
+    Route::get('/fin_payment_req/download_view', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'excelDownload']);
+    
     // Route::prefix("stok/api")->group(function(){
 
 //     // Route::post('login', function () {

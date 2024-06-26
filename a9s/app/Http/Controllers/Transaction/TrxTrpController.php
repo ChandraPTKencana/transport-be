@@ -479,11 +479,13 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
-      if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
+      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+      if(!$supir_dt)
       throw new \Exception("Supir tidak terdaftar",1);
 
-      if($request->kernet){
-        if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
+      if($request->kernet_id){
+        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
@@ -529,8 +531,18 @@ class TrxTrpController extends Controller
         }
       }
 
-      $model_query->supir=$request->supir;
-      $model_query->kernet=MyLib::emptyStrToNull($request->kernet);
+      $model_query->supir_id          = $supir_dt->id;
+      $model_query->supir             = $supir_dt->name;
+      $model_query->supir_rek_no      = $supir_dt->rek_no;
+      $model_query->supir_rek_name    = $supir_dt->rek_name;
+
+      if(isset($kernet_dt)){
+        $model_query->kernet_id       = $kernet_dt->id;
+        $model_query->kernet          = $kernet_dt->name;
+        $model_query->kernet_rek_no   = $kernet_dt->rek_no;
+        $model_query->kernet_rek_name = $kernet_dt->rek_name;  
+      }
+
       $model_query->no_pol=$request->no_pol;
       
       $model_query->created_at      = $t_stamp;
@@ -581,11 +593,13 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
-      if(!\App\Models\MySql\Employee::where("role","Supir")->where('name',$request->supir)->first())
+      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+      if(!$supir_dt)
       throw new \Exception("Supir tidak terdaftar",1);
 
-      if($request->kernet){
-        if(!\App\Models\MySql\Employee::where("role","Kernet")->where('name',$request->kernet)->first())
+      if($request->kernet_id){
+        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
@@ -626,8 +640,22 @@ class TrxTrpController extends Controller
           $model_query->transition_type   = null;
         }
         
-        $model_query->supir           = $request->supir;
-        $model_query->kernet          = MyLib::emptyStrToNull($request->kernet);
+        $model_query->supir_id          = $supir_dt->id;
+        $model_query->supir             = $supir_dt->name;
+        $model_query->supir_rek_no      = $supir_dt->rek_no;
+        $model_query->supir_rek_name    = $supir_dt->rek_name;
+  
+        if(isset($kernet_dt)){
+          $model_query->kernet_id       = $kernet_dt->id;
+          $model_query->kernet          = $kernet_dt->name;
+          $model_query->kernet_rek_no   = $kernet_dt->rek_no;
+          $model_query->kernet_rek_name = $kernet_dt->rek_name;  
+        }else{
+          $model_query->kernet_id       = null;
+          $model_query->kernet          = null;
+          $model_query->kernet_rek_no   = null;
+          $model_query->kernet_rek_name = null;  
+        }
         $model_query->no_pol          = $request->no_pol;
       }
       if($online_status=="true"){
@@ -643,8 +671,8 @@ class TrxTrpController extends Controller
             $model_query->cost_center_code = $list_cost_center->CostCenter;
             $model_query->cost_center_desc = $list_cost_center->Description;
           }else{
-            $model_query->cost_center_code =null;
-            $model_query->cost_center_desc =null;
+            $model_query->cost_center_code = null;
+            $model_query->cost_center_desc = null;
           } 
         }
       }else{

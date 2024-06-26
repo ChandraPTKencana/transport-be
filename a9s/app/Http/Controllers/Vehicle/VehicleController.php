@@ -32,7 +32,7 @@ class VehicleController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
 
     // \App\Helpers\MyAdmin::checkScope($this->auth, ['ap-user-view']);
 
@@ -155,7 +155,7 @@ class VehicleController extends Controller
   public function show(VehicleRequest $request)
   {
     // MyLib::checkScope($this->auth, ['ap-user-view']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     $model_query = Vehicle::find($request->id);
     return response()->json([
       "data" => new VehicleResource($model_query),
@@ -164,7 +164,7 @@ class VehicleController extends Controller
 
   public function store(VehicleRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     // MyLib::checkScope($this->auth, ['ap-user-add']);
 
     DB::beginTransaction();
@@ -207,7 +207,7 @@ class VehicleController extends Controller
 
   public function update(VehicleRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     // MyLib::checkScope($this->auth, ['ap-user-edit']);
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
@@ -248,7 +248,7 @@ class VehicleController extends Controller
   public function delete(VehicleRequest $request)
   {
     // MyLib::checkScope($this->auth, ['ap-user-remove']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
     DB::beginTransaction();
 
     try {

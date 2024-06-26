@@ -51,8 +51,14 @@ class TrxTrpResource extends JsonResource
             'ticket_b_in_at'    => $this->ticket_b_in_at ?? "",
             'ticket_b_out_at'   => $this->ticket_b_out_at ?? "",
 
+            'supir_id'          => $this->supir_id ?? "",
             'supir'             => $this->supir,
+            'supir_rek_no'      => $this->supir_rek_no ?? "",
+            'supir_rek_name'    => $this->supir_rek_name ?? "",
+            'kernet_id'         => $this->kernet_id ?? "",
             'kernet'            => $this->kernet ?? "",
+            'kernet_rek_no'     => $this->kernet_rek_no ?? "",
+            'kernet_rek_name'   => $this->kernet_rek_name ?? "",
             'no_pol'            => $this->no_pol,
 
             'val'               => $this->val,

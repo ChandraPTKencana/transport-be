@@ -39,8 +39,9 @@ class StandbyTrxRequest extends FormRequest
             $rules['standby_mst_id'] = 'required|exists:App\Models\MySql\StandbyMst,id';
             // $rules['cost_center_code'] = 'required';
             
-            $rules['supir'] = 'required_without:kernet|max:255';
-            $rules['kernet'] = 'required_without:supir|max:255';
+            $rules['supir_id']      = 'required_without:kernet_id|exists:App\Models\MySql\Employee,id';
+            $rules['kernet_id']     = 'required_without:supir_id|exists:App\Models\MySql\Employee,id';
+
             $rules['no_pol'] = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';
             $rules['xto'] = 'nullable|max:50|exists:App\Models\MySql\Ujalan,xto';
 
@@ -62,11 +63,11 @@ class StandbyTrxRequest extends FormRequest
             'jenis.required'                => 'Jenis tidak boleh kosong',
             'jenis.in'                      => 'Jenis harus dipilih',
 
-            'supir.required_without'        => 'Supir tidak boleh kosong Kalau Kernet Kosong',
-            'supir.max'                     => 'Supir tidak boleh melebihi 255 karakter',
+            'supir_id.required_without'     => 'Supir tidak boleh kosong Kalau Kernet Kosong',
+            'supir_id.exists'               => 'Supir tidak terdaftar',
 
-            'kernet.required_without'       => 'Kernet tidak boleh kosong Kalau Supir Kosong',
-            'kernet.max'                    => 'Kernet tidak boleh melebihi 255 karakter',
+            'kernet_id.required_without'    => 'Kernet tidak boleh kosong Kalau Supir Kosong',
+            'kernet_id.exists'              => 'Kernet tidak terdaftar',
 
             'no_pol.required'               => 'No Pol tidak boleh kosong',
             'no_pol.max'                    => 'No Pol tidak boleh melebihi 12 karakter',

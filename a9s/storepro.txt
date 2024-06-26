@@ -1,0 +1,86 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        $procedure = "
+           CREATE PROCEDURE p_quj(IN customer_country VARCHAR(50))
+            BEGIN
+            select
+                'UJ' as `tipe`,
+                `trx_trp`.`id` as `id`,
+                `trx_trp`.`tanggal` as `tanggal`,
+                cast(`trx_trp`.`pv_datetime` as date) as `tanggalpv`,
+                `trx_trp`.`no_pol` as `no_pol`,
+                `trx_trp`.`supir` as `supir`,
+                `trx_trp`.`kernet` as `kernet`,
+                sum(if(`is_ujdetails2`.`xfor` = 'Supir' and `is_ujdetails2`.`ac_account_code` = '01.510.001', `is_ujdetails2`.`qty` * `is_ujdetails2`.`amount`, 0)) as `gajis`,
+                sum(if(`is_ujdetails2`.`xfor` = 'Supir' and `is_ujdetails2`.`ac_account_code` = '01.510.005', `is_ujdetails2`.`qty` * `is_ujdetails2`.`amount`, 0)) as `makans`,
+                sum(if(`is_ujdetails2`.`xfor` = 'Kernet' and `is_ujdetails2`.`ac_account_code` = '01.510.001', `is_ujdetails2`.`qty` * `is_ujdetails2`.`amount`, 0)) as `gajik`,
+                sum(if(`is_ujdetails2`.`xfor` = 'Kernet' and `is_ujdetails2`.`ac_account_code` = '01.510.005', `is_ujdetails2`.`qty` * `is_ujdetails2`.`amount`, 0)) as `makank`
+            from
+                ((`trx_trp`
+            join `is_uj` on
+                (`is_uj`.`id` = `trx_trp`.`id_uj`))
+            join `is_ujdetails2` on
+                (`is_ujdetails2`.`id_uj` = `is_uj`.`id`))
+            where
+                `trx_trp`.`tanggal` >= '2024-06-10'
+            group by
+                `trx_trp`.`id`,
+                `trx_trp`.`tanggal`,
+                `trx_trp`.`supir`
+            union all
+            select
+                'SB' as `tipe`,
+                `standby_trx`.`id` as `id`,
+                cast(`standby_trx`.`created_at` as date) as `tgl`,
+                cast(`standby_trx`.`pv_datetime` as date) as `tglpv`,
+                `standby_trx`.`supir` as `supir`,
+                `standby_trx`.`kernet` as `kernet`,
+                sum(if(`standby_trx_dtl`.`standby_trx_id` = `standby_trx`.`id`, 1, 0)) as `qty`,
+                sum(if(`standby_dtl`.`xfor` = 'Supir' and `standby_dtl`.`ac_account_code` = '01.510.001', `standby_dtl`.`amount`, 0)) as `gajis`,
+                sum(if(`standby_dtl`.`xfor` = 'Supir' and `standby_dtl`.`ac_account_code` = '01.510.005', `standby_dtl`.`amount`, 0)) as `makans`,
+                sum(if(`standby_dtl`.`xfor` = 'Kernet' and `standby_dtl`.`ac_account_code` = '01.510.001', `standby_dtl`.`amount`, 0)) as `gajik`,
+                sum(if(`standby_dtl`.`xfor` = 'Kernet' and `standby_dtl`.`ac_account_code` = '01.510.005', `standby_dtl`.`amount`, 0)) as `makank`
+            from
+                (((`standby_trx`
+            join `standby_trx_dtl` on
+                (`standby_trx_dtl`.`standby_trx_id` = `standby_trx`.`id`))
+            join `standby_mst` on
+                (`standby_mst`.`id` = `standby_trx`.`standby_mst_id`))
+            join `standby_dtl` on
+                (`standby_dtl`.`standby_mst_id` = `standby_mst`.`id`))
+            group by
+                `standby_trx`.`id`,
+                `standby_trx`.`created_at`,
+                `standby_trx`.`supir`,
+                `standby_trx`.`kernet`;
+            END;
+        ";
+
+        DB::statement($procedure);
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        $dropProcedure = "DROP PROCEDURE IF EXISTS p_quj";
+        DB::statement($dropProcedure);
+    }
+};

@@ -37,6 +37,8 @@ class EmployeeRequest extends FormRequest
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['name'] = 'required|max:50';
             $rules['role'] = 'required|in:Supir,Kernet';
+            $rules['id_no'] = 'required_with:id_type';
+            $rules['id_type'] = 'required_with:id_no';
         }
         return $rules;
     }
@@ -53,6 +55,10 @@ class EmployeeRequest extends FormRequest
 
             'role.required' => 'Jabatan Tidak boleh kosong',
             'role.in' => 'Jabatan harus dipilih',
+
+            'id_no.required_with' => 'No ID perlu diisi',
+            'id_type.required_with' => 'Tipe ID perlu dipilih',
+
         ];
     }
 }

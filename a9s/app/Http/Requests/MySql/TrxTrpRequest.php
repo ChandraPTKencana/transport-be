@@ -36,8 +36,8 @@ class TrxTrpRequest extends FormRequest
             $rules['id_uj']         = 'required|exists:App\Models\MySql\Ujalan,id';
             // $rules['tipe'] = 'required|max:50';
             $rules['jenis']         = 'required|in:CPO,TBS,PK,TBSK';
-            $rules['supir']         = 'required|max:255';
-            $rules['kernet']        = 'nullable|max:255';
+            $rules['supir_id']      = 'required|exists:App\Models\MySql\Employee,id';
+            $rules['kernet_id']     = 'nullable|exists:App\Models\MySql\Employee,id';
             $rules['no_pol']        = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';
             $rules['online_status'] = 'required';
         }
@@ -60,16 +60,15 @@ class TrxTrpRequest extends FormRequest
             'xto.required'          => 'Tujuan tidak boleh kosong',
             'xto.max'               => 'Tujuan tidak boleh melebihi 50 karakter',
 
-            // 'tipe.required' => 'Tipe tidak boleh kosong',
-            // 'tipe.max' => 'Tipe tidak boleh melebihi 50 karakter',
-
             'jenis.required'        => 'Jenis tidak boleh kosong',
             'jenis.in'              => 'Jenis harus dipilih',
 
-            'supir.required'        => 'Supir tidak boleh kosong',
-            'supir.max'             => 'Supir tidak boleh melebihi 255 karakter',
+            'supir_id.required'     => 'Supir tidak boleh kosong',
+            // 'supir_id.max'       => 'Supir tidak boleh melebihi 255 karakter',
+            'supir_id.exists'       => 'Supir tidak terdaftar',
 
-            'kernet.max'            => 'kernet tidak boleh melebihi 255 karakter',
+            // 'kernet_id.max'      => 'Kernet tidak boleh melebihi 255 karakter',
+            'kernet_id.exists'      => 'Kernet tidak terdaftar',
 
             'no_pol.required'       => 'No Pol tidak boleh kosong',
             'no_pol.max'            => 'No Pol tidak boleh melebihi 12 karakter',

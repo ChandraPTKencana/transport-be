@@ -29,9 +29,16 @@ class StandbyTrxResource extends JsonResource
             'standby_mst_'       => new StandbyMstResource($this->whenLoaded('standby_mst')),
 
 
-            'supir'             => $this->supir ?? "",
+            'supir_id'          => $this->supir_id ?? "",
+            'supir'             => $this->supir,
+            'supir_rek_no'      => $this->supir_rek_no ?? "",
+            'supir_rek_name'    => $this->supir_rek_name ?? "",
+            'kernet_id'         => $this->kernet_id ?? "",
             'kernet'            => $this->kernet ?? "",
+            'kernet_rek_no'     => $this->kernet_rek_no ?? "",
+            'kernet_rek_name'   => $this->kernet_rek_name ?? "",
             'no_pol'            => $this->no_pol,
+            
             'xto'               => $this->xto ?? "",
             'note_for_remarks'  => $this->note_for_remarks ?? '',
             'ref'               => $this->ref ?? '',

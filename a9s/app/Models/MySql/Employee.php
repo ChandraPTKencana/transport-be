@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Str;
+use Illuminate\Database\Eloquent\Builder;
+
 class Employee extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -63,5 +65,19 @@ class Employee extends Authenticatable
     //     $locs=explode(",",$this->loc);
     //     return $this->from("hrm_revisi_lokasi")->select('*')->whereIn("id",$locs)->get()->pluck("id")->toArray();
     //     // return $this->belongsTo(HrmRevisiLokasi::class, 'loc', 'id');
+    // }
+
+    public function scopeVerified(Builder $builder){
+        $builder->where('val',1);
+    }
+
+    public function scopeAvailable(Builder $builder){
+        $builder->where('deleted',0);
+    }
+
+
+    // public function scopeOfRole(Builder $query, string $role): void
+    // {
+    //     $query->where('role', $role);
     // }
 }

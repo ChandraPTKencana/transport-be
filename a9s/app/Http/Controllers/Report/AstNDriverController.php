@@ -52,7 +52,7 @@ class AstNDriverController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
 
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->orderBy('xto','asc')->groupBy('xto')->get()->pluck('xto');
-    $list_employee = \App\Models\MySql\Employee::where("deleted",0)->orderBy('name','asc')->get();
+    $list_employee = \App\Models\MySql\Employee::available()->orderBy('name','asc')->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->orderBy('no_pol','asc')->get();
     return response()->json([
       "list_xto" => $list_xto,

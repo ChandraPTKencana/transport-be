@@ -5,22 +5,30 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Helpers\MyLib;
 use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
-use App\Models\MySql\Employee;
-use App\Http\Resources\MySql\EmployeeResource;
-use App\Http\Requests\MySql\EmployeeRequest;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
+use App\Helpers\MyLib;
+
+use App\Models\MySql\Employee;
+use App\Models\MySql\IsUser;
+
+use App\Http\Resources\MySql\EmployeeResource;
+use App\Http\Requests\MySql\EmployeeRequest;
+use App\Http\Resources\MySql\IsUserResource;
 
 class EmployeeController extends Controller
 {
   private $admin;
   private $admin_id;
   private $role;
+
+  private $syslog_db = 'employee_mst';
 
   public function __construct(Request $request)
   {
@@ -32,7 +40,7 @@ class EmployeeController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
 
     // \App\Helpers\MyAdmin::checkScope($this->auth, ['ap-user-view']);
 
@@ -169,7 +177,7 @@ class EmployeeController extends Controller
   public function show(EmployeeRequest $request)
   {
     // MyLib::checkScope($this->auth, ['ap-user-view']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
     $model_query = Employee::find($request->id);
     return response()->json([
       "data" => new EmployeeResource($model_query),
@@ -178,25 +186,34 @@ class EmployeeController extends Controller
 
   public function store(EmployeeRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
     // MyLib::checkScope($this->auth, ['ap-user-add']);
 
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
-      $emp = Employee::where("name",$request->name)->where("role",$request->role)->first();
-      if($emp)
-      throw new \Exception("Karyawan Telah Terdaftar",1);
+      $id_no = MyLib::emptyStrToNull($request->id_no);
+      $id_type = MyLib::emptyStrToNull($request->id_type);
+      if($id_no!=null){
+        $emp = Employee::whereNotNull("id_no")->where('id_no',$id_no)->where('id_type',$id_type)->first();
+        if($emp)
+        throw new \Exception("No ID Telah Terdaftar",1);
+      }
       $model_query                = new Employee();
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
+      $model_query->id_no         = $id_no;
+      $model_query->id_type       = $id_type;
+      $model_query->bank_name     = MyLib::emptyStrToNull($request->bank_name);
+      $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
+      $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
       $model_query->created_at    = $t_stamp;
       $model_query->created_user  = $this->admin_id;
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
 
-      MyLog::sys("employee_mst",$model_query->id,"insert");
+      MyLog::sys($this->syslog_db,$model_query->id,"insert");
       DB::commit();
       return response()->json([
         "message" => "Proses tambah data berhasil",
@@ -225,26 +242,42 @@ class EmployeeController extends Controller
 
   public function update(EmployeeRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
     // MyLib::checkScope($this->auth, ['ap-user-edit']);
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $emp = Employee::where("id","!=",$request->id)->where("name",$request->name)->where("role",$request->role)->first();
-      if($emp)
-      throw new \Exception("Karyawan Telah Terdaftar",1);
-
+      $id_no = MyLib::emptyStrToNull($request->id_no);
+      $id_type = MyLib::emptyStrToNull($request->id_type);
+      if($id_no!=null){
+        $emp = Employee::where("id","!=",$request->id)->whereNotNull("id_no")->where('id_no',$id_no)->where('id_type',$id_type)->first();
+        if($emp)
+        throw new \Exception("No ID Telah Terdaftar",1);
+      }
       $model_query                = Employee::where("id",$request->id)->lockForUpdate()->first();
+      
+      if($model_query->id==1){
+        throw new \Exception("Izin Ubah Ditolak",1);
+      }
+
+      if($model_query->val==1)
+      throw new \Exception("Data sudah tervalidasi",1);
+
       $SYSOLD                     = clone($model_query);
 
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
+      $model_query->id_no         = $id_no;
+      $model_query->id_type       = $id_type;
+      $model_query->bank_name     = MyLib::emptyStrToNull($request->bank_name);
+      $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
+      $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
       
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
-      MyLog::sys("employee_mst",$request->id,"update",$SYSNOTE);
+      MyLog::sys($this->syslog_db,$request->id,"update",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -271,7 +304,7 @@ class EmployeeController extends Controller
   public function delete(EmployeeRequest $request)
   {
     // MyLib::checkScope($this->auth, ['ap-user-remove']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
     DB::beginTransaction();
 
     try {
@@ -284,6 +317,10 @@ class EmployeeController extends Controller
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
       }
+
+      if($model_query->id==1){
+        throw new \Exception("Izin Hapus Ditolak",1);
+      }
   
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
@@ -291,7 +328,7 @@ class EmployeeController extends Controller
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys("employee_mst",$request->id,"delete");
+      MyLog::sys($this->syslog_db,$request->id,"delete");
 
       DB::commit();
       return response()->json([
@@ -324,5 +361,69 @@ class EmployeeController extends Controller
     // return response()->json([
     //     "message"=>"Proses ubah data gagal",
     // ],400);
+  }
+
+
+  public function validasi(Request $request){
+    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\Employee,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = Employee::lockForUpdate()->find($request->id);
+      if($model_query->val){
+        throw new \Exception("Data Sudah Tervalidasi",1);
+      }
+      
+      if(in_array($this->role,["SuperAdmin","Logistic"]) && !$model_query->val){
+        $model_query->val = 1;
+        $model_query->val_user = $this->admin_id;
+        $model_query->val_at = $t_stamp;
+      }
+
+      $model_query->save();
+
+      MyLog::sys($this->syslog_db,$request->id,"approve");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val"=>$model_query->val,
+        "val_user"=>$model_query->val_user,
+        "val_at"=>$model_query->val_at,
+        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
   }
 }
