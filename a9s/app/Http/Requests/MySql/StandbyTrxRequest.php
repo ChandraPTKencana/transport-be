@@ -39,8 +39,8 @@ class StandbyTrxRequest extends FormRequest
             $rules['standby_mst_id'] = 'required|exists:App\Models\MySql\StandbyMst,id';
             // $rules['cost_center_code'] = 'required';
             
-            $rules['supir_id']      = 'required_without:kernet_id|exists:App\Models\MySql\Employee,id';
-            $rules['kernet_id']     = 'required_without:supir_id|exists:App\Models\MySql\Employee,id';
+            $rules['supir_id']      = 'required_without:kernet_id';
+            $rules['kernet_id']     = 'required_without:supir_id';
 
             $rules['no_pol'] = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';
             $rules['xto'] = 'nullable|max:50|exists:App\Models\MySql\Ujalan,xto';

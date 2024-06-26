@@ -68,7 +68,7 @@ class Employee extends Authenticatable
     // }
 
     public function scopeVerified(Builder $builder){
-        $builder->where('val',1)->where('val',0); // TEMP
+        $builder->where('val',1)->orWhere('val',0); // TEMP
         // $builder->where('val',1); //Right
     }
 

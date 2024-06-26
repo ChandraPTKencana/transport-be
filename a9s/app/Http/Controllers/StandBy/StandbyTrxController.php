@@ -331,15 +331,20 @@ class StandbyTrxController extends Controller
     DB::beginTransaction();
     try {
 
-      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
-      if(!$supir_dt)
-      throw new \Exception("Supir tidak terdaftar",1);
+      if($request->supir_id){
+        $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+        if(!$supir_dt)
+        throw new \Exception("Supir tidak terdaftar",1);
+      }
 
       if($request->kernet_id){
         $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
         if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
+
+      if($request->supir_id && $request->kernet_id &&  $request->supir_id == $request->kernet_id)
+      throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
       $unique_items = [];
       foreach ($details_in as $key => $value) {
@@ -377,10 +382,12 @@ class StandbyTrxController extends Controller
       // $model_query->standby_mst_type    = $standby_mst->tipe;
       // $model_query->standby_mst_amount  = $standby_mst->amount;
 
-      $model_query->supir_id          = $supir_dt->id;
-      $model_query->supir             = $supir_dt->name;
-      $model_query->supir_rek_no      = $supir_dt->rek_no;
-      $model_query->supir_rek_name    = $supir_dt->rek_name;
+      if(isset($supir_dt)){
+        $model_query->supir_id          = $supir_dt->id;
+        $model_query->supir             = $supir_dt->name;
+        $model_query->supir_rek_no      = $supir_dt->rek_no;
+        $model_query->supir_rek_name    = $supir_dt->rek_name;
+      }
 
       if(isset($kernet_dt)){
         $model_query->kernet_id       = $kernet_dt->id;
@@ -482,15 +489,20 @@ class StandbyTrxController extends Controller
     DB::beginTransaction();
     try {
 
-      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
-      if(!$supir_dt)
-      throw new \Exception("Supir tidak terdaftar",1);
+      if($request->supir_id){
+        $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+        if(!$supir_dt)
+        throw new \Exception("Supir tidak terdaftar",1);
+      }
 
       if($request->kernet_id){
         $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
         if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
+
+      if($request->supir_id && $request->kernet_id &&  $request->supir_id == $request->kernet_id)
+      throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
       $SYSNOTES=[];
       $model_query = StandbyTrx::where("id",$request->id)->lockForUpdate()->first();
@@ -525,12 +537,19 @@ class StandbyTrxController extends Controller
         // $model_query->standby_mst_name    = $standby_mst->name;
         // $model_query->standby_mst_type    = $standby_mst->tipe;
         // $model_query->standby_mst_amount  = $standby_mst->amount;
-  
-        $model_query->supir_id          = $supir_dt->id;
-        $model_query->supir             = $supir_dt->name;
-        $model_query->supir_rek_no      = $supir_dt->rek_no;
-        $model_query->supir_rek_name    = $supir_dt->rek_name;
-  
+        if(isset($supir_dt)){
+          $model_query->supir_id          = $supir_dt->id;
+          $model_query->supir             = $supir_dt->name;
+          $model_query->supir_rek_no      = $supir_dt->rek_no;
+          $model_query->supir_rek_name    = $supir_dt->rek_name;
+        }
+        else{
+          $model_query->supir_id       = null;
+          $model_query->supir          = null;
+          $model_query->supir_rek_no   = null;
+          $model_query->supir_rek_name = null;  
+        }
+
         if(isset($kernet_dt)){
           $model_query->kernet_id       = $kernet_dt->id;
           $model_query->kernet          = $kernet_dt->name;
