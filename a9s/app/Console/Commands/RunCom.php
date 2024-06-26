@@ -41,7 +41,7 @@ class RunCom extends Command
             foreach ($sds as $k => $v) {
                 $newId= $v->id+1;
                 if($k==0){
-                    DB::statement("ALTER TABLE fin_payment_req AUTO_INCREMENT = $newId");
+                    DB::statement("ALTER TABLE employee_mst AUTO_INCREMENT = $newId");
                 }
                 $v->id = $newId;
                 $v->save();
