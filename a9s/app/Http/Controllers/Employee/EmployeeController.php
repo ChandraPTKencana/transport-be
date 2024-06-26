@@ -192,21 +192,29 @@ class EmployeeController extends Controller
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
-      $id_no = MyLib::emptyStrToNull($request->id_no);
-      $id_type = MyLib::emptyStrToNull($request->id_type);
-      if($id_no!=null){
-        $emp = Employee::whereNotNull("id_no")->where('id_no',$id_no)->where('id_type',$id_type)->first();
+      $ktp_no = MyLib::emptyStrToNull($request->ktp_no);
+      if($ktp_no!=null){
+        $emp = Employee::whereNotNull("ktp_no")->where('ktp_no',$ktp_no)->first();
         if($emp)
-        throw new \Exception("No ID Telah Terdaftar",1);
+        throw new \Exception("No KTP Telah Terdaftar",1);
       }
+
+      $sim_no = MyLib::emptyStrToNull($request->sim_no);
+      if($sim_no!=null){
+        $emp = Employee::whereNotNull("sim_no")->where('sim_no',$sim_no)->first();
+        if($emp)
+        throw new \Exception("No SIM Telah Terdaftar",1);
+      }
+
       $model_query                = new Employee();
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
-      $model_query->id_no         = $id_no;
-      $model_query->id_type       = $id_type;
+      $model_query->ktp_no        = $ktp_no;
+      $model_query->sim_no        = $sim_no;
       $model_query->bank_name     = MyLib::emptyStrToNull($request->bank_name);
       $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
       $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
+      $model_query->phone_number  = MyLib::emptyStrToNull($request->phone_number);
       $model_query->created_at    = $t_stamp;
       $model_query->created_user  = $this->admin_id;
       $model_query->updated_at    = $t_stamp;
@@ -247,13 +255,20 @@ class EmployeeController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $id_no = MyLib::emptyStrToNull($request->id_no);
-      $id_type = MyLib::emptyStrToNull($request->id_type);
-      if($id_no!=null){
-        $emp = Employee::where("id","!=",$request->id)->whereNotNull("id_no")->where('id_no',$id_no)->where('id_type',$id_type)->first();
+      $ktp_no = MyLib::emptyStrToNull($request->ktp_no);
+      if($ktp_no!=null){
+        $emp = Employee::where("id","!=",$request->id)->whereNotNull("ktp_no")->where('ktp_no',$ktp_no)->first();
         if($emp)
-        throw new \Exception("No ID Telah Terdaftar",1);
+        throw new \Exception("No KTP Telah Terdaftar",1);
       }
+
+      $sim_no = MyLib::emptyStrToNull($request->sim_no);
+      if($sim_no!=null){
+        $emp = Employee::where("id","!=",$request->id)->whereNotNull("sim_no")->where('sim_no',$sim_no)->first();
+        if($emp)
+        throw new \Exception("No SIM Telah Terdaftar",1);
+      }
+
       $model_query                = Employee::where("id",$request->id)->lockForUpdate()->first();
       
       if($model_query->id==1){
@@ -267,11 +282,12 @@ class EmployeeController extends Controller
 
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
-      $model_query->id_no         = $id_no;
-      $model_query->id_type       = $id_type;
+      $model_query->ktp_no        = $ktp_no;
+      $model_query->sim_no        = $sim_no;
       $model_query->bank_name     = MyLib::emptyStrToNull($request->bank_name);
       $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
       $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
+      $model_query->phone_number  = MyLib::emptyStrToNull($request->phone_number);
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();

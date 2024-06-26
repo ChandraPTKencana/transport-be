@@ -14,12 +14,14 @@ return new class extends Migration
     public function up()
     {
         Schema::table('employee_mst', function (Blueprint $table) {
-            $table->string('id_no',50)->nullable();
-            $table->string('id_type',8)->nullable();
+            $table->string('ktp_no',50)->nullable();
+            $table->string('sim_no',50)->nullable();
             
             $table->string('bank_name',20)->nullable();
             $table->string('rek_no',20)->nullable();
             $table->string('rek_name',50)->nullable();
+
+            $table->string('phone_number',20)->nullable();
 
             $table->boolean('val')->default(0);
             $table->foreignId('val_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
@@ -59,12 +61,14 @@ return new class extends Migration
             $table->dropColumn('val_user');
             $table->dropColumn('val_at');
             
-            $table->dropColumn('id_no');
-            $table->dropColumn('id_type');
+            $table->dropColumn('ktp_no');
+            $table->dropColumn('sim_no');
 
             $table->dropColumn('bank_name');
             $table->dropColumn('rek_no');
             $table->dropColumn('rek_name');
+
+            $table->dropColumn('phone_number');
         });
 
         Schema::table('trx_trp', function (Blueprint $table) { 

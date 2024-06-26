@@ -53,7 +53,9 @@ class RunCom extends Command
                 "role"=>"BLANK",
                 "val"=>1,
                 "val_user"=>1,
-                "val_at"=>date("Y-m-d H:i:s")
+                "val_at"=>date("Y-m-d H:i:s"),
+                "created_at"=>date("Y-m-d H:i:s"),
+                "updated_at"=>date("Y-m-d H:i:s"),
             ]);    
             $this->info("=====End Employee=====\n ");
         } else{
