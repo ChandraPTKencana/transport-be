@@ -49,7 +49,7 @@ class AstNDriverController extends Controller
 
   public function loadData(Request $request){
 
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
 
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->orderBy('xto','asc')->groupBy('xto')->get()->pluck('xto');
     $list_employee = \App\Models\MySql\Employee::available()->orderBy('name','asc')->get();
@@ -63,6 +63,8 @@ class AstNDriverController extends Controller
 
   public function index(Request $request)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+
     $list_xto = json_decode($request->list_xto, true);
     $list_employee = json_decode($request->list_employee, true);
     $list_vehicle = json_decode($request->list_vehicle, true);
@@ -414,7 +416,7 @@ class AstNDriverController extends Controller
   }
 
   public function pdfPreview(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
 
     set_time_limit(0);
     $callGet = $this->index($request);
@@ -475,7 +477,7 @@ class AstNDriverController extends Controller
   }
 
   public function excelDownload(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
 
     set_time_limit(0);
     $callGet = $this->index($request);

@@ -46,7 +46,7 @@ class RampController extends Controller
 
   public function getLocations(Request $request){
 
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
 
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');
     return response()->json([
@@ -56,6 +56,8 @@ class RampController extends Controller
 
   public function index(Request $request)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+
     $model_query = TrxTrp::where('val2',1)->where("deleted",0)->orderBy("xto","asc");
     $date_from="";
     $date_to="";
@@ -280,7 +282,7 @@ class RampController extends Controller
   }
 
   public function pdfPreview(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
 
     set_time_limit(0);
     $callGet = $this->index($request);
@@ -334,7 +336,7 @@ class RampController extends Controller
   }
 
   public function excelDownload(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
 
     set_time_limit(0);
     $callGet = $this->index($request);

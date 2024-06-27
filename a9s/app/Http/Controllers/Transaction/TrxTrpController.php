@@ -383,7 +383,7 @@ class TrxTrpController extends Controller
 
   public function show(TrxTrpRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic']);
 
     $model_query = TrxTrp::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens'])->find($request->id);
     return response()->json([
@@ -393,7 +393,7 @@ class TrxTrpController extends Controller
 
   public function mandorGetVerifyTrx(TrxTrpRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikMandor']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikMandor']);
 
     $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
     return response()->json([
@@ -1132,7 +1132,7 @@ class TrxTrpController extends Controller
   }
 
   public function previewFile(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic']);
 
     set_time_limit(0);
 
@@ -1190,7 +1190,7 @@ class TrxTrpController extends Controller
   }
 
   public function previewFiles(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS','Accounting']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Finance','Marketing','Logistic','MIS','Accounting']);
 
     // set_time_limit(0);
 
@@ -1389,7 +1389,7 @@ class TrxTrpController extends Controller
   }
 
   public function downloadExcel(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS','Accounting']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Finance','Marketing','Logistic','MIS','Accounting']);
 
     set_time_limit(0);
     $callGet = $this->index($request, true);

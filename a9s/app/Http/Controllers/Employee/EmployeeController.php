@@ -40,7 +40,7 @@ class EmployeeController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
 
     // \App\Helpers\MyAdmin::checkScope($this->auth, ['ap-user-view']);
 
@@ -177,7 +177,7 @@ class EmployeeController extends Controller
   public function show(EmployeeRequest $request)
   {
     // MyLib::checkScope($this->auth, ['ap-user-view']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
     $model_query = Employee::find($request->id);
     return response()->json([
       "data" => new EmployeeResource($model_query),

@@ -32,7 +32,7 @@ class VehicleController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic']);
 
     // \App\Helpers\MyAdmin::checkScope($this->auth, ['ap-user-view']);
 
@@ -155,7 +155,7 @@ class VehicleController extends Controller
   public function show(VehicleRequest $request)
   {
     // MyLib::checkScope($this->auth, ['ap-user-view']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic']);
     $model_query = Vehicle::find($request->id);
     return response()->json([
       "data" => new VehicleResource($model_query),

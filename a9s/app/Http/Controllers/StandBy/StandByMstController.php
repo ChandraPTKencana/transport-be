@@ -36,7 +36,7 @@ class StandbyMstController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport']);
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -149,7 +149,7 @@ class StandbyMstController extends Controller
 
   public function show(StandbyMstRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport']);
 
     $model_query = StandbyMst::with([
     'details'=>function($q){

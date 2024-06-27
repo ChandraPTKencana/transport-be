@@ -88,6 +88,7 @@ class StandbyTrxController extends Controller
 
   public function index(Request $request, $download = false)
   {
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor']);
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -280,7 +281,7 @@ class StandbyTrxController extends Controller
 
   public function show(StandbyTrxRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic','PabrikMandor']);
 
     $model_query = StandbyTrx::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','details','standby_mst'])->find($request->id);
     return response()->json([
@@ -980,7 +981,7 @@ class StandbyTrxController extends Controller
   } 
 
   public function previewFile(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport']);
 
     set_time_limit(0);
 

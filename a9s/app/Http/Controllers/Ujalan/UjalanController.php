@@ -45,7 +45,7 @@ class UjalanController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport']);
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -204,7 +204,7 @@ class UjalanController extends Controller
 
   public function show(UjalanRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport','Finance']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport','Finance']);
 
     // return response()->json([
     //   "message" => "Hanya yang membuat transaksi yang boleh melakukan pergantian atau konfirmasi data",
