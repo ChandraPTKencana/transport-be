@@ -26,6 +26,7 @@ use Excel;
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\IsUser;
 use App\Exports\MyReport;
+use App\Http\Requests\MySql\TrxTrpTicketRequest;
 use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\Ujalan;
 use App\Models\MySql\UjalanDetail;
@@ -719,7 +720,7 @@ class TrxTrpController extends Controller
     }
   }
 
-  public function updateTicket(TrxTrpRequest $request)
+  public function updateTicket(TrxTrpTicketRequest $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
     MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
