@@ -49,7 +49,7 @@ class StandbyTrxController extends Controller
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');
 
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
-    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet'])->get();
+    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
     
     return response()->json([
       "list_standby_mst" => $list_standby_mst,
@@ -343,7 +343,7 @@ class StandbyTrxController extends Controller
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
-      if($request->supir_id && $request->kernet_id &&  $request->supir_id == $request->kernet_id)
+      if($request->supir_id && $request->kernet_id &&  $request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
       $unique_items = [];
@@ -501,7 +501,7 @@ class StandbyTrxController extends Controller
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
-      if($request->supir_id && $request->kernet_id &&  $request->supir_id == $request->kernet_id)
+      if($request->supir_id && $request->kernet_id &&  $request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
       $SYSNOTES=[];

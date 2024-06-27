@@ -489,7 +489,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
-      if($request->supir_id == $request->kernet_id )
+      if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
 
@@ -606,7 +606,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Kernet tidak terdaftar",1);
       }
 
-      if($request->supir_id == $request->kernet_id )
+      if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
