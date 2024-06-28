@@ -1,3 +1,3 @@
-cd /xampp/htdocs/logistik
+cd ../logistik
 git pull origin main
 pause
