@@ -43,7 +43,7 @@ class StandbyTrxController extends Controller
 
   public function loadLocal()
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
 
     $list_standby_mst = \App\Models\MySql\StandbyMst::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');
@@ -61,7 +61,7 @@ class StandbyTrxController extends Controller
 
   public function loadSqlSrv(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
 
     $online_status = $request->online_status;
 
@@ -319,7 +319,7 @@ class StandbyTrxController extends Controller
 
   public function store(StandbyTrxRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
 
     $details_in = json_decode($request->details, true);
@@ -479,7 +479,7 @@ class StandbyTrxController extends Controller
 
   public function update(StandbyTrxRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
     
     $t_stamp        = date("Y-m-d H:i:s");
     $online_status  = $request->online_status;
@@ -750,7 +750,7 @@ class StandbyTrxController extends Controller
   public function delete(Request $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
 
     DB::beginTransaction();
 
@@ -817,7 +817,7 @@ class StandbyTrxController extends Controller
   public function reqDelete(Request $request)
   {
     // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
 
     DB::beginTransaction();
 
@@ -981,7 +981,7 @@ class StandbyTrxController extends Controller
   } 
 
   public function previewFile(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor']);
 
     set_time_limit(0);
 
@@ -1404,7 +1404,7 @@ class StandbyTrxController extends Controller
   }
 
   public function doGenPVR(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
     $rules = [
       // 'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
       'online_status' => "required",
@@ -1686,7 +1686,7 @@ class StandbyTrxController extends Controller
   }
 
   public function doUpdatePV(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
     $rules = [
       'online_status' => "required",
     ];
