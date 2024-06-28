@@ -1429,7 +1429,7 @@ class StandbyTrxController extends Controller
     $miniError="";
     $id="";
     try {
-      $standby_trxs = StandbyTrx::whereNull("pvr_id")->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val1',1)->get();
+      $standby_trxs = StandbyTrx::where(function($q1){$q1->where('pvr_had_detail',0)->orWhereNull("pvr_id");})->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val1',1)->get();
       if(count($standby_trxs)==0){
         throw new \Exception("Semua PVR sudah terisi",1);
       }
