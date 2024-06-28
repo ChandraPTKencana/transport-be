@@ -36,7 +36,7 @@ class IsUserRequest extends FormRequest
             $rules['username'] = 'required|max:255|unique:App\Models\MySql\IsUser,username,' . request()->id;
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
-            $rules['hak_akses'] = 'required|in:SuperAdmin,Logistic,Finance,Marketing,MIS,PabrikTransport,Accounting,PabrikMandor';
+            $rules['hak_akses'] = 'required|in:SuperAdmin,ViewOnly,Logistic,Finance,Marketing,MIS,PabrikTransport,Accounting,PabrikMandor';
             $rules['is_active'] = 'required|in:0,1';
         }
         return $rules;

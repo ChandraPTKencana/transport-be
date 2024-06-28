@@ -110,7 +110,7 @@ class TrxLoadDataController extends Controller
 
   public function cost_center(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
 
     $online_status = $request->online_status;
 
@@ -137,7 +137,7 @@ class TrxLoadDataController extends Controller
   }
   public function trp(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
 
     $online_status = $request->online_status;
     $transition_target = $request->transition_target;
@@ -254,7 +254,7 @@ class TrxLoadDataController extends Controller
 
   public function local(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
 
     $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
