@@ -88,10 +88,11 @@ class MyLib
 
   public static function compareChange($old,$new){
     $note="";
-    $o = $old->toArray();
-    $n = $new->toArray();
+    $o = is_array($old) ? $old : $old->toArray();
+    $n = is_array($new) ? $new : $new->toArray();
+
     foreach ($o as $k => $v) {
-      if($n[$k]!=$v){
+      if(isset($n[$k]) && $n[$k]!=$v){
         if($note==""){
           $note.="Data yang berubah: \n";
         }

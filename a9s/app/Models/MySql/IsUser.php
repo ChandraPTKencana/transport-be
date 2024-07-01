@@ -64,4 +64,10 @@ class IsUser extends Authenticatable
     //     return $this->from("hrm_revisi_lokasi")->select('*')->whereIn("id",$locs)->get()->pluck("id")->toArray();
     //     // return $this->belongsTo(HrmRevisiLokasi::class, 'loc', 'id');
     // }
+
+
+    public function details()
+    {
+        return $this->hasMany(PermissionUserDetail::class, 'user_id', 'id');
+    }
 }
