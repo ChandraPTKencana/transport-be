@@ -3,6 +3,8 @@
 namespace App\Models\MySql;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Helpers\MyLog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -70,4 +72,18 @@ class IsUser extends Authenticatable
     {
         return $this->hasMany(PermissionUserDetail::class, 'user_id', 'id');
     }
+
+
+    public function listPermissions()
+    {
+        $id = $this->id;
+        $group_permissions = PermissionGroupDetail::whereIn('permission_group_id',function($q)use($id) {
+            $q->select('permission_group_id');
+            $q->from('permission_group_user');
+            $q->where('user_id',$id);
+        })->get()->pluck('permission_list_name')->toArray();
+        $permissions = $this->details()->pluck('permission_list_name')->toArray();
+        return array_merge($group_permissions,$permissions);
+    }
+
 }
