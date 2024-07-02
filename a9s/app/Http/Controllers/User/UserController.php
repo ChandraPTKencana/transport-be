@@ -216,11 +216,13 @@ class UserController extends Controller
   {
     // MyLib::checkScope($this->auth, ['ap-user-view']);
     MyAdmin::checkRole($this->role, ['SuperAdmin']);
-    $model_query = IsUser::with([
-      'details'=>function($q){
-        $q->orderBy("ordinal","asc");
-      },
-    ])->find($request->id);
+    // $model_query = IsUser::with([
+    //   'details'=>function($q){
+    //     $q->orderBy("ordinal","asc");
+    //   },
+    // ])->find($request->id);
+
+    $model_query = IsUser::find($request->id);
     return response()->json([
       "data" => new IsUserResource($model_query),
     ], 200);
