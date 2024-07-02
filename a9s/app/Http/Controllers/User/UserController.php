@@ -14,7 +14,7 @@ use App\Http\Requests\MySql\IsUserRequest;
 
 use Illuminate\Support\Facades\DB;
 use App\Helpers\MyAdmin;
-use App\Models\MySql\PermissionUserDetail;
+// use App\Models\MySql\PermissionUserDetail;
 
 class UserController extends Controller
 {
@@ -257,8 +257,8 @@ class UserController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin']);
     // MyLib::checkScope($this->auth, ['ap-user-add']);
 
-    $permission_list_in = json_decode($request->permission_list, true);
-    $this->validateItems($permission_list_in);
+    // $permission_list_in = json_decode($request->permission_list, true);
+    // $this->validateItems($permission_list_in);
 
     $rollback_id = -1;
     DB::beginTransaction();
@@ -292,19 +292,19 @@ class UserController extends Controller
       //   Employee::where("no",$request->employee_no)->update(["which_user_id"=>$model_query->id]);
       // }
 
-      $ordinal=0;
-      foreach ($permission_list_in as $key => $value) {
-        $ordinal = $key + 1;
-        PermissionUserDetail::insert([
-          'ordinal' => $ordinal,
-          'user_id' => $model_query->id,
-          'permission_list_name' => $value['name'],
-          'created_at' => $t_stamp,
-          'created_user' => $this->admin_id,
-          'updated_at' => $t_stamp,
-          'updated_user' => $this->admin_id,
-        ]);
-      }
+      // $ordinal=0;
+      // foreach ($permission_list_in as $key => $value) {
+      //   $ordinal = $key + 1;
+      //   PermissionUserDetail::insert([
+      //     'ordinal' => $ordinal,
+      //     'user_id' => $model_query->id,
+      //     'permission_list_name' => $value['name'],
+      //     'created_at' => $t_stamp,
+      //     'created_user' => $this->admin_id,
+      //     'updated_at' => $t_stamp,
+      //     'updated_user' => $this->admin_id,
+      //   ]);
+      // }
       
 
       DB::commit();
@@ -341,8 +341,8 @@ class UserController extends Controller
     MyAdmin::checkRole($this->role, ['SuperAdmin']);
     // MyLib::checkScope($this->auth, ['ap-user-edit']);
 
-    $permission_list_in = json_decode($request->permission_list, true);
-    $this->validateItems($permission_list_in);
+    // $permission_list_in = json_decode($request->permission_list, true);
+    // $this->validateItems($permission_list_in);
 
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
@@ -386,52 +386,52 @@ class UserController extends Controller
       //   }
       // }
       //start for permission_list
-      $data_from_db = PermissionUserDetail::where('user_id', $model_query->id)
-      ->orderBy("ordinal", "asc")
-      ->lockForUpdate()
-      ->get();
+      // $data_from_db = PermissionUserDetail::where('user_id', $model_query->id)
+      // ->orderBy("ordinal", "asc")
+      // ->lockForUpdate()
+      // ->get();
 
-      $in_dt = array_map(function ($x) {
-        return $x["name"];
-      }, $permission_list_in);
+      // $in_dt = array_map(function ($x) {
+      //   return $x["name"];
+      // }, $permission_list_in);
 
-      $ordinal=0;
-      foreach ($data_from_db as $k => $v) {
-        $search = array_search($v->permission_list_name,$in_dt);
-        if($search===false){
-          PermissionUserDetail::where('user_id',$v->user_id)->where('permission_list_name',$v->permission_list_name)
-          ->delete();
-        }else{
-          $ordinal++;
+      // $ordinal=0;
+      // foreach ($data_from_db as $k => $v) {
+      //   $search = array_search($v->permission_list_name,$in_dt);
+      //   if($search===false){
+      //     PermissionUserDetail::where('user_id',$v->user_id)->where('permission_list_name',$v->permission_list_name)
+      //     ->delete();
+      //   }else{
+      //     $ordinal++;
           
-          $updateV = [
-            'ordinal' => $ordinal,
-            'p_change' => false,
-            'updated_at' => $t_stamp,
-            'updated_user' => $this->admin_id
-          ];
+      //     $updateV = [
+      //       'ordinal' => $ordinal,
+      //       'p_change' => false,
+      //       'updated_at' => $t_stamp,
+      //       'updated_user' => $this->admin_id
+      //     ];
 
-          PermissionUserDetail::where('user_id',$v->user_id)->where('permission_list_name',$v->permission_list_name)
-          ->update($updateV);
-        }
+      //     PermissionUserDetail::where('user_id',$v->user_id)->where('permission_list_name',$v->permission_list_name)
+      //     ->update($updateV);
+      //   }
         
-        $in_dt = array_filter($in_dt,function($q)use($v){
-          return $q != $v->permission_list_name;
-        });
-      }
+      //   $in_dt = array_filter($in_dt,function($q)use($v){
+      //     return $q != $v->permission_list_name;
+      //   });
+      // }
 
-      foreach ($in_dt as $k => $v) {
-        $ordinal++;
-        PermissionUserDetail::insert([
-            'user_id'               => $model_query->id,
-            'ordinal'               => $ordinal,
-            "permission_list_name"  => $v,
-            'created_at'            => $t_stamp,
-            'created_user'          => $this->admin_id,
-            'updated_at'            => $t_stamp,
-            'updated_user'          => $this->admin_id,
-        ]);
-      }
+      // foreach ($in_dt as $k => $v) {
+      //   $ordinal++;
+      //   PermissionUserDetail::insert([
+      //       'user_id'               => $model_query->id,
+      //       'ordinal'               => $ordinal,
+      //       "permission_list_name"  => $v,
+      //       'created_at'            => $t_stamp,
+      //       'created_user'          => $this->admin_id,
+      //       'updated_at'            => $t_stamp,
+      //       'updated_user'          => $this->admin_id,
+      //   ]);
+      // }
       //end for permission_list
       DB::commit();
       return response()->json([
