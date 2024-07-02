@@ -36,9 +36,6 @@ class PermissionListController extends Controller
 
   public function index(Request $request)
   {
-    return response()->json([
-      "data" => [],
-    ], 200);
     MyAdmin::checkRole($this->role, ['SuperAdmin']);
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset

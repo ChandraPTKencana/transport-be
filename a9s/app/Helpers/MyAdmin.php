@@ -51,7 +51,21 @@ class MyAdmin
     return $loc;
   }
 
-  public static function checkScope($user, $allowed_scopes = [], $msg = "Forbidden", $return = false)
+  public static function checkScope($scopes, $allowed_scopes = '')
+  {
+    if (!in_array($allowed_scopes,$scopes)) {
+      throw new MyException(["message" => "Need ".$allowed_scopes." Permission"], 403);
+    }
+  }
+
+  public static function returnCheckScope($user, $allowed_scopes = [])
+  {
+    $scopes = $user->data_permissions->pluck("in_one_line")->toArray();
+    $has_value = count(array_intersect($allowed_scopes, $scopes));
+    return $has_value;
+  }
+
+  public static function callCheckScope($user, $allowed_scopes = [], $msg = "Forbidden", $return = false)
   {
     $scopes = $user->listPermissions();
     $has_value = count(array_intersect($allowed_scopes, $scopes));
@@ -62,13 +76,6 @@ class MyAdmin
     if ($has_value == 0) {
       throw new MyException(["message" => $msg], 403);
     }
-  }
-
-  public static function checkDataScope($user, $allowed_scopes = [])
-  {
-    $scopes = $user->data_permissions->pluck("in_one_line")->toArray();
-    $has_value = count(array_intersect($allowed_scopes, $scopes));
-    return $has_value;
   }
 
   public static function checkActionScope($user, $allowed_scopes = [])

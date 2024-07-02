@@ -27,7 +27,7 @@ class EmployeeController extends Controller
   private $admin;
   private $admin_id;
   private $role;
-
+  private $permissions;
   private $syslog_db = 'employee_mst';
 
   public function __construct(Request $request)
@@ -35,14 +35,13 @@ class EmployeeController extends Controller
     $this->admin = MyAdmin::user();
     $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
+    $this->permissions = $this->admin->the_user->listPermission();
 
   }
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
-
-    // \App\Helpers\MyAdmin::checkScope($this->auth, ['ap-user-view']);
+    MyAdmin::checkScope($this->permissions, 'employee.views');
 
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -176,8 +175,8 @@ class EmployeeController extends Controller
 
   public function show(EmployeeRequest $request)
   {
-    // MyLib::checkScope($this->auth, ['ap-user-view']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'employee.view');
+    
     $model_query = Employee::find($request->id);
     return response()->json([
       "data" => new EmployeeResource($model_query),
@@ -186,8 +185,7 @@ class EmployeeController extends Controller
 
   public function store(EmployeeRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
-    // MyLib::checkScope($this->auth, ['ap-user-add']);
+    MyAdmin::checkScope($this->permissions, 'employee.create');
 
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
@@ -250,8 +248,8 @@ class EmployeeController extends Controller
 
   public function update(EmployeeRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
-    // MyLib::checkScope($this->auth, ['ap-user-edit']);
+    MyAdmin::checkScope($this->permissions, 'employee.modify');
+
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
@@ -319,10 +317,9 @@ class EmployeeController extends Controller
 
   public function delete(EmployeeRequest $request)
   {
-    // MyLib::checkScope($this->auth, ['ap-user-remove']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
-    DB::beginTransaction();
+    MyAdmin::checkScope($this->permissions, 'employee.remove');
 
+    DB::beginTransaction();
     try {
       $deleted_reason = $request->deleted_reason;
       if(!$deleted_reason)
@@ -381,7 +378,7 @@ class EmployeeController extends Controller
 
 
   public function validasi(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'employee.val');
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Employee,id",
@@ -406,7 +403,7 @@ class EmployeeController extends Controller
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
       
-      if(in_array($this->role,["SuperAdmin","Logistic"]) && !$model_query->val){
+      if(!$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
