@@ -17,18 +17,20 @@ class AcAccountController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+    MyAdmin::checkScope($this->permissions, 'srv.cost_center.views');
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset

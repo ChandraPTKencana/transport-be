@@ -14,7 +14,6 @@ use App\Helpers\MyLog;
 use App\Http\Requests\MySql\TrxTrpRequest;
 use App\Http\Resources\MySql\TrxTrpResource;
 use App\Models\HrmRevisiLokasi;
-use App\Models\Stok\Item;
 use App\Models\MySql\TrxTrpDetail;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -39,17 +38,19 @@ class AstNDriverController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
   }
 
   public function loadData(Request $request){
 
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ast_n_driver.download_file');
 
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->orderBy('xto','asc')->groupBy('xto')->get()->pluck('xto');
     $list_employee = \App\Models\MySql\Employee::available()->orderBy('name','asc')->get();
@@ -63,7 +64,7 @@ class AstNDriverController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ast_n_driver.download_file');
 
     $list_xto = json_decode($request->list_xto, true);
     $list_employee = json_decode($request->list_employee, true);
@@ -416,7 +417,7 @@ class AstNDriverController extends Controller
   }
 
   public function pdfPreview(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ast_n_driver.download_file');
 
     set_time_limit(0);
     $callGet = $this->index($request);
@@ -477,7 +478,7 @@ class AstNDriverController extends Controller
   }
 
   public function excelDownload(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ast_n_driver.download_file');
 
     set_time_limit(0);
     $callGet = $this->index($request);

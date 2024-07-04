@@ -33,17 +33,19 @@ class StandbyTrxController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
   }
 
   public function loadLocal()
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.create','standby_trx.modify']);
 
     $list_standby_mst = \App\Models\MySql\StandbyMst::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');
@@ -61,7 +63,7 @@ class StandbyTrxController extends Controller
 
   public function loadSqlSrv(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.create','standby_trx.modify']);
 
     $online_status = $request->online_status;
 
@@ -88,7 +90,7 @@ class StandbyTrxController extends Controller
 
   public function index(Request $request, $download = false)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.views');
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -281,7 +283,7 @@ class StandbyTrxController extends Controller
 
   public function show(StandbyTrxRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.view');
 
     $model_query = StandbyTrx::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','details','standby_mst'])->find($request->id);
     return response()->json([
@@ -319,11 +321,14 @@ class StandbyTrxController extends Controller
 
   public function store(StandbyTrxRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.create');
 
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
+
+    if(count($details_in)>0){
+      MyAdmin::checkScope($this->permissions, 'standby_trx.detail.insert');
+    }
 
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
@@ -479,7 +484,7 @@ class StandbyTrxController extends Controller
 
   public function update(StandbyTrxRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.modify');
     
     $t_stamp        = date("Y-m-d H:i:s");
     $online_status  = $request->online_status;
@@ -644,6 +649,19 @@ class StandbyTrxController extends Controller
               array_push($for_deletes, $details_in[$k]);
         }
   
+
+        if(count($for_adds) > 0){
+          MyAdmin::checkScope($this->permissions, 'standby_trx.detail.insert');
+        }
+  
+        if(count($for_edits) > 0){
+          MyAdmin::checkScope($this->permissions, 'standby_trx.detail.modify');
+        }
+  
+        if(count($for_deletes) > 0){
+          MyAdmin::checkScope($this->permissions, 'standby_trx.detail.remove');
+        }
+
         $data_to_processes = array_merge($for_deletes, $for_edits, $for_adds);
         
         if(count($for_edits)==0 && count($for_adds)==0){
@@ -749,8 +767,7 @@ class StandbyTrxController extends Controller
 
   public function delete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.remove');
 
     DB::beginTransaction();
 
@@ -816,8 +833,7 @@ class StandbyTrxController extends Controller
 
   public function reqDelete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.request_remove');
 
     DB::beginTransaction();
 
@@ -887,8 +903,7 @@ class StandbyTrxController extends Controller
 
   public function approveReqDelete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.approve_request_remove');
 
     $time = microtime(true);
     $mSecs = sprintf('%03d', ($time - floor($time)) * 1000);
@@ -981,7 +996,7 @@ class StandbyTrxController extends Controller
   } 
 
   public function previewFile(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.preview_file');
 
     set_time_limit(0);
 
@@ -1302,7 +1317,7 @@ class StandbyTrxController extends Controller
   // }
 
   public function validasi(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor','Logistic']);
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.val','standby_trx.val1','standby_trx.val2']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
@@ -1331,39 +1346,30 @@ class StandbyTrxController extends Controller
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
   
-      $index_item = array_search($this->role, ["SuperAdmin","PabrikMandor"]);    
-      if ($index_item !== false){
-        if(!$model_query->val1){
-          if($model_query->val==0){
-            throw new \Exception("Kasir Harus Memvalidasi Terlebih Dahulu",1);
-          }
-          $model_query->val1 = 1;
-          $model_query->val1_user = $this->admin_id;
-          $model_query->val1_at = $t_stamp;
+    if(MyAdmin::checkScope($this->permissions, 'standby_trx.val1',true) && !$model_query->val1){
+        if($model_query->val==0){
+          throw new \Exception("Kasir Harus Memvalidasi Terlebih Dahulu",1);
         }
+        $model_query->val1 = 1;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
       }
 
-      $index_item = array_search($this->role, ["SuperAdmin","Logistic"]);    
-      if ($index_item !== false){
-        if(!$model_query->val2){
-          if($model_query->val1==0){
-            throw new \Exception("Mandor Harus Memvalidasi Terlebih Dahulu",1);
-          }
-          $model_query->val2 = 1;
-          $model_query->val2_user = $this->admin_id;
-          $model_query->val2_at = $t_stamp;
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val2',true) && !$model_query->val2){
+        if($model_query->val1==0){
+          throw new \Exception("Mandor Harus Memvalidasi Terlebih Dahulu",1);
         }
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
       }
-  
 
-      $index_item = array_search($this->role, ["SuperAdmin","PabrikTransport"]);    
-      if ($index_item !== false){      
-        if(!$model_query->val){
-          $model_query->val = 1;
-          $model_query->val_user = $this->admin_id;
-          $model_query->val_at = $t_stamp;
-        }
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val',true) && !$model_query->val){
+        $model_query->val = 1;
+        $model_query->val_user = $this->admin_id;
+        $model_query->val_at = $t_stamp;
       }
+
       $model_query->save();
 
       MyLog::sys("standby_trx",$request->id,"approve");
@@ -1404,7 +1410,7 @@ class StandbyTrxController extends Controller
   }
 
   public function doGenPVR(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.generate_pvr');
     $rules = [
       // 'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
       'online_status' => "required",
@@ -1686,7 +1692,7 @@ class StandbyTrxController extends Controller
   }
 
   public function doUpdatePV(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'standby_trx.get_pv');
     $rules = [
       'online_status' => "required",
     ];

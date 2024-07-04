@@ -6,7 +6,6 @@ use App\Helpers\MyLog;
 use Illuminate\Console\Command;
 
 use Illuminate\Support\Facades\Validator;
-use App\Models\Stok\Transaction;
 
 class SupirAndKernet extends Command
 {

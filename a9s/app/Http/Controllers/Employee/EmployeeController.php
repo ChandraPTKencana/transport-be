@@ -35,7 +35,7 @@ class EmployeeController extends Controller
     $this->admin = MyAdmin::user();
     $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
-    $this->permissions = $this->admin->the_user->listPermission();
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 

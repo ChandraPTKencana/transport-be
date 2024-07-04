@@ -11,15 +11,6 @@ use Illuminate\Validation\ValidationException;
 use App\Models\MySql\TrxTrp;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Http\Requests\MySql\TrxTrpRequest;
-use App\Http\Resources\MySql\TrxTrpResource;
-use App\Models\HrmRevisiLokasi;
-use App\Models\Stok\Item;
-use App\Models\MySql\TrxTrpDetail;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Image;
-use File;
 use PDF;
 use Excel;
 
@@ -36,17 +27,18 @@ class RampController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
   }
 
   public function getLocations(Request $request){
-
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ramp.download_file');
 
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');
     return response()->json([
@@ -56,7 +48,7 @@ class RampController extends Controller
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ramp.download_file');
 
     $model_query = TrxTrp::where('val2',1)->where("deleted",0)->orderBy("xto","asc");
     $date_from="";
@@ -282,7 +274,7 @@ class RampController extends Controller
   }
 
   public function pdfPreview(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ramp.download_file');
 
     set_time_limit(0);
     $callGet = $this->index($request);
@@ -336,7 +328,7 @@ class RampController extends Controller
   }
 
   public function excelDownload(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'report.ramp.download_file');
 
     set_time_limit(0);
     $callGet = $this->index($request);

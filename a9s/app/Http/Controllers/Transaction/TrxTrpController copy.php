@@ -13,13 +13,7 @@ use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
 use App\Http\Requests\MySql\TrxTrpRequest;
 use App\Http\Resources\MySql\TrxTrpResource;
-use App\Models\HrmRevisiLokasi;
-use App\Models\Stok\Item;
-use App\Models\MySql\TrxTrpDetail;
-use Exception;
 use Illuminate\Support\Facades\DB;
-use Image;
-use File;
 use PDF;
 use Excel;
 

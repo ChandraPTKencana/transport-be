@@ -13,7 +13,6 @@ use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
 use App\Http\Requests\MySql\PermissionGroupRequest;
 use App\Http\Resources\MySql\PermissionGroupResource;
-use App\Http\Resources\IsUserResource;
 use App\Models\MySql\IsUser;
 use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
@@ -26,18 +25,20 @@ class PermissionGroupController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin']);
+    MyAdmin::checkScope($this->permissions, 'permission_group.views');
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -150,7 +151,7 @@ class PermissionGroupController extends Controller
 
   public function show(PermissionGroupRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin']);
+    MyAdmin::checkScope($this->permissions, 'permission_group.view');
 
     $model_query = PermissionGroup::with([
       'details'=>function($q){
@@ -221,14 +222,21 @@ class PermissionGroupController extends Controller
 
   public function store(PermissionGroupRequest $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin']);
+    MyAdmin::checkScope($this->permissions, 'permission_group.create');
 
     $permission_list_in = json_decode($request->permission_list, true);
     $this->validateItems($permission_list_in);
 
     $users_in = json_decode($request->users, true);
     $this->validateItems2($users_in);
+
+    if(count($permission_list_in)>0){
+      MyAdmin::checkScope($this->permissions, 'permission_group_detail.insert');
+    }
+
+    if(count($users_in)>0){
+      MyAdmin::checkScope($this->permissions, 'permission_group_user.insert');
+    }
 
     $rollback_id = -1;
     DB::beginTransaction();
@@ -308,7 +316,7 @@ class PermissionGroupController extends Controller
 
   public function update(PermissionGroupRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin']);
+    MyAdmin::checkScope($this->permissions, 'permission_group.modify');
     $t_stamp = date("Y-m-d H:i:s");
 
     //start for details2
@@ -339,6 +347,42 @@ class PermissionGroupController extends Controller
       $in_dt = array_map(function ($x) {
         return $x["name"];
       }, $permission_list_in);
+
+      $from_dt = array_map(function ($x) {
+        return $x['permission_list_name'];
+      }, $data_from_db->toArray());
+
+
+      if(count(array_diff($in_dt, $from_dt))>0) {
+        MyAdmin::checkScope($this->permissions, 'permission_group_detail.insert');
+      }
+
+      if(count(array_diff($from_dt, $in_dt))>0) {
+        MyAdmin::checkScope($this->permissions, 'permission_group_detail.remove');
+      }
+
+      //start for user
+      $data_from_db2 = PermissionGroupUser::where('permission_group_id', $model_query->id)
+      ->orderBy("ordinal", "asc")
+      ->lockForUpdate()
+      ->get();
+     
+      $in_dt2 = array_map(function ($x) {
+        return $x["id"];
+      }, $users_in);
+
+      $from_dt2 = array_map(function ($x) {
+        return $x['user_id'];
+      }, $data_from_db2->toArray());
+
+
+      if(count(array_diff($in_dt2, $from_dt2))>0) {
+        MyAdmin::checkScope($this->permissions, 'permission_group_user.insert');
+      }
+
+      if(count(array_diff($from_dt2, $in_dt2))>0) {
+        MyAdmin::checkScope($this->permissions, 'permission_group_user.remove');
+      }
 
       $ordinal=0;
       foreach ($data_from_db as $k => $v) {
@@ -386,24 +430,12 @@ class PermissionGroupController extends Controller
             'updated_user'    => $this->admin_id,
         ]);
       }
-      //end for permission_list
 
-
-
-      //start for user
       array_push( $SYSNOTES ,"Details Users: \n");
-      $data_from_db = PermissionGroupUser::where('permission_group_id', $model_query->id)
-      ->orderBy("ordinal", "asc")
-      ->lockForUpdate()
-      ->get();
-     
-      $in_dt = array_map(function ($x) {
-        return $x["id"];
-      }, $users_in);
 
       $ordinal=0;
-      foreach ($data_from_db as $k => $v) {
-        $search = array_search($v->user_id,$in_dt);
+      foreach ($data_from_db2 as $k => $v) {
+        $search = array_search($v->user_id,$in_dt2);
         if($search===false){
           array_push( $SYSNOTES ,"User ID:".$v->user_id." [Deleted]");
           PermissionGroupUser::where('permission_group_id',$v->permission_group_id)->where('user_id',$v->user_id)
@@ -427,12 +459,12 @@ class PermissionGroupController extends Controller
           array_push( $SYSNOTES ,"Ordinal ".$ordinal."\n".$SYSNOTE);
         }
         
-        $in_dt = array_filter($in_dt,function($q)use($v){
+        $in_dt2 = array_filter($in_dt2,function($q)use($v){
           return $q != $v->user_id;
         });
       }
 
-      foreach ($in_dt as $k => $v) {
+      foreach ($in_dt2 as $k => $v) {
         $ordinal++;
 
         array_push( $SYSNOTES ,"Ordinal ".$ordinal." [Insert]");
@@ -447,7 +479,6 @@ class PermissionGroupController extends Controller
             'updated_user'          => $this->admin_id,
         ]);
       }
-      //end for permission_list
 
       $model_query->save();
 
@@ -483,8 +514,8 @@ class PermissionGroupController extends Controller
 
   public function delete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+
+    MyAdmin::checkScope($this->permissions, 'permission_group.remove');
 
     DB::beginTransaction();
 
@@ -530,83 +561,5 @@ class PermissionGroupController extends Controller
       //throw $th;
     }
   }
-
-  public function validasi(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
-
-    $rules = [
-      'id' => "required|exists:\App\Models\MySql\PermissionGroup,id",
-    ];
-
-    $messages = [
-      'id.required' => 'ID tidak boleh kosong',
-      'id.exists' => 'ID tidak terdaftar',
-    ];
-
-    $validator = \Validator::make($request->all(), $rules, $messages);
-
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
-
-    $t_stamp = date("Y-m-d H:i:s");
-    DB::beginTransaction();
-    try {
-      $model_query = PermissionGroup::where("id",$request->id)->lockForUpdate()->first();
-      if($this->role=='PabrikTransport' &&  $model_query->val){
-        throw new \Exception("Data Sudah Tervalidasi",1);
-      }
-
-      if($this->role == "Logistic" && $model_query->val1){
-        throw new \Exception("Data Sudah Tervalidasi",1);
-      }
-
-      
-      if(in_array($this->role,["SuperAdmin","PabrikTransport"]) && !$model_query->val){
-        $model_query->val = 1;
-        $model_query->val_user = $this->admin_id;
-        $model_query->val_at = $t_stamp;
-      }
-
-      if(in_array($this->role,["SuperAdmin","Logistic"]) && !$model_query->val1){
-        $model_query->val1 = 1;
-        $model_query->val1_user = $this->admin_id;
-        $model_query->val1_at = $t_stamp;
-      }
-      $model_query->save();
-
-      MyLog::sys("permission_group",$request->id,"approve");
-
-      DB::commit();
-      return response()->json([
-        "message" => "Proses validasi data berhasil",
-        "val"=>$model_query->val,
-        "val_user"=>$model_query->val_user,
-        "val_at"=>$model_query->val_at,
-        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
-        "val1"=>$model_query->val1,
-        "val1_user"=>$model_query->val1_user,
-        "val1_at"=>$model_query->val1_at,
-        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses ubah data gagal",
-      ], 400);
-    }
-
-  }
-
   
 }

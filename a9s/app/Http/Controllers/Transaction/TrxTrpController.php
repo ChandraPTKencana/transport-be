@@ -13,13 +13,7 @@ use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
 use App\Http\Requests\MySql\TrxTrpRequest;
 use App\Http\Resources\MySql\TrxTrpResource;
-use App\Models\HrmRevisiLokasi;
-use App\Models\Stok\Item;
-use App\Models\MySql\TrxTrpDetail;
-use Exception;
 use Illuminate\Support\Facades\DB;
-use Image;
-use File;
 use PDF;
 use Excel;
 
@@ -36,17 +30,20 @@ class TrxTrpController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
   public function index(Request $request, $download = false)
   {
+    MyAdmin::checkScope($this->permissions, 'trp_trx.views');
 
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -383,7 +380,7 @@ class TrxTrpController extends Controller
 
   public function show(TrxTrpRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.view');
 
     $model_query = TrxTrp::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens'])->find($request->id);
     return response()->json([
@@ -393,7 +390,7 @@ class TrxTrpController extends Controller
 
   public function mandorGetVerifyTrx(TrxTrpRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.view');
 
     $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
     return response()->json([
@@ -402,7 +399,7 @@ class TrxTrpController extends Controller
   }
 
   public function mandorGetVerifySet(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.val1');
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -472,8 +469,7 @@ class TrxTrpController extends Controller
 
   public function store(TrxTrpRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.create');
 
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
@@ -589,8 +585,7 @@ class TrxTrpController extends Controller
 
   public function update(TrxTrpRequest $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.modify');
     
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
@@ -722,8 +717,7 @@ class TrxTrpController extends Controller
 
   public function updateTicket(TrxTrpTicketRequest $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.modify');
     
     $t_stamp = date("Y-m-d H:i:s");
     $online_status=$request->online_status;
@@ -868,8 +862,7 @@ class TrxTrpController extends Controller
 
   public function delete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.remove');
 
     DB::beginTransaction();
 
@@ -934,8 +927,7 @@ class TrxTrpController extends Controller
 
   public function reqDelete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.request_remove');
 
     DB::beginTransaction();
 
@@ -1004,8 +996,7 @@ class TrxTrpController extends Controller
 
   public function approveReqDelete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.approve_request_remove');
 
     $time = microtime(true);
     $mSecs = sprintf('%03d', ($time - floor($time)) * 1000);
@@ -1132,7 +1123,7 @@ class TrxTrpController extends Controller
   }
 
   public function previewFile(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.preview_file');
 
     set_time_limit(0);
 
@@ -1190,7 +1181,7 @@ class TrxTrpController extends Controller
   }
 
   public function previewFiles(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Finance','Marketing','Logistic','MIS','Accounting','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
 
     // set_time_limit(0);
 
@@ -1389,7 +1380,7 @@ class TrxTrpController extends Controller
   }
 
   public function downloadExcel(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Finance','Marketing','Logistic','MIS','Accounting','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
 
     set_time_limit(0);
     $callGet = $this->index($request, true);
@@ -1467,7 +1458,7 @@ class TrxTrpController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -1492,25 +1483,19 @@ class TrxTrpController extends Controller
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
   
-      $index_item = array_search($this->role, ["SuperAdmin","PabrikMandor"]);    
-      if ($index_item !== false){
-        if(!$model_query->val1){
-          $model_query->val1 = 1;
-          $model_query->val1_user = $this->admin_id;
-          $model_query->val1_at = $t_stamp;
-        }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$model_query->val1){
+        $model_query->val1 = 1;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
       }
 
-      $index_item = array_search($this->role, ["SuperAdmin","Logistic"]);    
-      if ($index_item !== false){
-        if(!$model_query->val2){
-          $model_query->val2 = 1;
-          $model_query->val2_user = $this->admin_id;
-          $model_query->val2_at = $t_stamp;
-        }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val2',true) && !$model_query->val2){
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
       }
   
-      if(!$model_query->val && $model_query->created_user == $this->admin_id){
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val',true) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
@@ -1567,7 +1552,7 @@ class TrxTrpController extends Controller
   }
 
   public function doGenPVR(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.generate_pvr');
     $rules = [
       // 'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
       'online_status' => "required",
@@ -1854,7 +1839,7 @@ class TrxTrpController extends Controller
   }
 
   public function doUpdatePV(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.get_pv');
     $rules = [
       'online_status' => "required",
     ];
@@ -1943,8 +1928,7 @@ class TrxTrpController extends Controller
 
   public function delete_absen(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'trp_trx.absen.remove');
 
     $ids = json_decode($request->ids, true);
 

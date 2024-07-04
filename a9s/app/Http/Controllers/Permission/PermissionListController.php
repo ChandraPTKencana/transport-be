@@ -14,7 +14,6 @@ use App\Helpers\MyLog;
 use App\Http\Requests\MySql\PermissionListRequest;
 use App\Http\Resources\MySql\PermissionListResource;
 use App\Models\MySql\StandbyDtl;
-use App\Http\Resources\IsUserResource;
 use App\Models\MySql\IsUser;
 
 use Exception;
@@ -25,18 +24,21 @@ class PermissionListController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin']);
+    MyAdmin::checkScope($this->permissions, 'permission_list.views');
+
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
     //======================================================================================================
@@ -55,16 +57,17 @@ class PermissionListController extends Controller
     //======================================================================================================
     // Jika Halaman Ditentutkan maka $offset akan disesuaikan
     //======================================================================================================
-    if (isset($request->page)) {
-      $page =  (int) $request->page;
-      $offset = ($page * $limit) - $limit;
-    }
+    // if (isset($request->page)) {
+    //   $page =  (int) $request->page;
+    //   $offset = ($page * $limit) - $limit;
+    // }
 
 
     //======================================================================================================
     // Init Model
     //======================================================================================================
-    $model_query = PermissionList::offset($offset)->limit($limit);
+    // $model_query = PermissionList::offset($offset)->limit($limit);
+    $model_query = new PermissionList();
 
     $first_row=[];
     if($request->first_row){

@@ -8,31 +8,24 @@ use Illuminate\Http\Request;
 use App\Helpers\MyLib;
 use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
-use App\Models\MySql\TrxCpo;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Http\Requests\MySql\TrxCpoRequest;
-use App\Http\Resources\MySql\TrxCpoResource;
-use App\Models\HrmRevisiLokasi;
-use App\Models\Stok\Item;
-use App\Models\MySql\TrxCpoDetail;
-use Exception;
 use Illuminate\Support\Facades\DB;
-use Image;
-use File;
-use App\Http\Resources\IsUserResource;
 
 class TrxLoadDataController extends Controller
 {
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
+    $this->permissions = $this->admin->the_user->listPermissions();
+
   }
 
   // public function cpo(Request $request)
@@ -110,7 +103,7 @@ class TrxLoadDataController extends Controller
 
   public function cost_center(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'srv.cost_center.views');
 
     $online_status = $request->online_status;
 
@@ -137,7 +130,7 @@ class TrxLoadDataController extends Controller
   }
   public function trp(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
+    MyAdmin::checkScope($this->permissions, 'srv.palm_ticket.views');
 
     $online_status = $request->online_status;
     $transition_target = $request->transition_target;
@@ -254,8 +247,6 @@ class TrxLoadDataController extends Controller
 
   public function local(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic','PabrikMandor']);
-
     $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
     $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();

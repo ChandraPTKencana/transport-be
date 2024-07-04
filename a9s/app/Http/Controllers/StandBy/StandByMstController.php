@@ -25,18 +25,21 @@ class StandbyMstController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
+
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport']);
+    MyAdmin::checkScope($this->permissions, 'standby_mst.views');
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -149,7 +152,7 @@ class StandbyMstController extends Controller
 
   public function show(StandbyMstRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','Logistic','PabrikTransport']);
+    MyAdmin::checkScope($this->permissions, 'standby_mst.view');
 
     $model_query = StandbyMst::with([
     'details'=>function($q){
@@ -215,11 +218,14 @@ class StandbyMstController extends Controller
 
   public function store(StandbyMstRequest $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkScope($this->permissions, 'standby_mst.create');
 
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
+
+    if(count($details_in)>0){
+      MyAdmin::checkScope($this->permissions, 'standby_mst.detail.insert');
+    }
 
     $rollback_id = -1;
     DB::beginTransaction();
@@ -338,7 +344,7 @@ class StandbyMstController extends Controller
 
   public function update(StandbyMstRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport']);
+    MyAdmin::checkScope($this->permissions, 'standby_mst.modify');
     $t_stamp = date("Y-m-d H:i:s");
 
     //start for details2
@@ -452,6 +458,18 @@ class StandbyMstController extends Controller
               array_push($for_adds, $details_in[$k]);
         } else
             array_push($for_deletes, $details_in[$k]);
+      }
+
+      if(count($for_adds) > 0){
+        MyAdmin::checkScope($this->permissions, 'standby_mst.detail.insert');
+      }
+
+      if(count($for_edits) > 0){
+        MyAdmin::checkScope($this->permissions, 'standby_mst.detail.modify');
+      }
+
+      if(count($for_deletes) > 0){
+        MyAdmin::checkScope($this->permissions, 'standby_mst.detail.remove');
       }
 
       $data_to_processes = array_merge($for_deletes, $for_edits, $for_adds);
@@ -600,8 +618,7 @@ class StandbyMstController extends Controller
 
   public function delete(Request $request)
   {
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'standby_mst.remove');
 
     DB::beginTransaction();
 
@@ -649,7 +666,7 @@ class StandbyMstController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+    MyAdmin::checkMultiScope($this->permissions, ['standby_mst.val','standby_mst.val1']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\StandbyMst,id",
@@ -670,22 +687,24 @@ class StandbyMstController extends Controller
     DB::beginTransaction();
     try {
       $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
-      if($this->role=='PabrikTransport' &&  $model_query->val){
+      
+      
+      if(MyAdmin::checkScope($this->permissions, 'standby_mst.val',true) &&  $model_query->val){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
 
-      if($this->role == "Logistic" && $model_query->val1){
+      if(MyAdmin::checkScope($this->permissions, 'standby_mst.val1',true) && $model_query->val1){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
 
       
-      if(in_array($this->role,["SuperAdmin","PabrikTransport"]) && !$model_query->val){
+      if(MyAdmin::checkScope($this->permissions, 'standby_mst.val',true) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
       }
 
-      if(in_array($this->role,["SuperAdmin","Logistic"]) && !$model_query->val1){
+      if(MyAdmin::checkScope($this->permissions, 'standby_mst.val1',true) && !$model_query->val1){
         $model_query->val1 = 1;
         $model_query->val1_user = $this->admin_id;
         $model_query->val1_at = $t_stamp;

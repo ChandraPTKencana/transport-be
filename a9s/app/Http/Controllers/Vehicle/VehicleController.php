@@ -21,18 +21,20 @@ class VehicleController extends Controller
   private $admin;
   private $admin_id;
   private $role;
+  private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'vehicle.views');
 
     // \App\Helpers\MyAdmin::checkScope($this->auth, ['ap-user-view']);
 
@@ -154,8 +156,7 @@ class VehicleController extends Controller
   
   public function show(VehicleRequest $request)
   {
-    // MyLib::checkScope($this->auth, ['ap-user-view']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','ViewOnly','PabrikTransport','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'vehicle.view');
     $model_query = Vehicle::find($request->id);
     return response()->json([
       "data" => new VehicleResource($model_query),
@@ -164,8 +165,7 @@ class VehicleController extends Controller
 
   public function store(VehicleRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
-    // MyLib::checkScope($this->auth, ['ap-user-add']);
+    MyAdmin::checkScope($this->permissions, 'vehicle.create');
 
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
@@ -207,8 +207,7 @@ class VehicleController extends Controller
 
   public function update(VehicleRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
-    // MyLib::checkScope($this->auth, ['ap-user-edit']);
+    MyAdmin::checkScope($this->permissions, 'vehicle.modify');
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
@@ -247,8 +246,7 @@ class VehicleController extends Controller
 
   public function delete(VehicleRequest $request)
   {
-    // MyLib::checkScope($this->auth, ['ap-user-remove']);
-    MyAdmin::checkRole($this->role, ['SuperAdmin','PabrikTransport','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'vehicle.remove');
     DB::beginTransaction();
 
     try {

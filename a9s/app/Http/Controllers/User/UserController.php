@@ -14,6 +14,7 @@ use App\Http\Requests\MySql\IsUserRequest;
 
 use Illuminate\Support\Facades\DB;
 use App\Helpers\MyAdmin;
+use App\Helpers\MyLog;
 use App\Models\MySql\PermissionUserDetail;
 
 class UserController extends Controller
@@ -28,7 +29,7 @@ class UserController extends Controller
     $this->admin = MyAdmin::user();
     $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
-    $this->permissions = $this->admin->the_user->listPermission();
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
@@ -262,6 +263,10 @@ class UserController extends Controller
     $permission_list_in = json_decode($request->permission_list, true);
     $this->validateItems($permission_list_in);
 
+    if(count($permission_list_in)>0){
+      MyAdmin::checkScope($this->permissions, 'permission_user.insert');
+    }
+
     $rollback_id = -1;
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
@@ -295,11 +300,6 @@ class UserController extends Controller
       // }
 
       $ordinal=0;
-
-      if(count($permission_list_in)>0){
-        MyAdmin::checkScope($this->permissions, 'user.create');
-      }
-
       foreach ($permission_list_in as $key => $value) {
         $ordinal = $key + 1;
         PermissionUserDetail::insert([
@@ -362,8 +362,6 @@ class UserController extends Controller
       $model_query->is_active   = $request->is_active;
       $model_query->updated_at  = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
-      $model_query->save();
-
 
       // if($request->employee_no){
       //   //Check apakah di update dengan data yang sama
@@ -400,6 +398,19 @@ class UserController extends Controller
       $in_dt = array_map(function ($x) {
         return $x["name"];
       }, $permission_list_in);
+
+      $from_dt = array_map(function ($x) {
+        return $x['permission_list_name'];
+      }, $data_from_db->toArray());
+
+      
+      if(count(array_diff($in_dt, $from_dt))>0) {
+        MyAdmin::checkScope($this->permissions, 'permission_user.insert');
+      }
+
+      if(count(array_diff($from_dt, $in_dt))>0) {
+        MyAdmin::checkScope($this->permissions, 'permission_user.remove');
+      }
 
       $ordinal=0;
       foreach ($data_from_db as $k => $v) {
@@ -438,6 +449,8 @@ class UserController extends Controller
             'updated_user'          => $this->admin_id,
         ]);
       }
+
+      $model_query->save();
       //end for permission_list
       DB::commit();
       return response()->json([

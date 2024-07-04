@@ -7,7 +7,6 @@ use App\Models\MySql\Employee;
 use Illuminate\Console\Command;
 
 use Illuminate\Support\Facades\Validator;
-use App\Models\Stok\Transaction;
 use DB;
 class RunCom extends Command
 {

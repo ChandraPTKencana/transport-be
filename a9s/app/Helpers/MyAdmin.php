@@ -51,10 +51,27 @@ class MyAdmin
     return $loc;
   }
 
-  public static function checkScope($scopes, $allowed_scopes = '')
+  public static function checkScope($scopes, $allowed_scopes = '',$return=false,$localException=false)
   {
-    if (!in_array($allowed_scopes,$scopes)) {
+    if ($return) {
+      return in_array($allowed_scopes,$scopes);
+    }
+
+    if (!in_array($allowed_scopes,$scopes) && $localException==false) {
       throw new MyException(["message" => "Need ".$allowed_scopes." Permission"], 403);
+    }elseif(!in_array($allowed_scopes,$scopes) && $localException){
+      throw new \Exception("Need ".$allowed_scopes." Permission",1);
+    }
+  }
+
+  public static function checkMultiScope($scopes, $allowed_scopes = [],$return=false)
+  {
+    $has_value = count(array_intersect($allowed_scopes, $scopes));
+    if ($return) {
+      return $has_value;
+    }
+    if ($has_value == 0) {
+      throw new MyException(["message" => "Need ".implode(" or ",$allowed_scopes)." Permission"], 403);
     }
   }
 
