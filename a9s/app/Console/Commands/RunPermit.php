@@ -127,7 +127,10 @@ class RunPermit extends Command
             ["permit"=>'vehicle.modify',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'vehicle.remove',"to"=>['SuperAdmin','Logistic']],
 
+            ["permit"=>'report.ast_n_driver.views', "to"=>['SuperAdmin','ViewOnly','Logistic']],
             ["permit"=>'report.ast_n_driver.download_file', "to"=>['SuperAdmin','ViewOnly','Logistic']],
+
+            ["permit"=>'report.ramp.views', "to"=>['SuperAdmin','ViewOnly','Logistic']],
             ["permit"=>'report.ramp.download_file', "to"=>['SuperAdmin','ViewOnly','Logistic']],
 
             ["permit"=>'standby_mst.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport']],
@@ -195,11 +198,16 @@ class RunPermit extends Command
             ["permit"=>'trp_trx.request_remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.approve_request_remove',"to"=>['SuperAdmin','Logistic']],
             ["permit"=>'trp_trx.preview_file',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'trp_trx.report.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor','Finance','Marketing','MIS','Accounting']],
             ["permit"=>'trp_trx.download_file',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor','Finance','Marketing','MIS','Accounting']],
             ["permit"=>'trp_trx.generate_pvr',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.get_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
 
+            ["permit"=>'trp_trx.ticket.views',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'trp_trx.ticket.modify',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
+
+            ["permit"=>'trp_trx.ritase.views',"to"=>['SuperAdmin','PabrikMandor']],
+
             ["permit"=>'trp_trx.absen.remove',"to"=>['SuperAdmin','PabrikMandor','PabrikTransport']],
 
             ["permit"=>'srv.cost_center.views',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],

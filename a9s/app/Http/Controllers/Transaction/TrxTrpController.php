@@ -390,7 +390,7 @@ class TrxTrpController extends Controller
 
   public function mandorGetVerifyTrx(TrxTrpRequest $request)
   {
-    MyAdmin::checkScope($this->permissions, 'trp_trx.view');
+    MyAdmin::checkScope($this->permissions, 'trp_trx.ritase.views');
 
     $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
     return response()->json([
