@@ -146,8 +146,8 @@ class RunPermit extends Command
             ["permit"=>'standby_mst.detail.modify',"to"=>['SuperAdmin','PabrikTransport']],
             ["permit"=>'standby_mst.detail.remove',"to"=>['SuperAdmin','PabrikTransport']],
 
-            ["permit"=>'standby_trx.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport']],
-            ["permit"=>'standby_trx.view',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport']],
+            ["permit"=>'standby_trx.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor']],
+            ["permit"=>'standby_trx.view',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor']],
             ["permit"=>'standby_trx.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'standby_trx.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'standby_trx.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
@@ -165,9 +165,6 @@ class RunPermit extends Command
             ["permit"=>'standby_trx.detail.insert',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'standby_trx.detail.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'standby_trx.detail.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-
-
-
 
             ["permit"=>'ujalan.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport']],
             ["permit"=>'ujalan.view',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport']],
@@ -187,26 +184,28 @@ class RunPermit extends Command
             ["permit"=>'ujalan.detail2.modify',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'ujalan.detail2.remove',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
 
-            ["permit"=>'trp_trx.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor','Finance','Marketing','MIS','Accounting']],
-            ["permit"=>'trp_trx.view',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor','Finance','Marketing','MIS','Accounting']],
+            ["permit"=>'trp_trx.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor']],
+            ["permit"=>'trp_trx.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.val',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.val1',"to"=>['SuperAdmin','PabrikMandor']],
-            ["permit"=>'trp_trx.val2',"to"=>['SuperAdmin','Logistic']],
             ["permit"=>'trp_trx.request_remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.approve_request_remove',"to"=>['SuperAdmin','Logistic']],
             ["permit"=>'trp_trx.preview_file',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'trp_trx.report.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor','Finance','Marketing','MIS','Accounting']],
-            ["permit"=>'trp_trx.download_file',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','PabrikMandor','Finance','Marketing','MIS','Accounting']],
+            ["permit"=>'trp_trx.report.views',"to"=>['SuperAdmin','ViewOnly','Logistic','Finance','Marketing','MIS','Accounting']],
+            ["permit"=>'trp_trx.download_file',"to"=>['SuperAdmin','ViewOnly','Logistic','Finance','Marketing','MIS','Accounting']],
             ["permit"=>'trp_trx.generate_pvr',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.get_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
 
             ["permit"=>'trp_trx.ticket.views',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
+            ["permit"=>'trp_trx.ticket.view',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'trp_trx.ticket.modify',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
+            ["permit"=>'trp_trx.ticket.val2',"to"=>['SuperAdmin','Logistic']],
 
             ["permit"=>'trp_trx.ritase.views',"to"=>['SuperAdmin','PabrikMandor']],
+            ["permit"=>'trp_trx.ritase.view',"to"=>['SuperAdmin','PabrikMandor']],
 
             ["permit"=>'trp_trx.absen.remove',"to"=>['SuperAdmin','PabrikMandor','PabrikTransport']],
 
@@ -216,6 +215,7 @@ class RunPermit extends Command
         ];
 
         PermissionList::truncate();
+        PermissionGroupDetail::truncate();
         $this->info("pass3\n ");
 
         foreach ($lists as $k => $v) {

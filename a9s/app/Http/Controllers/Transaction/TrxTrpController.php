@@ -43,7 +43,8 @@ class TrxTrpController extends Controller
 
   public function index(Request $request, $download = false)
   {
-    MyAdmin::checkScope($this->permissions, 'trp_trx.views');
+    if(!$download)
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.views','trp_trx.ticket.views']);
 
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -380,7 +381,7 @@ class TrxTrpController extends Controller
 
   public function show(TrxTrpRequest $request)
   {
-    MyAdmin::checkScope($this->permissions, 'trp_trx.view');
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
     $model_query = TrxTrp::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens'])->find($request->id);
     return response()->json([
@@ -1458,7 +1459,7 @@ class TrxTrpController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.ticket.val2']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -1489,7 +1490,7 @@ class TrxTrpController extends Controller
         $model_query->val1_at = $t_stamp;
       }
 
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val2',true) && !$model_query->val2){
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val2',true) && !$model_query->val2){
         $model_query->val2 = 1;
         $model_query->val2_user = $this->admin_id;
         $model_query->val2_at = $t_stamp;
