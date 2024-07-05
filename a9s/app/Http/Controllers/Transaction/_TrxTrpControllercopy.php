@@ -14,8 +14,8 @@ use App\Helpers\MyLog;
 use App\Http\Requests\MySql\TrxTrpRequest;
 use App\Http\Resources\MySql\TrxTrpResource;
 use Illuminate\Support\Facades\DB;
-use PDF;
-use Excel;
+use Barryvdh\DomPDF\Facade\PDF;
+use Maatwebsite\Excel\Facades\Excel;
 
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\IsUser;
@@ -23,6 +23,7 @@ use App\Exports\MyReport;
 use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\Ujalan;
 use App\Models\MySql\UjalanDetail;
+use Illuminate\Support\Facades\Validator;
 
 class TrxTrpController extends Controller
 {
@@ -958,7 +959,7 @@ class TrxTrpController extends Controller
     //   'date_from.date_format' => 'Please Select Date From',
     // ];
 
-    // $validator = \Validator::make($request->all(), $rules, $messages);
+    // $validator = Validator::make($request->all(), $rules, $messages);
 
     // if ($validator->fails()) {
     //   throw new ValidationException($validator);
@@ -1234,7 +1235,7 @@ class TrxTrpController extends Controller
       'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);
@@ -1318,7 +1319,7 @@ class TrxTrpController extends Controller
       'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);
@@ -1545,7 +1546,7 @@ class TrxTrpController extends Controller
       'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);
@@ -1643,7 +1644,7 @@ class TrxTrpController extends Controller
       $messages["details.{$k}.id_uj.exists"]            = "Baris #" . ($k + 1) . ". ID harus diisi";
     }
 
-    $validator = \Validator::make(['details' => $ids], $rules, $messages);
+    $validator = Validator::make(['details' => $ids], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {

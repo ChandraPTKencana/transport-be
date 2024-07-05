@@ -5,19 +5,13 @@ namespace App\Http\Controllers\Permission;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Helpers\MyLib;
 use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
-use App\Models\MySql\PermissionList;
-use App\Helpers\MyAdmin;
-use App\Helpers\MyLog;
-use App\Http\Requests\MySql\PermissionListRequest;
-use App\Http\Resources\MySql\PermissionListResource;
-use App\Models\MySql\StandbyDtl;
-use App\Models\MySql\IsUser;
 
-use Exception;
-use Illuminate\Support\Facades\DB;
+use App\Helpers\MyAdmin;
+
+use App\Models\MySql\PermissionList;
+
+use App\Http\Resources\MySql\PermissionListResource;
 
 class PermissionListController extends Controller
 {

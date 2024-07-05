@@ -4,13 +4,12 @@ namespace App\Http\Controllers\Transaction;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+use App\Exceptions\MyException;
 
 use App\Helpers\MyLib;
-use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
 use App\Helpers\MyAdmin;
-use App\Helpers\MyLog;
-use Illuminate\Support\Facades\DB;
 
 class TrxLoadDataController extends Controller
 {

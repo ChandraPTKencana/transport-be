@@ -4,18 +4,20 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
-use App\Helpers\MyLib;
 use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
+
+use App\Helpers\MyAdmin;
+
+use App\Models\MySql\PermissionUserDetail;
 use App\Models\MySql\IsUser;
-use App\Http\Resources\MySql\IsUserResource;
+
 use App\Http\Requests\MySql\IsUserRequest;
 
-use Illuminate\Support\Facades\DB;
-use App\Helpers\MyAdmin;
-use App\Helpers\MyLog;
-use App\Models\MySql\PermissionUserDetail;
+use App\Http\Resources\MySql\IsUserResource;
+
 
 class UserController extends Controller
 {
@@ -246,7 +248,7 @@ class UserController extends Controller
       $messages["permission_list.{$index}.name.exists"]    = "Baris #" . ($index + 1) . ". Nama tidak terdaftar.";
     }
 
-    $validator = \Validator::make(['permission_list' => $permission_list_in], $rules, $messages);
+    $validator = Validator::make(['permission_list' => $permission_list_in], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {

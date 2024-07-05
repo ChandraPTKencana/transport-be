@@ -5,21 +5,25 @@ namespace App\Http\Controllers\Permission;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Helpers\MyLib;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
 use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
-use App\Models\MySql\PermissionGroup;
+
+use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
+
+use App\Models\MySql\PermissionGroup;
+
 use App\Http\Requests\MySql\PermissionGroupRequest;
+
 use App\Http\Resources\MySql\PermissionGroupResource;
-use App\Models\MySql\IsUser;
+
 use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
-use App\Models\MySql\PermissionList;
-use Exception;
-use Illuminate\Support\Facades\DB;
 
+use Exception;
 class PermissionGroupController extends Controller
 {
   private $admin;
@@ -184,7 +188,7 @@ class PermissionGroupController extends Controller
       $messages["permission_list.{$index}.name.exists"]    = "Baris #" . ($index + 1) . ". Nama tidak terdaftar.";
     }
 
-    $validator = \Validator::make(['permission_list' => $permission_list_in], $rules, $messages);
+    $validator = Validator::make(['permission_list' => $permission_list_in], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {
@@ -210,7 +214,7 @@ class PermissionGroupController extends Controller
       $messages["users.{$index}.id.exists"]    = "Baris #" . ($index + 1) . ". User ID tidak terdaftar.";
     }
 
-    $validator = \Validator::make(['users' => $users_in], $rules, $messages);
+    $validator = Validator::make(['users' => $users_in], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {

@@ -5,16 +5,14 @@ namespace App\Http\Controllers\Ujalan;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Helpers\MyLib;
-use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
+use App\Exceptions\MyException;
 use Exception;
-use Image;
-use File;
 
+use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
 
@@ -23,8 +21,9 @@ use App\Models\MySql\UjalanDetail;
 use App\Models\MySql\UjalanDetail2;
 use App\Models\MySql\IsUser;
 
-use App\Http\Resources\IsUserResource;
 use App\Http\Requests\MySql\UjalanRequest;
+
+use App\Http\Resources\IsUserResource;
 use App\Http\Resources\MySql\UjalanResource;
 
 class UjalanController extends Controller

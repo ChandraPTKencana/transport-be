@@ -18,8 +18,9 @@ use App\Helpers\MyLib;
 use App\Models\MySql\Employee;
 use App\Models\MySql\IsUser;
 
-use App\Http\Resources\MySql\EmployeeResource;
 use App\Http\Requests\MySql\EmployeeRequest;
+
+use App\Http\Resources\MySql\EmployeeResource;
 use App\Http\Resources\MySql\IsUserResource;
 
 class EmployeeController extends Controller

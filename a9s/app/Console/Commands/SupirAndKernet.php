@@ -2,10 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\MyLog;
 use Illuminate\Console\Command;
-
-use Illuminate\Support\Facades\Validator;
 
 class SupirAndKernet extends Command
 {

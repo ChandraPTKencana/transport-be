@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
-use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\File;
 
-use App\Models\MySql\IsUser;
 use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Models\HrmRevisiLokasi;
-use Illuminate\Support\Facades\Log;
-use DB;
-use File;
+
+use App\Models\MySql\IsUser;
+
 class UserAccount extends Controller
 {
   public function login(Request $request)

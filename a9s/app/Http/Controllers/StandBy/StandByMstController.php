@@ -3,19 +3,26 @@
 namespace App\Http\Controllers\Standby;
 
 use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
+
+use App\Exceptions\MyException;
 
 use App\Helpers\MyLib;
-use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
-use App\Models\MySql\StandbyMst;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Http\Requests\MySql\StandbyMstRequest;
-use App\Http\Resources\MySql\StandbyMstResource;
+
+use App\Models\MySql\StandbyMst;
 use App\Models\MySql\StandbyDtl;
-use App\Http\Resources\IsUserResource;
 use App\Models\MySql\IsUser;
+
+use App\Http\Requests\MySql\StandbyMstRequest;
+
+use App\Http\Resources\MySql\StandbyMstResource;
+use App\Http\Resources\IsUserResource;
+
 
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -206,7 +213,7 @@ class StandbyMstController extends Controller
       
     }
 
-    $validator = \Validator::make(['details' => $details_in], $rules, $messages);
+    $validator = Validator::make(['details' => $details_in], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {
@@ -677,7 +684,7 @@ class StandbyMstController extends Controller
       'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);

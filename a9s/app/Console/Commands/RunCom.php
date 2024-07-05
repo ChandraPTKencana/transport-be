@@ -2,12 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\MyLog;
-use App\Models\MySql\Employee;
 use Illuminate\Console\Command;
 
 use Illuminate\Support\Facades\Validator;
-use DB;
+use Illuminate\Support\Facades\DB;
+
+use App\Models\MySql\Employee;
+use App\Helpers\MyLog;
+
 class RunCom extends Command
 {
     /**

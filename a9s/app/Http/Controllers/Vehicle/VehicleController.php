@@ -4,17 +4,19 @@ namespace App\Http\Controllers\Vehicle;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
-use App\Helpers\MyLib;
-use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
-use App\Models\MySql\Vehicle;
-use App\Http\Resources\MySql\VehicleResource;
-use App\Http\Requests\MySql\VehicleRequest;
-
 use Illuminate\Support\Facades\DB;
+
+use App\Exceptions\MyException;
+
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
+use App\Helpers\MyLib;
+
+use App\Models\MySql\Vehicle;
+
+use App\Http\Requests\MySql\VehicleRequest;
+
+use App\Http\Resources\MySql\VehicleResource;
 
 class VehicleController extends Controller
 {

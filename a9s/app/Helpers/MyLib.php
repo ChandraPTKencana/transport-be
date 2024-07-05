@@ -16,24 +16,6 @@ class MyLib
   // public static $incorrect_value = 0;
   public static $list_pabrik = ["KPN","KAS","KUS","ARP","KAP","SMP"];
 
-  public static function internalUser()
-  {
-    $token = Request::bearerToken();
-    if ($token == "") {
-      throw new MyException(["message" => "Get user info cannot complete, please restart the apps"], 400);
-    }
-    $model_query = \App\Model\Internal\User::where("api_token", $token)->first();
-    if (!$model_query) {
-      throw new MyException(["message" => "Unauthenticate"], 401);
-    }
-    if ($model_query->can_login == false) {
-      throw new MyException(["message" => "Izin Masuk Tidak Diberikan"], 400);
-    }
-
-    return $model_query;
-  }
-
-
   public static function checkScope($user, $allowed_scopes = [], $msg = "Forbidden", $return = false)
   {
     $scopes = $user->listPermissions();
@@ -101,70 +83,6 @@ class MyLib
     }
     return $note;
   }
-
-  // public static function visitor()
-  // {
-  //   $token = Request::bearerToken();
-  //   if ($token=="") {
-  //     throw new MyException(["message"=>"Get user info cannot complete, please restart the apps"]);
-  //   }
-
-  //   $session = \App\Model\PalmOil\Public_Session::where("session_key",$token)->first();
-  //   if (!$session) {
-  //     throw new MyException(["message"=>"Unauthenticate"],403);
-  //   }
-
-  //   $visitor_profile = \App\Model\PalmOil\Visitor_Profile::where('visitor_id',$session->visitor_id)->first();
-  //   if (!$visitor_profile) {
-  //     throw new MyException(["message"=>"Sorry your account not listed"],403);
-  //   }
-
-  //   return $session;
-  // }
-
-  // public static function office_user()
-  // {
-  //   $token = request()->bearerToken();
-  //   if ($token=="") {
-  //     throw new MyException("Maaf anda tidak teridentifikasi");
-  //   }
-
-  //   $data = \App\Model\PalmOil\Office_User::where("token",$token)->first();
-  //   if (!$data) {
-  //     throw new MyException("Maaf data yang dimasukkan tidak valid");
-  //   }
-  //   return $data;
-  // }
-
-
-  // public static function company_admin()
-  // {
-  //   // Header tidak boleh memakai underscore
-  //   $session_key = Request::header('session-key');
-  //   $code = Request::header('code');
-  //   // $token = Request::bearerToken();
-  //   if ($session_key=="") {
-  //     throw new MyException(["message"=>"Need Session Key"]);
-  //   }
-  //   if ($code=="") {
-  //     throw new MyException(["message"=>"Need Company Code"]);
-  //   }
-
-  //   $user_session = DB::connection('pgsql')->table("company.user_sessions")->where('ukey',$session_key)->first();
-  //   if (!$user_session) {
-  //     throw new MyException(["message"=>"Unauthenticate"],403);
-  //   }
-
-  //   $session = DB::connection('pgsql')->table("company.users")->where('id',$user_session->user_id)->where("company_code",$code)->first();
-  //   if (!$session) {
-  //     throw new MyException(["message"=>"Unauthenticate"],403);
-  //   }
-  //   return [
-  //     "session_key"=>$session_key,
-  //     "company_code"=>$session->company_code,
-  //     "id"=>$session->id
-  //   ];
-  // }
 
   public static function http_request($url)
   {
@@ -293,7 +211,7 @@ class MyLib
     $noUrutInt = (int) substr($split[1], 4, strlen($split[1]) - 4) + 1;
     $noUrutStr = str_pad($noUrutInt, 4, "0", STR_PAD_LEFT);
     $split[1] = substr($split[1], 0, 4) . $noUrutStr;
-    return implode($split, ".");
+    return implode(".",$split);
     // $split = explode("/",$no); 
     // $noUrutInt = (int) substr( $split[0], 4, strlen( $split[0] ) - 4) + 1;
     // $noUrutStr = str_pad( $noUrutInt, 4, "0", STR_PAD_LEFT );

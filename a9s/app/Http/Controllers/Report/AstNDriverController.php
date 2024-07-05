@@ -5,33 +5,20 @@ namespace App\Http\Controllers\Report;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Helpers\MyLib;
 use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
-use App\Models\MySql\TrxTrp;
-use App\Helpers\MyAdmin;
-use App\Helpers\MyLog;
-use App\Http\Requests\MySql\TrxTrpRequest;
-use App\Http\Resources\MySql\TrxTrpResource;
-use App\Models\HrmRevisiLokasi;
-use App\Models\MySql\TrxTrpDetail;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Image;
-use File;
-use PDF;
-use Excel;
 
-use App\Http\Resources\MySql\IsUserResource;
-use App\Models\MySql\IsUser;
-use App\Exports\MyReport;
+use Barryvdh\DomPDF\Facade\PDF;
+use Maatwebsite\Excel\Facades\Excel;
+
+use App\Helpers\MyLib;
+use App\Helpers\MyAdmin;
+
+use App\Models\MySql\TrxTrp;
 use App\Models\MySql\Employee;
 use App\Models\MySql\StandbyTrx;
-use App\Models\MySql\TrxAbsen;
-use App\Models\MySql\Ujalan;
-use App\Models\MySql\UjalanDetail;
-use App\Models\MySql\UjalanDetail2;
 use App\Models\MySql\Vehicle;
+
+use App\Exports\MyReport;
 
 class AstNDriverController extends Controller
 {
@@ -457,11 +444,9 @@ class AstNDriverController extends Controller
 
     
 
-
-
     $date = new \DateTime();
     $filename = $date->format("YmdHis");
-    Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+    PDF::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
     $pdf = PDF::loadView($blade, ["data"=>$data,"info"=>$info])->setPaper('a4', 'portrait');
 
 

@@ -5,28 +5,27 @@ namespace App\Http\Controllers\Standby;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Helpers\MyLib;
-use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
-use App\Models\MySql\StandbyTrx;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
+use App\Exceptions\MyException;
+use Exception;
+
+use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Http\Requests\MySql\StandbyTrxRequest;
-use App\Http\Resources\MySql\StandbyTrxResource;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use PDF;
-use Excel;
 
-use App\Http\Resources\MySql\IsUserResource;
+use App\Models\MySql\StandbyTrx;
 use App\Models\MySql\IsUser;
-use App\Exports\MyReport;
 use App\Models\MySql\StandbyDtl;
 use App\Models\MySql\StandbyMst;
 use App\Models\MySql\StandbyTrxDtl;
-use App\Models\MySql\TrxAbsen;
-use App\Models\MySql\Ujalan;
-use App\Models\MySql\UjalanDetail;
+
+use App\Http\Requests\MySql\StandbyTrxRequest;
+
+use App\Http\Resources\MySql\StandbyTrxResource;
+use App\Http\Resources\MySql\IsUserResource;
 
 class StandbyTrxController extends Controller
 {
@@ -309,7 +308,7 @@ class StandbyTrxController extends Controller
       $messages["details.{$index}.tanggal.date_format"] = "Baris #" . ($index + 1) . ". Format Tanggal Salah.";
     }
 
-    $validator = \Validator::make(['details' => $details_in], $rules, $messages);
+    $validator = Validator::make(['details' => $details_in], $rules, $messages);
 
     // Check if validation fails
     if ($validator->fails()) {
@@ -1053,7 +1052,7 @@ class StandbyTrxController extends Controller
   //   //   'date_from.date_format' => 'Please Select Date From',
   //   // ];
 
-  //   // $validator = \Validator::make($request->all(), $rules, $messages);
+  //   // $validator = Validator::make($request->all(), $rules, $messages);
 
   //   // if ($validator->fails()) {
   //   //   throw new ValidationException($validator);
@@ -1328,7 +1327,7 @@ class StandbyTrxController extends Controller
       'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);
@@ -1421,7 +1420,7 @@ class StandbyTrxController extends Controller
       // 'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);
@@ -1701,7 +1700,7 @@ class StandbyTrxController extends Controller
       'id.exists' => 'ID tidak terdaftar',
     ];
 
-    $validator = \Validator::make($request->all(), $rules, $messages);
+    $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
       throw new ValidationException($validator);

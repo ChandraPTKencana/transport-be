@@ -5,21 +5,18 @@ namespace App\Http\Controllers\Report;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Helpers\MyLib;
 use App\Exceptions\MyException;
-use Illuminate\Validation\ValidationException;
-use App\Models\MySql\TrxTrp;
-use App\Helpers\MyAdmin;
-use App\Helpers\MyLog;
-use PDF;
-use Excel;
 
-use App\Http\Resources\MySql\IsUserResource;
-use App\Models\MySql\IsUser;
+use Barryvdh\DomPDF\Facade\PDF;
+use Maatwebsite\Excel\Facades\Excel;
+
+use App\Helpers\MyLib;
+use App\Helpers\MyAdmin;
+
 use App\Exports\MyReport;
-use App\Models\MySql\TrxAbsen;
+
+use App\Models\MySql\TrxTrp;
 use App\Models\MySql\Ujalan;
-use App\Models\MySql\UjalanDetail;
 use App\Models\MySql\UjalanDetail2;
 
 class RampController extends Controller

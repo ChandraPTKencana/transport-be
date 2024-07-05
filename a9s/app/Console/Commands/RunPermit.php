@@ -2,17 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\MyLog;
-use App\Models\MySql\Employee;
+use Illuminate\Console\Command;
+
 use App\Models\MySql\IsUser;
 use App\Models\MySql\PermissionGroup;
 use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
 use App\Models\MySql\PermissionList;
-use Illuminate\Console\Command;
 
-use Illuminate\Support\Facades\Validator;
-use DB;
 class RunPermit extends Command
 {
     /**
