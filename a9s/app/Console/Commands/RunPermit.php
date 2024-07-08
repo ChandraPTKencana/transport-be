@@ -195,6 +195,7 @@ class RunPermit extends Command
             ["permit"=>'trp_trx.download_file',"to"=>['SuperAdmin','ViewOnly','Logistic','Finance','Marketing','MIS','Accounting']],
             ["permit"=>'trp_trx.generate_pvr',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.get_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'trp_trx.get_ticket',"to"=>['SuperAdmin','PabrikTransport','Logistic']],
 
             ["permit"=>'trp_trx.ticket.views',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'trp_trx.ticket.view',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
