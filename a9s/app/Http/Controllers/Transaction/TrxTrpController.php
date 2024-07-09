@@ -50,7 +50,7 @@ class TrxTrpController extends Controller
   public function index(Request $request, $download = false)
   {
     if(!$download)
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.views','trp_trx.ticket.views']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.views','trp_trx.ticket.views','trp_trx.report.views']);
 
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset

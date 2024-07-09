@@ -21,6 +21,12 @@ return new class extends Migration
             $table->bigInteger('ticket_b_ori_bruto')->nullable();
             $table->bigInteger('ticket_b_ori_tara')->nullable();
             $table->bigInteger('ticket_b_ori_netto')->nullable();
+        
+            $table->bigInteger('rv_id')->nullable();
+            $table->string('rv_no',50)->nullable();
+            $table->decimal('rv_total',18)->nullable();
+            $table->boolean('rv_completed')->default(0);
+
         });
     }
 
@@ -39,6 +45,11 @@ return new class extends Migration
             $table->dropColumn('ticket_b_ori_bruto');
             $table->dropColumn('ticket_b_ori_tara');
             $table->dropColumn('ticket_b_ori_netto');
+
+            $table->dropColumn('rv_id');
+            $table->dropColumn('rv_no');
+            $table->dropColumn('rv_total');
+            $table->dropColumn('rv_completed');
         });
     }
 };
