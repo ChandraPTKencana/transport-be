@@ -7,7 +7,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
-use App\Models\MySql\Employee;
+use App\Models\MySql\PaymentMethod;
+use App\Models\MySql\Info;
 use App\Helpers\MyLog;
 
 class RunCom extends Command
@@ -24,7 +25,7 @@ class RunCom extends Command
      *
      * @var string
      */
-    protected $description = 'Get Supir And Kernet Name From Server';
+    protected $description = 'Insert account code to table';
 
     /**
      * Execute the console command.
@@ -36,34 +37,22 @@ class RunCom extends Command
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
         
-        if(!Employee::where('name','BLANK')->first()){
-            $this->info("=====Begin Employee=====\n ");
-            $sds = Employee::orderBy("id","desc")->get();         
-            foreach ($sds as $k => $v) {
-                $newId= $v->id+1;
-                if($k==0){
-                    DB::statement("ALTER TABLE employee_mst AUTO_INCREMENT = $newId");
-                }
-                $v->id = $newId;
-                $v->save();
-            }
-    
-            Employee::insert([
-                "id"=>1,
-                "name"=>"BLANK",
-                "role"=>"BLANK",
-                "val"=>1,
-                "val_user"=>1,
-                "val_at"=>date("Y-m-d H:i:s"),
-                "created_at"=>date("Y-m-d H:i:s"),
-                "updated_at"=>date("Y-m-d H:i:s"),
-            ]);    
-            $this->info("=====End Employee=====\n ");
-        } else{
-            $this->info("=====Abort Employee=====\n ");
-        }
+        $this->info("=====Begin=====\n ");
+               
+        Info::insert([
+            "dkey"=>"company_code",
+            "dval"=>'KPN',
+        ]);    
+        Info::insert([
+            "dkey"=>"company_name",
+            "dval"=>'PT. KENCANA PERSADA NUSANTARA',
+        ]);   
+        Info::insert([
+            "dkey"=>"company_email",
+            "dval"=>'KPN@genkagromas.com',
+        ]);   
+        $this->info("=====End=====\n ");
 
-       
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");
     }
