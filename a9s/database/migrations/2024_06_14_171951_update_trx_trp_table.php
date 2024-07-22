@@ -15,6 +15,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('trx_trp', function (Blueprint $table) {
+
+            $table->text('ticket_note')->nullable();
+
             $table->boolean('val4')->default(0);
             $table->foreignId('val4_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamp('val4_at')->nullable();
@@ -25,7 +28,7 @@ return new class extends Migration
 
             $table->boolean('val_ticket')->default(0);
             $table->foreignId('val_ticket_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
-            $table->timestamp('val_ticket_at')->nullable();
+            $table->timestamp('val_ticket_at')->nullable(); 
         });
 
         DB::update('update trx_trp set val_ticket = val2, val_ticket_user = val2_user, val_ticket_at=val2_at');
@@ -46,6 +49,8 @@ return new class extends Migration
             $table->dropForeign(["val4_user"]);
             $table->dropForeign(["val5_user"]);
             $table->dropForeign(["val_ticket_user"]);
+
+            $table->dropColumn('ticket_note');
 
             $table->dropColumn('val4');
             $table->dropColumn('val4_user');

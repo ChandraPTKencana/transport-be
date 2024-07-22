@@ -60,6 +60,7 @@ class TrxTrpResource extends JsonResource
             'kernet_rek_no'     => $this->kernet_rek_no ?? "",
             'kernet_rek_name'   => $this->kernet_rek_name ?? "",
             'no_pol'            => $this->no_pol,
+            'ticket_note'       => $this->ticket_note,
 
             'val'               => $this->val,
             'val_user'          => $this->val_user ?? "",

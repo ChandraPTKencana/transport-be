@@ -551,13 +551,12 @@ class TrxTrpController extends Controller
         $model_query->kernet_rek_name = $kernet_dt->rek_name;  
       }
 
-      $model_query->no_pol=$request->no_pol;
-      
-      $model_query->created_at      = $t_stamp;
-      $model_query->created_user    = $this->admin_id;
+      $model_query->no_pol            = $request->no_pol;      
+      $model_query->created_at        = $t_stamp;
+      $model_query->created_user      = $this->admin_id;
 
-      $model_query->updated_at      = $t_stamp;
-      $model_query->updated_user    = $this->admin_id;
+      $model_query->updated_at        = $t_stamp;
+      $model_query->updated_user      = $this->admin_id;
 
       $model_query->save();
 
@@ -891,7 +890,7 @@ class TrxTrpController extends Controller
         $model_query->transition_type     = null;
       }
 
-
+      $model_query->ticket_note     = $request->ticket_note;
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
       $model_query->save();
