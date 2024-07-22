@@ -191,8 +191,8 @@ class RunPermit extends Command
             ["permit"=>'ujalan.detail2.modify',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'ujalan.detail2.remove',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
 
-            ["permit"=>'trp_trx.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor']],
-            ["permit"=>'trp_trx.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor']],
+            ["permit"=>'trp_trx.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','WakilKTU','KTU','Marketing']],
+            ["permit"=>'trp_trx.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','WakilKTU','KTU','Marketing']],
             ["permit"=>'trp_trx.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],

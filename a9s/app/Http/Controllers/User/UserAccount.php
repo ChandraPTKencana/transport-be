@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\File;
 use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-
+use App\Models\MySql\Info;
 use App\Models\MySql\IsUser;
 
 class UserAccount extends Controller
@@ -106,6 +106,9 @@ class UserAccount extends Controller
   public function checkUser(Request $request)
   {
     $admin = MyAdmin::user();
+
+    $infos = Info::get();
+
     return response()->json([
       "message" => "Tampilkan data user",
       "user" => [
@@ -113,7 +116,8 @@ class UserAccount extends Controller
         "username" => $admin->the_user->username,
         // "fullname" => $admin->the_user->nama_user,
         "role" => $admin->the_user->hak_akses,
-        "permissions"=>$admin->the_user->listPermissions()
+        "permissions"=>$admin->the_user->listPermissions(),
+        "company_info"=>$infos
         // "locs"=>HrmRevisiLokasi::whereRaw("id in (".$admin->the_user->loc.")")->get()
         // // "scope"=>($p_user->role && count($p_user->role->permissions)>0) ? $p_user->role->permissions->pluck('name') : [],
         // "scopes" => $p_user->listPermissions()
