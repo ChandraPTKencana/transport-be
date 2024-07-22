@@ -10,6 +10,7 @@ use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
 use App\Models\MySql\PermissionList;
 
+use Illuminate\Support\Facades\Schema;
 class RunPermit extends Command
 {
     /**
@@ -35,6 +36,9 @@ class RunPermit extends Command
     {
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
+        Schema::disableForeignKeyConstraints();
+
+        // 'SuperAdmin','ViewOnly','Logistic','Finance','Marketing','MIS','PabrikTransport','Accounting','PabrikMandor'
 
         $lists = [
             'SuperAdmin',
@@ -45,15 +49,21 @@ class RunPermit extends Command
             'MIS',
             'PabrikTransport',
             'Accounting',
-            'PabrikMandor'
+            'PabrikMandor',
+            'WakilKTU',
+            'KTU',
+            'SPVLogistik',
         ];
 
         // $permissiongroups = PermissionGroup::get();
         // foreach ($permissiongroups as $k => $v) {
         //     $v->delete();
         // }
-
         // DB::statement("ALTER TABLE permission_group AUTO_INCREMENT = 1");
+        PermissionGroupDetail::truncate();
+        PermissionGroupUser::truncate();
+        // PermissionGroup::truncate();
+        PermissionList::truncate();
 
         foreach ($lists as $k => $v) {
             if(!PermissionGroup::where('name',$v)->first())
@@ -164,7 +174,7 @@ class RunPermit extends Command
             ["permit"=>'standby_trx.detail.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
 
             ["permit"=>'ujalan.views',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport']],
-            ["permit"=>'ujalan.view',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport']],
+            ["permit"=>'ujalan.view',"to"=>['SuperAdmin','ViewOnly','Logistic','PabrikTransport','Finance']],
             ["permit"=>'ujalan.create',"to"=>['SuperAdmin','Logistic']],
             ["permit"=>'ujalan.modify',"to"=>['SuperAdmin','Logistic']],
             ["permit"=>'ujalan.remove',"to"=>['SuperAdmin','Logistic']],
@@ -188,6 +198,10 @@ class RunPermit extends Command
             ["permit"=>'trp_trx.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.val',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.val1',"to"=>['SuperAdmin','PabrikMandor']],
+            ["permit"=>'trp_trx.val2',"to"=>['SuperAdmin','WakilKTU','KTU']],
+            ["permit"=>'trp_trx.val3',"to"=>['SuperAdmin','Marketing']],
+            ["permit"=>'trp_trx.val4',"to"=>['SuperAdmin','Logistik']],
+            ["permit"=>'trp_trx.val5',"to"=>['SuperAdmin','SPVLogistik']],
             ["permit"=>'trp_trx.request_remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'trp_trx.approve_request_remove',"to"=>['SuperAdmin','Logistic']],
             ["permit"=>'trp_trx.preview_file',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
@@ -200,7 +214,7 @@ class RunPermit extends Command
             ["permit"=>'trp_trx.ticket.views',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'trp_trx.ticket.view',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
             ["permit"=>'trp_trx.ticket.modify',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
-            ["permit"=>'trp_trx.ticket.val2',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'trp_trx.ticket.val_ticket',"to"=>['SuperAdmin','Logistic']],
 
             ["permit"=>'trp_trx.ritase.views',"to"=>['SuperAdmin','PabrikMandor']],
             ["permit"=>'trp_trx.ritase.view',"to"=>['SuperAdmin','PabrikMandor']],
@@ -210,10 +224,26 @@ class RunPermit extends Command
             ["permit"=>'srv.cost_center.views',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'srv.palm_ticket.views',"to"=>['SuperAdmin','Logistic','PabrikTransport','PabrikMandor']],
 
-        ];
 
-        PermissionList::truncate();
-        PermissionGroupDetail::truncate();
+            ["permit"=>'potongan_mst.views',"to"=>['SuperAdmin','ViewOnly','Logistic']],
+            ["permit"=>'potongan_mst.view',"to"=>['SuperAdmin','ViewOnly','Logistic']],
+            ["permit"=>'potongan_mst.create',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'potongan_mst.modify',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'potongan_mst.remove',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'potongan_mst.val',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'potongan_mst.val1',"to"=>['SuperAdmin','Logistic']],
+
+            
+            ["permit"=>'potongan_trx.views',"to"=>['SuperAdmin','ViewOnly','Logistic']],
+            ["permit"=>'potongan_trx.view',"to"=>['SuperAdmin','ViewOnly','Logistic']],
+            ["permit"=>'potongan_trx.create',"to"=>['SuperAdmin','Logistic','PabrikTransport']],
+            ["permit"=>'potongan_trx.modify',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'potongan_trx.remove',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'potongan_trx.val',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'potongan_trx.val1',"to"=>['SuperAdmin','Logistic']],
+
+
+        ];
         $this->info("pass3\n ");
 
         foreach ($lists as $k => $v) {
@@ -223,7 +253,6 @@ class RunPermit extends Command
             PermissionList::insert([
                 'name'=>$v['permit']
             ]);
-
 
             $prgid = PermissionGroup::whereIn('name',$v['to'])->get()->pluck('id')->toArray();
             if(count($prgid) > 0){
@@ -243,7 +272,7 @@ class RunPermit extends Command
 
 
         }
-
+        Schema::enableForeignKeyConstraints();
         $this->info("pass4\n ");
 
         

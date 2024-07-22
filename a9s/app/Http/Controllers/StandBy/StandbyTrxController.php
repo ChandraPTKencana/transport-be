@@ -937,25 +937,25 @@ class StandbyTrxController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
 
-      if($model_query->pvr_no){
-        DB::connection('sqlsrv')->table('FI_APRequest')
-        ->where("VoucherNo",$model_query->pvr_no)->update([
-          "Void" => 1,
-          "VoidBy" => $this->admin->the_user->username,
-          "VoidDateTime" => $t_stamp_ms,
-          "VoidReason" => $deleted_reason
-        ]);
-      }
+      // if($model_query->pvr_no){
+      //   DB::connection('sqlsrv')->table('FI_APRequest')
+      //   ->where("VoucherNo",$model_query->pvr_no)->update([
+      //     "Void" => 1,
+      //     "VoidBy" => $this->admin->the_user->username,
+      //     "VoidDateTime" => $t_stamp_ms,
+      //     "VoidReason" => $deleted_reason
+      //   ]);
+      // }
 
-      if($model_query->pv_no){
-        DB::connection('sqlsrv')->table('FI_Arap')
-        ->where("VoucherNo",$model_query->pv_no)->update([
-          "Void" => 1,
-          "VoidBy" => $this->admin->the_user->username,
-          "VoidDateTime" => $t_stamp_ms,
-          "VoidReason" => $deleted_reason
-        ]);
-      }
+      // if($model_query->pv_no){
+      //   DB::connection('sqlsrv')->table('FI_Arap')
+      //   ->where("VoucherNo",$model_query->pv_no)->update([
+      //     "Void" => 1,
+      //     "VoidBy" => $this->admin->the_user->username,
+      //     "VoidDateTime" => $t_stamp_ms,
+      //     "VoidReason" => $deleted_reason
+      //   ]);
+      // }
       
       $model_query->save();
 

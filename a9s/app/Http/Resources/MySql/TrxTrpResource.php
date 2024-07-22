@@ -75,7 +75,27 @@ class TrxTrpResource extends JsonResource
             'val2_user'         => $this->val2_user ?? "",
             'val2_by'           => new IsUserResource($this->whenLoaded('val2_by')),
             'val2_at'           => $this->val2_at ?? "",
+            
+            'val3'              => $this->val3,
+            'val3_user'         => $this->val3_user ?? "",
+            'val3_by'           => new IsUserResource($this->whenLoaded('val3_by')),
+            'val3_at'           => $this->val3_at ?? "",
 
+            'val4'              => $this->val4,
+            'val4_user'         => $this->val4_user ?? "",
+            'val4_by'           => new IsUserResource($this->whenLoaded('val4_by')),
+            'val4_at'           => $this->val4_at ?? "",
+
+            'val5'              => $this->val5,
+            'val5_user'         => $this->val5_user ?? "",
+            'val5_by'           => new IsUserResource($this->whenLoaded('val5_by')),
+            'val5_at'           => $this->val5_at ?? "",
+
+            'val_ticket'        => $this->val_ticket,
+            'val_ticket_user'   => $this->val_ticket_user ?? "",
+            'val_ticket_by'     => new IsUserResource($this->whenLoaded('val_ticket_by')),
+            'val_ticket_at'     => $this->val_ticket_at ?? "",
+            
             'created_user'      => $this->created_user,
             'updated_user'      => $this->updated_user,
             'created_at'        => $this->created_at,
@@ -122,6 +142,7 @@ class TrxTrpResource extends JsonResource
 
 
             'details_uj'        => UjalanDetailResource::collection($this->whenLoaded('uj_details')),
+            'potongan'          => PotonganTrxResource::collection($this->whenLoaded('potongan')),
 
         ];
     }

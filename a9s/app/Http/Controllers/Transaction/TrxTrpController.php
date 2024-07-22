@@ -30,6 +30,7 @@ use App\Http\Resources\MySql\TrxTrpResource;
 use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
+use App\PS\PSPotonganTrx;
 
 class TrxTrpController extends Controller
 {
@@ -376,7 +377,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at');
     }])->get();
 
@@ -389,7 +390,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
-    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens'])->find($request->id);
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','potongan'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -399,7 +400,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'trp_trx.ritase.views');
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -560,6 +561,29 @@ class TrxTrpController extends Controller
 
       $model_query->save();
 
+
+      $ptg_trx_dt=[];
+      if($supir_dt->id!=1 && $supir_dt->potongan){
+        array_push($ptg_trx_dt,[
+          "_source"     => "TRX_TRP",
+          "employee_id" => $supir_dt->id,
+          "user_id"     => $this->admin_id,
+          "trx_trp_id"  => $model_query->id,
+        ]);
+      }
+
+      if(isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
+        array_push($ptg_trx_dt,[
+          "_source"     => "TRX_TRP",
+          "employee_id" => $kernet_dt->id,
+          "user_id"     => $this->admin_id,
+          "trx_trp_id"  => $model_query->id,
+        ]);
+      }
+
+      if(count($ptg_trx_dt) > 0)
+      PSPotonganTrx::insertData($ptg_trx_dt);
+    
       MyLog::sys("trx_trp",$model_query->id,"insert");
 
       DB::commit();
@@ -649,21 +673,30 @@ class TrxTrpController extends Controller
           $model_query->transition_type   = null;
         }
         
+        $prev_supir_id = $model_query->supir_id;
+        if($prev_supir_id != null && $prev_supir_id!=1 && $prev_supir_id != $supir_dt->id){
+          throw new \Exception("Supir sudah tidak boleh di ubah",1);
+        }
+
         $model_query->supir_id          = $supir_dt->id;
         $model_query->supir             = $supir_dt->name;
         $model_query->supir_rek_no      = $supir_dt->rek_no;
         $model_query->supir_rek_name    = $supir_dt->rek_name;
   
+
+        $prev_kernet_id = $model_query->kernet_id;
         if(isset($kernet_dt)){
+          if($prev_kernet_id != null && $prev_kernet_id!=1 && $prev_kernet_id != $kernet_dt->id){
+            throw new \Exception("Kernet sudah tidak boleh di ubah",1);
+          }
           $model_query->kernet_id       = $kernet_dt->id;
           $model_query->kernet          = $kernet_dt->name;
           $model_query->kernet_rek_no   = $kernet_dt->rek_no;
           $model_query->kernet_rek_name = $kernet_dt->rek_name;  
         }else{
-          $model_query->kernet_id       = null;
-          $model_query->kernet          = null;
-          $model_query->kernet_rek_no   = null;
-          $model_query->kernet_rek_name = null;  
+          if($prev_kernet_id != null){
+            throw new \Exception("Kernet sudah tidak boleh di kosong",1);
+          }
         }
         $model_query->no_pol          = $request->no_pol;
       }
@@ -692,6 +725,31 @@ class TrxTrpController extends Controller
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
       $model_query->save();
+
+      $ptg_trx_dt=[];
+
+
+
+      if(($prev_supir_id == null || $prev_supir_id == 1 ) && $supir_dt->id!=1 && $supir_dt->potongan){
+        array_push($ptg_trx_dt,[
+          "_source"     => "TRX_TRP",
+          "employee_id" => $supir_dt->id,
+          "user_id"     => $this->admin_id,
+          "trx_trp_id"  => $model_query->id,
+        ]);
+      }
+
+      if(($prev_kernet_id == null || $prev_kernet_id == 1) && isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
+        array_push($ptg_trx_dt,[
+          "_source"     => "TRX_TRP",
+          "employee_id" => $kernet_dt->id,
+          "user_id"     => $this->admin_id,
+          "trx_trp_id"  => $model_query->id,
+        ]);
+      }
+
+      if(count($ptg_trx_dt) > 0)
+      PSPotonganTrx::insertData($ptg_trx_dt);
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys("trx_trp",$request->id,"update",$SYSNOTE);
@@ -737,9 +795,9 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
-      $SYSOLD                     = clone($model_query);
+      $SYSOLD                  = clone($model_query);
       
-      if($model_query->val2==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
+      if($model_query->val_ticket==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
 
@@ -882,7 +940,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if($model_query->val2==1 || $model_query->req_deleted==1  || $model_query->deleted==1) 
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val_ticket]) || $model_query->req_deleted==1  || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->pvr_id!="" || $model_query->pvr_id!=null)
@@ -892,21 +950,31 @@ class TrxTrpController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
-      $model_query->deleted = 1;
-      $model_query->deleted_user = $this->admin_id;
-      $model_query->deleted_at = date("Y-m-d H:i:s");
-      $model_query->deleted_reason = $deleted_reason;
+      $t_stamp                      = date("Y-m-d H:i:s");
+      $model_query->deleted         = 1;
+      $model_query->deleted_user    = $this->admin_id;
+      $model_query->deleted_at      = $t_stamp;
+      $model_query->deleted_reason  = $deleted_reason;
       $model_query->save();
+
+      PSPotonganTrx::deletePotongan([
+        "_source"         => "TRX_TRP",
+        "trx_trp_id"      => $model_query->id,
+        "deleted_user"    => $this->admin_id,
+        "deleted_at"      => $t_stamp,
+        "deleted_reason"  => $deleted_reason,
+      ]);
+
       MyLog::sys("trx_trp",$request->id,"delete");
 
       DB::commit();
       return response()->json([
-        "message" => "Proses Hapus data berhasil",
-        "deleted"=>$model_query->deleted,
-        "deleted_user"=>$model_query->deleted_user,
-        "deleted_by"=>$model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
-        "deleted_at"=>$model_query->deleted_at,
-        "deleted_reason"=>$model_query->deleted_reason,
+        "message"         => "Proses Hapus data berhasil",
+        "deleted"         => $model_query->deleted,
+        "deleted_user"    => $model_query->deleted_user,
+        "deleted_by"      => $model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
+        "deleted_at"      => $model_query->deleted_at,
+        "deleted_reason"  => $model_query->deleted_reason,
       ], 200);
     } catch (\Exception  $e) {
       DB::rollback();
@@ -947,7 +1015,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if($model_query->val2==1)
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val_ticket]))
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->deleted==1 || $model_query->req_deleted==1 )
@@ -1020,7 +1088,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if($model_query->val2==1)
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val_ticket]))
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->deleted==1 )
@@ -1033,30 +1101,39 @@ class TrxTrpController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
-      $model_query->deleted = 1;
-      $model_query->deleted_user = $this->admin_id;
-      $model_query->deleted_at = date("Y-m-d H:i:s");
-      $model_query->deleted_reason = $deleted_reason;
+      $t_stamp                      = date("Y-m-d H:i:s");
+      $model_query->deleted         = 1;
+      $model_query->deleted_user    = $this->admin_id;
+      $model_query->deleted_at      = $t_stamp;
+      $model_query->deleted_reason  = $deleted_reason;
 
-      if($model_query->pvr_no){
-        DB::connection('sqlsrv')->table('FI_APRequest')
-        ->where("VoucherNo",$model_query->pvr_no)->update([
-          "Void" => 1,
-          "VoidBy" => $this->admin->the_user->username,
-          "VoidDateTime" => $t_stamp_ms,
-          "VoidReason" => $deleted_reason
-        ]);
-      }
+      PSPotonganTrx::deletePotongan([
+        "_source"         => "TRX_TRP",
+        "trx_trp_id"      => $model_query->id,
+        "deleted_user"    => $this->admin_id,
+        "deleted_at"      => $t_stamp,
+        "deleted_reason"  => $deleted_reason,
+      ]);
 
-      if($model_query->pv_no){
-        DB::connection('sqlsrv')->table('FI_Arap')
-        ->where("VoucherNo",$model_query->pv_no)->update([
-          "Void" => 1,
-          "VoidBy" => $this->admin->the_user->username,
-          "VoidDateTime" => $t_stamp_ms,
-          "VoidReason" => $deleted_reason
-        ]);
-      }
+      // if($model_query->pvr_no){
+      //   DB::connection('sqlsrv')->table('FI_APRequest')
+      //   ->where("VoucherNo",$model_query->pvr_no)->update([
+      //     "Void" => 1,
+      //     "VoidBy" => $this->admin->the_user->username,
+      //     "VoidDateTime" => $t_stamp_ms,
+      //     "VoidReason" => $deleted_reason
+      //   ]);
+      // }
+
+      // if($model_query->pv_no){
+      //   DB::connection('sqlsrv')->table('FI_Arap')
+      //   ->where("VoucherNo",$model_query->pv_no)->update([
+      //     "Void" => 1,
+      //     "VoidBy" => $this->admin->the_user->username,
+      //     "VoidDateTime" => $t_stamp_ms,
+      //     "VoidReason" => $deleted_reason
+      //   ]);
+      // }
       
       $model_query->save();
       MyLog::sys("trx_trp",$request->id,"delete","Approve Request Delete (Void)");
@@ -1136,11 +1213,31 @@ class TrxTrpController extends Controller
 
     $trx_trp = TrxTrp::find($request->id);
 
-    // if($trx_trp->val==0)
-    // return response()->json([
-    //   "message" => "Harap Di Validasi Terlebih Dahulu",
-    // ], 400);
+    if($trx_trp->val1==0)
+    return response()->json([
+      "message" => "Mandor harus Validasi Terlebih Dahulu",
+    ], 400);
 
+
+    $supir_id   = $trx_trp->supir_id;
+    $kernet_id  = $trx_trp->kernet_id;
+    $ttl_ps     = 0;
+    $ttl_pk     = 0;
+
+    $ptg_ps_ids = "";
+    $ptg_pk_ids = "";
+    foreach ($trx_trp->potongan as $k => $v) {
+      if($v->potongan_mst->employee_id == $supir_id){
+        $ttl_ps+=$v->nominal_cut;
+        $ptg_ps_ids.="#".$v->potongan_mst->id." ";
+      }
+
+      if($v->potongan_mst->employee_id == $kernet_id){
+        $ttl_pk+=$v->nominal_cut;
+        $ptg_pk_ids.="#".$v->potongan_mst->id." ";
+      }
+    }
+    
     $ujalan = \App\Models\MySql\Ujalan::where("id",$trx_trp->id_uj)->first();
     $details = \App\Models\MySql\UjalanDetail::where("id_uj",$trx_trp->id_uj)->orderBy("ordinal","asc")->get();
     // $total = 0;
@@ -1150,21 +1247,25 @@ class TrxTrpController extends Controller
     // }
 
     $sendData = [
-      "id"=>$trx_trp->id,
-      "id_uj"=>$trx_trp->id_uj,
-      "no_pol"=>$trx_trp->no_pol,
-      "supir"=>$trx_trp->supir,
-      "kernet"=>$trx_trp->kernet,
-      "tanggal"=>$trx_trp->tanggal,
-      "created_at"=>$trx_trp->created_at,
-      "asal"=>env("app_name"),
-      "xto"=>$trx_trp->xto,
-      "jenis"=>$trx_trp->jenis,
-      "tipe"=>$trx_trp->tipe,
-      "details"=>$details,
-      "total"=>$ujalan->harga,
-      "is_transition"=>$trx_trp->transition_type=='From',
-      "user_1"=>$this->admin->the_user->username,
+      "id"            => $trx_trp->id,
+      "id_uj"         => $trx_trp->id_uj,
+      "no_pol"        => $trx_trp->no_pol,
+      "supir"         => $trx_trp->supir,
+      "ttl_ps"        => $ttl_ps,
+      "ptg_ps_ids"    => $ptg_ps_ids,
+      "kernet"        => $trx_trp->kernet,
+      "ttl_pk"        => $ttl_pk,
+      "ptg_pk_ids"    => $ptg_pk_ids,
+      "tanggal"       => $trx_trp->tanggal,
+      "created_at"    => $trx_trp->created_at,
+      "asal"          => env("app_name"),
+      "xto"           => $trx_trp->xto,
+      "jenis"         => $trx_trp->jenis,
+      "tipe"          => $trx_trp->tipe,
+      "details"       => $details,
+      "total"         => $ujalan->harga,
+      "is_transition" => $trx_trp->transition_type=='From',
+      "user_1"        => $this->admin->the_user->username,
     ];   
     
     // $date = new \DateTime();
@@ -1465,7 +1566,7 @@ class TrxTrpController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.ticket.val2']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5','trp_trx.ticket.val_ticket']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -1486,27 +1587,47 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->val && $model_query->val1 && $model_query->val2){
+      if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5 && $model_query->val_ticket){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
-  
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$model_query->val1){
-        $model_query->val1 = 1;
-        $model_query->val1_user = $this->admin_id;
-        $model_query->val1_at = $t_stamp;
-      }
 
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val2',true) && !$model_query->val2){
-        $model_query->val2 = 1;
-        $model_query->val2_user = $this->admin_id;
-        $model_query->val2_at = $t_stamp;
-      }
-  
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.val',true) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
       }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$model_query->val1){
+        $model_query->val1 = 1;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val2',true) && !$model_query->val2){
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val3',true) && !$model_query->val3){
+        $model_query->val3 = 1;
+        $model_query->val3_user = $this->admin_id;
+        $model_query->val3_at = $t_stamp;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$model_query->val4){
+        $model_query->val4 = 1;
+        $model_query->val4_user = $this->admin_id;
+        $model_query->val4_at = $t_stamp;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && !$model_query->val5){
+        $model_query->val5 = 1;
+        $model_query->val5_user = $this->admin_id;
+        $model_query->val5_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$model_query->val_ticket){
+        $model_query->val_ticket = 1;
+        $model_query->val_ticket_user = $this->admin_id;
+        $model_query->val_ticket_at = $t_stamp;
+      }
+
       $model_query->save();
 
       MyLog::sys("trx_trp",$request->id,"approve");
@@ -1526,6 +1647,22 @@ class TrxTrpController extends Controller
         "val2_user"=>$model_query->val2_user,
         "val2_at"=>$model_query->val2_at,
         "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null,
+        "val4"=>$model_query->val4,
+        "val4_user"=>$model_query->val4_user,
+        "val4_at"=>$model_query->val4_at,
+        "val4_by"=>$model_query->val4_user ? new IsUserResource(IsUser::find($model_query->val4_user)) : null,
+        "val5"=>$model_query->val5,
+        "val5_user"=>$model_query->val5_user,
+        "val5_at"=>$model_query->val5_at,
+        "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
+        "val_ticket"=>$model_query->val_ticket,
+        "val_ticket_user"=>$model_query->val_ticket_user,
+        "val_ticket_at"=>$model_query->val_ticket_at,
+        "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

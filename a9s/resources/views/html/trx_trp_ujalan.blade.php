@@ -84,15 +84,64 @@
             <td style="width:50px; text-align: right;">{{ number_format(($v["qty"] * $v["harga"]), 0,',','.') }}</td>
           </tr>
           @endforeach
+          @if($ttl_ps > 0 || $ttl_pk > 0)
           <tr>
             <td colspan="2" style="font-weight: bold;">
                 Total
             </td>
             <td style="font-weight: bold;">Rp. </td>
-            <td style="font-weight: bold;">
+            <td style="font-weight: bold; text-align: right;">
               {{ number_format($total, 0,',','.') }}
             </td>
           </tr>
+          @endif
+          @if($ttl_ps>0)
+          <tr style="color:red;">
+            <td colspan="2" style="font-weight: bold;">
+                Potongan Supir <br> {{$ptg_ps_ids}}
+            </td>
+            <td style="font-weight: bold;">Rp. </td>
+            <td style="font-weight: bold; text-align: right;">
+              {{ number_format($ttl_ps, 0,',','.') }}
+            </td>
+          </tr>
+          @endif
+
+          @if($ttl_pk>0)
+          <tr style="color:red;">
+            <td colspan="2" style="font-weight: bold;">
+                Potongan Kernet <br> {{$ptg_pk_ids}}
+            </td>
+            <td style="font-weight: bold;">Rp. </td>
+            <td style="font-weight: bold; text-align: right;">
+              {{ number_format($ttl_pk, 0,',','.') }}
+            </td>
+          </tr>
+          @endif
+
+          @if($ttl_ps > 0 || $ttl_pk > 0)
+          <tr style="color:red;">
+            <td colspan="2" style="font-weight: bold;">
+                Total Potongan
+            </td>
+            <td style="font-weight: bold;">Rp. </td>
+            <td style="font-weight: bold; text-align: right;">
+              {{ number_format( $ttl_ps + $ttl_pk, 0,',','.') }}
+            </td>
+          </tr>
+          @endif
+
+
+          <tr>
+            <td colspan="2" style="font-weight: bold;">
+                Total Diterima
+            </td>
+            <td style="font-weight: bold;">Rp. </td>
+            <td style="font-weight: bold; text-align: right;">
+              {{ number_format( ($total - ( $ttl_ps + $ttl_pk) ), 0,',','.') }}
+            </td>
+          </tr>
+
           <tr>
             <td colspan="4" style="text-align: right;">
                 Dibuat tanggal:{{ date('d-m-Y H:i:s',strtotime($created_at)) }} (#{{$id_uj}})

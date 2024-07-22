@@ -151,63 +151,17 @@ Route::post('/permission_group', [\App\Http\Controllers\Permission\PermissionGro
 Route::put('/permission_group', [\App\Http\Controllers\Permission\PermissionGroupController::class, 'update']);
 Route::delete('/permission_group', [\App\Http\Controllers\Permission\PermissionGroupController::class, 'delete']);
 
-// Route::prefix("stok/api")->group(function(){
+Route::get('/potongan_msts', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'index']);
+Route::get('/potongan_mst', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'show']);
+Route::post('/potongan_mst', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'store']);
+Route::put('/potongan_mst', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'update']);
+Route::delete('/potongan_mst', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'delete']);
+Route::get('/potongan_mst_load_local', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'loadLocal']);
 
-//     // Route::post('login', function () {
-//     //     return response()->json(["error"],400);
-//     // });
+Route::get('/potongan_trxs', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'index']);
+Route::get('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'show']);
+Route::post('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'store']);
+Route::put('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'update']);
+Route::delete('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'delete']);
+Route::post('/potongan_trx_recalculate', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'recalculate']);
 
-
-//     Route::get('/units', [\App\Http\Controllers\Stok\UnitController::class, 'index']);
-//     Route::get('/unit', [\App\Http\Controllers\Stok\UnitController::class, 'show']);
-//     Route::post('/unit', [\App\Http\Controllers\Stok\UnitController::class, 'store']);
-//     Route::put('/unit', [\App\Http\Controllers\Stok\UnitController::class, 'update']);
-//     Route::delete('/unit', [\App\Http\Controllers\Stok\UnitController::class, 'delete']);
-
-//     Route::get('/warehouses', [\App\Http\Controllers\Stok\WarehouseController::class, 'index']);
-//     Route::get('/warehouse', [\App\Http\Controllers\Stok\WarehouseController::class, 'show']);
-//     Route::post('/warehouse', [\App\Http\Controllers\Stok\WarehouseController::class, 'store']);
-//     Route::put('/warehouse', [\App\Http\Controllers\Stok\WarehouseController::class, 'update']);
-//     Route::delete('/warehouse', [\App\Http\Controllers\Stok\WarehouseController::class, 'delete']);
-
-//     Route::get('/items', [\App\Http\Controllers\Stok\ItemController::class, 'index']);
-//     Route::get('/item', [\App\Http\Controllers\Stok\ItemController::class, 'show']);
-//     Route::post('/item', [\App\Http\Controllers\Stok\ItemController::class, 'store']);
-//     Route::put('/item', [\App\Http\Controllers\Stok\ItemController::class, 'update']);
-//     Route::delete('/item', [\App\Http\Controllers\Stok\ItemController::class, 'delete']);
-
-//     Route::get('/transactions', [\App\Http\Controllers\Stok\TransactionController::class, 'index']);
-//     Route::get('/transaction', [\App\Http\Controllers\Stok\TransactionController::class, 'show']);
-//     Route::post('/transaction', [\App\Http\Controllers\Stok\TransactionController::class, 'store']);
-//     Route::put('/transaction', [\App\Http\Controllers\Stok\TransactionController::class, 'update']);
-//     Route::delete('/transaction', [\App\Http\Controllers\Stok\TransactionController::class, 'delete']);
-//     Route::put('/confirm_transaction', [\App\Http\Controllers\Stok\TransactionController::class, 'confirm_transaction']);
-    
-//     Route::get('/request_transactions', [\App\Http\Controllers\Stok\TransactionController::class, 'request_transactions']);
-//     Route::post('/request_transaction_confirm', [\App\Http\Controllers\Stok\TransactionController::class, 'request_transaction_confirm']);
-
-//     Route::get('/summary_transactions', [\App\Http\Controllers\Stok\TransactionController::class, 'summary_transactions']);
-//     Route::get('/summary_detail_transactions', [\App\Http\Controllers\Stok\TransactionController::class, 'summary_detail_transactions']);
-
-//     Route::get('/hrm_revisi_lokasis', [\App\Http\Controllers\HrmRevisiLokasiController::class, 'index']);
-    
-
-  
-//     // Route::get('/action_permissions', [\App\Http\Controllers\Internal\User\UserPermissionController::class, 'getActionPermissions']);
-//     // Route::get('/data_permissions', [\App\Http\Controllers\Internal\User\UserPermissionController::class, 'getDataPermissions']);
-//     // Route::get('/user/permissions', [\App\Http\Controllers\Internal\User\UserPermissionController::class, 'show']);
-//     // Route::put('/user/permissions', [\App\Http\Controllers\Internal\User\UserPermissionController::class, 'update']);
-  
-//     // Route::get('/institutes', [\App\Http\Controllers\Internal\InstituteController::class, 'index']);
-//     // Route::get('/institute', [\App\Http\Controllers\Internal\InstituteController::class, 'show']);
-//     // Route::post('/institute', [\App\Http\Controllers\Internal\InstituteController::class, 'store']);
-//     // Route::put('/institute', [\App\Http\Controllers\Internal\InstituteController::class, 'update']);
-//     // Route::delete('/institute', [\App\Http\Controllers\Internal\InstituteController::class, 'delete']);
-  
-//     // Route::get('/members', [\App\Http\Controllers\Internal\MemberController::class, 'index']);
-//     // Route::get('/member', [\App\Http\Controllers\Internal\MemberController::class, 'show']);
-//     // Route::post('/member', [\App\Http\Controllers\Internal\MemberController::class, 'store']);
-//     // Route::put('/member', [\App\Http\Controllers\Internal\MemberController::class, 'update']);
-//     // Route::delete('/member', [\App\Http\Controllers\Internal\MemberController::class, 'delete']);
-  
-// });

@@ -76,6 +76,9 @@ class Employee extends Authenticatable
         $builder->where('deleted',0);
     }
 
+    public function potongan(){
+        return $this->hasOne(PotonganMst::class,"employee_id","id")->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
+    }
 
     // public function scopeOfRole(Builder $query, string $role): void
     // {

@@ -193,7 +193,7 @@ class AstNDriverController extends Controller
     ->groupBy('standby_trx.id','standby_trx.created_at','standby_trx.pv_datetime','standby_trx.xto','standby_trx.no_pol','standby_trx.supir','standby_trx.kernet');  
 
     if($jenis=="" || $jenis == "UJ"){
-      $uj_trx = $uj_trx->where('trx_trp.val2',1)->get();
+      $uj_trx = $uj_trx->where('trx_trp.val_ticket',1)->get();
     }else{
       $uj_trx = [];
     }

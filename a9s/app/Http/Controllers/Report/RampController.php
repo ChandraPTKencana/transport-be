@@ -47,7 +47,7 @@ class RampController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'report.ramp.download_file');
 
-    $model_query = TrxTrp::where('val2',1)->where("deleted",0)->orderBy("xto","asc");
+    $model_query = TrxTrp::where('val_ticket',1)->where("deleted",0)->orderBy("xto","asc");
     $date_from="";
     $date_to="";
     if($request->date_from || $request->date_to){

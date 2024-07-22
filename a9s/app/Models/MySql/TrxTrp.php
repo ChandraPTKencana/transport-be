@@ -52,6 +52,26 @@ class TrxTrp extends Model
         return $this->hasOne(IsUser::class, 'id', "val2_user");
     }
 
+    public function val3_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val3_user");
+    }
+
+    public function val4_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val4_user");
+    }
+
+    public function val5_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val5_user");
+    }
+
+    public function val_ticket_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val_ticket_user");
+    }
+
     public function deleted_by()
     {
         return $this->hasOne(IsUser::class, 'id', "deleted_user");
@@ -76,4 +96,10 @@ class TrxTrp extends Model
     {
         return $this->hasMany(UjalanDetail::class, 'id_uj', 'id_uj');
     }
+
+    public function potongan()
+    {
+        return $this->hasMany(PotonganTrx::class, 'trx_trp_id', 'id')->with('potongan_mst');
+    }
+
 }
