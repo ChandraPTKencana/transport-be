@@ -2278,7 +2278,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if($model_query->val==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
+      if($model_query->val4==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       $model_query = TrxAbsen::whereIn("id",$all_id)->lockForUpdate()->delete();
