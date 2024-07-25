@@ -11,7 +11,7 @@ class PermissionGroupDetail extends Model
 
     protected $table = 'permission_group_detail';
     // public $timestamps = false;
-    protected $primaryKey = null;
+    // protected $primaryKey = null;
 
     // public function warehouse()
     // {

@@ -11,7 +11,7 @@ class PermissionGroupUser extends Model
 
     protected $table = 'permission_group_user';
     // public $timestamps = false;
-    protected $primaryKey = null;
+    // protected $primaryKey = null;
 
     // public function warehouse()
     // {

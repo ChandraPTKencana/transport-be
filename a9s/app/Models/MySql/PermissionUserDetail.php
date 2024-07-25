@@ -11,7 +11,7 @@ class PermissionUserDetail extends Model
 
     protected $table = 'permission_user_detail';
     // public $timestamps = false;
-    protected $primaryKey = null;
+    // protected $primaryKey = null;
 
     // public function warehouse()
     // {

@@ -165,3 +165,22 @@ Route::put('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxControlle
 Route::delete('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'delete']);
 Route::post('/potongan_trx_recalculate', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'recalculate']);
 
+Route::get('/salary_paids', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'index']);
+Route::get('/salary_paid', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'show']);
+Route::post('/salary_paid', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'store']);
+Route::put('/salary_paid', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'update']);
+// Route::delete('/salary_paid', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'delete']);
+Route::put('/salary_paid_validasi', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'validasi']);
+Route::get('/salary_paid/pdf_preview', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'pdfPreview']);
+Route::get('/salary_paid/excel_download', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'excelDownload']);
+
+
+Route::get('/salary_bonuses', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'index']);
+Route::get('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'show']);
+Route::post('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'store']);
+Route::put('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'update']);
+Route::get('/salary_bonus_load_local', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'loadLocal']);
+Route::delete('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'delete']);
+Route::put('/salary_bonus_validasi', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'validasi']);
+// Route::get('/salary_bonus_generate_detail', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFiles']);
+// Route::get('/salary_bonus_preview_file', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'previewFile']);

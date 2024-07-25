@@ -199,7 +199,7 @@ class AstNDriverController extends Controller
     }
 
     if($jenis=="" || $jenis == "SB"){
-      $standby_trx = $standby_trx->where('standby_trx.val2',1)->get();
+      $standby_trx = $standby_trx->where('standby_trx.val2',">=",1)->get();
     }else{
       $standby_trx = [];
     }
