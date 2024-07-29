@@ -52,6 +52,10 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE employee_mst ADD attachment_1 LONGBLOB"); 
         DB::statement("ALTER TABLE employee_mst ADD attachment_2 LONGBLOB"); 
+        Schema::table('employee_mst', function (Blueprint $table) {
+            $table->string("attachment_1_type",255)->nullable();
+            $table->string("attachment_2_type",255)->nullable();
+        });
     }
 
     /**
@@ -73,6 +77,8 @@ return new class extends Migration
         Schema::table('employee_mst', function (Blueprint $table) {
             $table->dropColumn('attachment_1');
             $table->dropColumn('attachment_2');
+            $table->dropColumn('attachment_1_type');
+            $table->dropColumn('attachment_2_type');
         });
 
         Schema::table('info', function (Blueprint $table) {

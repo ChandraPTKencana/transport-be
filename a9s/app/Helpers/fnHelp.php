@@ -17,7 +17,8 @@
 if (!function_exists('files_path')) {
     function files_path($x = "")
     {
-        return public_path("/../../../".$x);
+        return public_path("/../../a9p" . $x);
+        // return public_path("/../../../".$x);
         // return public_path("/../public/" . $x);
         // return public_path($x);
     }

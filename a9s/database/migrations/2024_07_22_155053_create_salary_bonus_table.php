@@ -43,7 +43,7 @@ return new class extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->text('deleted_reason')->nullable();
 
-
+            $table->string("attachment_1_type",255)->nullable();
         });
 
         DB::statement("ALTER TABLE salary_bonus ADD attachment_1 LONGBLOB"); 

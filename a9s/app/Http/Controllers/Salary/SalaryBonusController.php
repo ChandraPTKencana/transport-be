@@ -9,6 +9,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
+use Illuminate\Support\Facades\File;
+
 use App\Exceptions\MyException;
 use Exception;
 
@@ -256,10 +258,19 @@ class SalaryBonusController extends Controller
 
     DB::beginTransaction();
     try {
+      $model_query                  = new SalaryBonus();
+
+      if($request->hasFile('attachment_1')){
+        $file = $request->file('attachment_1');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $blobFile = base64_encode(file_get_contents($path));
+        $model_query->attachment_1 = $blobFile;
+        $model_query->attachment_1_type = $fileType;
+      }
+
       // if(SalaryBonus::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       // throw new \Exception("List sudah terdaftar",1);
-
-      $model_query                  = new SalaryBonus();
 
       $model_query->tanggal         = $request->tanggal;
       $model_query->type            = $request->type;
@@ -290,10 +301,10 @@ class SalaryBonusController extends Controller
 
       if($rollback_id>-1)
       DB::statement("ALTER TABLE salary_bonus AUTO_INCREMENT = $rollback_id");
-      
-      return response()->json([
-        "message" => $e->getMessage(),
-      ], 400);
+
+      // return response()->json([
+      //   "message" => $e->getMessage(),
+      // ], 400);
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
@@ -311,12 +322,17 @@ class SalaryBonusController extends Controller
     MyAdmin::checkScope($this->permissions, 'salary_bonus.modify');
 
     $t_stamp = date("Y-m-d H:i:s");
-    
+    $attachment_1_preview = $request->attachment_1_preview;
+    $fileType = null;
+    $blobFile = null;
+    $change = 0;
     DB::beginTransaction();
     try {
       $SYSNOTES=[];
       $model_query = SalaryBonus::where("id",$request->id)->lockForUpdate()->first();
       $SYSOLD      = clone($model_query);
+        // $model_query->attachment_1_type = $fileType;
+      $fileType     = $model_query->attachment_1_type;
       
       if( $model_query->val==1 )
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
@@ -324,16 +340,38 @@ class SalaryBonusController extends Controller
       if($model_query->salary_paid_id) 
       throw new \Exception("Data Sudah Digunakan Dan Tidak Dapat Di Ubah",1);
 
-      $model_query->tanggal         = $request->tanggal;
-      $model_query->type            = $request->type;
-      $model_query->employee_id     = $request->employee_id;
-      $model_query->nominal         = $request->nominal;
-      $model_query->note            = $request->note;
+      if($request->hasFile('attachment_1')){
+        $file = $request->file('attachment_1');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $blobFile = base64_encode(file_get_contents($path));
+        $change++;
+      }
 
-      $model_query->updated_at      = $t_stamp;
-      $model_query->updated_user    = $this->admin_id;
+      if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
+        $blobFile = null;
+        $fileType = null;
+        $change++;
+      }
+
+      $model_query->attachment_1_type = $fileType;
+
+      $model_query->tanggal           = $request->tanggal;
+      $model_query->type              = $request->type;
+      $model_query->employee_id       = $request->employee_id;
+      $model_query->nominal           = $request->nominal;
+      $model_query->note              = $request->note;
+
+      $model_query->updated_at        = $t_stamp;
+      $model_query->updated_user      = $this->admin_id;
 
       $model_query->save();
+
+      if($change){
+        SalaryBonus::where("id",$request->id)->update([
+          "attachment_1"      => $blobFile
+        ]);
+      }
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
       array_unshift( $SYSNOTES , $SYSNOTE );            
