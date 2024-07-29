@@ -272,7 +272,7 @@ class StandbyTrxController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst'])
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','details'])
     ->withCount('details')->get();
 
     return response()->json([

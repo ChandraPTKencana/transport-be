@@ -63,6 +63,7 @@ Route::put('/trx_trp_validasi', [\App\Http\Controllers\Transaction\TrxTrpControl
 Route::post('/trx_trp_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);
 Route::post('/trx_trp_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
 Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdateTicket']);
+Route::put('/trx_trp_val_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'valTickets']);
 
 Route::get('/trx_load_cost_center', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'cost_center']);
 Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'trp']);

@@ -1682,6 +1682,62 @@ class TrxTrpController extends Controller
 
   }
 
+  public function valTickets(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
+
+    $ids = json_decode($request->ids, true);
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_querys = TrxTrp::whereIn("id",$ids)->get();
+      $valList = [];
+
+      foreach ($model_querys as $key => $v) {
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+          $v->val_ticket = 1;
+          $v->val_ticket_user = $this->admin_id;
+          $v->val_ticket_at = $t_stamp;
+          $v->save();
+          array_push($valList,[
+            "id"=>$v->id,
+            "val_ticket"=>$v->val_ticket,
+            "val_ticket_user"=>$v->val_ticket_user,
+            "val_ticket_at"=>$v->val_ticket_at,
+            "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
+          ]);
+        }
+      }
+
+      $nids = array_map(function($x) {
+        return $x['id'];        
+      },$valList);
+
+      MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val_lists"=>$valList
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
   public function genPersen($a,$b){
     $a = (float)$a;
     $b = (float)$b;
