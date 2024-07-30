@@ -817,25 +817,31 @@ class TrxTrpController extends Controller
           ->where("id","!=",$model_query->id)->first())
           throw new \Exception("Data Ticket telah digunakan",1);
 
-          $model_query->ticket_a_id =  $request->ticket_a_id;
-          $model_query->ticket_a_no =  $get_data_ticket->TicketNo;
-          $model_query->ticket_a_bruto =  $get_data_ticket->Bruto;
-          $model_query->ticket_a_tara =  $get_data_ticket->Tara;
-          $model_query->ticket_a_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
-          $model_query->ticket_a_supir =  $get_data_ticket->NamaSupir;
-          $model_query->ticket_a_no_pol =  $get_data_ticket->VehicleNo;
-          $model_query->ticket_a_in_at =  $get_data_ticket->DateTimeIn;
-          $model_query->ticket_a_out_at =  $get_data_ticket->DateTimeOut;       
+          $model_query->ticket_a_id         = $request->ticket_a_id;
+          $model_query->ticket_a_no         = $get_data_ticket->TicketNo;
+          $model_query->ticket_a_bruto      = $get_data_ticket->Bruto;
+          $model_query->ticket_a_tara       = $get_data_ticket->Tara;
+          $model_query->ticket_a_netto      = $get_data_ticket->Bruto - $get_data_ticket->Tara;
+          $model_query->ticket_a_ori_bruto  = $get_data_ticket->OriginalBruto;
+          $model_query->ticket_a_ori_tara   = $get_data_ticket->OriginalTara;
+          $model_query->ticket_a_ori_netto  = $get_data_ticket->OriginalBruto - $get_data_ticket->OriginalTara;
+          $model_query->ticket_a_supir      = $get_data_ticket->NamaSupir;
+          $model_query->ticket_a_no_pol     = $get_data_ticket->VehicleNo;
+          $model_query->ticket_a_in_at      = $get_data_ticket->DateTimeIn;
+          $model_query->ticket_a_out_at     = $get_data_ticket->DateTimeOut;       
         }else{
-          $model_query->ticket_a_id =  null;
-          $model_query->ticket_a_no =  null;
-          $model_query->ticket_a_bruto =  null;
-          $model_query->ticket_a_tara =  null;
-          $model_query->ticket_a_netto =  null;
-          $model_query->ticket_a_supir =  null;
-          $model_query->ticket_a_no_pol =  null;
-          $model_query->ticket_a_in_at =  null;
-          $model_query->ticket_a_out_at =  null;
+          $model_query->ticket_a_id         = null;
+          $model_query->ticket_a_no         = null;
+          $model_query->ticket_a_bruto      = null;
+          $model_query->ticket_a_tara       = null;
+          $model_query->ticket_a_netto      = null;
+          $model_query->ticket_a_ori_bruto  = null;
+          $model_query->ticket_a_ori_tara   = null;
+          $model_query->ticket_a_ori_netto  = null;
+          $model_query->ticket_a_supir      = null;
+          $model_query->ticket_a_no_pol     = null;
+          $model_query->ticket_a_in_at      = null;
+          $model_query->ticket_a_out_at     = null;
         }
 
         if($request->ticket_b_id){
@@ -853,25 +859,31 @@ class TrxTrpController extends Controller
           ->where("id","!=",$model_query->id)->first())
           throw new \Exception("Data Ticket telah digunakan",1);
 
-          $model_query->ticket_b_id =  $request->ticket_b_id;
-          $model_query->ticket_b_no =  $get_data_ticket->TicketNo;
-          $model_query->ticket_b_bruto =  $get_data_ticket->Bruto;
-          $model_query->ticket_b_tara =  $get_data_ticket->Tara;
-          $model_query->ticket_b_netto =  $get_data_ticket->Bruto - $get_data_ticket->Tara;
-          $model_query->ticket_b_supir =  $get_data_ticket->NamaSupir;
-          $model_query->ticket_b_no_pol =  $get_data_ticket->VehicleNo;
-          $model_query->ticket_b_in_at =  $get_data_ticket->DateTimeIn;
-          $model_query->ticket_b_out_at =  $get_data_ticket->DateTimeOut;
+          $model_query->ticket_b_id         = $request->ticket_b_id;
+          $model_query->ticket_b_no         = $get_data_ticket->TicketNo;
+          $model_query->ticket_b_bruto      = $get_data_ticket->Bruto;
+          $model_query->ticket_b_tara       = $get_data_ticket->Tara;
+          $model_query->ticket_b_netto      = $get_data_ticket->Bruto - $get_data_ticket->Tara;
+          $model_query->ticket_b_ori_bruto  = $get_data_ticket->OriginalBruto;
+          $model_query->ticket_b_ori_tara   = $get_data_ticket->OriginalTara;
+          $model_query->ticket_b_ori_netto  = $get_data_ticket->OriginalBruto - $get_data_ticket->OriginalTara;
+          $model_query->ticket_b_supir      = $get_data_ticket->NamaSupir;
+          $model_query->ticket_b_no_pol     = $get_data_ticket->VehicleNo;
+          $model_query->ticket_b_in_at      = $get_data_ticket->DateTimeIn;
+          $model_query->ticket_b_out_at     = $get_data_ticket->DateTimeOut;
         }else{
-          $model_query->ticket_b_id =  null;
-          $model_query->ticket_b_no =  null;
-          $model_query->ticket_b_bruto =  MyLib::emptyStrToNull($request->ticket_b_bruto);
-          $model_query->ticket_b_tara =  MyLib::emptyStrToNull($request->ticket_b_tara);
-          $model_query->ticket_b_netto =  MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
-          $model_query->ticket_b_supir =  null;
-          $model_query->ticket_b_no_pol =  null;
-          $model_query->ticket_b_in_at =  MyLib::emptyStrToNull($request->ticket_b_in_at);
-          $model_query->ticket_b_out_at =  MyLib::emptyStrToNull($request->ticket_b_out_at);
+          $model_query->ticket_b_id         = null;
+          $model_query->ticket_b_no         = null;
+          $model_query->ticket_b_bruto      = MyLib::emptyStrToNull($request->ticket_b_bruto);
+          $model_query->ticket_b_tara       = MyLib::emptyStrToNull($request->ticket_b_tara);
+          $model_query->ticket_b_netto      = MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
+          $model_query->ticket_b_ori_bruto  = null;
+          $model_query->ticket_b_ori_tara   = null;
+          $model_query->ticket_b_ori_netto  = null;
+          $model_query->ticket_b_supir      = null;
+          $model_query->ticket_b_no_pol     = null;
+          $model_query->ticket_b_in_at      = MyLib::emptyStrToNull($request->ticket_b_in_at);
+          $model_query->ticket_b_out_at     = MyLib::emptyStrToNull($request->ticket_b_out_at);
         }
 
       }
@@ -1173,7 +1185,7 @@ class TrxTrpController extends Controller
 
   public function getTicketA($connection_name,$request){
     $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
-    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut','OriginalBruto','OriginalTara')
     ->where("TicketID",$request->ticket_a_id)
     ->where("TicketNo",$request->ticket_a_no);
     if($request->jenis=="CPO"){
@@ -1190,7 +1202,7 @@ class TrxTrpController extends Controller
 
   public function getTicketB($connection_name,$request){
     $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
-    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut')
+    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut','OriginalBruto','OriginalTara')
     ->where("TicketID",$request->ticket_b_id)
     ->where("TicketNo",$request->ticket_b_no);
 
