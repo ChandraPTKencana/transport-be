@@ -2025,17 +2025,21 @@ class TrxTrpController extends Controller
     if(!$checked2)
     throw new \Exception("User Tidak terdaftar",1);
 
-    DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoCheck @VoucherID=:voucher_no,
-    @CheckedBy=:login_name",[
-      ":voucher_no"=>$d_voucher_id,
-      ":login_name"=>$login_name,
-    ]);
+    if($tocheck->Checked==0){
+      DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoCheck @VoucherID=:voucher_no,
+      @CheckedBy=:login_name",[
+        ":voucher_no"=>$d_voucher_id,
+        ":login_name"=>$login_name,
+      ]);
+    }
 
-    DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoApprove @VoucherID=:voucher_no,
-    @ApprovedBy=:login_name",[
-      ":voucher_no"=>$d_voucher_id,
-      ":login_name"=>$checked2->username,
-    ]);
+    if($tocheck->Approved==0){
+      DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoApprove @VoucherID=:voucher_no,
+      @ApprovedBy=:login_name",[
+        ":voucher_no"=>$d_voucher_id,
+        ":login_name"=>$checked2->username,
+      ]);
+    }
 
     $trx_trp->pvr_had_detail = 1;
     $trx_trp->save();
