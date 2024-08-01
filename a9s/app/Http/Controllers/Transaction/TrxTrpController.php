@@ -378,7 +378,7 @@ class TrxTrpController extends Controller
     }
 
     $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at');
+      $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
     return response()->json([
@@ -390,7 +390,9 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
-    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','potongan'])->find($request->id);
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens'=>function ($q){
+      $q->where("status","B");
+    },'potongan'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -2349,7 +2351,7 @@ class TrxTrpController extends Controller
       if($model_query->val4==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
-      $model_query = TrxAbsen::whereIn("id",$all_id)->lockForUpdate()->delete();
+      $model_query = TrxAbsen::whereIn("id",$all_id)->where("status","B")->lockForUpdate()->delete();
 
       MyLog::sys("trx_absen",null,"delete",implode(",",$all_id));
 

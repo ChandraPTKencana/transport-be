@@ -37,21 +37,21 @@ class RunCom extends Command
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
         
-        $this->info("=====Begin=====\n ");
+        // $this->info("=====Begin=====\n ");
                
-        Info::insert([
-            "dkey"=>"company_code",
-            "dval"=>'KPN',
-        ]);    
-        Info::insert([
-            "dkey"=>"company_name",
-            "dval"=>'PT. KENCANA PERSADA NUSANTARA',
-        ]);   
-        Info::insert([
-            "dkey"=>"company_email",
-            "dval"=>'KPN@genkagromas.com',
-        ]);   
-        $this->info("=====End=====\n ");
+        // Info::insert([
+        //     "dkey"=>"company_code",
+        //     "dval"=>'KPN',
+        // ]);    
+        // Info::insert([
+        //     "dkey"=>"company_name",
+        //     "dval"=>'PT. KENCANA PERSADA NUSANTARA',
+        // ]);   
+        // Info::insert([
+        //     "dkey"=>"company_email",
+        //     "dval"=>'KPN@genkagromas.com',
+        // ]);   
+        // $this->info("=====End=====\n ");
 
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");

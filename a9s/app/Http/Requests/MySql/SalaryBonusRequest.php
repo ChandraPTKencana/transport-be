@@ -35,8 +35,7 @@ class SalaryBonusRequest extends FormRequest
             $rules['type']          = 'required|in:Kerajinan';
             $rules['employee_id']   = 'required|exists:App\Models\MySql\Employee,id';
             $rules['nominal']       = 'required|numeric';
-            
-        
+            $rules['attachment_1']  = 'nullable|mimes:jpeg,jpg,png,pdf|max:2048';
         }
         return $rules;
     }
@@ -59,6 +58,9 @@ class SalaryBonusRequest extends FormRequest
 
             'nominal.required'      => 'Nominal tidak boleh kosong',
             'nominal.numeric'       => 'Format Nominal harus angka',
+
+            'attachment_1.mimes'    => 'Lampiran Harus Berupa Gambar Atau PDF',
+            'attachment_1.max'      => 'Besar File Lampiran maksimal 2048kB ',
 
         ];
     }

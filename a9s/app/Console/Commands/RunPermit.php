@@ -80,6 +80,16 @@ class RunPermit extends Command
             ["permit"=>'salary_bonus.val2',"to"=>['SuperAdmin','SPVLogistik']],
 
             ["permit"=>'salary_bonus.detail.views',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','SPVLogistik']],
+
+            ["permit"=>'trp_trx.absen.views',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','Logistic','SPVLogistik']],
+            ["permit"=>'trp_trx.absen.view',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','Logistic','SPVLogistik']],
+            ["permit"=>'trp_trx.absen.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','Logistic','SPVLogistik']],
+            ["permit"=>'trp_trx.absen.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'trp_trx.absen.val2',"to"=>['SuperAdmin','Logistic','SPVLogistik']],
+        
+            ["permit"=>'trp_trx.absen.val',"to"=>['SuperAdmin','PabrikMandor','PabrikTransport']],
+            ["permit"=>'trp_trx.absen.val1',"to"=>['SuperAdmin','Logistik','SPVLogistic']],
+
         ];
         $this->info("pass3\n ");
 

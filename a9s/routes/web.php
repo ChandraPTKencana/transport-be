@@ -70,6 +70,10 @@ Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataCo
 Route::get('/trx_load_for_local', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'local']);
 Route::delete('/trx_trp_absen', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete_absen']);
 
+Route::get('/trx_trp/absens', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'index']);
+Route::get('/trx_trp/absen', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'show']);
+Route::put('/trx_trp/absen', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'update']);
+Route::put('/trx_trp/absen/validasi', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'validasi']);
 
 Route::get('/users', [\App\Http\Controllers\User\UserController::class, 'index']);
 Route::get('/user', [\App\Http\Controllers\User\UserController::class, 'show']);
