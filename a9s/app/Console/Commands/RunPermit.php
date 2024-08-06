@@ -88,7 +88,32 @@ class RunPermit extends Command
             ["permit"=>'trp_trx.absen.val2',"to"=>['SuperAdmin','Logistic','SPVLogistik']],
         
             ["permit"=>'trp_trx.absen.val',"to"=>['SuperAdmin','PabrikMandor','PabrikTransport']],
-            ["permit"=>'trp_trx.absen.val1',"to"=>['SuperAdmin','Logistik','SPVLogistic']],
+            ["permit"=>'trp_trx.absen.val1',"to"=>['SuperAdmin','Logistic','SPVLogistik']],
+
+            ["permit"=>'extra_money.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','Logistic']],
+            ["permit"=>'extra_money.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','Logistic']],
+            ["permit"=>'extra_money.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money.val2',"to"=>['SuperAdmin','Logistic','SPVLogistik']],
+
+            ["permit"=>'extra_money_trx.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','WKTU','KTU','SPVLogistik','Logistic','Marketing']],
+            ["permit"=>'extra_money_trx.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','WKTU','KTU','SPVLogistik','Logistic','Marketing']],
+            ["permit"=>'extra_money_trx.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.val2',"to"=>['SuperAdmin','PabrikMandor']],
+            ["permit"=>'extra_money_trx.val3',"to"=>['SuperAdmin','WakilKTU','KTU']],
+            ["permit"=>'extra_money_trx.val4',"to"=>['SuperAdmin','Marketing']],
+            ["permit"=>'extra_money_trx.val5',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'extra_money_trx.val6',"to"=>['SuperAdmin','SPVLogistik']],
+            ["permit"=>'extra_money_trx.request_remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.approve_request_remove',"to"=>['SuperAdmin','Logistic']],
+            ["permit"=>'extra_money_trx.preview_file',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.generate_pvr',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.get_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
 
         ];
         $this->info("pass3\n ");
@@ -124,8 +149,6 @@ class RunPermit extends Command
         Schema::enableForeignKeyConstraints();
         $this->info("pass4\n ");
 
-        
-       
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");
     }

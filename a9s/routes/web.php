@@ -189,3 +189,25 @@ Route::delete('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusControll
 Route::put('/salary_bonus_validasi', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'validasi']);
 // Route::get('/salary_bonus_generate_detail', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFiles']);
 // Route::get('/salary_bonus_preview_file', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'previewFile']);
+
+
+Route::get('/extra_moneys', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'index']);
+Route::get('/extra_money', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'show']);
+Route::post('/extra_money', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'store']);
+Route::put('/extra_money', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'update']);
+Route::delete('/extra_money', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'delete']);
+Route::put('/extra_money_validasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'validasi']);
+Route::get('/extra_money_load_local', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'loadLocal']);
+Route::get('/extra_money_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'loadSqlSrv']);
+
+Route::get('/extra_money_trxs', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'index']);
+Route::get('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'show']);
+Route::post('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'store']);
+Route::put('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'update']);
+Route::delete('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'delete']);
+Route::get('/extra_money_trx_load_local', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'loadLocal']);
+Route::get('/extra_money_trx_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'loadSqlSrv']);
+Route::put('/extra_money_trx_validasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'validasi']);
+Route::get('/extra_money_trx_preview_file', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFile']);
+
+
