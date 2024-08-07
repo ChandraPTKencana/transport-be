@@ -53,6 +53,12 @@ class RunCom extends Command
         // ]);   
         // $this->info("=====End=====\n ");
 
+        // PaymentMethodDB::insert('insert into users (id, name) values (?, ?)', [1, 'Dayle'])
+        PaymentMethod::insert([
+            "name"=>"TRANSFER-DUITKU",
+            "account_code"=>"01.100.005",
+        ]);
+
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");
     }

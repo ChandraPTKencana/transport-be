@@ -377,7 +377,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -390,7 +390,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
-    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens'=>function ($q){
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function ($q){
       $q->where("status","B");
     },'potongan'])->find($request->id);
     return response()->json([
@@ -553,6 +553,7 @@ class TrxTrpController extends Controller
         $model_query->kernet_rek_name = $kernet_dt->rek_name;  
       }
 
+      $model_query->payment_method_id = $request->payment_method_id;
       $model_query->no_pol            = $request->no_pol;      
       $model_query->created_at        = $t_stamp;
       $model_query->created_user      = $this->admin_id;
@@ -699,7 +700,8 @@ class TrxTrpController extends Controller
             throw new \Exception("Kernet sudah tidak boleh di kosong",1);
           }
         }
-        $model_query->no_pol          = $request->no_pol;
+        $model_query->payment_method_id = $request->payment_method_id;
+        $model_query->no_pol            = $request->no_pol;
       }
       if($online_status=="true"){
         if($model_query->pvr_id==null){

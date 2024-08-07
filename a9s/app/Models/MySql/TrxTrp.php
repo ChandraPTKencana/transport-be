@@ -112,4 +112,9 @@ class TrxTrp extends Model
         return $this->hasMany(PotonganTrx::class, 'trx_trp_id', 'id')->with('potongan_mst');
     }
 
+    public function payment_method()
+    {
+        return $this->belongsTo(PaymentMethod::class, "payment_method_id", 'id');
+    }
+
 }

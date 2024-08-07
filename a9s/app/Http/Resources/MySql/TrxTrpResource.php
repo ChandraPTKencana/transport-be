@@ -145,6 +145,8 @@ class TrxTrpResource extends JsonResource
             'details_uj'        => UjalanDetailResource::collection($this->whenLoaded('uj_details')),
             'potongan'          => PotonganTrxResource::collection($this->whenLoaded('potongan')),
 
+            'payment_method'    => new PaymentMethodResource($this->whenLoaded('payment_method')),
+            'payment_method_id' => $this->payment_method_id,
         ];
     }
 }
