@@ -166,7 +166,7 @@ class EmployeeController extends Controller
     }
 
 
-    $model_query = $model_query->where("deleted",0)->get();
+    $model_query = $model_query->where("deleted",0)->with('bank')->get();
 
     return response()->json([
       // "data"=>EmployeeResource::collection($employees->keyBy->id),
@@ -178,7 +178,7 @@ class EmployeeController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'employee.view');
     
-    $model_query = Employee::find($request->id);
+    $model_query = Employee::with('bank')->find($request->id);
     return response()->json([
       "data" => new EmployeeResource($model_query),
     ], 200);
@@ -206,11 +206,21 @@ class EmployeeController extends Controller
       }
 
       $model_query                = new Employee();
+
+      if($request->hasFile('attachment_1')){
+        $file = $request->file('attachment_1');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $blobFile = base64_encode(file_get_contents($path));
+        $model_query->attachment_1 = $blobFile;
+        $model_query->attachment_1_type = $fileType;
+      }
+
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
       $model_query->ktp_no        = $ktp_no;
       $model_query->sim_no        = $sim_no;
-      $model_query->bank_name     = MyLib::emptyStrToNull($request->bank_name);
+      $model_query->bank_id       = $request->bank_id;
       $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
       $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
       $model_query->phone_number  = MyLib::emptyStrToNull($request->phone_number);
@@ -252,6 +262,10 @@ class EmployeeController extends Controller
     MyAdmin::checkScope($this->permissions, 'employee.modify');
 
     $t_stamp = date("Y-m-d H:i:s");
+    $attachment_1_preview = $request->attachment_1_preview;
+    $fileType = null;
+    $blobFile = null;
+    $change = 0;
     DB::beginTransaction();
     try {
       $ktp_no = MyLib::emptyStrToNull($request->ktp_no);
@@ -279,11 +293,27 @@ class EmployeeController extends Controller
 
       $SYSOLD                     = clone($model_query);
 
+      if($request->hasFile('attachment_1')){
+        $file = $request->file('attachment_1');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $blobFile = base64_encode(file_get_contents($path));
+        $change++;
+      }
+
+      if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
+        $blobFile = null;
+        $fileType = null;
+        $change++;
+      }
+
+      $model_query->attachment_1_type = $fileType;
+
       $model_query->name          = $request->name;
       $model_query->role          = $request->role;
       $model_query->ktp_no        = $ktp_no;
       $model_query->sim_no        = $sim_no;
-      $model_query->bank_name     = MyLib::emptyStrToNull($request->bank_name);
+      $model_query->bank_id       = $request->bank_id;
       $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
       $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
       $model_query->phone_number  = MyLib::emptyStrToNull($request->phone_number);
@@ -291,6 +321,12 @@ class EmployeeController extends Controller
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
       
+      if($change){
+        Employee::where("id",$request->id)->update([
+          "attachment_1"      => $blobFile
+        ]);
+      }
+
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys($this->syslog_db,$request->id,"update",$SYSNOTE);
 

@@ -107,6 +107,11 @@ class TrxTrp extends Model
         return $this->hasMany(UjalanDetail::class, 'id_uj', 'id_uj');
     }
 
+    public function uj_details2()
+    {
+        return $this->hasMany(UjalanDetail2::class, 'id_uj', 'id_uj');
+    }
+
     public function potongan()
     {
         return $this->hasMany(PotonganTrx::class, 'trx_trp_id', 'id')->with('potongan_mst');

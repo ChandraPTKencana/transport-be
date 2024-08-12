@@ -210,4 +210,12 @@ Route::get('/extra_money_trx_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\Ext
 Route::put('/extra_money_trx_validasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'validasi']);
 Route::get('/extra_money_trx_preview_file', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFile']);
 
+Route::get('/payment_methods', [\App\Http\Controllers\PaymentMethodController::class, 'index']);
+Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);
+Route::get('/trx_trp/transfers', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'index']);
+Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransfer']);
+Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'show']);
 
+
+Route::get('/ga_qr', [\App\Http\Controllers\GAController::class, 'qr']);
+Route::post('/ga_pin', [\App\Http\Controllers\GAController::class, 'pin']);

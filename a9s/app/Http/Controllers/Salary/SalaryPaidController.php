@@ -648,6 +648,8 @@ class SalaryPaidController extends Controller
       }else{
         $dt_dtl[$search]['salary_bonus_nominal']+=$v->nominal;
       }
+      $v->salary_paid_id = $model_query->id;
+      $v->save();
     }
 
     foreach ($dt_dtl as $k => $v) {
@@ -662,7 +664,9 @@ class SalaryPaidController extends Controller
     set_time_limit(0);
     $sp = SalaryPaid::where("id",$request->id)->first();
 
-    $data = SalaryPaidDtl::where('salary_paid_id',$request->id)->with("employee")->orderBy(function($q){
+    $data = SalaryPaidDtl::where('salary_paid_id',$request->id)->with(["employee"=>function($q1){
+      $q1->with('bank');
+    }])->orderBy(function($q){
       $q->from("employee_mst")
       ->select("name")
       ->whereColumn("id","employee_id");
@@ -720,7 +724,9 @@ class SalaryPaidController extends Controller
     set_time_limit(0);
     $sp = SalaryPaid::where("id",$request->id)->first();
 
-    $data = SalaryPaidDtl::where('salary_paid_id',$request->id)->with("employee")->orderBy(function($q){
+    $data = SalaryPaidDtl::where('salary_paid_id',$request->id)->with(["employee"=>function($q1){
+      $q1->with('bank');
+    }])->orderBy(function($q){
       $q->from("employee_mst")
       ->select("name")
       ->whereColumn("id","employee_id");

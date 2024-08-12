@@ -16,20 +16,27 @@ class EmployeeResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'val'          => $this->val,
-            'id'           => $this->id,
-            'name'         => $this->name,
-            'role'         => $this->role,
-            'ktp_no'       => $this->ktp_no ?? '',
-            'sim_no'       => $this->sim_no ?? '',
-            'bank_name'    => $this->bank_name ?? '',
-            'rek_no'       => $this->rek_no ?? '',
-            'rek_name'     => $this->rek_name ?? '',
-            'phone_number' => $this->phone_number ?? '',
-            'created_at'   => $this->created_at,
-            'updated_at'   => $this->updated_at,
-            'created_user' => $this->created_user,
-            'updated_user' => $this->updated_user,
+            'val'                   => $this->val,
+            'val_user'              => $this->val_user ?? "",
+            'val_by'                => new IsUserResource($this->whenLoaded('val_by')),
+            'val_at'                => $this->val_at ?? "",
+            'id'                    => $this->id,
+            'name'                  => $this->name,
+            'role'                  => $this->role,
+            'ktp_no'                => $this->ktp_no ?? '',
+            'sim_no'                => $this->sim_no ?? '',
+            'bank'                  => new BankResource($this->whenLoaded('bank')),
+            'bank_id'               => $this->bank_id ?? '',
+            'rek_no'                => $this->rek_no ?? '',
+            'rek_name'              => $this->rek_name ?? '',
+            'phone_number'          => $this->phone_number ?? '',
+            'created_at'            => $this->created_at,
+            'updated_at'            => $this->updated_at,
+            'created_user'          => $this->created_user,
+            'updated_user'          => $this->updated_user,
+            'attachment_1'          => null,
+            'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+
         ];
     }
 }

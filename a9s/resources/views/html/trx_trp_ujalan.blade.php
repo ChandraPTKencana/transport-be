@@ -37,6 +37,11 @@
       </div>
       <table style="font-size: 12px; ">
         <tr>
+          <td > Metode Bayar </td>
+          <td> : </td>
+          <td> {{$payment_name}} </td>
+        </tr>
+        <tr>
           <td > Ujalan Per </td>
           <td> : </td>
           <td> {{date('d-m-Y',strtotime($tanggal))}} </td>
@@ -56,12 +61,27 @@
           <td> : </td>
           <td> {{$supir}} </td>
         </tr>
+        @if($payment==2)
+        <tr>
+          <td> No Rek Supir </td>
+          <td> : </td>
+          <td> {{$supir_rek_no}} </td>
+        </tr>
+        @endif
 
         @if($kernet)
         <tr>
           <td> Nama Kernet </td>
           <td> : </td>
           <td> {{$kernet}} </td>
+        </tr>
+        @endif
+
+        @if($payment==2)
+        <tr>
+          <td> No Rek Kernet </td>
+          <td> : </td>
+          <td> {{$kernet_rek_no}} </td>
         </tr>
         @endif
       </table>

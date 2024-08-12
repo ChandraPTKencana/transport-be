@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 use Barryvdh\DomPDF\Facade\PDF;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Illuminate\Support\Facades\File;
 use App\Exceptions\MyException;
 
 use App\Helpers\MyLib;
@@ -499,6 +499,13 @@ class TrxTrpController extends Controller
       if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
+      if($request->payment_method_id == 2){
+        if(!$supir_dt->rek_no && $supir_dt->id != 1)
+        throw new \Exception("Tidak ada no rekening supir",1);
+
+        if(isset($kernet_dt) && !$kernet_dt->rek_no && $kernet_dt->id != 1)
+        throw new \Exception("Tidak ada no rekening kernet",1);
+      }
 
       // if(TrxTrp::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       // throw new \Exception("List sudah terdaftar");
@@ -638,10 +645,21 @@ class TrxTrpController extends Controller
       if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
+      if($request->payment_method_id == 2){
+        if(!$supir_dt->rek_no && $supir_dt->id != 1)
+        throw new \Exception("Tidak ada no rekening supir",1);
+
+        if(isset($kernet_dt) && !$kernet_dt->rek_no && $kernet_dt->id != 1)
+        throw new \Exception("Tidak ada no rekening kernet",1);
+      }
+
       $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
       $SYSOLD      = clone($model_query);
-      if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
+      // if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
+      // throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
+
+      if($model_query->req_deleted==1 || $model_query->deleted==1) 
+      throw new \Exception("Data Sudah Tidak Dapat Di Ubah",1);
 
 
       if($model_query->val==0){
@@ -703,6 +721,7 @@ class TrxTrpController extends Controller
         $model_query->payment_method_id = $request->payment_method_id;
         $model_query->no_pol            = $request->no_pol;
       }
+      
       if($online_status=="true"){
         if($model_query->pvr_id==null){
           if($request->cost_center_code){  
@@ -733,7 +752,7 @@ class TrxTrpController extends Controller
 
 
 
-      if(($prev_supir_id == null || $prev_supir_id == 1 ) && $supir_dt->id!=1 && $supir_dt->potongan){
+      if(isset($prev_supir_id) && ($prev_supir_id == null || $prev_supir_id == 1 ) && $supir_dt->id!=1 && $supir_dt->potongan){
         array_push($ptg_trx_dt,[
           "_source"     => "TRX_TRP",
           "employee_id" => $supir_dt->id,
@@ -742,7 +761,7 @@ class TrxTrpController extends Controller
         ]);
       }
 
-      if(($prev_kernet_id == null || $prev_kernet_id == 1) && isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
+      if(isset($prev_kernet_id) && ($prev_kernet_id == null || $prev_kernet_id == 1) && isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
         array_push($ptg_trx_dt,[
           "_source"     => "TRX_TRP",
           "employee_id" => $kernet_dt->id,
@@ -1265,10 +1284,14 @@ class TrxTrpController extends Controller
       "id"            => $trx_trp->id,
       "id_uj"         => $trx_trp->id_uj,
       "no_pol"        => $trx_trp->no_pol,
+      "payment"       => $trx_trp->payment_method_id,
+      "payment_name"  => $trx_trp->payment_method->name,
       "supir"         => $trx_trp->supir,
+      "supir_rek_no"  => $trx_trp->supir_rek_no,
       "ttl_ps"        => $ttl_ps,
       "ptg_ps_ids"    => $ptg_ps_ids,
       "kernet"        => $trx_trp->kernet,
+      "kernet_rek_no" => $trx_trp->kernet_rek_no,
       "ttl_pk"        => $ttl_pk,
       "ptg_pk_ids"    => $ptg_pk_ids,
       "tanggal"       => $trx_trp->tanggal,
@@ -1298,6 +1321,75 @@ class TrxTrpController extends Controller
       // "data" => $bs64,
       // "dataBase64" => $mime["dataBase64"] . $bs64,
       // "filename" => $filename . "." . $mime["ext"],
+      "html"=>$html->render()
+    ];
+    return $result;
+  }
+
+  public function previewFileBT(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.preview_file');
+
+    set_time_limit(0);
+
+    $trx_trp = TrxTrp::find($request->id);
+
+    if($trx_trp->val1==0)
+    return response()->json([
+      "message" => "Mandor harus Validasi Terlebih Dahulu",
+    ], 400);
+
+
+    $supir_id   = $trx_trp->supir_id;
+    $kernet_id  = $trx_trp->kernet_id;
+    $ttl_ps     = 0;
+    $ttl_pk     = 0;
+
+    $supir_money = 0;
+    $kernet_money = 0;
+    foreach ($trx_trp->uj_details2 as $key => $val) {
+      if($val->xfor=='Kernet'){
+        $kernet_money+=$val->amount*$val->qty;
+      }else{
+        $supir_money+=$val->amount*$val->qty;
+      }
+    }
+
+    $ptg_ps_ids = "";
+    $ptg_pk_ids = "";
+    foreach ($trx_trp->potongan as $k => $v) {
+      if($v->potongan_mst->employee_id == $supir_id){
+        $ttl_ps+=$v->nominal_cut;
+        $ptg_ps_ids.="#".$v->potongan_mst->id." ";
+      }
+
+      if($v->potongan_mst->employee_id == $kernet_id){
+        $ttl_pk+=$v->nominal_cut;
+        $ptg_pk_ids.="#".$v->potongan_mst->id." ";
+      }
+    }
+
+
+    $supir_money -= $ttl_ps;
+    $kernet_money -= $ttl_pk;
+  
+    $sendData = [
+      "id"            => $trx_trp->id,
+      "id_uj"         => $trx_trp->id_uj,
+      "logo"          => File::exists(files_path("/duitku.png")) ? "data:image/png;base64,".base64_encode(File::get(files_path("/duitku.png"))) :"",
+      "ref_no0"       => $trx_trp->duitku_supir_disburseId,
+      "supir"         => $trx_trp->supir,
+      "supir_rek_no"  => $trx_trp->supir_rek_no,
+      "nominal0"      => $supir_money,
+
+      "ref_no1"       => $trx_trp->duitku_kernet_disburseId,
+      "kernet"        => $trx_trp->kernet,
+      "kernet_rek_no" => $trx_trp->kernet_rek_no,
+      "nominal1"      => $kernet_money,
+      
+      "tanggal"       => $trx_trp->val5_at,
+    ];   
+    $html = view("html.trx_trp_ujalan_bt",$sendData);  
+    $result = [
       "html"=>$html->render()
     ];
     return $result;

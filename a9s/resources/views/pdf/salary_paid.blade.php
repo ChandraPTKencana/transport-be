@@ -87,7 +87,7 @@
           <td class="text-right p-1">{{ $v["employee"]["sim_no"] }}</td>
           <td class="text-right p-1">{{ $v["employee"]["rek_no"] }}</td>
           <td class="text-right p-1">{{ $v["employee"]["rek_name"] }}</td>
-          <td class="text-right p-1">{{ $v["employee"]["bank_name"] }}</td>
+          <td class="text-right p-1">{{ $v["employee"]["bank"] ? $v["employee"]["bank"]["code"] : "" }}</td>
           <td class="text-right p-1">{{ $v["standby_nominal"] }}</td>
           <td class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td>
           <td class="text-right p-1">{{ $v["total"] }}</td>

@@ -57,66 +57,11 @@ class RunPermit extends Command
         $this->info("pass1\n ");
 
         $lists = [
-            ["permit"=>'salary_paid.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','HR']],
-            ["permit"=>'salary_paid.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','HR']],
-            ["permit"=>'salary_paid.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','SPVLogistik']],
-            ["permit"=>'salary_paid.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','SPVLogistik']],
-            // ["permit"=>'salary_paid.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','SPVLogistik']],
-            ["permit"=>'salary_paid.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','SPVLogistik']],
-            ["permit"=>'salary_paid.val2',"to"=>['SuperAdmin','SPVLogistik']],
-            ["permit"=>'salary_paid.val3',"to"=>['SuperAdmin','HR']],
+            ["permit"=>'trp_trx.transfer.views',"to"=>['SuperAdmin','ViewOnly','SPVLogistik']],
+            ["permit"=>'trp_trx.transfer.view',"to"=>['SuperAdmin','ViewOnly','SPVLogistik']],
+            ["permit"=>'trp_trx.transfer.do_transfer',"to"=>['SuperAdmin','SPVLogistik']],
 
-            ["permit"=>'salary_paid.generate_detail',"to"=>['SuperAdmin','PabrikTransport',"PabrikMandor",'SPVLogistik']],
-            ["permit"=>'salary_paid.preview_file',"to"=>['SuperAdmin','HR']],
-
-            ["permit"=>'salary_paid.detail.views',"to"=>['SuperAdmin','PabrikTransport',"PabrikMandor",'SPVLogistik','HR']],
-
-            ["permit"=>'salary_bonus.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','HR']],
-            ["permit"=>'salary_bonus.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','HR']],
-            ["permit"=>'salary_bonus.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'salary_bonus.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'salary_bonus.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'salary_bonus.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'salary_bonus.val2',"to"=>['SuperAdmin','SPVLogistik']],
-
-            ["permit"=>'salary_bonus.detail.views',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','SPVLogistik']],
-
-            ["permit"=>'trp_trx.views',"to"=>['Logistic']],
-            ["permit"=>'trp_trx.view',"to"=>['Logistic']],
-            
-            ["permit"=>'trp_trx.absen.views',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','Logistic','SPVLogistik']],
-            ["permit"=>'trp_trx.absen.view',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','Logistic','SPVLogistik']],
-            ["permit"=>'trp_trx.absen.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor','Logistic','SPVLogistik']],
-            ["permit"=>'trp_trx.absen.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'trp_trx.absen.val2',"to"=>['SuperAdmin','Logistic','SPVLogistik']],
-        
-            ["permit"=>'trp_trx.absen.val',"to"=>['SuperAdmin','PabrikMandor','PabrikTransport']],
-            ["permit"=>'trp_trx.absen.val1',"to"=>['SuperAdmin','Logistic','SPVLogistik']],
-
-            ["permit"=>'extra_money.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','Logistic']],
-            ["permit"=>'extra_money.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','SPVLogistik','Logistic']],
-            ["permit"=>'extra_money.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money.val2',"to"=>['SuperAdmin','Logistic','SPVLogistik']],
-
-            ["permit"=>'extra_money_trx.views',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','WKTU','KTU','SPVLogistik','Logistic','Marketing']],
-            ["permit"=>'extra_money_trx.view',"to"=>['SuperAdmin','ViewOnly','PabrikTransport','PabrikMandor','WKTU','KTU','SPVLogistik','Logistic','Marketing']],
-            ["permit"=>'extra_money_trx.create',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.modify',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.val1',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.val2',"to"=>['SuperAdmin','PabrikMandor']],
-            ["permit"=>'extra_money_trx.val3',"to"=>['SuperAdmin','WakilKTU','KTU']],
-            ["permit"=>'extra_money_trx.val4',"to"=>['SuperAdmin','Marketing']],
-            ["permit"=>'extra_money_trx.val5',"to"=>['SuperAdmin','Logistic']],
-            ["permit"=>'extra_money_trx.val6',"to"=>['SuperAdmin','SPVLogistik']],
-            ["permit"=>'extra_money_trx.request_remove',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.approve_request_remove',"to"=>['SuperAdmin','Logistic']],
-            ["permit"=>'extra_money_trx.preview_file',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.generate_pvr',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.get_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'trp_trx.val4',"to"=>['SuperAdmin','Logistic']],
 
         ];
         $this->info("pass3\n ");

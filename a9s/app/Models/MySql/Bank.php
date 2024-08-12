@@ -10,11 +10,11 @@ use Laravel\Sanctum\HasApiTokens;
 use Str;
 use Illuminate\Database\Eloquent\Builder;
 
-class Employee extends Authenticatable
+class Bank extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'employee_mst';
+    protected $table = 'bank';
     // protected $primaryKey = "id_user";
 
     /**
@@ -67,23 +67,19 @@ class Employee extends Authenticatable
     //     // return $this->belongsTo(HrmRevisiLokasi::class, 'loc', 'id');
     // }
 
-    public function scopeVerified(Builder $builder){
-        $builder->where('val',1)->orWhere('val',0); // TEMP
-        // $builder->where('val',1); //Right
-    }
+    // public function scopeVerified(Builder $builder){
+    //     $builder->where('val',1)->orWhere('val',0); // TEMP
+    //     // $builder->where('val',1); //Right
+    // }
 
-    public function scopeAvailable(Builder $builder){
-        $builder->where('deleted',0);
-    }
+    // public function scopeAvailable(Builder $builder){
+    //     $builder->where('deleted',0);
+    // }
 
-    public function potongan(){
-        return $this->hasOne(PotonganMst::class,"employee_id","id")->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
-    }
+    // public function potongan(){
+    //     return $this->hasOne(PotonganMst::class,"employee_id","id")->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
+    // }
 
-    public function bank(){
-        return $this->belongsTo(Bank::class,"bank_id","id");
-    }
-    
     // public function scopeOfRole(Builder $query, string $role): void
     // {
     //     $query->where('role', $role);
