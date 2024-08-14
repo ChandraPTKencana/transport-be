@@ -8,14 +8,17 @@ use File;
 use Request;
 
 class TrfDuitku {
-    private static $userId = 48271;
-    private static $secretKey = '26c52e376ebe13a216175e8c2998de582b984d2c765a0f5f7700765ce6208653';
-    private static $email = 'miausion@gmail.com';
+    // private static $userId = 48271;
+    // private static $secretKey = '26c52e376ebe13a216175e8c2998de582b984d2c765a0f5f7700765ce6208653';
+    // private static $email = 'miausion@gmail.com';
     private static $type = 'BIFAST';
 
 
     public static function generate_invoice($bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){
-        $timestamp = round(microtime(true) * 1000);
+        $userId     = env("DK_I");
+        $secretKey  = env("DK_S");
+        $email      = env("DK_E");
+        $timestamp  = round(microtime(true) * 1000);
 
         // $bankCode          = '014'; 
         // $bankAccount       = '8760673466';
@@ -24,13 +27,13 @@ class TrfDuitku {
         // // $senderName        = 'John Doe';
         // // $senderId          =  12345789; 
         // $purpose           = 'Test BIFAST Inquiry with duitku';
-        $paramSignature    = self::$email . $timestamp . $bankCode . self::$type . $bankAccount . $amountTransfer . $purpose . self::$secretKey; 
+        $paramSignature    = $email . $timestamp . $bankCode . self::$type . $bankAccount . $amountTransfer . $purpose . $secretKey; 
 
         $signature = hash('sha256', $paramSignature);
 
         $params = array(
-            'userId'         => self::$userId,
-            'email'          => self::$email,
+            'userId'         => $userId,
+            'email'          => $email,
             'bankCode'       => $bankCode,
             'bankAccount'    => $bankAccount,
             'amountTransfer' => $amountTransfer,
@@ -92,6 +95,9 @@ class TrfDuitku {
     }
 
     public static function generate_transfer($disburseId,$bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){
+        $userId     = env("DK_I");
+        $secretKey  = env("DK_S");
+        $email      = env("DK_E");
         // $bankCode       = '014'; 
         // $bankAccount    = '8760673466';
         // $amountTransfer =  11000;
@@ -101,14 +107,14 @@ class TrfDuitku {
         // $custRefNumber  = '11';
         // $purpose        = 'Test Clearing Inquiry with duitku';
         $timestamp      = round(microtime(true) * 1000);
-        $paramSignature = self::$email . $timestamp . $bankCode . self::$type . $bankAccount . $accountName . $custRefNumber . $amountTransfer . $purpose . $disburseId . self::$secretKey; 
+        $paramSignature = $email . $timestamp . $bankCode . self::$type . $bankAccount . $accountName . $custRefNumber . $amountTransfer . $purpose . $disburseId . $secretKey; 
 
         $signature = hash('sha256', $paramSignature);
 
         $params = array(
             'disburseId' => $disburseId,
-            'userId'         => self::$userId,
-            'email'          => self::$email,
+            'userId'         => $userId,
+            'email'          => $email,
             'bankCode'       => $bankCode,
             'bankAccount'    => $bankAccount,
             'amountTransfer' => $amountTransfer,
@@ -161,9 +167,9 @@ class TrfDuitku {
             
    
 
-            // if(!empty(self::$email) && !empty($bankCode) && !empty($bankAccount) && !empty($accountName) && !empty($custRefNumber) && !empty($amountTransfer) && !empty($disburseId) && !empty($signature))
+            // if(!empty($email) && !empty($bankCode) && !empty($bankAccount) && !empty($accountName) && !empty($custRefNumber) && !empty($amountTransfer) && !empty($disburseId) && !empty($signature))
             // {
-            //         $params = self::$email . $bankCode . $bankAccount . $accountName . $custRefNumber .  $amountTransfer . $disburseId . self::$secretKey;
+            //         $params = $email . $bankCode . $bankAccount . $accountName . $custRefNumber .  $amountTransfer . $disburseId . $secretKey;
             //         $calcSignature = hash('sha256', $params);
             //         if($signature == $calcSignature)
             //         {

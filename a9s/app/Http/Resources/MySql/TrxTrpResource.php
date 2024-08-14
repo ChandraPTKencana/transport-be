@@ -147,6 +147,9 @@ class TrxTrpResource extends JsonResource
 
             'payment_method'    => new PaymentMethodResource($this->whenLoaded('payment_method')),
             'payment_method_id' => $this->payment_method_id,
+
+            'received_payment'  => $this->received_payment,
+
         ];
     }
 }

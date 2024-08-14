@@ -37,6 +37,9 @@ class PotonganMstRequest extends FormRequest
             $rules['nominal'] = 'required|numeric';
             $rules['nominal_cut'] = 'required|numeric';
             $rules['status'] = 'required|in:Open,Close Clear,Close UnClear';
+            $rules['attachment_1']  = 'nullable|mimes:jpeg,jpg,png,pdf|max:2048';
+            $rules['attachment_2']  = 'nullable|mimes:jpeg,jpg,png,pdf|max:2048';
+
         }
         return $rules;
     }
@@ -65,6 +68,11 @@ class PotonganMstRequest extends FormRequest
             'status.required' => 'Status tidak boleh kosong',
             'status.in' => 'Status harus dipilih',
 
+            'attachment_1.mimes'    => 'Lampiran Pertama Harus Berupa Gambar Atau PDF',
+            'attachment_1.max'      => 'Besar File Lampiran Pertama maksimal 2048kB ',
+
+            'attachment_2.mimes'    => 'Lampiran Lanjutan Harus Berupa Gambar Atau PDF',
+            'attachment_2.max'      => 'Besar File Lampiran Lanjutan maksimal 2048kB ',
         ];
     }
 

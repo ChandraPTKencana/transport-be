@@ -51,7 +51,7 @@ class PSPotonganTrx
   }
 
   public static function loopCut($v,$emp,$t_stamp,$sisa_cut=0){
-    $potongan_mst   = PotonganMst::where('employee_id',$emp->id)
+    $potongan_mst   = PotonganMst::where('employee_id',$emp->id)->where('val1',1)
     ->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc')
     ->lockForUpdate()
     ->first();
@@ -71,6 +71,9 @@ class PSPotonganTrx
       $potongan_trx->created_user     = $v['user_id'];
       $potongan_trx->updated_at       = $t_stamp;
       $potongan_trx->updated_user     = $v['user_id'];
+      $potongan_trx->val              = 1;
+      $potongan_trx->val_user         = $v['user_id'];
+      $potongan_trx->val_at           = $t_stamp;
 
       if($v["_source"]=='TRX_TRP' && isset($v['trx_trp_id']))
       $potongan_trx->trx_trp_id       = $v['trx_trp_id'];

@@ -41,4 +41,14 @@ class PotonganTrx extends Model
     // {
     //     return $this->hasOne(\App\Models\IsUser::class, 'id_user', "confirmed_by");
     // }
+
+    public function val_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val_user");
+    }
+
+    public function val1_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val1_user");
+    }
 }

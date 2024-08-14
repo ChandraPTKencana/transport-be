@@ -122,7 +122,7 @@
             </td>
             <td style="font-weight: bold;">Rp. </td>
             <td style="font-weight: bold; text-align: right;">
-              {{ number_format($ttl_ps, 0,',','.') }}
+              -{{ number_format($ttl_ps, 0,',','.') }}
             </td>
           </tr>
           @endif
@@ -134,7 +134,7 @@
             </td>
             <td style="font-weight: bold;">Rp. </td>
             <td style="font-weight: bold; text-align: right;">
-              {{ number_format($ttl_pk, 0,',','.') }}
+              -{{ number_format($ttl_pk, 0,',','.') }}
             </td>
           </tr>
           @endif
@@ -146,7 +146,7 @@
             </td>
             <td style="font-weight: bold;">Rp. </td>
             <td style="font-weight: bold; text-align: right;">
-              {{ number_format( $ttl_ps + $ttl_pk, 0,',','.') }}
+              -{{ number_format( $ttl_ps + $ttl_pk, 0,',','.') }}
             </td>
           </tr>
           @endif

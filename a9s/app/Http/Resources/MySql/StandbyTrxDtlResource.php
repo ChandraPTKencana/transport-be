@@ -17,9 +17,11 @@ class StandbyTrxDtlResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'ordinal'           => $this->ordinal,
-            'tanggal'           => $this->tanggal,
-            'note'              => $this->note ?? "",
+            'ordinal'               => $this->ordinal,
+            'tanggal'               => $this->tanggal,
+            'note'                  => $this->note ?? "",
+            'attachment_1'          => null,
+            'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
         ];
     }
 }

@@ -162,6 +162,7 @@ Route::post('/potongan_mst', [\App\Http\Controllers\Potongan\PotonganMstControll
 Route::put('/potongan_mst', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'update']);
 Route::delete('/potongan_mst', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'delete']);
 Route::get('/potongan_mst_load_local', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'loadLocal']);
+Route::put('/potongan_mst_validasi', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'validasi']);
 
 Route::get('/potongan_trxs', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'index']);
 Route::get('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'show']);
@@ -169,6 +170,7 @@ Route::post('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxControll
 Route::put('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'update']);
 Route::delete('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'delete']);
 Route::post('/potongan_trx_recalculate', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'recalculate']);
+Route::put('/potongan_trx_validasi', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'validasi']);
 
 Route::get('/salary_paids', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'index']);
 Route::get('/salary_paid', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'show']);
@@ -215,7 +217,7 @@ Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);
 Route::get('/trx_trp/transfers', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'index']);
 Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransfer']);
 Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'show']);
-
+Route::get('/trx_trp_preview_file_bt', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFileBT']);
 
 Route::get('/ga_qr', [\App\Http\Controllers\GAController::class, 'qr']);
 Route::post('/ga_pin', [\App\Http\Controllers\GAController::class, 'pin']);

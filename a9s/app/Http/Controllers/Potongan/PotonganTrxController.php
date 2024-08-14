@@ -183,7 +183,7 @@ class PotonganTrxController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'potongan_trx.view');
     
-    $model_query = PotonganTrx::find($request->id);
+    $model_query = PotonganTrx::with(['val_by','val1_by'])->find($request->id);
     return response()->json([
       "data" => new PotonganTrxResource($model_query),
     ], 200);
@@ -442,7 +442,7 @@ class PotonganTrxController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkScope($this->permissions, 'potongan_trx.val');
+    MyAdmin::checkMultiScope($this->permissions, ['potongan_trx.val','potongan_trx.val1']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\PotonganTrx,id",
@@ -463,14 +463,20 @@ class PotonganTrxController extends Controller
     DB::beginTransaction();
     try {
       $model_query = PotonganTrx::lockForUpdate()->find($request->id);
-      if($model_query->val){
-        throw new \Exception("Data Sudah Tervalidasi",1);
+      if($model_query->val && $model_query->val1){
+        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
       
-      if(!$model_query->val){
+      if(MyAdmin::checkScope($this->permissions, 'potongan_trx.val',true) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'potongan_trx.val1',true) && !$model_query->val1){
+        $model_query->val1 = 1;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
       }
 
       $model_query->save();
@@ -484,6 +490,10 @@ class PotonganTrxController extends Controller
         "val_user"=>$model_query->val_user,
         "val_at"=>$model_query->val_at,
         "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

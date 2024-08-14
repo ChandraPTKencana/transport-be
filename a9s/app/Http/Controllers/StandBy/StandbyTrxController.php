@@ -272,7 +272,10 @@ class StandbyTrxController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','details'])
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','details'=>function($q) {
+      $q->orderBy("tanggal","asc");
+      $q->select("id", "tanggal","standby_trx_id");
+    }])
     ->withCount('details')->get();
 
     return response()->json([
@@ -284,7 +287,9 @@ class StandbyTrxController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'standby_trx.view');
 
-    $model_query = StandbyTrx::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','details','standby_mst'])->find($request->id);
+    $model_query = StandbyTrx::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','details'=>function($q){
+      $q->orderby("ordinal","asc");      
+    },'standby_mst'])->find($request->id);
     return response()->json([
       "data" => new StandbyTrxResource($model_query),
     ], 200);
@@ -431,11 +436,43 @@ class StandbyTrxController extends Controller
       $rollback_id = $model_query->id - 1;
 
       $ordinal=0;
+      
+      $blobFiles = [];
+      $fileTypes = [];
+      $attachments =$request->all()['attachments'];
+      foreach ($attachments as $key => $attachment) {
+        $blobFile=null;
+        $fileType=null;
+        
+        if($attachment instanceof \Illuminate\Http\UploadedFile){
+          
+          $path     = $attachment->getRealPath();
+          $fileType = $attachment->getClientMimeType();
+          $fileSize = $attachment->getSize();
+
+          if($fileSize > 2048000)
+          throw new Exception("Baris #" . ($key + 1) . ".Size File max 2048 kb", 1);
+
+          if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+          throw new Exception("Baris #" . ($key + 1) . ".Tipe File Harus berupa jpg,jpeg, atau png", 1);
+
+          $blobFile = base64_encode(file_get_contents($path));
+        }
+
+        $blobFiles[$key]=$blobFile;
+        $fileTypes[$key]=$fileType;
+
+        // $filename = $attachment->getClientOriginalName();
+        // $attachment->storeAs('attachments', $filename);
+      }
+
       foreach ($details_in as $key => $value) {
         $ordinal                    = $key + 1;
         $detail                     = new StandbyTrxDtl();
         $detail->standby_trx_id     = $model_query->id;
         $detail->ordinal            = $ordinal;
+        $detail->attachment_1       = $blobFiles[$key];
+        $detail->attachment_1_type  = $fileTypes[$key];
 
         $detail->tanggal            = $value['tanggal'];
         $detail->note               = $value['note'];
@@ -462,11 +499,11 @@ class StandbyTrxController extends Controller
       if($rollback_id>-1)
       DB::statement("ALTER TABLE standby_trx AUTO_INCREMENT = $rollback_id");
 
-      return response()->json([
-        "message" => $e->getMessage(),
-        "code" => $e->getCode(),
-        "line" => $e->getLine(),
-      ], 400);
+      // return response()->json([
+      //   "message" => $e->getMessage(),
+      //   "code" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      // ], 400);
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
@@ -603,6 +640,35 @@ class StandbyTrxController extends Controller
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
       
+      $blobFiles = [];
+      $fileTypes = [];
+      $attachments =$request->all()['attachments'];
+      foreach ($attachments as $key => $attachment) {
+        $blobFile=null;
+        $fileType=null;
+        
+        if($attachment instanceof \Illuminate\Http\UploadedFile){
+          
+          $path     = $attachment->getRealPath();
+          $fileType = $attachment->getClientMimeType();
+          $fileSize = $attachment->getSize();
+
+          if($fileSize > 2048000)
+          throw new Exception("Baris #" . ($key + 1) . ".Size File max 2048 kb", 1);
+
+          if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+          throw new Exception("Baris #" . ($key + 1) . ".Tipe File Harus berupa jpg,jpeg, atau png", 1);
+
+          $blobFile = base64_encode(file_get_contents($path));
+        }
+
+        $blobFiles[$key]=$blobFile;
+        $fileTypes[$key]=$fileType;
+
+        // $filename = $attachment->getClientOriginalName();
+        // $attachment->storeAs('attachments', $filename);
+      }
+
       if($model_query->val==0){
         //start for details2
         $data_from_db = StandbyTrxDtl::where('standby_trx_id', $model_query->id)
@@ -695,13 +761,30 @@ class StandbyTrxController extends Controller
 
               $mqToCom = clone($mq);
               
-              $mq->ordinal         = $v["ordinal"];
-              $mq->tanggal         = $v["tanggal"];
-              $mq->note            = $v["note"];
-              $mq->p_change        = true;
-              $mq->updated_at      = $t_stamp;
-              $mq->updated_user    = $this->admin_id;
+              $change=0;
+              if($blobFiles[$v["ordinal"]-1]){
+                $change++;
+              }else if($v["attachment_1_preview"]== null){
+                $change++;
+              }
+
+              $mq->ordinal            = $v["ordinal"];
+              $mq->tanggal            = $v["tanggal"];
+              $mq->note               = $v["note"];
+
+              if($change)
+              $mq->attachment_1_type  = $fileTypes[$v["ordinal"]-1];
+
+              $mq->p_change           = true;
+              $mq->updated_at         = $t_stamp;
+              $mq->updated_user       = $this->admin_id;
               $mq->save();
+
+              if($change){
+                StandbyTrxDtl::where("id",$mq->id)->update([
+                  "attachment_1"      => $blobFiles[$v["ordinal"]-1]
+                ]);
+              }
 
               $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
               array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
@@ -720,15 +803,17 @@ class StandbyTrxController extends Controller
             array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
 
             StandbyTrxDtl::insert([
-                'standby_trx_id'  => $model_query->id,
-                'ordinal'         => $v["ordinal"],
-                "tanggal"         => $v["tanggal"],
-                "note"            => $v["note"],
-                "p_change"        => true,
-                'created_at'      => $t_stamp,
-                'created_user'    => $this->admin_id,
-                'updated_at'      => $t_stamp,
-                'updated_user'    => $this->admin_id,
+                'standby_trx_id'    => $model_query->id,
+                'ordinal'           => $v["ordinal"],
+                "tanggal"           => $v["tanggal"],
+                "note"              => $v["note"],
+                "attachment_1"      => $blobFiles[$v["ordinal"]-1],
+                "attachment_1_type" => $fileTypes[$v["ordinal"]-1],
+                "p_change"          => true,
+                'created_at'        => $t_stamp,
+                'created_user'      => $this->admin_id,
+                'updated_at'        => $t_stamp,
+                'updated_user'      => $this->admin_id,
             ]);
           }
         }

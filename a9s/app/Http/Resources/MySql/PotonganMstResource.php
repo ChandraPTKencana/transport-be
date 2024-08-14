@@ -43,6 +43,13 @@ class PotonganMstResource extends JsonResource
             'val1_at'       => $this->val1_at ?? "",
             
             'trxs'          => PotonganTrxResource::collection($this->whenLoaded('trxs')),
+
+            'attachment_1'          => "",
+            'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+
+            'attachment_2'          => "",
+            'attachment_2_preview'  => $this->attachment_2 ? "data:".$this->attachment_2_type.";base64,".$this->attachment_2 : "",
+
         ];
     }
 }

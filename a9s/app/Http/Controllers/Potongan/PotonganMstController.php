@@ -200,7 +200,8 @@ class PotonganMstController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'potongan_mst.view');
     
-    $model_query = PotonganMst::with('employee')->find($request->id);
+    $model_query = PotonganMst::with(['val_by','val1_by','employee'])
+    ->find($request->id);
     return response()->json([
       "data" => new PotonganMstResource($model_query),
     ], 200);
@@ -214,6 +215,25 @@ class PotonganMstController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     try {
       $model_query                = new PotonganMst();
+
+      if($request->hasFile('attachment_1')){
+        $file = $request->file('attachment_1');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $blobFile = base64_encode(file_get_contents($path));
+        $model_query->attachment_1 = $blobFile;
+        $model_query->attachment_1_type = $fileType;
+      }
+
+      if($request->hasFile('attachment_2')){
+        $file = $request->file('attachment_2');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $blobFile = base64_encode(file_get_contents($path));
+        $model_query->attachment_2 = $blobFile;
+        $model_query->attachment_2_type = $fileType;
+      }
+
       $model_query->kejadian      = $request->kejadian;
       $model_query->employee_id   = $request->employee_id;
       $model_query->no_pol        = $request->no_pol;
@@ -262,6 +282,14 @@ class PotonganMstController extends Controller
     MyAdmin::checkScope($this->permissions, 'potongan_mst.modify');
 
     $t_stamp = date("Y-m-d H:i:s");
+    $attachment_1_preview = $request->attachment_1_preview;
+    $attachment_2_preview = $request->attachment_2_preview;
+    $fileType_1 = null;
+    $fileType_2 = null;
+    $blobFile_1 = null;
+    $blobFile_2 = null;
+    $change_1 = 0;
+    $change_2 = 0;
     DB::beginTransaction();
     try {
       
@@ -276,6 +304,9 @@ class PotonganMstController extends Controller
 
       $SYSOLD                     = clone($model_query);
 
+      $fileType_1     = $model_query->attachment_1_type;
+      $fileType_2     = $model_query->attachment_2_type;
+      
       $model_query->kejadian      = $request->kejadian;
       $model_query->employee_id   = $request->employee_id;
       $model_query->no_pol        = $request->no_pol;
@@ -295,7 +326,52 @@ class PotonganMstController extends Controller
       if($model_query->remaining_cut < 0)
       throw new \Exception("Nominal yang sudah terpotong Melebihi Nominal yang ada",1);
       
+      if($request->hasFile('attachment_1')){
+        $file = $request->file('attachment_1');
+        $path = $file->getRealPath();
+        $fileType_1 = $file->getClientMimeType();
+        $blobFile_1 = base64_encode(file_get_contents($path));
+        $change_1++;
+      }
+
+      if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
+        $fileType_1 = null;
+        $blobFile_1 = null;
+        $change_1++;
+      }
+
+      if($request->hasFile('attachment_2')){
+        $file = $request->file('attachment_2');
+        $path = $file->getRealPath();
+        $fileType_2 = $file->getClientMimeType();
+        $blobFile_2 = base64_encode(file_get_contents($path));
+        $change_2++;
+      }
+
+      if (!$request->hasFile('attachment_2') && $attachment_2_preview == null) {
+        $fileType_2 = null;
+        $blobFile_2 = null;
+        $change_2++;
+      }
+
+      $model_query->attachment_1_type = $fileType_1;
+      $model_query->attachment_2_type = $fileType_2;
+
       $model_query->save();
+
+      $update=[];
+
+      if($change_1){
+        $update["attachment_1"] = $blobFile_1;
+      }
+
+      if($change_2){
+        $update["attachment_2"] = $blobFile_2;
+      }
+
+      if($change_1 || $change_2){
+        PotonganMst::where("id",$request->id)->update($update);
+      }
       
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys($this->syslog_db,$request->id,"update",$SYSNOTE);
@@ -386,7 +462,7 @@ class PotonganMstController extends Controller
 
 
   public function validasi(Request $request){
-    MyAdmin::checkScope($this->permissions, 'potongan_mst.val');
+    MyAdmin::checkMultiScope($this->permissions, ['potongan_mst.val','potongan_mst.val1']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\PotonganMst,id",
@@ -407,14 +483,20 @@ class PotonganMstController extends Controller
     DB::beginTransaction();
     try {
       $model_query = PotonganMst::lockForUpdate()->find($request->id);
-      if($model_query->val){
-        throw new \Exception("Data Sudah Tervalidasi",1);
+      if($model_query->val && $model_query->val1){
+        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
       
-      if(!$model_query->val){
+      if(MyAdmin::checkScope($this->permissions, 'potongan_mst.val',true) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'potongan_mst.val1',true) && !$model_query->val1){
+        $model_query->val1 = 1;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
       }
 
       $model_query->save();
@@ -428,6 +510,10 @@ class PotonganMstController extends Controller
         "val_user"=>$model_query->val_user,
         "val_at"=>$model_query->val_at,
         "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

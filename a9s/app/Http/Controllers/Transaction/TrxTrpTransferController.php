@@ -402,6 +402,12 @@ class TrxTrpTransferController extends Controller
         throw new \Exception("Pembayaran sudah selesai",1);
       }
 
+
+      $supir_id   = $model_query->supir_id;
+      $kernet_id  = $model_query->kernet_id;
+      $ttl_ps     = 0;
+      $ttl_pk     = 0;
+
       $supir_money = 0;
       $kernet_money = 0;
       foreach ($model_query->uj_details2 as $key => $val) {
@@ -411,6 +417,23 @@ class TrxTrpTransferController extends Controller
           $supir_money+=$val->amount*$val->qty;
         }
       }
+
+      $ptg_ps_ids = "";
+      $ptg_pk_ids = "";
+      foreach ($model_query->potongan as $k => $v) {
+        if($v->potongan_mst->employee_id == $supir_id){
+          $ttl_ps+=$v->nominal_cut;
+          $ptg_ps_ids.="#".$v->potongan_mst->id." ";
+        }
+  
+        if($v->potongan_mst->employee_id == $kernet_id){
+          $ttl_pk+=$v->nominal_cut;
+          $ptg_pk_ids.="#".$v->potongan_mst->id." ";
+        }
+      }
+      
+      $supir_money -= $ttl_ps;
+      $kernet_money -= $ttl_pk;
 
       if($model_query->supir_id){
         $supir = Employee::with('bank')->find($model_query->supir_id);
@@ -480,7 +503,7 @@ class TrxTrpTransferController extends Controller
       if($model_query->duitku_supir_trf_res_code=="00" & $model_query->duitku_kernet_trf_res_code=="00"){
         $model_query->received_payment=1;
 
-        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && !$model_query->val5){
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true)){
           $model_query->val5 = 1;
           $model_query->val5_user = $this->admin_id;
           $model_query->val5_at = $t_stamp;
