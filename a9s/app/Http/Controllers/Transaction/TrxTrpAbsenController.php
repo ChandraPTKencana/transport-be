@@ -236,7 +236,7 @@ class TrxTrpAbsenController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['ritase_val_by','ritase_val1_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual');
     }])->get();
 
@@ -249,7 +249,7 @@ class TrxTrpAbsenController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.view']);
 
-    $model_query = TrxTrp::with(['ritase_val_by','ritase_val1_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
+    $model_query = TrxTrp::with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar");
     }])->find($request->id);
 
@@ -311,6 +311,11 @@ class TrxTrpAbsenController extends Controller
       'ritase_val1_user'  => $model_query->ritase_val1_user ?? "",
       'ritase_val1_by'    => $model_query->ritase_val1_by ? new IsUserResource($model_query->ritase_val1_by) : "",
       'ritase_val1_at'    => $model_query->ritase_val1_at ?? "",
+
+      'ritase_val2'       => $model_query->ritase_val2,
+      'ritase_val2_user'  => $model_query->ritase_val2_user ?? "",
+      'ritase_val2_by'    => $model_query->ritase_val2_by ? new IsUserResource($model_query->ritase_val2_by) : "",
+      'ritase_val2_at'    => $model_query->ritase_val2_at ?? "",
 
       "img_leave_ts"      => $model_query->ritase_leave_at,
       "img_arrive_ts"     => $model_query->ritase_arrive_at,
@@ -560,7 +565,7 @@ class TrxTrpAbsenController extends Controller
 
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.val','trp_trx.absen.val1']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.val','trp_trx.absen.val1','trp_trx.absen.val2']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -581,7 +586,7 @@ class TrxTrpAbsenController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->ritase_val && $model_query->ritase_val1){
+      if($model_query->ritase_val && $model_query->ritase_val1 && $model_query->ritase_val2){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
@@ -594,6 +599,12 @@ class TrxTrpAbsenController extends Controller
         $model_query->ritase_val1 = 1;
         $model_query->ritase_val1_user = $this->admin_id;
         $model_query->ritase_val1_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val2',true) && !$model_query->ritase_val2){
+        $model_query->ritase_val2 = 1;
+        $model_query->ritase_val2_user = $this->admin_id;
+        $model_query->ritase_val2_at = $t_stamp;
       }
       
       $model_query->save();
@@ -611,6 +622,10 @@ class TrxTrpAbsenController extends Controller
         "ritase_val1_user"=> $model_query->ritase_val1_user,
         "ritase_val1_at"  => $model_query->ritase_val1_at,
         "ritase_val1_by"  => $model_query->ritase_val1_user ? new IsUserResource(IsUser::find($model_query->ritase_val1_user)) : null,
+        "ritase_val2"     => $model_query->ritase_val2,
+        "ritase_val2_user"=> $model_query->ritase_val2_user,
+        "ritase_val2_at"  => $model_query->ritase_val2_at,
+        "ritase_val2_by"  => $model_query->ritase_val2_user ? new IsUserResource(IsUser::find($model_query->ritase_val2_user)) : null,
         ], 200);
     } catch (\Exception $e) {
       DB::rollback();

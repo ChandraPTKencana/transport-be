@@ -28,6 +28,11 @@ class PermissionGroupUser extends Model
         return $this->belongsTo(IsUser::class, "user_id", 'id');
     }
 
+    public function permission_group()
+    {
+        return $this->belongsTo(PermissionGroup::class, "permission_group_id", 'id');
+    }
+
     // public function details()
     // {
     //     return $this->hasMany(FinPaymentReqDtl::class, 'fin_payment_req_id', 'id');

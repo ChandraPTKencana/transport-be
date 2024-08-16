@@ -60,7 +60,7 @@ class TrxTrpResource extends JsonResource
             'kernet_rek_no'     => $this->kernet_rek_no ?? "",
             'kernet_rek_name'   => $this->kernet_rek_name ?? "",
             'no_pol'            => $this->no_pol,
-            'ticket_note'       => $this->ticket_note,
+            'ticket_note'       => $this->ticket_note ?? "",
 
             'val'               => $this->val,
             'val_user'          => $this->val_user ?? "",
@@ -141,6 +141,10 @@ class TrxTrpResource extends JsonResource
             'ritase_val1_by'    => new IsUserResource($this->whenLoaded('ritase_val1_by')),
             'ritase_val1_at'    => $this->ritase_val1_at ?? "",
 
+            'ritase_val2'       => $this->ritase_val2,
+            'ritase_val2_user'  => $this->ritase_val2_user ?? "",
+            'ritase_val2_by'    => new IsUserResource($this->whenLoaded('ritase_val2_by')),
+            'ritase_val2_at'    => $this->ritase_val2_at ?? "",
 
             'details_uj'        => UjalanDetailResource::collection($this->whenLoaded('uj_details')),
             'potongan'          => PotonganTrxResource::collection($this->whenLoaded('potongan')),

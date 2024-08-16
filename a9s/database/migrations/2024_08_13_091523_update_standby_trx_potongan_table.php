@@ -27,6 +27,12 @@ return new class extends Migration
             $table->string("attachment_2_type",255)->nullable();
         });
 
+        Schema::table('trx_trp', function (Blueprint $table) {
+            $table->boolean('ritase_val2')->default(0);
+            $table->foreignId('ritase_val2_user')->nullable()->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
+            $table->timestamp('ritase_val2_at')->nullable(); 
+        });
+
     }
 
     /**
@@ -47,6 +53,13 @@ return new class extends Migration
             $table->dropColumn('attachment_2');
             $table->dropColumn('attachment_2_type');
 
+        });
+
+        Schema::table('trx_trp', function (Blueprint $table) {
+            $table->dropForeign(["ritase_val2_user"]);
+            $table->dropColumn('ritase_val2');
+            $table->dropColumn('ritase_val2_user');
+            $table->dropColumn('ritase_val2_at');
         });
     }
 };

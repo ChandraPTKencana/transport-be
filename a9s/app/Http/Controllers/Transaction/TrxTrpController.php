@@ -430,9 +430,9 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->cost_center_code==""){
-        throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
-      }
+      // if($model_query->cost_center_code==""){
+      //   throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
+      // }
 
       if($model_query->val==0){
         throw new \Exception("Data Perlu Divalidasi oleh kasir terlebih dahulu",1);
@@ -534,19 +534,19 @@ class TrxTrpController extends Controller
         $model_query->transition_type   = "From";
       }
       
-      if($online_status=="true"){
-        if($request->cost_center_code){
-          $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-          ->select('CostCenter','Description')
-          ->where('CostCenter',$request->cost_center_code)
-          ->first();
-          if(!$list_cost_center)
-          throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+      // if($online_status=="true"){
+      //   if($request->cost_center_code){
+      //     $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+      //     ->select('CostCenter','Description')
+      //     ->where('CostCenter',$request->cost_center_code)
+      //     ->first();
+      //     if(!$list_cost_center)
+      //     throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
         
-          $model_query->cost_center_code = $list_cost_center->CostCenter;
-          $model_query->cost_center_desc = $list_cost_center->Description;
-        }
-      }
+      //     $model_query->cost_center_code = $list_cost_center->CostCenter;
+      //     $model_query->cost_center_desc = $list_cost_center->Description;
+      //   }
+      // }
 
       $model_query->supir_id          = $supir_dt->id;
       $model_query->supir             = $supir_dt->name;
@@ -722,27 +722,27 @@ class TrxTrpController extends Controller
         $model_query->no_pol            = $request->no_pol;
       }
       
-      if($online_status=="true"){
-        if($model_query->pvr_id==null){
-          if($request->cost_center_code){  
-            $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-            ->select('CostCenter','Description')
-            ->where('CostCenter',$request->cost_center_code)
-            ->first();
-            if(!$list_cost_center)
-            throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+      // if($online_status=="true"){
+      //   if($model_query->pvr_id==null){
+      //     if($request->cost_center_code){  
+      //       $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+      //       ->select('CostCenter','Description')
+      //       ->where('CostCenter',$request->cost_center_code)
+      //       ->first();
+      //       if(!$list_cost_center)
+      //       throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
           
-            $model_query->cost_center_code = $list_cost_center->CostCenter;
-            $model_query->cost_center_desc = $list_cost_center->Description;
-          }else{
-            $model_query->cost_center_code = null;
-            $model_query->cost_center_desc = null;
-          } 
-        }
-      }else{
-        if($request->cost_center_code)
-        throw new \Exception("Pengisian cost center harus dalam mode online", 1);
-      }
+      //       $model_query->cost_center_code = $list_cost_center->CostCenter;
+      //       $model_query->cost_center_desc = $list_cost_center->Description;
+      //     }else{
+      //       $model_query->cost_center_code = null;
+      //       $model_query->cost_center_desc = null;
+      //     } 
+      //   }
+      // }else{
+      //   if($request->cost_center_code)
+      //   throw new \Exception("Pengisian cost center harus dalam mode online", 1);
+      // }
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
@@ -752,7 +752,7 @@ class TrxTrpController extends Controller
 
 
 
-      if(isset($prev_supir_id) && ($prev_supir_id == null || $prev_supir_id == 1 ) && $supir_dt->id!=1 && $supir_dt->potongan){
+      if(($prev_supir_id == null || $prev_supir_id == 1 ) && $supir_dt->id!=1 && $supir_dt->potongan){
         array_push($ptg_trx_dt,[
           "_source"     => "TRX_TRP",
           "employee_id" => $supir_dt->id,
@@ -761,7 +761,7 @@ class TrxTrpController extends Controller
         ]);
       }
 
-      if(isset($prev_kernet_id) && ($prev_kernet_id == null || $prev_kernet_id == 1) && isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
+      if(($prev_kernet_id == null || $prev_kernet_id == 1) && isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
         array_push($ptg_trx_dt,[
           "_source"     => "TRX_TRP",
           "employee_id" => $kernet_dt->id,
@@ -802,162 +802,157 @@ class TrxTrpController extends Controller
     }
   }
 
-  public function updateTicket(TrxTrpTicketRequest $request)
-  {
-    MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.modify');
+  // public function updateTicket(TrxTrpTicketRequest $request)
+  // {
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.modify');
     
-    $t_stamp = date("Y-m-d H:i:s");
-    $online_status=$request->online_status;
+  //   $t_stamp = date("Y-m-d H:i:s");
 
-    $transition_target = $request->transition_target;
-    if($transition_target==env("app_name") || !in_array($transition_target,MyLib::$list_pabrik)){
-      $transition_target="";
-    }
+  //   $transition_target = $request->transition_target;
+  //   if($transition_target==env("app_name") || !in_array($transition_target,MyLib::$list_pabrik)){
+  //     $transition_target="";
+  //   }
 
-    DB::beginTransaction();
-    try {
-      $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
-      $SYSOLD                  = clone($model_query);
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_query             = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
+  //     $SYSOLD                  = clone($model_query);
       
-      if($model_query->val_ticket==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
+  //     if($model_query->val_ticket==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
+  //     throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
 
-      
-      if($online_status=="true"){
-        if($request->ticket_a_id){
+  //     if($request->ticket_a_id){
 
-          $get_data_ticket = $this->getTicketA("sqlsrv",$request);
+  //       $get_data_ticket = $this->getTicketA("sqlsrv",$request);
 
-          if(!$get_data_ticket && $transition_target!="") 
-          $get_data_ticket = $this->getTicketA($transition_target,$request);            
-          
-          if(!$get_data_ticket) 
-          throw new \Exception("Data Ticket tidak terdaftar",1);
+  //       if(!$get_data_ticket && $transition_target!="") 
+  //       $get_data_ticket = $this->getTicketA($transition_target,$request);            
+        
+  //       if(!$get_data_ticket) 
+  //       throw new \Exception("Data Ticket tidak terdaftar",1);
 
-          if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)
-          ->where("ticket_a_no",$get_data_ticket->TicketNo)
-          ->where("id","!=",$model_query->id)->first())
-          throw new \Exception("Data Ticket telah digunakan",1);
+  //       if(\App\Models\MySql\TrxTrp::where("ticket_a_id",$get_data_ticket->TicketID)
+  //       ->where("ticket_a_no",$get_data_ticket->TicketNo)
+  //       ->where("id","!=",$model_query->id)->first())
+  //       throw new \Exception("Data Ticket telah digunakan",1);
 
-          $model_query->ticket_a_id         = $request->ticket_a_id;
-          $model_query->ticket_a_no         = $get_data_ticket->TicketNo;
-          $model_query->ticket_a_bruto      = $get_data_ticket->Bruto;
-          $model_query->ticket_a_tara       = $get_data_ticket->Tara;
-          $model_query->ticket_a_netto      = $get_data_ticket->Bruto - $get_data_ticket->Tara;
-          $model_query->ticket_a_ori_bruto  = $get_data_ticket->OriginalBruto;
-          $model_query->ticket_a_ori_tara   = $get_data_ticket->OriginalTara;
-          $model_query->ticket_a_ori_netto  = $get_data_ticket->OriginalBruto - $get_data_ticket->OriginalTara;
-          $model_query->ticket_a_supir      = $get_data_ticket->NamaSupir;
-          $model_query->ticket_a_no_pol     = $get_data_ticket->VehicleNo;
-          $model_query->ticket_a_in_at      = $get_data_ticket->DateTimeIn;
-          $model_query->ticket_a_out_at     = $get_data_ticket->DateTimeOut;       
-        }else{
-          $model_query->ticket_a_id         = null;
-          $model_query->ticket_a_no         = null;
-          $model_query->ticket_a_bruto      = null;
-          $model_query->ticket_a_tara       = null;
-          $model_query->ticket_a_netto      = null;
-          $model_query->ticket_a_ori_bruto  = null;
-          $model_query->ticket_a_ori_tara   = null;
-          $model_query->ticket_a_ori_netto  = null;
-          $model_query->ticket_a_supir      = null;
-          $model_query->ticket_a_no_pol     = null;
-          $model_query->ticket_a_in_at      = null;
-          $model_query->ticket_a_out_at     = null;
-        }
+  //       $model_query->ticket_a_id         = $request->ticket_a_id;
+  //       $model_query->ticket_a_no         = $get_data_ticket->TicketNo;
+  //       $model_query->ticket_a_bruto      = $get_data_ticket->Bruto;
+  //       $model_query->ticket_a_tara       = $get_data_ticket->Tara;
+  //       $model_query->ticket_a_netto      = $get_data_ticket->Bruto - $get_data_ticket->Tara;
+  //       $model_query->ticket_a_ori_bruto  = $get_data_ticket->OriginalBruto;
+  //       $model_query->ticket_a_ori_tara   = $get_data_ticket->OriginalTara;
+  //       $model_query->ticket_a_ori_netto  = $get_data_ticket->OriginalBruto - $get_data_ticket->OriginalTara;
+  //       $model_query->ticket_a_supir      = $get_data_ticket->NamaSupir;
+  //       $model_query->ticket_a_no_pol     = $get_data_ticket->VehicleNo;
+  //       $model_query->ticket_a_in_at      = $get_data_ticket->DateTimeIn;
+  //       $model_query->ticket_a_out_at     = $get_data_ticket->DateTimeOut;       
+  //     }else{
+  //       $model_query->ticket_a_id         = null;
+  //       $model_query->ticket_a_no         = null;
+  //       $model_query->ticket_a_bruto      = null;
+  //       $model_query->ticket_a_tara       = null;
+  //       $model_query->ticket_a_netto      = null;
+  //       $model_query->ticket_a_ori_bruto  = null;
+  //       $model_query->ticket_a_ori_tara   = null;
+  //       $model_query->ticket_a_ori_netto  = null;
+  //       $model_query->ticket_a_supir      = null;
+  //       $model_query->ticket_a_no_pol     = null;
+  //       $model_query->ticket_a_in_at      = null;
+  //       $model_query->ticket_a_out_at     = null;
+  //     }
 
-        if($request->ticket_b_id){
+  //     if($request->ticket_b_id){
 
-          $get_data_ticket = $this->getTicketB('sqlsrv',$request);
+  //       $get_data_ticket = $this->getTicketB('sqlsrv',$request);
 
-          if(!$get_data_ticket && $transition_target!="")
-          $get_data_ticket = $this->getTicketB($transition_target,$request);
+  //       if(!$get_data_ticket && $transition_target!="")
+  //       $get_data_ticket = $this->getTicketB($transition_target,$request);
 
-          if(!$get_data_ticket) 
-          throw new \Exception("Data Ticket tidak terdaftar",1);
+  //       if(!$get_data_ticket) 
+  //       throw new \Exception("Data Ticket tidak terdaftar",1);
 
-          if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)
-          ->where("ticket_b_no",$get_data_ticket->TicketNo)
-          ->where("id","!=",$model_query->id)->first())
-          throw new \Exception("Data Ticket telah digunakan",1);
+  //       if(\App\Models\MySql\TrxTrp::where("ticket_b_id",$get_data_ticket->TicketID)
+  //       ->where("ticket_b_no",$get_data_ticket->TicketNo)
+  //       ->where("id","!=",$model_query->id)->first())
+  //       throw new \Exception("Data Ticket telah digunakan",1);
 
-          $model_query->ticket_b_id         = $request->ticket_b_id;
-          $model_query->ticket_b_no         = $get_data_ticket->TicketNo;
-          $model_query->ticket_b_bruto      = $get_data_ticket->Bruto;
-          $model_query->ticket_b_tara       = $get_data_ticket->Tara;
-          $model_query->ticket_b_netto      = $get_data_ticket->Bruto - $get_data_ticket->Tara;
-          $model_query->ticket_b_ori_bruto  = $get_data_ticket->OriginalBruto;
-          $model_query->ticket_b_ori_tara   = $get_data_ticket->OriginalTara;
-          $model_query->ticket_b_ori_netto  = $get_data_ticket->OriginalBruto - $get_data_ticket->OriginalTara;
-          $model_query->ticket_b_supir      = $get_data_ticket->NamaSupir;
-          $model_query->ticket_b_no_pol     = $get_data_ticket->VehicleNo;
-          $model_query->ticket_b_in_at      = $get_data_ticket->DateTimeIn;
-          $model_query->ticket_b_out_at     = $get_data_ticket->DateTimeOut;
-        }else{
-          $model_query->ticket_b_id         = null;
-          $model_query->ticket_b_no         = null;
-          $model_query->ticket_b_bruto      = MyLib::emptyStrToNull($request->ticket_b_bruto);
-          $model_query->ticket_b_tara       = MyLib::emptyStrToNull($request->ticket_b_tara);
-          $model_query->ticket_b_netto      = MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
-          $model_query->ticket_b_ori_bruto  = null;
-          $model_query->ticket_b_ori_tara   = null;
-          $model_query->ticket_b_ori_netto  = null;
-          $model_query->ticket_b_supir      = null;
-          $model_query->ticket_b_no_pol     = null;
-          $model_query->ticket_b_in_at      = MyLib::emptyStrToNull($request->ticket_b_in_at);
-          $model_query->ticket_b_out_at     = MyLib::emptyStrToNull($request->ticket_b_out_at);
-        }
+  //       $model_query->ticket_b_id         = $request->ticket_b_id;
+  //       $model_query->ticket_b_no         = $get_data_ticket->TicketNo;
+  //       $model_query->ticket_b_bruto      = $get_data_ticket->Bruto;
+  //       $model_query->ticket_b_tara       = $get_data_ticket->Tara;
+  //       $model_query->ticket_b_netto      = $get_data_ticket->Bruto - $get_data_ticket->Tara;
+  //       $model_query->ticket_b_ori_bruto  = $get_data_ticket->OriginalBruto;
+  //       $model_query->ticket_b_ori_tara   = $get_data_ticket->OriginalTara;
+  //       $model_query->ticket_b_ori_netto  = $get_data_ticket->OriginalBruto - $get_data_ticket->OriginalTara;
+  //       $model_query->ticket_b_supir      = $get_data_ticket->NamaSupir;
+  //       $model_query->ticket_b_no_pol     = $get_data_ticket->VehicleNo;
+  //       $model_query->ticket_b_in_at      = $get_data_ticket->DateTimeIn;
+  //       $model_query->ticket_b_out_at     = $get_data_ticket->DateTimeOut;
+  //     }else{
+  //       $model_query->ticket_b_id         = null;
+  //       $model_query->ticket_b_no         = null;
+  //       $model_query->ticket_b_bruto      = MyLib::emptyStrToNull($request->ticket_b_bruto);
+  //       $model_query->ticket_b_tara       = MyLib::emptyStrToNull($request->ticket_b_tara);
+  //       $model_query->ticket_b_netto      = MyLib::emptyStrToNull($request->ticket_b_bruto - $request->ticket_b_tara);
+  //       $model_query->ticket_b_ori_bruto  = null;
+  //       $model_query->ticket_b_ori_tara   = null;
+  //       $model_query->ticket_b_ori_netto  = null;
+  //       $model_query->ticket_b_supir      = null;
+  //       $model_query->ticket_b_no_pol     = null;
+  //       $model_query->ticket_b_in_at      = MyLib::emptyStrToNull($request->ticket_b_in_at);
+  //       $model_query->ticket_b_out_at     = MyLib::emptyStrToNull($request->ticket_b_out_at);
+  //     }
 
-      }
+  //     if($request->transition_target){
+  //       if($model_query->transition_type=="From" && $model_query->transition_target !== $request->transition_target){
+  //         throw new \Exception("Peralihan Sudah Terkunci",1);
+  //       }else if($model_query->transition_type=="From" && $model_query->transition_target == $request->transition_target){
 
-      if($request->transition_target){
-        if($model_query->transition_type=="From" && $model_query->transition_target !== $request->transition_target){
-          throw new \Exception("Peralihan Sudah Terkunci",1);
-        }else if($model_query->transition_type=="From" && $model_query->transition_target == $request->transition_target){
+  //       }else{
+  //         $model_query->transition_target = $request->transition_target;
+  //         $model_query->transition_type   = "To";
+  //       }
+  //     }else{
+  //       $model_query->transition_target   = null;
+  //       $model_query->transition_type     = null;
+  //     }
 
-        }else{
-          $model_query->transition_target = $request->transition_target;
-          $model_query->transition_type   = "To";
-        }
-      }else{
-        $model_query->transition_target   = null;
-        $model_query->transition_type     = null;
-      }
+  //     $model_query->ticket_note     = $request->ticket_note;
+  //     $model_query->updated_at      = $t_stamp;
+  //     $model_query->updated_user    = $this->admin_id;
+  //     $model_query->save();
 
-      $model_query->ticket_note     = $request->ticket_note;
-      $model_query->updated_at      = $t_stamp;
-      $model_query->updated_user    = $this->admin_id;
-      $model_query->save();
+  //     $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+  //     MyLog::sys("trx_trp",$request->id,"update",$SYSNOTE);
 
-      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
-      MyLog::sys("trx_trp",$request->id,"update",$SYSNOTE);
-
-      DB::commit();
-      return response()->json([
-        "message" => "Proses ubah data berhasil",
-        "updated_at"=>$t_stamp
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      if ($e->getCode() == 422) {
-        return response()->json(json_decode($e->getMessage()), 422);
-      }
-      return response()->json([
-        "message" => "Proses ubah data gagal",
-      ], 400);
-    }
-  }
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses ubah data berhasil",
+  //       "updated_at"=>$t_stamp
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     if ($e->getCode() == 422) {
+  //       return response()->json(json_decode($e->getMessage()), 422);
+  //     }
+  //     return response()->json([
+  //       "message" => "Proses ubah data gagal",
+  //     ], 400);
+  //   }
+  // }
 
   public function delete(Request $request)
   {
@@ -1672,6 +1667,284 @@ class TrxTrpController extends Controller
     return $result;
   }
 
+  public function reportSusutPDF(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    
+    $newDetails = [];
+    $total_a_bruto = 0;
+    $total_a_tara = 0;
+    $total_a_netto = 0;
+    $total_b_bruto = 0;
+    $total_b_tara = 0;
+    $total_b_netto = 0;
+    $total_b_a_bruto = 0;
+    $total_b_a_tara = 0;
+    $total_b_a_netto = 0;
+    foreach ($ori["data"] as $key => $value) {
+      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
+      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
+      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
+      $ticket_a_tara = (float)$value["ticket_a_tara"];
+      $ticket_b_tara = (float)$value["ticket_b_tara"];
+      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
+      $ticket_a_netto = (float)$value["ticket_a_netto"];
+      $ticket_b_netto = (float)$value["ticket_b_netto"];
+      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
+
+      $total_a_bruto+=$ticket_a_bruto;
+      $total_a_tara+=$ticket_a_tara;
+      $total_a_netto+=$ticket_a_netto;
+
+      $total_b_bruto+=$ticket_b_bruto;
+      $total_b_tara+=$ticket_b_tara;
+      $total_b_netto+=$ticket_b_netto;
+
+      $limitSusut = 0.4;
+
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
+      $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
+      $value['ticket_a_bruto']=number_format($ticket_a_bruto, 0,',','.');
+      $value['ticket_b_bruto']=number_format($ticket_b_bruto, 0,',','.');
+      $value['ticket_b_a_bruto']=block_negative($ticket_b_a_bruto, 0);
+      $value['ticket_b_a_bruto_persen_red']=abs($ticket_b_a_bruto_persen) >= $limitSusut ? 'color:red;' : '';
+      $value['ticket_b_a_bruto_persen']=block_negative($ticket_b_a_bruto_persen, 2);
+      $value['ticket_a_tara']=number_format($ticket_a_tara, 0,',','.');
+      $value['ticket_b_tara']=number_format($ticket_b_tara, 0,',','.');
+      $value['ticket_b_a_tara']=block_negative($ticket_b_a_tara, 0);
+      $value['ticket_b_a_tara_persen_red']=abs($ticket_b_a_tara_persen) >= $limitSusut ? 'color:red;' : '';
+      $value['ticket_b_a_tara_persen']=block_negative($ticket_b_a_tara_persen, 2);
+      $value['ticket_a_netto']=number_format($ticket_a_netto, 0,',','.');
+      $value['ticket_b_netto']=number_format($ticket_b_netto, 0,',','.');
+      $value['ticket_b_a_netto']=block_negative($ticket_b_a_netto, 0);
+      $value['ticket_b_a_netto_persen_red']=abs($ticket_b_a_netto_persen) >= $limitSusut ? 'color:red;' : '';
+      $value['ticket_b_a_netto_persen']=block_negative($ticket_b_a_netto_persen, 2);
+      $value['amount']=number_format((float)$value["amount"], 0,',','.');
+      // $value['pv_total']=number_format((float)$value["pv_total"], 0,',','.');
+      // $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+      array_push($newDetails,$value);
+    }
+
+    list($total_b_a_bruto, $total_b_a_bruto_persen) =  $this->genPersen($total_a_bruto,$total_b_bruto);
+    list($total_b_a_tara, $total_b_a_tara_persen) =  $this->genPersen($total_a_tara,$total_b_tara);
+    list($total_b_a_netto, $total_b_a_netto_persen) =  $this->genPersen($total_a_netto,$total_b_netto);
+    
+
+    $ttl_a_tara=number_format($total_a_tara, 0,',','.');
+    $ttl_a_bruto=number_format($total_a_bruto, 0,',','.');
+    $ttl_a_netto=number_format($total_a_netto, 0,',','.');
+
+    $ttl_b_tara=number_format($total_b_tara, 0,',','.');
+    $ttl_b_bruto=number_format($total_b_bruto, 0,',','.');
+    $ttl_b_netto=number_format($total_b_netto, 0,',','.');
+
+
+    $ttl_b_a_tara=block_negative($total_b_a_tara, 0);
+    $ttl_b_a_bruto=block_negative($total_b_a_bruto, 0);
+    $ttl_b_a_netto=block_negative($total_b_a_netto, 0);
+    
+    $ttl_b_a_bruto_persen=block_negative($total_b_a_bruto_persen, 2);
+    $ttl_b_a_tara_persen=block_negative($total_b_a_tara_persen, 2);
+    $ttl_b_a_netto_persen=block_negative($total_b_a_netto_persen, 2);
+
+    // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+    $date = new \DateTime();
+    $filename = $date->format("YmdHis");
+    Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+    $pdf = PDF::loadView('pdf.trx_trp_susut', ["data"=>$newDetails,"info"=>[
+      "from"=>date("d-m-Y",strtotime($tanggal['value_1'])),
+      "to"=>date("d-m-Y",strtotime($tanggal['value_2'])),
+      "now"=>date("d-m-Y H:i:s"),
+      "ttl_a_bruto"=>$ttl_a_bruto,
+      "ttl_a_tara"=>$ttl_a_tara,
+      "ttl_a_netto"=>$ttl_a_netto,
+      "ttl_b_bruto"=>$ttl_b_bruto,
+      "ttl_b_tara"=>$ttl_b_tara,
+      "ttl_b_netto"=>$ttl_b_netto,
+      "ttl_b_a_bruto"=>$ttl_b_a_bruto,
+      "ttl_b_a_tara"=>$ttl_b_a_tara,
+      "ttl_b_a_netto"=>$ttl_b_a_netto,
+      // "ttl_b_a_bruto_persen"=>$ttl_b_a_bruto_persen,
+      // "ttl_b_a_tara_persen"=>$ttl_b_a_tara_persen,
+      // "ttl_b_a_netto_persen"=>$ttl_b_a_netto_persen,
+    ]])->setPaper('a4', 'landscape');
+
+
+    $mime = MyLib::mime("pdf");
+    $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
+  public function reportSusutExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
+      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
+      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
+      $ticket_a_tara = (float)$value["ticket_a_tara"];
+      $ticket_b_tara = (float)$value["ticket_b_tara"];
+      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
+      $ticket_a_netto = (float)$value["ticket_a_netto"];
+      $ticket_b_netto = (float)$value["ticket_b_netto"];
+      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
+
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
+      $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
+      $value['ticket_a_bruto']=$ticket_a_bruto;
+      $value['ticket_b_bruto']=$ticket_b_bruto;
+      $value['ticket_b_a_bruto']=$ticket_b_a_bruto;
+      $value['ticket_b_a_bruto_persen']=$ticket_b_a_bruto_persen;
+      $value['ticket_a_tara']=$ticket_a_tara;
+      $value['ticket_b_tara']=$ticket_b_tara;
+      $value['ticket_b_a_tara']=$ticket_b_a_tara;
+      $value['ticket_b_a_tara_persen']=$ticket_b_a_tara_persen;
+      $value['ticket_a_netto']=$ticket_a_netto;
+      $value['ticket_b_netto']=$ticket_b_netto;
+      $value['ticket_b_a_netto']=$ticket_b_a_netto;
+      $value['ticket_b_a_netto_persen']=$ticket_b_a_netto_persen;
+      $value['amount']=$value["amount"];
+      // $value['pv_total']=$value["pv_total"];
+      // $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+      array_push($newDetails,$value);
+    }
+
+    // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+
+    $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-trx_trp'."[".$date_from."*".$date_to."]";
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.trx_trp_susut'), $mime["exportType"]));
+
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
+
+  public function reportPVPDF(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    
+    $newDetails = [];
+    foreach ($ori["data"] as $key => $value) {
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      $value['amount']=number_format((float)$value["amount"], 0,',','.');
+      $value['pv_total']=number_format((float)$value["pv_total"], 0,',','.');
+      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+      array_push($newDetails,$value);
+    }
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+    $date = new \DateTime();
+    $filename = $date->format("YmdHis");
+    Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+    $pdf = PDF::loadView('pdf.trx_trp_pv', ["data"=>$newDetails,"info"=>[
+      "from"=>date("d-m-Y",strtotime($tanggal['value_1'])),
+      "to"=>date("d-m-Y",strtotime($tanggal['value_2'])),
+      "now"=>date("d-m-Y H:i:s"),
+    ]])->setPaper('a4', 'landscape');
+
+
+    $mime = MyLib::mime("pdf");
+    $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
+  public function reportPVExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      $value['amount']=$value["amount"];
+      $value['pv_total']=$value["pv_total"];
+      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+      array_push($newDetails,$value);
+    }
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+    $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-trx_trp'."[".$date_from."_".$date_to."]";
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.trx_trp_pv'), $mime["exportType"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
   public function validasi(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5','trp_trx.ticket.val_ticket']);
 
@@ -1940,8 +2213,24 @@ class TrxTrpController extends Controller
     }
 
     if($trx_trp->pvr_had_detail==1) throw new \Exception("Karna PVR sudah selesai dibuat",1);
-    if($trx_trp->cost_center_code==null) throw new \Exception("Cost Center Code belum diisi",1);
+    // if($trx_trp->cost_center_code==null) throw new \Exception("Cost Center Code belum diisi",1);
     if($trx_trp->pv_id!=null) throw new \Exception("Karna PV sudah diisi",1);
+
+    if($trx_trp->cost_center_code==null){
+      $trx_trp->cost_center_code = '112';
+      $trx_trp->cost_center_desc = 'Transport';      
+  
+      $get_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+      ->select('CostCenter','Description')
+      ->where('CostCenter','like', '112%')
+      ->where('Description','like', '%'.trim($trx_trp->no_pol))
+      ->first();
+  
+      if($get_cost_center){
+        $trx_trp->cost_center_code = $get_cost_center->CostCenter;
+        $trx_trp->cost_center_desc = $get_cost_center->Description;
+      }
+    }
       
     $supir = $trx_trp->supir;
     $no_pol = $trx_trp->no_pol;
@@ -1984,7 +2273,8 @@ class TrxTrpController extends Controller
       $associate_name = substr($associate_name,0,80);
     }
 
-    $bank_account_code=env("PVR_BANK_ACCOUNT_CODE");
+    // $bank_account_code=env("PVR_BANK_ACCOUNT_CODE");
+    $bank_account_code=$trx_trp->payment_method->account_code;
     
     $bank_acccount_db = DB::connection('sqlsrv')->table('FI_BankAccounts')
     ->select('BankAccountID')
@@ -2090,6 +2380,54 @@ class TrxTrpController extends Controller
         $d_qty=$v->qty;
         $d_unit_price=$v->amount;
         $details = DB::connection('sqlsrv')->update("exec 
+        USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+        @VoucherExtraItemID=:d_voucher_extra_item_id,
+        @Description=:d_description,@Amount=:d_amount,
+        @AccountID=:d_account_id,@TypeID=:d_type,
+        @Department=:d_dept,@LoginName=:login_name,
+        @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+          ":d_voucher_id"=>$d_voucher_id,
+          ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+          ":d_description"=>$d_description,
+          ":d_amount"=>$d_amount,
+          ":d_account_id"=>$d_account_id,
+          ":d_type"=>$d_type,
+          ":d_dept"=>$d_dept,
+          ":login_name"=>$login_name,
+          ":d_qty"=>$d_qty,
+          ":d_unit_price"=>$d_unit_price
+        ]);
+      }
+    }
+
+
+    if($trx_trp->payment_method->id==2){
+      $admin_cost_code=env("PVR_ADMIN_COST");
+  
+      $admin_cost_db = DB::connection('sqlsrv')->table('FI_BankAccounts')
+      ->select('BankAccountID')
+      ->where("bankaccountcode",$admin_cost_code)
+      ->first();
+      if(!$admin_cost_db) throw new \Exception("Bank account code tidak terdaftar ,segera infokan ke tim IT",1);
+
+      $adm_cost_id = $admin_cost_db->BankAccountID;
+      $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+      ->select('VoucherID')
+      ->where("VoucherID",$d_voucher_id)
+      ->where("AccountID",$adm_cost_id)
+      ->first();
+
+      if(!$adm_fee_exists){
+        $adm_cost = 2500;
+  
+        $d_description = "Biaya Admin";
+        $d_amount = $adm_cost;
+        $d_account_id = $adm_cost_id;
+        $d_dept = '112';
+        $d_qty=1;
+        $d_unit_price=$adm_cost;
+  
+        DB::connection('sqlsrv')->update("exec 
         USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
         @VoucherExtraItemID=:d_voucher_extra_item_id,
         @Description=:d_description,@Amount=:d_amount,
@@ -2237,162 +2575,144 @@ class TrxTrpController extends Controller
     }
   }
 
-  public function doUpdateTicket(Request $request){
-    MyAdmin::checkScope($this->permissions, 'trp_trx.get_ticket');
-    $rules = [
-      'online_status' => "required",
-    ];
+  // public function doUpdateTicket(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.get_ticket');
 
-    $messages = [
-      'id.exists' => 'ID tidak terdaftar',
-    ];
+  //   $miniError="";
+  //   try {
+  //     $t_stamp = date("Y-m-d H:i:s");
+  //     $trx_trps = TrxTrp::where(function ($q){
+  //       $q->where(function($q1){
+  //         $q1->where(function ($q2){
+  //           $q2->whereNull("ticket_a_id")->orWhereNull("ticket_b_id");        
+  //         })->whereIn('jenis',['TBS','TBSK']);    
+  //       });
+  //       $q->orWhere(function($q1){
+  //         $q1->whereNull("ticket_a_id")->whereIn('jenis',['CPO','PK']);        
+  //       });
+  //     })->where("deleted",0)->get();
+  //     if(count($trx_trps)==0){
+  //       throw new \Exception("Semua transaksi uang jalan yang ada sudah terisi",1);
+  //     }
 
-    $validator = Validator::make($request->all(), $rules, $messages);
-
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
-    $online_status=$request->online_status;
-    if($online_status!="true")
-    return response()->json([
-      "message" => "Mode Harus Online",
-    ], 400);
-
-    $miniError="";
-    try {
-      $t_stamp = date("Y-m-d H:i:s");
-      $trx_trps = TrxTrp::where(function ($q){
-        $q->where(function($q1){
-          $q1->where(function ($q2){
-            $q2->whereNull("ticket_a_id")->orWhereNull("ticket_b_id");        
-          })->whereIn('jenis',['TBS','TBSK']);    
-        });
-        $q->orWhere(function($q1){
-          $q1->whereNull("ticket_a_id")->whereIn('jenis',['CPO','PK']);        
-        });
-      })->where("deleted",0)->get();
-      if(count($trx_trps)==0){
-        throw new \Exception("Semua transaksi uang jalan yang ada sudah terisi",1);
-      }
-
-      $ids=$trx_trps->pluck('id');
+  //     $ids=$trx_trps->pluck('id');
       
-      $get_data_tickets = DB::connection('sqlsrv')->table('palm_tickets')->whereIn('tag1',$ids)->get();
+  //     $get_data_tickets = DB::connection('sqlsrv')->table('palm_tickets')->whereIn('tag1',$ids)->get();
       
-      $get_data_tickets=MyLib::objsToArray($get_data_tickets);
-      MyLog::logging($get_data_tickets);
-      $changes=[];
-      foreach ($get_data_tickets as $key => $v) {
-        MyLog::logging($v);
-        $ud_trx_trp=TrxTrp::where("id", $v["Tag1"])->first();
-        if(!$ud_trx_trp) continue;
+  //     $get_data_tickets=MyLib::objsToArray($get_data_tickets);
+  //     MyLog::logging($get_data_tickets);
+  //     $changes=[];
+  //     foreach ($get_data_tickets as $key => $v) {
+  //       MyLog::logging($v);
+  //       $ud_trx_trp=TrxTrp::where("id", $v["Tag1"])->first();
+  //       if(!$ud_trx_trp) continue;
 
-        $ticket_no = $v['TicketNo'];
-        $ticket_path = explode("/",$ticket_no);
+  //       $ticket_no = $v['TicketNo'];
+  //       $ticket_path = explode("/",$ticket_no);
 
-        if(in_array($ud_trx_trp->jenis,['TBS','TBSK'])){
-          if($ticket_path[0]==env("app_name")){
-            $ud_trx_trp->ticket_b_id=$v["TicketID"];
-            $ud_trx_trp->ticket_b_no=$v["TicketNo"];
-            $ud_trx_trp->ticket_b_bruto=(int)$v["Bruto"];
-            $ud_trx_trp->ticket_b_tara=(int)$v["Tara"];
-            $ud_trx_trp->ticket_b_netto=(int)$v["Bruto"]-(int)$v["Tara"];
-            $ud_trx_trp->ticket_b_ori_bruto=(int)$v["OriginalBruto"];
-            $ud_trx_trp->ticket_b_ori_tara=(int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_b_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_b_supir=$v["NamaSupir"];
-            $ud_trx_trp->ticket_b_no_pol=$v["VehicleNo"];
-            $ud_trx_trp->ticket_b_in_at=$v["DateTimeIn"];
-            $ud_trx_trp->ticket_b_out_at=$v["DateTimeOut"];
-          }else{
-            $ud_trx_trp->ticket_a_id=$v["TicketID"];
-            $ud_trx_trp->ticket_a_no=$v["TicketNo"];
-            $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
-            $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
-            $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
-            $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
-            $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
-            $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
-          }
-        }else{
-          if($ticket_path[0]==env("app_name")){
-            $ud_trx_trp->ticket_a_id=$v["TicketID"];
-            $ud_trx_trp->ticket_a_no=$v["TicketNo"];
-            $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
-            $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
-            $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
-            $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
-            $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
-            $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
-          }
-        }
-        $ud_trx_trp->updated_at=$t_stamp;
-        $ud_trx_trp->save();
-        array_push($changes,[
-          "id"                  => $ud_trx_trp->id,
-          "ticket_a_id"         => $ud_trx_trp->ticket_a_id,
-          "ticket_a_no"         => $ud_trx_trp->ticket_a_no,
-          "ticket_a_bruto"      => $ud_trx_trp->ticket_a_bruto,
-          "ticket_a_tara"       => $ud_trx_trp->ticket_a_tara,
-          "ticket_a_netto"      => $ud_trx_trp->ticket_a_netto,
-          // "ticket_a_ori_bruto"  => $ud_trx_trp->ticket_a_ori_bruto,
-          // "ticket_a_ori_tara"   => $ud_trx_trp->ticket_a_ori_tara,
-          // "ticket_a_ori_netto"  => $ud_trx_trp->ticket_a_ori_netto,
-          "ticket_a_supir"      => $ud_trx_trp->ticket_a_supir,
-          "ticket_a_no_pol"     => $ud_trx_trp->ticket_a_no_pol,
-          "ticket_a_in_at"      => $ud_trx_trp->ticket_a_in_at,
-          "ticket_a_out_at"     => $ud_trx_trp->ticket_a_out_at,
+  //       if(in_array($ud_trx_trp->jenis,['TBS','TBSK'])){
+  //         if($ticket_path[0]==env("app_name")){
+  //           $ud_trx_trp->ticket_b_id=$v["TicketID"];
+  //           $ud_trx_trp->ticket_b_no=$v["TicketNo"];
+  //           $ud_trx_trp->ticket_b_bruto=(int)$v["Bruto"];
+  //           $ud_trx_trp->ticket_b_tara=(int)$v["Tara"];
+  //           $ud_trx_trp->ticket_b_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+  //           $ud_trx_trp->ticket_b_ori_bruto=(int)$v["OriginalBruto"];
+  //           $ud_trx_trp->ticket_b_ori_tara=(int)$v["OriginalTara"];
+  //           $ud_trx_trp->ticket_b_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+  //           $ud_trx_trp->ticket_b_supir=$v["NamaSupir"];
+  //           $ud_trx_trp->ticket_b_no_pol=$v["VehicleNo"];
+  //           $ud_trx_trp->ticket_b_in_at=$v["DateTimeIn"];
+  //           $ud_trx_trp->ticket_b_out_at=$v["DateTimeOut"];
+  //         }else{
+  //           $ud_trx_trp->ticket_a_id=$v["TicketID"];
+  //           $ud_trx_trp->ticket_a_no=$v["TicketNo"];
+  //           $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
+  //           $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
+  //           $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+  //           $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
+  //           $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
+  //           $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+  //           $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
+  //           $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
+  //           $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
+  //           $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+  //         }
+  //       }else{
+  //         if($ticket_path[0]==env("app_name")){
+  //           $ud_trx_trp->ticket_a_id=$v["TicketID"];
+  //           $ud_trx_trp->ticket_a_no=$v["TicketNo"];
+  //           $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
+  //           $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
+  //           $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+  //           $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
+  //           $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
+  //           $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+  //           $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
+  //           $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
+  //           $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
+  //           $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+  //         }
+  //       }
+  //       $ud_trx_trp->updated_at=$t_stamp;
+  //       $ud_trx_trp->save();
+  //       array_push($changes,[
+  //         "id"                  => $ud_trx_trp->id,
+  //         "ticket_a_id"         => $ud_trx_trp->ticket_a_id,
+  //         "ticket_a_no"         => $ud_trx_trp->ticket_a_no,
+  //         "ticket_a_bruto"      => $ud_trx_trp->ticket_a_bruto,
+  //         "ticket_a_tara"       => $ud_trx_trp->ticket_a_tara,
+  //         "ticket_a_netto"      => $ud_trx_trp->ticket_a_netto,
+  //         // "ticket_a_ori_bruto"  => $ud_trx_trp->ticket_a_ori_bruto,
+  //         // "ticket_a_ori_tara"   => $ud_trx_trp->ticket_a_ori_tara,
+  //         // "ticket_a_ori_netto"  => $ud_trx_trp->ticket_a_ori_netto,
+  //         "ticket_a_supir"      => $ud_trx_trp->ticket_a_supir,
+  //         "ticket_a_no_pol"     => $ud_trx_trp->ticket_a_no_pol,
+  //         "ticket_a_in_at"      => $ud_trx_trp->ticket_a_in_at,
+  //         "ticket_a_out_at"     => $ud_trx_trp->ticket_a_out_at,
 
-          "ticket_b_id"         => $ud_trx_trp->ticket_b_id,
-          "ticket_b_no"         => $ud_trx_trp->ticket_b_no,
-          "ticket_b_bruto"      => $ud_trx_trp->ticket_b_bruto,
-          "ticket_b_tara"       => $ud_trx_trp->ticket_b_tara,
-          "ticket_b_netto"      => $ud_trx_trp->ticket_b_netto,
-          // "ticket_b_ori_bruto"  => $ud_trx_trp->ticket_b_ori_bruto,
-          // "ticket_b_ori_tara"   => $ud_trx_trp->ticket_b_ori_tara,
-          // "ticket_b_ori_netto"  => $ud_trx_trp->ticket_b_ori_netto,
-          "ticket_b_supir"      => $ud_trx_trp->ticket_b_supir,
-          "ticket_b_no_pol"     => $ud_trx_trp->ticket_b_no_pol,
-          "ticket_b_in_at"      => $ud_trx_trp->ticket_b_in_at,
-          "ticket_b_out_at"     => $ud_trx_trp->ticket_b_out_at,
-          "updated_at"          => $t_stamp
-        ]);
-      }
+  //         "ticket_b_id"         => $ud_trx_trp->ticket_b_id,
+  //         "ticket_b_no"         => $ud_trx_trp->ticket_b_no,
+  //         "ticket_b_bruto"      => $ud_trx_trp->ticket_b_bruto,
+  //         "ticket_b_tara"       => $ud_trx_trp->ticket_b_tara,
+  //         "ticket_b_netto"      => $ud_trx_trp->ticket_b_netto,
+  //         // "ticket_b_ori_bruto"  => $ud_trx_trp->ticket_b_ori_bruto,
+  //         // "ticket_b_ori_tara"   => $ud_trx_trp->ticket_b_ori_tara,
+  //         // "ticket_b_ori_netto"  => $ud_trx_trp->ticket_b_ori_netto,
+  //         "ticket_b_supir"      => $ud_trx_trp->ticket_b_supir,
+  //         "ticket_b_no_pol"     => $ud_trx_trp->ticket_b_no_pol,
+  //         "ticket_b_in_at"      => $ud_trx_trp->ticket_b_in_at,
+  //         "ticket_b_out_at"     => $ud_trx_trp->ticket_b_out_at,
+  //         "updated_at"          => $t_stamp
+  //       ]);
+  //     }
 
-      if(count($changes)==0)
-      throw new \Exception("Ticket Tidak ada yang di Update",1);
+  //     if(count($changes)==0)
+  //     throw new \Exception("Ticket Tidak ada yang di Update",1);
 
-      $ids = array_map(function ($x) {
-        return $x["id"];
-      }, $changes);
-      MyLog::sys("trx_trp",null,"do_update_ticket",implode(",",$ids));
+  //     $ids = array_map(function ($x) {
+  //       return $x["id"];
+  //     }, $changes);
+  //     MyLog::sys("trx_trp",null,"do_update_ticket",implode(",",$ids));
 
-      return response()->json([
-        "message" => "Ticket Berhasil di Update",
-        "data" => $changes,
-      ], 200);
+  //     return response()->json([
+  //       "message" => "Ticket Berhasil di Update",
+  //       "data" => $changes,
+  //     ], 200);
       
-    } catch (\Exception $e) {
-      if ($e->getCode() == 1) {
-        $miniError="Ticket Batal Update: ".$e->getMessage();
-      }else{
-        $miniError="Ticket Batal Update. Akses Jaringan Gagal";
-      }
-      return response()->json([
-        "message" => $miniError,
-        // "e"=>$e->getMessage(),
-        // "line" => $e->getLine(),
-      ], 400);
-    }
-  }
+  //   } catch (\Exception $e) {
+  //     if ($e->getCode() == 1) {
+  //       $miniError="Ticket Batal Update: ".$e->getMessage();
+  //     }else{
+  //       $miniError="Ticket Batal Update. Akses Jaringan Gagal";
+  //     }
+  //     return response()->json([
+  //       "message" => $miniError,
+  //       // "e"=>$e->getMessage(),
+  //       // "line" => $e->getLine(),
+  //     ], 400);
+  //   }
+  // }
 
 
 

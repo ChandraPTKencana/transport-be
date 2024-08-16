@@ -73,6 +73,10 @@ class IsUser extends Authenticatable
         return $this->hasMany(PermissionUserDetail::class, 'user_id', 'id');
     }
 
+    public function permission_group_users()
+    {
+        return $this->hasMany(PermissionGroupUser::class, 'user_id', 'id');
+    }
 
     public function listPermissions()
     {

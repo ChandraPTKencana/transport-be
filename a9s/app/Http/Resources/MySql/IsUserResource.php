@@ -16,13 +16,14 @@ class IsUserResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'id'                  => $this->id,
-            'username'            => $this->username,
-            'hak_akses'           => $this->hak_akses,
-            'is_active'           => $this->is_active,
-            'created_at'          => $this->created_at,
-            'updated_at'          => $this->updated_at,
-            'details'             => PermissionUserDetailResource::collection($this->whenLoaded('details')),
+            'id'                        => $this->id,
+            'username'                  => $this->username,
+            'hak_akses'                 => $this->hak_akses,
+            'is_active'                 => $this->is_active,
+            'created_at'                => $this->created_at,
+            'updated_at'                => $this->updated_at,
+            'details'                   => PermissionUserDetailResource::collection($this->whenLoaded('details')),
+            'permission_group_users'    => $this->permission_group_users,
         ];
     }
 }

@@ -378,9 +378,9 @@ class TrxTrpTransferController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->cost_center_code==""){
-        throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
-      }
+      // if($model_query->cost_center_code==""){
+      //   throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
+      // }
 
       if($model_query->val==0){
         throw new \Exception("Data Perlu Divalidasi oleh kasir terlebih dahulu",1);

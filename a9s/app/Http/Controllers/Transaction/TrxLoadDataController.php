@@ -131,7 +131,6 @@ class TrxLoadDataController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'srv.palm_ticket.views');
 
-    $online_status = $request->online_status;
     $transition_target = $request->transition_target;
     if($transition_target==env("app_name") || !in_array($transition_target,MyLib::$list_pabrik)){
       $transition_target="";
@@ -153,39 +152,73 @@ class TrxLoadDataController extends Controller
     }
 
     try {
-      if($online_status=="true"){
-        $arr_tickets = [];
-        $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date_from)->get();
-        foreach ($used_ticket_pvs as $key=>$val){    
-          if($val->ticket_a_no){
-            array_push($arr_tickets,$val->ticket_a_no);
-          }
-    
-          if($val->ticket_b_no){
-            array_push($arr_tickets,$val->ticket_b_no);
-          }
+      $arr_tickets = [];
+      $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date_from)->get();
+      foreach ($used_ticket_pvs as $key=>$val){    
+        if($val->ticket_a_no){
+          array_push($arr_tickets,$val->ticket_a_no);
         }
-        $jenis = $request->jenis;
-        $product_names = [];
   
-        switch ($jenis) {
-          case 'TBSK':
-            $product_names = ["TBS"];
-            break;
-          case 'TBS':
-            $product_names = ["RTBS","MTBS","TBS"];
-            break;
-          case 'CPO':
-            $product_names = ["CPO"];
-            break;
-          case 'PK':
-            $product_names = ["KERNEL"];
-            break;
-          default:
-            # code...
-            break;
+        if($val->ticket_b_no){
+          array_push($arr_tickets,$val->ticket_b_no);
         }
-        $list_ticket = $connectionDB->table("palm_tickets")
+      }
+      $jenis = $request->jenis;
+      $product_names = [];
+
+      switch ($jenis) {
+        case 'TBSK':
+          $product_names = ["TBS"];
+          break;
+        case 'TBS':
+          $product_names = ["RTBS","MTBS","TBS"];
+          break;
+        case 'CPO':
+          $product_names = ["CPO"];
+          break;
+        case 'PK':
+          $product_names = ["KERNEL"];
+          break;
+        default:
+          # code...
+          break;
+      }
+      $list_ticket = $connectionDB->table("palm_tickets")
+      // ->select('*')
+      ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
+      ->whereDate('Date','>=', $date_from)
+      ->whereDate('Date','<=', $date_to)
+      ->whereIn('ProductName',$product_names) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+      ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+      // ->limit(1)
+      ->get();
+
+      // $list_ticket= $list_ticket->map(function ($item) {
+      //   return array_map('utf8_encode', (array)$item);
+      // })->toArray();
+      $list_ticket= MyLib::objsToArray($list_ticket); 
+
+      // $list_pv = $connectionDB->table("fi_arap")
+      // // ->select('*')
+      // ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
+      // ->whereDate('VoucherDate','>=', $date_from)
+      // ->whereDate('VoucherDate','<=', $date_to)
+      // ->where('VoucherType',"TRP")
+      // ->where("IsAR",0)
+      // ->whereNotIn('VoucherNo',$arr_pvs) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
+      // ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
+      // ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
+      // ->get();
+
+      // $list_pv= MyLib::objsToArray($list_pv); 
+
+
+      if($transition_target!=""){
+        if($jenis=="TBS" && $transition_target!=""){
+          $product_names = ["MTBS","TBS","RTBS"];
+        }
+        
+        $ad_list_ticket = DB::connection($transition_target)->table("palm_tickets")
         // ->select('*')
         ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
         ->whereDate('Date','>=', $date_from)
@@ -194,45 +227,8 @@ class TrxLoadDataController extends Controller
         ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
         // ->limit(1)
         ->get();
-  
-        // $list_ticket= $list_ticket->map(function ($item) {
-        //   return array_map('utf8_encode', (array)$item);
-        // })->toArray();
-        $list_ticket= MyLib::objsToArray($list_ticket); 
-  
-        // $list_pv = $connectionDB->table("fi_arap")
-        // // ->select('*')
-        // ->select('fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName',DB::raw('SUM(fi_arapextraitems.Amount) as total_amount'))
-        // ->whereDate('VoucherDate','>=', $date_from)
-        // ->whereDate('VoucherDate','<=', $date_to)
-        // ->where('VoucherType',"TRP")
-        // ->where("IsAR",0)
-        // ->whereNotIn('VoucherNo',$arr_pvs) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-        // ->leftJoin('fi_arapextraitems', 'fi_arap.VoucherID', '=', 'fi_arapextraitems.VoucherID')
-        // ->groupBy(['fi_arap.VoucherID','VoucherNo','VoucherDate','AmountPaid','AssociateName'])
-        // ->get();
-  
-        // $list_pv= MyLib::objsToArray($list_pv); 
-
-
-        if($transition_target!=""){
-          if($jenis=="TBS" && $transition_target!=""){
-            $product_names = ["MTBS","TBS","RTBS"];
-          }
-          
-          $ad_list_ticket = DB::connection($transition_target)->table("palm_tickets")
-          // ->select('*')
-          ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut')
-          ->whereDate('Date','>=', $date_from)
-          ->whereDate('Date','<=', $date_to)
-          ->whereIn('ProductName',$product_names) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-          ->whereNotIn('TicketNo',$arr_tickets) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-          // ->limit(1)
-          ->get();
-          $ad_list_ticket= MyLib::objsToArray($ad_list_ticket);
-          $list_ticket = array_merge($list_ticket, $ad_list_ticket);
-        }
-
+        $ad_list_ticket= MyLib::objsToArray($ad_list_ticket);
+        $list_ticket = array_merge($list_ticket, $ad_list_ticket);
       }
     } catch (\Exception $e) {
       // return response()->json($e->getMessage(), 400);

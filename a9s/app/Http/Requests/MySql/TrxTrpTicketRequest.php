@@ -31,7 +31,7 @@ class TrxTrpTicketRequest extends FormRequest
             $rules['id']            = 'required|exists:App\Models\MySql\TrxTrp,id';
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
-            $rules['online_status'] = 'required';
+            // $rules['online_status'] = 'required';
         }
         return $rules;
     }

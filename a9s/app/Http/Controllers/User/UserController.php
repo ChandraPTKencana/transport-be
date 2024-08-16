@@ -172,6 +172,11 @@ class UserController extends Controller
       $model_query = $model_query->where("hak_akses", 'like', '%' . $request->hak_akses . '%');
     }
 
+
+    $model_query=$model_query->with(['permission_group_users'=>function ($q){
+      $q->with('permission_group');      
+    }]);
+
     $model_query = $model_query->get();
 
     return response()->json([
