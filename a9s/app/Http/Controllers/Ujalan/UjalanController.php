@@ -219,7 +219,7 @@ class UjalanController extends Controller
       $q->orderBy("ordinal","asc");
     }
     //end for details2
-    ])->with(['val_by','val1_by'])->where("deleted",0)->find($request->id);
+    ])->with(['val_by','val1_by'])->find($request->id);
 
     // if($model_query->requested_by != $this->admin_id){
     //   return response()->json([
