@@ -2313,7 +2313,7 @@ class TrxTrpTicketController extends Controller
         $q->orWhere(function($q1){
           $q1->whereNull("ticket_a_id")->whereIn('jenis',['CPO','PK']);        
         });
-      })->where("deleted",0)->get();
+      })->where('val_ticket',0)->where("deleted",0)->get();
       if(count($trx_trps)==0){
         throw new \Exception("Semua transaksi uang jalan yang ada sudah terisi",1);
       }
@@ -2335,46 +2335,52 @@ class TrxTrpTicketController extends Controller
 
         if(in_array($ud_trx_trp->jenis,['TBS','TBSK'])){
           if($ticket_path[0]==env("app_name")){
-            $ud_trx_trp->ticket_b_id=$v["TicketID"];
-            $ud_trx_trp->ticket_b_no=$v["TicketNo"];
-            $ud_trx_trp->ticket_b_bruto=(int)$v["Bruto"];
-            $ud_trx_trp->ticket_b_tara=(int)$v["Tara"];
-            $ud_trx_trp->ticket_b_netto=(int)$v["Bruto"]-(int)$v["Tara"];
-            $ud_trx_trp->ticket_b_ori_bruto=(int)$v["OriginalBruto"];
-            $ud_trx_trp->ticket_b_ori_tara=(int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_b_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_b_supir=$v["NamaSupir"];
-            $ud_trx_trp->ticket_b_no_pol=$v["VehicleNo"];
-            $ud_trx_trp->ticket_b_in_at=$v["DateTimeIn"];
-            $ud_trx_trp->ticket_b_out_at=$v["DateTimeOut"];
+            if($ud_trx_trp->ticket_b_id==null){
+              $ud_trx_trp->ticket_b_id=$v["TicketID"];
+              $ud_trx_trp->ticket_b_no=$v["TicketNo"];
+              $ud_trx_trp->ticket_b_bruto=(int)$v["Bruto"];
+              $ud_trx_trp->ticket_b_tara=(int)$v["Tara"];
+              $ud_trx_trp->ticket_b_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+              $ud_trx_trp->ticket_b_ori_bruto=(int)$v["OriginalBruto"];
+              $ud_trx_trp->ticket_b_ori_tara=(int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_b_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_b_supir=$v["NamaSupir"];
+              $ud_trx_trp->ticket_b_no_pol=$v["VehicleNo"];
+              $ud_trx_trp->ticket_b_in_at=$v["DateTimeIn"];
+              $ud_trx_trp->ticket_b_out_at=$v["DateTimeOut"];
+            }
           }else{
-            $ud_trx_trp->ticket_a_id=$v["TicketID"];
-            $ud_trx_trp->ticket_a_no=$v["TicketNo"];
-            $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
-            $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
-            $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
-            $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
-            $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
-            $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+            if($ud_trx_trp->ticket_a_id==null){
+              $ud_trx_trp->ticket_a_id=$v["TicketID"];
+              $ud_trx_trp->ticket_a_no=$v["TicketNo"];
+              $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
+              $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
+              $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+              $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
+              $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
+              $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
+              $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
+              $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+            }
           }
         }else{
           if($ticket_path[0]==env("app_name")){
-            $ud_trx_trp->ticket_a_id=$v["TicketID"];
-            $ud_trx_trp->ticket_a_no=$v["TicketNo"];
-            $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
-            $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
-            $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
-            $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
-            $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
-            $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
-            $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
-            $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+            if($ud_trx_trp->ticket_a_id==null){
+              $ud_trx_trp->ticket_a_id=$v["TicketID"];
+              $ud_trx_trp->ticket_a_no=$v["TicketNo"];
+              $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
+              $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
+              $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+              $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
+              $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
+              $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
+              $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
+              $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+            }
           }
         }
         $ud_trx_trp->updated_at=$t_stamp;
