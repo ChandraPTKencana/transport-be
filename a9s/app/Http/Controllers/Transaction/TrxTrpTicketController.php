@@ -2308,7 +2308,10 @@ class TrxTrpTicketController extends Controller
         $q->where(function($q1){
           $q1->where(function ($q2){
             $q2->whereNull("ticket_a_id")->orWhereNull("ticket_b_id");        
-          })->whereIn('jenis',['TBS','TBSK']);    
+          })->whereIn('jenis',['TBS']);    
+        });
+        $q->orWhere(function($q1){
+          $q1->whereNull("ticket_b_id")->whereIn('jenis',['TBSK']);
         });
         $q->orWhere(function($q1){
           $q1->whereNull("ticket_a_id")->whereIn('jenis',['CPO','PK']);        
@@ -2333,7 +2336,7 @@ class TrxTrpTicketController extends Controller
         $ticket_no = $v['TicketNo'];
         $ticket_path = explode("/",$ticket_no);
 
-        if(in_array($ud_trx_trp->jenis,['TBS','TBSK'])){
+        if(in_array($ud_trx_trp->jenis,['TBS'])){
           if($ticket_path[0]==env("app_name")){
             if($ud_trx_trp->ticket_b_id==null){
               $ud_trx_trp->ticket_b_id=$v["TicketID"];
@@ -2363,6 +2366,23 @@ class TrxTrpTicketController extends Controller
               $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
               $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
               $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+            }
+          }
+        }else if(in_array($ud_trx_trp->jenis,['TBSK'])){
+          if($ticket_path[0]==env("app_name")){
+            if($ud_trx_trp->ticket_b_id==null){
+              $ud_trx_trp->ticket_b_id=$v["TicketID"];
+              $ud_trx_trp->ticket_b_no=$v["TicketNo"];
+              $ud_trx_trp->ticket_b_bruto=(int)$v["Bruto"];
+              $ud_trx_trp->ticket_b_tara=(int)$v["Tara"];
+              $ud_trx_trp->ticket_b_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+              $ud_trx_trp->ticket_b_ori_bruto=(int)$v["OriginalBruto"];
+              $ud_trx_trp->ticket_b_ori_tara=(int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_b_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+              $ud_trx_trp->ticket_b_supir=$v["NamaSupir"];
+              $ud_trx_trp->ticket_b_no_pol=$v["VehicleNo"];
+              $ud_trx_trp->ticket_b_in_at=$v["DateTimeIn"];
+              $ud_trx_trp->ticket_b_out_at=$v["DateTimeOut"];
             }
           }
         }else{
