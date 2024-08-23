@@ -148,6 +148,22 @@ class EmployeeController extends Controller
         $model_query = $model_query->orWhere("role", "like", $like_lists["role"]);
       }
 
+      if (isset($like_lists["ktp_no"])) {
+        $model_query = $model_query->orWhere("ktp_no", "like", $like_lists["ktp_no"]);
+      }
+
+      if (isset($like_lists["sim_no"])) {
+        $model_query = $model_query->orWhere("sim_no", "like", $like_lists["sim_no"]);
+      }
+
+      if (isset($like_lists["phone_number"])) {
+        $model_query = $model_query->orWhere("phone_number", "like", $like_lists["phone_number"]);
+      }
+
+      if (isset($like_lists["rek_no"])) {
+        $model_query = $model_query->orWhere("rek_no", "like", $like_lists["rek_no"]);
+      }
+
       // if (isset($like_lists["role"])) {
       //   $model_query = $model_query->orWhere("role","like",$like_lists["role"]);
       // }
