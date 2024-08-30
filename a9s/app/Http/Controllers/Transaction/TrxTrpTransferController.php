@@ -526,7 +526,7 @@ class TrxTrpTransferController extends Controller
         }
       }
 
-      if($model_query->duitku_kernet_inv_res_code!=="00"){
+      if(isset($kernet) && $model_query->duitku_kernet_inv_res_code!=="00"){
         $msg = TrfDuitku::info_inv($model_query->duitku_kernet_inv_res_code);
         if($msg==""){
           array_push($error,"Kernet:Unknown Error");

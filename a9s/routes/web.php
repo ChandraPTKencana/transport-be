@@ -58,11 +58,22 @@ Route::delete('/trx_trp_req_delete', [\App\Http\Controllers\Transaction\TrxTrpCo
 Route::delete('/trx_trp_approve_req_delete', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'approveReqDelete']);
 // Route::get('/trx_trps_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFiles']);
 
-Route::get('/trx_trps/reportSusutPDF', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportSusutPDF']);
-Route::get('/trx_trps/reportSusutExcel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportSusutExcel']);
+Route::get('/trx_trps/dataSusut', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'index']);
+Route::get('/trx_trps/reportSusutPDF', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'reportSusutPDF']);
+Route::get('/trx_trps/reportSusutExcel', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'reportSusutExcel']);
 
-Route::get('/trx_trps/reportPVPDF', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportPVPDF']);
-Route::get('/trx_trps/reportPVExcel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportPVExcel']);
+Route::get('/trx_trps/dataFin', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'index']);
+Route::get('/trx_trps/reportFinPDF', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'reportFinPDF']);
+Route::get('/trx_trps/reportFinExcel', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'reportFinExcel']);
+
+Route::get('/trx_trp/transfers', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'index']);
+Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransfer']);
+Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'show']);
+Route::get('/trx_trp_preview_file_bt', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFileBT']);
+
+
+Route::get('/trx_trps/ticket_over', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'ticketOver']);
+
 
 
 // Route::get('/trx_trps_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
@@ -222,13 +233,6 @@ Route::get('/extra_money_trx_preview_file', [\App\Http\Controllers\ExtraMoney\Ex
 
 Route::get('/payment_methods', [\App\Http\Controllers\PaymentMethodController::class, 'index']);
 Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);
-Route::get('/trx_trp/transfers', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'index']);
-Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransfer']);
-Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'show']);
-Route::get('/trx_trp_preview_file_bt', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFileBT']);
-
-
-Route::get('/trx_trps/ticket_over', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'ticketOver']);
 
 Route::get('/ga_qr', [\App\Http\Controllers\GAController::class, 'qr']);
 Route::post('/ga_pin', [\App\Http\Controllers\GAController::class, 'pin']);
