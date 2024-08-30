@@ -72,7 +72,7 @@
       </table>
     </div>
   </main>
-
+  @if($kernet)
   <main style="padding:0px 25px 0px 29px;">
     <div style="width:100%; font-size:14px;">
       <div style="width:100%; text-align:center; padding:5px; margin-top:10px;">
@@ -118,6 +118,7 @@
       </table>
     </div>
   </main>
+  @endif
 </body>
 
 </html>
