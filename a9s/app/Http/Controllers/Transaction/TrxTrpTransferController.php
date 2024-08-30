@@ -394,9 +394,9 @@ class TrxTrpTransferController extends Controller
         throw new \Exception("Data Perlu Divalidasi oleh W/KTU terlebih dahulu",1);
       }
 
-      if(($model_query->jenis=='CPO' || $model_query->jenis=='PK') && $model_query->val3==0){
-        throw new \Exception("Data Perlu Divalidasi oleh marketing terlebih dahulu",1);
-      }
+      // if(($model_query->jenis=='CPO' || $model_query->jenis=='PK') && $model_query->val3==0){
+      //   throw new \Exception("Data Perlu Divalidasi oleh marketing terlebih dahulu",1);
+      // }
 
       if($model_query->receive_payment == 1){
         throw new \Exception("Pembayaran sudah selesai",1);
@@ -500,7 +500,8 @@ class TrxTrpTransferController extends Controller
         }
       }
 
-      if($model_query->duitku_supir_trf_res_code=="00" & $model_query->duitku_kernet_trf_res_code=="00"){
+
+      if((!isset($kernet) && $model_query->duitku_supir_trf_res_code=="00") || (isset($kernet) && $model_query->duitku_supir_trf_res_code=="00" && $model_query->duitku_kernet_trf_res_code=="00")){
         $model_query->received_payment=1;
 
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true)){
