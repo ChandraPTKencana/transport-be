@@ -52,15 +52,15 @@ Route::get('/trx_trp/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxT
 Route::post('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'store']);
 Route::put('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'update']);
 Route::put('/trx_trp/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'mandorGetVerifySet']);
-Route::put('/trx_trp_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'updateTicket']);
+
 Route::delete('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete']);
 Route::delete('/trx_trp_req_delete', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reqDelete']);
 Route::delete('/trx_trp_approve_req_delete', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'approveReqDelete']);
 // Route::get('/trx_trps_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFiles']);
 
-Route::get('/trx_trps/dataSusut', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'index']);
-Route::get('/trx_trps/reportSusutPDF', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'reportSusutPDF']);
-Route::get('/trx_trps/reportSusutExcel', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'reportSusutExcel']);
+Route::get('/trx_trp_susuts/data', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'index']);
+Route::get('/trx_trp_susuts/report_PDF', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'reportSusutPDF']);
+Route::get('/trx_trp_susuts/report_Excel', [\App\Http\Controllers\Transaction\TrxTrpSusutController::class, 'reportSusutExcel']);
 
 Route::get('/trx_trps/dataFin', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'index']);
 Route::get('/trx_trps/reportFinPDF', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'reportFinPDF']);
@@ -72,8 +72,10 @@ Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrp
 Route::get('/trx_trp_preview_file_bt', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFileBT']);
 
 
+Route::get('/trx_trp_tickets', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'index']);
+Route::put('/trx_trp_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'updateTicket']);
 Route::get('/trx_trps/ticket_over', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'ticketOver']);
-
+Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'doUpdateTicket']);
 
 
 // Route::get('/trx_trps_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
@@ -81,7 +83,6 @@ Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpCon
 Route::put('/trx_trp_validasi', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'validasi']);
 Route::post('/trx_trp_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);
 Route::post('/trx_trp_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
-Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'doUpdateTicket']);
 Route::put('/trx_trp_val_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'valTickets']);
 
 Route::get('/trx_load_cost_center', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'cost_center']);

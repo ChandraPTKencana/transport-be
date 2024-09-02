@@ -68,12 +68,12 @@ class Employee extends Authenticatable
     // }
 
     public function scopeVerified(Builder $builder){
-        $builder->where('val',1)->orWhere('val',0); // TEMP
-        // $builder->where('val',1); //Right
+        // $builder->where('val',1)->orWhere('val',0); // TEMP
+        $builder->where('val',1); //Right
     }
 
     public function scopeAvailable(Builder $builder){
-        $builder->where('deleted',0);
+        $builder->where('deleted',0)->where('req_deleted',0);
     }
 
     public function potongan(){

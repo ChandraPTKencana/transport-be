@@ -30,6 +30,7 @@ use App\Http\Resources\MySql\TrxTrpResource;
 use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
+use App\Models\MySql\Vehicle;
 use App\PS\PSPotonganTrx;
 use PHPUnit\Framework\Constraint\Count;
 
@@ -254,35 +255,35 @@ class TrxTrpTicketController extends Controller
                   };
                 }
 
-                if($r_val=='Done'){
-                  $q->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no")->Where(function ($q1){
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBSK")->whereNotNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
-                      });
-                  });
-                }else{
-                  $q->where("deleted",0)->where("req_deleted",0)->whereNull("pv_no")->Where(function ($q1){
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBS")->where(function($q2){
-                          $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
-                        });
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->where(function($q2){
-                          $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
-                        });
-                      });
-                  });
-                }
+                // if($r_val=='Done'){
+                //   $q->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no")->Where(function ($q1){
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBSK")->whereNotNull("ticket_b_no");
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
+                //       });
+                //   });
+                // }else{
+                //   $q->where("deleted",0)->where("req_deleted",0)->whereNull("pv_no")->Where(function ($q1){
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBS")->where(function($q2){
+                //           $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
+                //         });
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->whereIn("jenis",["CPO","PK"])->where(function($q2){
+                //           $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
+                //         });
+                //       });
+                //   });
+                // }
               }
             }
           }else{
@@ -337,7 +338,7 @@ class TrxTrpTicketController extends Controller
           $q->orWhere(function ($q1){
             $q1->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
           });
-      });
+      })->where('val_ticket',1);
     }
 
     if($filter_status=="ticket_not_done"){
@@ -355,6 +356,7 @@ class TrxTrpTicketController extends Controller
               $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
             });
           });
+          $q->orWhere('val_ticket',0);
       });
     }
 
@@ -2462,6 +2464,181 @@ class TrxTrpTicketController extends Controller
       ], 400);
     }
   }
+
+  // public function doUpdateTicket(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.get_ticket');
+
+  //   $miniError="";
+  //   try {
+  //     $vehicles = Vehicle::where('deleted',0)->where('req_deleted',0)->get();
+  //     foreach ($vehicles as $k => $vehicle) {
+
+
+  //     }
+
+
+
+  //     $t_stamp = date("Y-m-d H:i:s");
+  //     $trx_trps = TrxTrp::where(function ($q){
+  //       $q->where(function($q1){
+  //         $q1->where(function ($q2){
+  //           $q2->whereNull("ticket_a_id")->orWhereNull("ticket_b_id");        
+  //         })->whereIn('jenis',['TBS']);    
+  //       });
+  //       $q->orWhere(function($q1){
+  //         $q1->whereNull("ticket_b_id")->whereIn('jenis',['TBSK']);
+  //       });
+  //       $q->orWhere(function($q1){
+  //         $q1->whereNull("ticket_a_id")->whereIn('jenis',['CPO','PK']);        
+  //       });
+  //     })->where('val_ticket',0)->where("deleted",0)->where('req_deleted',0)->first();
+
+
+
+  //     if(count($trx_trps)==0){
+  //       throw new \Exception("Semua transaksi uang jalan yang ada sudah terisi",1);
+  //     }
+
+  //     $ids=$trx_trps->pluck('id');
+      
+  //     $get_data_tickets = DB::connection('sqlsrv')->table('palm_tickets')->whereIn('tag1',$ids)->get();
+      
+  //     $get_data_tickets=MyLib::objsToArray($get_data_tickets);
+
+  //     $changes=[];
+  //     foreach ($get_data_tickets as $key => $v) {
+  //       $ud_trx_trp=TrxTrp::where("id", $v["Tag1"])->first();
+  //       if(!$ud_trx_trp) continue;
+
+  //       $ticket_no = $v['TicketNo'];
+  //       $ticket_path = explode("/",$ticket_no);
+
+  //       if(in_array($ud_trx_trp->jenis,['TBS'])){
+  //         if($ticket_path[0]==env("app_name")){
+  //           if($ud_trx_trp->ticket_b_id==null){
+  //             $ud_trx_trp->ticket_b_id=$v["TicketID"];
+  //             $ud_trx_trp->ticket_b_no=$v["TicketNo"];
+  //             $ud_trx_trp->ticket_b_bruto=(int)$v["Bruto"];
+  //             $ud_trx_trp->ticket_b_tara=(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_b_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_b_ori_bruto=(int)$v["OriginalBruto"];
+  //             $ud_trx_trp->ticket_b_ori_tara=(int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_b_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_b_supir=$v["NamaSupir"];
+  //             $ud_trx_trp->ticket_b_no_pol=$v["VehicleNo"];
+  //             $ud_trx_trp->ticket_b_in_at=$v["DateTimeIn"];
+  //             $ud_trx_trp->ticket_b_out_at=$v["DateTimeOut"];
+  //           }
+  //         }else{
+  //           if($ud_trx_trp->ticket_a_id==null){
+  //             $ud_trx_trp->ticket_a_id=$v["TicketID"];
+  //             $ud_trx_trp->ticket_a_no=$v["TicketNo"];
+  //             $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
+  //             $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
+  //             $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
+  //             $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
+  //             $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
+  //             $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+  //           }
+  //         }
+  //       }else if(in_array($ud_trx_trp->jenis,['TBSK'])){
+  //         if($ticket_path[0]==env("app_name")){
+  //           if($ud_trx_trp->ticket_b_id==null){
+  //             $ud_trx_trp->ticket_b_id=$v["TicketID"];
+  //             $ud_trx_trp->ticket_b_no=$v["TicketNo"];
+  //             $ud_trx_trp->ticket_b_bruto=(int)$v["Bruto"];
+  //             $ud_trx_trp->ticket_b_tara=(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_b_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_b_ori_bruto=(int)$v["OriginalBruto"];
+  //             $ud_trx_trp->ticket_b_ori_tara=(int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_b_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_b_supir=$v["NamaSupir"];
+  //             $ud_trx_trp->ticket_b_no_pol=$v["VehicleNo"];
+  //             $ud_trx_trp->ticket_b_in_at=$v["DateTimeIn"];
+  //             $ud_trx_trp->ticket_b_out_at=$v["DateTimeOut"];
+  //           }
+  //         }
+  //       }else{
+  //         if($ticket_path[0]==env("app_name")){
+  //           if($ud_trx_trp->ticket_a_id==null){
+  //             $ud_trx_trp->ticket_a_id=$v["TicketID"];
+  //             $ud_trx_trp->ticket_a_no=$v["TicketNo"];
+  //             $ud_trx_trp->ticket_a_bruto=(int)$v["Bruto"];
+  //             $ud_trx_trp->ticket_a_tara=(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_a_netto=(int)$v["Bruto"]-(int)$v["Tara"];
+  //             $ud_trx_trp->ticket_a_ori_bruto=(int)$v["OriginalBruto"];
+  //             $ud_trx_trp->ticket_a_ori_tara=(int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_a_ori_netto=(int)$v["OriginalBruto"] - (int)$v["OriginalTara"];
+  //             $ud_trx_trp->ticket_a_supir=$v["NamaSupir"];
+  //             $ud_trx_trp->ticket_a_no_pol=$v["VehicleNo"];
+  //             $ud_trx_trp->ticket_a_in_at=$v["DateTimeIn"];
+  //             $ud_trx_trp->ticket_a_out_at=$v["DateTimeOut"];
+  //           }
+  //         }
+  //       }
+  //       $ud_trx_trp->updated_at=$t_stamp;
+  //       $ud_trx_trp->save();
+  //       array_push($changes,[
+  //         "id"                  => $ud_trx_trp->id,
+  //         "ticket_a_id"         => $ud_trx_trp->ticket_a_id,
+  //         "ticket_a_no"         => $ud_trx_trp->ticket_a_no,
+  //         "ticket_a_bruto"      => $ud_trx_trp->ticket_a_bruto,
+  //         "ticket_a_tara"       => $ud_trx_trp->ticket_a_tara,
+  //         "ticket_a_netto"      => $ud_trx_trp->ticket_a_netto,
+  //         // "ticket_a_ori_bruto"  => $ud_trx_trp->ticket_a_ori_bruto,
+  //         // "ticket_a_ori_tara"   => $ud_trx_trp->ticket_a_ori_tara,
+  //         // "ticket_a_ori_netto"  => $ud_trx_trp->ticket_a_ori_netto,
+  //         "ticket_a_supir"      => $ud_trx_trp->ticket_a_supir,
+  //         "ticket_a_no_pol"     => $ud_trx_trp->ticket_a_no_pol,
+  //         "ticket_a_in_at"      => $ud_trx_trp->ticket_a_in_at,
+  //         "ticket_a_out_at"     => $ud_trx_trp->ticket_a_out_at,
+
+  //         "ticket_b_id"         => $ud_trx_trp->ticket_b_id,
+  //         "ticket_b_no"         => $ud_trx_trp->ticket_b_no,
+  //         "ticket_b_bruto"      => $ud_trx_trp->ticket_b_bruto,
+  //         "ticket_b_tara"       => $ud_trx_trp->ticket_b_tara,
+  //         "ticket_b_netto"      => $ud_trx_trp->ticket_b_netto,
+  //         // "ticket_b_ori_bruto"  => $ud_trx_trp->ticket_b_ori_bruto,
+  //         // "ticket_b_ori_tara"   => $ud_trx_trp->ticket_b_ori_tara,
+  //         // "ticket_b_ori_netto"  => $ud_trx_trp->ticket_b_ori_netto,
+  //         "ticket_b_supir"      => $ud_trx_trp->ticket_b_supir,
+  //         "ticket_b_no_pol"     => $ud_trx_trp->ticket_b_no_pol,
+  //         "ticket_b_in_at"      => $ud_trx_trp->ticket_b_in_at,
+  //         "ticket_b_out_at"     => $ud_trx_trp->ticket_b_out_at,
+  //         "updated_at"          => $t_stamp
+  //       ]);
+  //     }
+
+  //     if(count($changes)==0)
+  //     throw new \Exception("Ticket Tidak ada yang di Update",1);
+
+  //     $ids = array_map(function ($x) {
+  //       return $x["id"];
+  //     }, $changes);
+  //     MyLog::sys("trx_trp",null,"do_update_ticket",implode(",",$ids));
+
+  //     return response()->json([
+  //       "message" => "Ticket Berhasil di Update",
+  //       "data" => $changes,
+  //     ], 200);
+      
+  //   } catch (\Exception $e) {
+  //     if ($e->getCode() == 1) {
+  //       $miniError="Ticket Batal Update: ".$e->getMessage();
+  //     }else{
+  //       $miniError="Ticket Batal Update. Akses Jaringan Gagal";
+  //     }
+  //     return response()->json([
+  //       "message" => $miniError,
+  //       // "e"=>$e->getMessage(),
+  //       // "line" => $e->getLine(),
+  //     ], 400);
+  //   }
+  // }
 
   public function ticketOver(Request $request)
   {

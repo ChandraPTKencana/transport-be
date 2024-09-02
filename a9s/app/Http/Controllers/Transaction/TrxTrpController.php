@@ -2511,7 +2511,7 @@ class TrxTrpController extends Controller
     $miniError="";
     try {
       $t_stamp = date("Y-m-d H:i:s");
-      $trx_trps = TrxTrp::whereNotNull("pvr_id")->whereNull("pv_id")->where("deleted",0)->get();
+      $trx_trps = TrxTrp::whereNotNull("pvr_id")->whereNull("pv_id")->where("deleted",0)->where("req_deleted",0)->get();
       if(count($trx_trps)==0){
         throw new \Exception("Semua PVR yang ada ,PV ny sudah terisi",1);
       }
