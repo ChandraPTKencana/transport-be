@@ -73,7 +73,7 @@ class Employee extends Authenticatable
     }
 
     public function scopeAvailable(Builder $builder){
-        $builder->where('deleted',0)->where('req_deleted',0);
+        $builder->where('deleted',0);
     }
 
     public function potongan(){
