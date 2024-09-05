@@ -129,12 +129,18 @@ class BankController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      if (isset($like_lists["name"])) {
-        $model_query = $model_query->orWhere("name", "like", $like_lists["name"]);
-      }
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){
+            
+          if (isset($like_lists["name"])) {
+            $q->orWhere("name", "like", $like_lists["name"]);
+          }
+    
+          if (isset($like_lists["role"])) {
+            $q->orWhere("role", "like", $like_lists["role"]);
+          }
 
-      if (isset($like_lists["role"])) {
-        $model_query = $model_query->orWhere("role", "like", $like_lists["role"]);
+        });        
       }
 
       // if (isset($like_lists["role"])) {

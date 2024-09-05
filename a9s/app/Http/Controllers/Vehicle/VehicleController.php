@@ -129,9 +129,14 @@ class VehicleController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      if (isset($like_lists["no_pol"])) {
-        $model_query = $model_query->orWhere("no_pol", "like", $like_lists["no_pol"]);
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){            
+          if (isset($like_lists["no_pol"])) {
+            $q->orWhere("no_pol", "like", $like_lists["no_pol"]);
+          }         
+        });        
       }
+
 
 
       // if (isset($like_lists["role"])) {

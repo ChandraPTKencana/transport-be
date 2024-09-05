@@ -148,12 +148,17 @@ class PotonganTrxController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      if (isset($like_lists["id"])) {
-        $model_query = $model_query->orWhere("id", "like", $like_lists["id"]);
-      }
 
-      if (isset($like_lists["id_uj"])) {
-        $model_query = $model_query->orWhere("id_uj", "like", $like_lists["id_uj"]);
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){            
+          if (isset($like_lists["id"])) {
+            $q->orWhere("id", "like", $like_lists["id"]);
+          }
+    
+          if (isset($like_lists["id_uj"])) {
+            $q->orWhere("id_uj", "like", $like_lists["id_uj"]);
+          }
+        });        
       }
 
     }

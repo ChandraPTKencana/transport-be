@@ -143,16 +143,21 @@ class UserController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      if (isset($like_lists["username"])) {
-        $model_query = $model_query->orWhere("username", "like", $like_lists["username"]);
-      }
 
-      if (isset($like_lists["hak_akses"])) {
-        $model_query = $model_query->orWhere("hak_akses", "like", $like_lists["hak_akses"]);
-      }
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){            
+          if (isset($like_lists["username"])) {
+            $q->orWhere("username", "like", $like_lists["username"]);
+          }
+    
+          if (isset($like_lists["hak_akses"])) {
+            $q->orWhere("hak_akses", "like", $like_lists["hak_akses"]);
+          }
 
-      if (isset($like_lists["is_active"])) {
-        $model_query = $model_query->orWhere("is_active", "like", $like_lists["is_active"]);
+          if (isset($like_lists["is_active"])) {
+            $q->orWhere("is_active", "like", $like_lists["is_active"]);
+          }
+        });        
       }
 
       // if (isset($like_lists["role"])) {
@@ -231,6 +236,9 @@ class UserController extends Controller
       'details'=>function($q){
         $q->orderBy("ordinal","asc");
       },
+      'permission_group_users'=>function ($q){
+        $q->with('permission_group');      
+      }
     ])->find($request->id);
     return response()->json([
       "data" => new IsUserResource($model_query),

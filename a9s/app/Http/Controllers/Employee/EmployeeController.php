@@ -140,33 +140,35 @@ class EmployeeController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      if (isset($like_lists["name"])) {
-        $model_query = $model_query->orWhere("name", "like", $like_lists["name"]);
-      }
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){
+            
+          if (isset($like_lists["name"])) {
+            $q->orWhere("name", "like", $like_lists["name"]);
+          }
+    
+          if (isset($like_lists["role"])) {
+            $q->orWhere("role", "like", $like_lists["role"]);
+          }
 
-      if (isset($like_lists["role"])) {
-        $model_query = $model_query->orWhere("role", "like", $like_lists["role"]);
-      }
+          if (isset($like_lists["ktp_no"])) {
+            $q->orWhere("ktp_no", "like", $like_lists["ktp_no"]);
+          }
+    
+          if (isset($like_lists["sim_no"])) {
+            $q->orWhere("sim_no", "like", $like_lists["sim_no"]);
+          }
 
-      if (isset($like_lists["ktp_no"])) {
-        $model_query = $model_query->orWhere("ktp_no", "like", $like_lists["ktp_no"]);
-      }
+          if (isset($like_lists["phone_number"])) {
+            $q->orWhere("phone_number", "like", $like_lists["phone_number"]);
+          }
+    
+          if (isset($like_lists["rek_no"])) {
+            $q->orWhere("rek_no", "like", $like_lists["rek_no"]);
+          }
 
-      if (isset($like_lists["sim_no"])) {
-        $model_query = $model_query->orWhere("sim_no", "like", $like_lists["sim_no"]);
+        });        
       }
-
-      if (isset($like_lists["phone_number"])) {
-        $model_query = $model_query->orWhere("phone_number", "like", $like_lists["phone_number"]);
-      }
-
-      if (isset($like_lists["rek_no"])) {
-        $model_query = $model_query->orWhere("rek_no", "like", $like_lists["rek_no"]);
-      }
-
-      // if (isset($like_lists["role"])) {
-      //   $model_query = $model_query->orWhere("role","like",$like_lists["role"]);
-      // }
     }
 
     // ==============

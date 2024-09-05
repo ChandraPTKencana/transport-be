@@ -154,25 +154,25 @@ class PotonganMstController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      if (isset($like_lists["name"])) {
-        $model_query = $model_query->orWhere("name", "like", $like_lists["name"]);
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists){
+            
+          if (isset($like_lists["name"])) {
+            $q->orWhere("name", "like", $like_lists["name"]);
+          }
+    
+          if (isset($like_lists["role"])) {
+            $q->orWhere("role", "like", $like_lists["role"]);
+          }
+
+          if (isset($like_lists["employee_name"])) {
+            $q->whereIn("employee_id", function($q1)use($like_lists){
+              $q1->select("id")->from('employee_mst')->where('name','like',$like_lists["employee_name"]);          
+            });
+          }
+        });        
       }
 
-      if (isset($like_lists["role"])) {
-        $model_query = $model_query->orWhere("role", "like", $like_lists["role"]);
-      }
-
-
-      if(isset($like_lists['employee_name'])){
-        $model_query = $model_query->whereIn("employee_id", function($q)use($like_lists){
-          $q->select("id")->from('employee_mst')->where('name','like',$like_lists["employee_name"]);          
-        });
-
-      }
-
-      // if (isset($like_lists["role"])) {
-      //   $model_query = $model_query->orWhere("role","like",$like_lists["role"]);
-      // }
     }
 
     // ==============
