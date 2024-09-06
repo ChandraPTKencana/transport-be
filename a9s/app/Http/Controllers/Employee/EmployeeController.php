@@ -184,6 +184,7 @@ class EmployeeController extends Controller
     }
 
 
+    $model_query = $model_query->select("id","val","val_user","val_at","name","role","ktp_no","bank_id","rek_no","rek_name","phone_number","created_at","updated_at","created_user","updated_user");
     $model_query = $model_query->where("deleted",0)->with('bank')->get();
 
     return response()->json([
@@ -196,7 +197,7 @@ class EmployeeController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'employee.view');
     
-    $model_query = Employee::with('bank')->find($request->id);
+    $model_query = Employee::with(['val_by','bank'])->find($request->id);
     return response()->json([
       "data" => new EmployeeResource($model_query),
     ], 200);

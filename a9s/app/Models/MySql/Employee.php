@@ -84,6 +84,10 @@ class Employee extends Authenticatable
         return $this->belongsTo(Bank::class,"bank_id","id");
     }
     
+    public function val_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val_user");
+    }
     // public function scopeOfRole(Builder $query, string $role): void
     // {
     //     $query->where('role', $role);
