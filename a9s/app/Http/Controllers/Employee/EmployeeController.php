@@ -184,7 +184,7 @@ class EmployeeController extends Controller
     }
 
 
-    $model_query = $model_query->select("id","val","val_user","val_at","name","role","ktp_no","bank_id","rek_no","rek_name","phone_number","created_at","updated_at","created_user","updated_user");
+    $model_query = $model_query->select("id","val","val_user","val_at","name","role","ktp_no","sim_no","bank_id","rek_no","rek_name","phone_number","created_at","updated_at","created_user","updated_user","attachment_1_type");
     $model_query = $model_query->where("deleted",0)->with('bank')->get();
 
     return response()->json([

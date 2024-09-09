@@ -209,6 +209,7 @@ class SalaryBonusController extends Controller
     // ==============
     // Model Filter
     // ==============
+    $model_query = $model_query->select("id","tanggal","type","nominal","note","val1","val1_user","val1_at","val2","val2_user","val2_at","created_user","updated_user","created_at","updated_at","attachment_1_type");
     $model_query = $model_query->where('deleted',0)->with('employee')->get();
     return response()->json([
       "data" => SalaryBonusResource::collection($model_query),

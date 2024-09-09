@@ -101,6 +101,7 @@ Route::post('/user', [\App\Http\Controllers\User\UserController::class, 'store']
 Route::put('/user', [\App\Http\Controllers\User\UserController::class, 'update']);
 Route::delete('/user', [\App\Http\Controllers\User\UserController::class, 'delete']);
 
+Route::get('/vehicles_available', [\App\Http\Controllers\Vehicle\VehicleController::class, 'available']);
 Route::get('/vehicles', [\App\Http\Controllers\Vehicle\VehicleController::class, 'index']);
 Route::get('/vehicle', [\App\Http\Controllers\Vehicle\VehicleController::class, 'show']);
 Route::post('/vehicle', [\App\Http\Controllers\Vehicle\VehicleController::class, 'store']);
@@ -237,3 +238,6 @@ Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);
 
 Route::get('/ga_qr', [\App\Http\Controllers\GAController::class, 'qr']);
 Route::post('/ga_pin', [\App\Http\Controllers\GAController::class, 'pin']);
+
+
+Route::get('/temp_data/vehiclesNotAllowedUpdateTicket', [\App\Http\Controllers\TempDataController::class, 'vehiclesNotAllowedUpdateTicket']);

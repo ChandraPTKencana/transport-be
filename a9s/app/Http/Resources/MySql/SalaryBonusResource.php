@@ -41,6 +41,7 @@ class SalaryBonusResource extends JsonResource
             'updated_at'            => $this->updated_at,
             'attachment_1'          => null,
             'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+            'attachment_1_type'     => $this->attachment_1_type,
         ];
     }
 }

@@ -36,7 +36,7 @@ class EmployeeResource extends JsonResource
             'updated_user'          => $this->updated_user,
             'attachment_1'          => null,
             'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
-
+            'attachment_1_type'     => $this->attachment_1_type,
         ];
     }
 }

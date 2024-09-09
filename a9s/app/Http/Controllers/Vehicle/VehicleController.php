@@ -307,4 +307,14 @@ class VehicleController extends Controller
     //     "message"=>"Proses ubah data gagal",
     // ],400);
   }
+
+
+
+  public function available(Request $request)
+  {
+    $model_query = Vehicle::where("deleted",0)->get();
+    return response()->json([
+      "data" => VehicleResource::collection($model_query),
+    ], 200);
+  }
 }
