@@ -240,4 +240,4 @@ Route::get('/ga_qr', [\App\Http\Controllers\GAController::class, 'qr']);
 Route::post('/ga_pin', [\App\Http\Controllers\GAController::class, 'pin']);
 
 
-Route::get('/temp_data/vehiclesNotAllowedUpdateTicket', [\App\Http\Controllers\TempDataController::class, 'vehiclesNotAllowedUpdateTicket']);
+Route::get('/temp_data/vehiclesAllowedUpdateTicket', [\App\Http\Controllers\TempDataController::class, 'vehiclesAllowedUpdateTicket']);
