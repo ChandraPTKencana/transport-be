@@ -33,10 +33,9 @@ class Employee extends Authenticatable
     //  *
     //  * @var array<int, string>
     //  */
-    // protected $hidden = [
-    //     'password',
-    //     'remember_token',
-    // ];
+    protected $hidden = [
+        'attachment_1',
+    ];
 
     // /**
     //  * The attributes that should be cast.
