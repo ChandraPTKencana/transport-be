@@ -28,15 +28,12 @@ use Illuminate\Support\Facades\Validator;
 class TrxTrpController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
-
   }
 
   public function index(Request $request, $download = false)

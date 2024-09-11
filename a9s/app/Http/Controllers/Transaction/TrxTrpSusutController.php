@@ -35,7 +35,6 @@ use App\PS\PSPotonganTrx;
 class TrxTrpSusutController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
@@ -43,7 +42,6 @@ class TrxTrpSusutController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
 
   }
@@ -313,15 +311,6 @@ class TrxTrpSusutController extends Controller
     }
 
     $filter_status = $request->filter_status;
-    
-    // if(in_array($this->role,["Finance","Accounting"])){
-    //   $filter_status = "pv_done";
-    // }
-
-    // if(in_array($this->role,["Marketing","MIS"])){
-    //   $filter_status = "ticket_done";
-    // }
-
     if($filter_status=="ticket_done"){
       $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
           $q->orWhere(function ($q1){

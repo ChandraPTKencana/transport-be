@@ -37,7 +37,6 @@ use App\PS\PSPotonganTrx;
 class TrxTrpTransferController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
@@ -45,7 +44,6 @@ class TrxTrpTransferController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
   }
 
@@ -324,15 +322,7 @@ class TrxTrpTransferController extends Controller
 
     $filter_status = $request->filter_status;
     
-    // if(in_array($this->role,["Finance","Accounting"])){
-    //   $filter_status = "pv_done";
-    // }
-
-    // if(in_array($this->role,["Marketing","MIS"])){
-    //   $filter_status = "ticket_done";
-    // }
-
-    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val4',1)->where('received_payment',0);
+    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val',1)->where('val1',1)->where('val2',1)->where('received_payment',0);
 
     $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");

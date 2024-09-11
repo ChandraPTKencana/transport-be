@@ -31,7 +31,6 @@ use App\Models\MySql\ExtraMoney;
 class ExtraMoneyTrxController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
@@ -39,7 +38,6 @@ class ExtraMoneyTrxController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
   }
 
@@ -743,7 +741,6 @@ class ExtraMoneyTrxController extends Controller
   }
 
   // public function previewFiles(Request $request){
-  //   MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS','Accounting']);
 
   //   // set_time_limit(0);
 
@@ -814,20 +811,6 @@ class ExtraMoneyTrxController extends Controller
   //   // dd($sendData);
 
   //   $shows=["id","tanggal","no_pol","jenis","xto","amount"];
-  //   if($this->role != "Finance"){
-  //     $shows = array_merge($shows,[
-  //       'ticket_a_out_at','ticket_b_in_at',
-  //       'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
-  //       'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
-  //       'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
-  //     ]);
-  //   }
-
-  //   if($this->role == "Finance"){
-  //     $shows = array_merge($shows,[
-  //       "pv_no","pvr_no","pv_total","pv_datetime"
-  //     ]);
-  //   }
   //   $newDetails = [];
   //   $total_a_bruto = 0;
   //   $total_a_tara = 0;
@@ -942,7 +925,6 @@ class ExtraMoneyTrxController extends Controller
   // }
 
   // public function downloadExcel(Request $request){
-  //   MyAdmin::checkRole($this->role, ['SuperAdmin','Finance','Marketing','Logistic','MIS','Accounting']);
 
   //   set_time_limit(0);
   //   $callGet = $this->index($request, true);
@@ -951,20 +933,6 @@ class ExtraMoneyTrxController extends Controller
   //   $data = $ori["data"];
     
   //   $shows=["id","tanggal","no_pol","jenis","xto","amount"];
-  //   if($this->role != "Finance"){
-  //     $shows = array_merge($shows,[
-  //       'ticket_a_out_at','ticket_b_in_at',
-  //       'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
-  //       'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
-  //       'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
-  //     ]);
-  //   }
-    
-  //   if($this->role == "Finance"){
-  //     $shows = array_merge($shows,[
-  //       "pv_no","pvr_no","pv_total","pv_datetime"
-  //     ]);
-  //   }
 
   //   $newDetails = [];
 

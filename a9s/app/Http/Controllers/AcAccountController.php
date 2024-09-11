@@ -15,7 +15,6 @@ use App\Http\Resources\AcAccountResource;
 class AcAccountController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
@@ -23,7 +22,6 @@ class AcAccountController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
 
   }

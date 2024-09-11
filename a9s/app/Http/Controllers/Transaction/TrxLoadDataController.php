@@ -14,14 +14,12 @@ use App\Helpers\MyAdmin;
 class TrxLoadDataController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
-    $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
     $this->permissions = $this->admin->the_user->listPermissions();
 

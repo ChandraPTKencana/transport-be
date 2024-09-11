@@ -1,0 +1,33 @@
+composer require google/authenticator
+
+
+
+composer require sonata-project/google-authenticator
+
+
+
+
+
+
+
+
+
+
+
+
+composer require intervention/image-laravel
+php artisan vendor:publish --provider="Intervention\Image\Laravel\ServiceProvider"
+
+
+
+Saat Peralihan Tiket B harus di isi secara manual 
+dan tiket a dan b setelah peralihan juga harus di input manual
+
+apabila saat update ticket terputus atau tidak jalan. 
+isi dulu 1 ticket secara manual 
+kemudian lanjutkan update ticket ny
+
+apabila tetap tidak bisa maka pastikan ticket dengan tanggal yang sama
+di input secara manual terlebih dahulu.
+
+Selalu cross cek dengan ascend.

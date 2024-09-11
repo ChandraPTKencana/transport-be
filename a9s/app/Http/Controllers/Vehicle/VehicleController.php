@@ -22,13 +22,11 @@ class VehicleController extends Controller
 {
   private $admin;
   private $admin_id;
-  private $role;
   private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
-    $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
     $this->permissions = $this->admin->the_user->listPermissions();
 

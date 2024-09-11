@@ -38,7 +38,6 @@ use PHPUnit\Framework\Constraint\Count;
 class TrxTrpTicketController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
@@ -46,7 +45,6 @@ class TrxTrpTicketController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
 
   }
@@ -315,14 +313,6 @@ class TrxTrpTicketController extends Controller
     }
 
     $filter_status = $request->filter_status;
-    
-    // if(in_array($this->role,["Finance","Accounting"])){
-    //   $filter_status = "pv_done";
-    // }
-
-    // if(in_array($this->role,["Marketing","MIS"])){
-    //   $filter_status = "ticket_done";
-    // }
 
     if($filter_status=="pv_done"){
       $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no");
@@ -1394,282 +1384,282 @@ class TrxTrpTicketController extends Controller
   //   return $result;
   // }
 
-  public function previewFiles(Request $request){
-    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+  // public function previewFiles(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
 
-    // set_time_limit(0);
+  //   // set_time_limit(0);
 
-    // $rules = [
-    //   'date_from' => "required|date_format:Y-m-d H:i:s",
-    // ];
+  //   // $rules = [
+  //   //   'date_from' => "required|date_format:Y-m-d H:i:s",
+  //   // ];
 
-    // $messages = [
-    //   'date_from.required' => 'Date From is required',
-    //   'date_from.date_format' => 'Please Select Date From',
-    // ];
+  //   // $messages = [
+  //   //   'date_from.required' => 'Date From is required',
+  //   //   'date_from.date_format' => 'Please Select Date From',
+  //   // ];
 
-    // $validator = Validator::make($request->all(), $rules, $messages);
+  //   // $validator = Validator::make($request->all(), $rules, $messages);
 
-    // if ($validator->fails()) {
-    //   throw new ValidationException($validator);
-    // }
+  //   // if ($validator->fails()) {
+  //   //   throw new ValidationException($validator);
+  //   // }
 
 
-    // // Change some request value
-    // $request['period'] = "Daily";
+  //   // // Change some request value
+  //   // $request['period'] = "Daily";
 
-    // $date_from = $request->date_from;
-    // $d_from = date("Y-m", MyLib::manualMillis($date_from) / 1000) . "-01 00:00:00";
-    // $date_f = new \DateTime($d_from);
+  //   // $date_from = $request->date_from;
+  //   // $d_from = date("Y-m", MyLib::manualMillis($date_from) / 1000) . "-01 00:00:00";
+  //   // $date_f = new \DateTime($d_from);
 
-    // $start = clone $date_f;
-    // $start->add(new \DateInterval('P1M'));
-    // $start->sub(new \DateInterval('P1D'));
-    // $x = $start->format("Y-m-d H:i:s");
+  //   // $start = clone $date_f;
+  //   // $start->add(new \DateInterval('P1M'));
+  //   // $start->sub(new \DateInterval('P1D'));
+  //   // $x = $start->format("Y-m-d H:i:s");
 
-    // $request['date_from'] = $d_from;
-    // $request['date_to'] = $x;
-    // return response()->json(["data"=>[$d_from,$x]],200);
+  //   // $request['date_from'] = $d_from;
+  //   // $request['date_to'] = $x;
+  //   // return response()->json(["data"=>[$d_from,$x]],200);
 
-    set_time_limit(0);
-    $callGet = $this->index($request, true);
-    if ($callGet->getStatusCode() != 200) return $callGet;
-    $ori = json_decode(json_encode($callGet), true)["original"];
-    $data = $ori["data"];
+  //   set_time_limit(0);
+  //   $callGet = $this->index($request, true);
+  //   if ($callGet->getStatusCode() != 200) return $callGet;
+  //   $ori = json_decode(json_encode($callGet), true)["original"];
+  //   $data = $ori["data"];
     
-    // $additional = $ori["additional"];
+  //   // $additional = $ori["additional"];
 
 
-    // $date = new \DateTime();
-    // $filename = $date->format("YmdHis") . "-" . $additional["company_name"] . "[" . $additional["date_from"] . "-" . $additional["date_to"] . "]";
-    // // $filename=$date->format("YmdHis");
+  //   // $date = new \DateTime();
+  //   // $filename = $date->format("YmdHis") . "-" . $additional["company_name"] . "[" . $additional["date_from"] . "-" . $additional["date_to"] . "]";
+  //   // // $filename=$date->format("YmdHis");
 
-    // // return response()->json(["message"=>$filename],200);
+  //   // // return response()->json(["message"=>$filename],200);
 
-    // $mime = MyLib::mime("csv");
-    // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.sensor_get_data_by_location'), $mime["exportType"]));
-    // $mime = MyLib::mime("xlsx");
-    // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.tracking_info2'), $mime["exportType"]));
+  //   // $mime = MyLib::mime("csv");
+  //   // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.sensor_get_data_by_location'), $mime["exportType"]));
+  //   // $mime = MyLib::mime("xlsx");
+  //   // $bs64 = base64_encode(Excel::raw(new MyReport($data, 'report.tracking_info2'), $mime["exportType"]));
 
-    
-
-    // $sendData = [
-    //   'pag_no'  => $pag->no,
-    //   'created_at'    => $pag->created_at,
-    //   'updated_at'    => $pag->updated_at,
-    //   'proyek'  => $pag->project ?? "",
-    //   'need'    => $pag->need,
-    //   'part'    => $pag->part,
-    //   'datas'   => $pag->pag_details,
-    //   'title'   => "PENGAMBILAN BARANG GUDANG (PAG)"
-    // ];
-    // dd($sendData);
-
-    $shows=["id","tanggal","no_pol","jenis","xto","amount"];
-    if($this->role != "Finance"){
-      $shows = array_merge($shows,[
-        'ticket_a_out_at','ticket_b_in_at',
-        'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
-        'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
-        'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
-      ]);
-    }
-
-    if($this->role == "Finance"){
-      $shows = array_merge($shows,[
-        "pv_no","pvr_no","pv_total","pv_datetime"
-      ]);
-    }
-    $newDetails = [];
-    $total_a_bruto = 0;
-    $total_a_tara = 0;
-    $total_a_netto = 0;
-    $total_b_bruto = 0;
-    $total_b_tara = 0;
-    $total_b_netto = 0;
-    $total_b_a_bruto = 0;
-    $total_b_a_tara = 0;
-    $total_b_a_netto = 0;
-    foreach ($ori["data"] as $key => $value) {
-      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
-      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
-      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
-      $ticket_a_tara = (float)$value["ticket_a_tara"];
-      $ticket_b_tara = (float)$value["ticket_b_tara"];
-      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
-      $ticket_a_netto = (float)$value["ticket_a_netto"];
-      $ticket_b_netto = (float)$value["ticket_b_netto"];
-      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
-
-      $total_a_bruto+=$ticket_a_bruto;
-      $total_a_tara+=$ticket_a_tara;
-      $total_a_netto+=$ticket_a_netto;
-
-      $total_b_bruto+=$ticket_b_bruto;
-      $total_b_tara+=$ticket_b_tara;
-      $total_b_netto+=$ticket_b_netto;
-
-      $limitSusut = 0.4;
-
-      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
-      $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
-      $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
-      $value['ticket_a_bruto']=number_format($ticket_a_bruto, 0,',','.');
-      $value['ticket_b_bruto']=number_format($ticket_b_bruto, 0,',','.');
-      $value['ticket_b_a_bruto']=block_negative($ticket_b_a_bruto, 0);
-      $value['ticket_b_a_bruto_persen_red']=abs($ticket_b_a_bruto_persen) >= $limitSusut ? 'color:red;' : '';
-      $value['ticket_b_a_bruto_persen']=block_negative($ticket_b_a_bruto_persen, 2);
-      $value['ticket_a_tara']=number_format($ticket_a_tara, 0,',','.');
-      $value['ticket_b_tara']=number_format($ticket_b_tara, 0,',','.');
-      $value['ticket_b_a_tara']=block_negative($ticket_b_a_tara, 0);
-      $value['ticket_b_a_tara_persen_red']=abs($ticket_b_a_tara_persen) >= $limitSusut ? 'color:red;' : '';
-      $value['ticket_b_a_tara_persen']=block_negative($ticket_b_a_tara_persen, 2);
-      $value['ticket_a_netto']=number_format($ticket_a_netto, 0,',','.');
-      $value['ticket_b_netto']=number_format($ticket_b_netto, 0,',','.');
-      $value['ticket_b_a_netto']=block_negative($ticket_b_a_netto, 0);
-      $value['ticket_b_a_netto_persen_red']=abs($ticket_b_a_netto_persen) >= $limitSusut ? 'color:red;' : '';
-      $value['ticket_b_a_netto_persen']=block_negative($ticket_b_a_netto_persen, 2);
-      $value['amount']=number_format((float)$value["amount"], 0,',','.');
-      $value['pv_total']=number_format((float)$value["pv_total"], 0,',','.');
-      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
-      array_push($newDetails,$value);
-    }
-
-    list($total_b_a_bruto, $total_b_a_bruto_persen) =  $this->genPersen($total_a_bruto,$total_b_bruto);
-    list($total_b_a_tara, $total_b_a_tara_persen) =  $this->genPersen($total_a_tara,$total_b_tara);
-    list($total_b_a_netto, $total_b_a_netto_persen) =  $this->genPersen($total_a_netto,$total_b_netto);
     
 
-    $ttl_a_tara=number_format($total_a_tara, 0,',','.');
-    $ttl_a_bruto=number_format($total_a_bruto, 0,',','.');
-    $ttl_a_netto=number_format($total_a_netto, 0,',','.');
+  //   // $sendData = [
+  //   //   'pag_no'  => $pag->no,
+  //   //   'created_at'    => $pag->created_at,
+  //   //   'updated_at'    => $pag->updated_at,
+  //   //   'proyek'  => $pag->project ?? "",
+  //   //   'need'    => $pag->need,
+  //   //   'part'    => $pag->part,
+  //   //   'datas'   => $pag->pag_details,
+  //   //   'title'   => "PENGAMBILAN BARANG GUDANG (PAG)"
+  //   // ];
+  //   // dd($sendData);
 
-    $ttl_b_tara=number_format($total_b_tara, 0,',','.');
-    $ttl_b_bruto=number_format($total_b_bruto, 0,',','.');
-    $ttl_b_netto=number_format($total_b_netto, 0,',','.');
+  //   $shows=["id","tanggal","no_pol","jenis","xto","amount"];
+  //   if($this->role != "Finance"){
+  //     $shows = array_merge($shows,[
+  //       'ticket_a_out_at','ticket_b_in_at',
+  //       'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
+  //       'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
+  //       'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
+  //     ]);
+  //   }
 
+  //   if($this->role == "Finance"){
+  //     $shows = array_merge($shows,[
+  //       "pv_no","pvr_no","pv_total","pv_datetime"
+  //     ]);
+  //   }
+  //   $newDetails = [];
+  //   $total_a_bruto = 0;
+  //   $total_a_tara = 0;
+  //   $total_a_netto = 0;
+  //   $total_b_bruto = 0;
+  //   $total_b_tara = 0;
+  //   $total_b_netto = 0;
+  //   $total_b_a_bruto = 0;
+  //   $total_b_a_tara = 0;
+  //   $total_b_a_netto = 0;
+  //   foreach ($ori["data"] as $key => $value) {
+  //     $ticket_a_bruto = (float)$value["ticket_a_bruto"];
+  //     $ticket_b_bruto = (float)$value["ticket_b_bruto"];
+  //     list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
+  //     $ticket_a_tara = (float)$value["ticket_a_tara"];
+  //     $ticket_b_tara = (float)$value["ticket_b_tara"];
+  //     list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
+  //     $ticket_a_netto = (float)$value["ticket_a_netto"];
+  //     $ticket_b_netto = (float)$value["ticket_b_netto"];
+  //     list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
 
-    $ttl_b_a_tara=block_negative($total_b_a_tara, 0);
-    $ttl_b_a_bruto=block_negative($total_b_a_bruto, 0);
-    $ttl_b_a_netto=block_negative($total_b_a_netto, 0);
+  //     $total_a_bruto+=$ticket_a_bruto;
+  //     $total_a_tara+=$ticket_a_tara;
+  //     $total_a_netto+=$ticket_a_netto;
+
+  //     $total_b_bruto+=$ticket_b_bruto;
+  //     $total_b_tara+=$ticket_b_tara;
+  //     $total_b_netto+=$ticket_b_netto;
+
+  //     $limitSusut = 0.4;
+
+  //     $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+  //     $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
+  //     $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
+  //     $value['ticket_a_bruto']=number_format($ticket_a_bruto, 0,',','.');
+  //     $value['ticket_b_bruto']=number_format($ticket_b_bruto, 0,',','.');
+  //     $value['ticket_b_a_bruto']=block_negative($ticket_b_a_bruto, 0);
+  //     $value['ticket_b_a_bruto_persen_red']=abs($ticket_b_a_bruto_persen) >= $limitSusut ? 'color:red;' : '';
+  //     $value['ticket_b_a_bruto_persen']=block_negative($ticket_b_a_bruto_persen, 2);
+  //     $value['ticket_a_tara']=number_format($ticket_a_tara, 0,',','.');
+  //     $value['ticket_b_tara']=number_format($ticket_b_tara, 0,',','.');
+  //     $value['ticket_b_a_tara']=block_negative($ticket_b_a_tara, 0);
+  //     $value['ticket_b_a_tara_persen_red']=abs($ticket_b_a_tara_persen) >= $limitSusut ? 'color:red;' : '';
+  //     $value['ticket_b_a_tara_persen']=block_negative($ticket_b_a_tara_persen, 2);
+  //     $value['ticket_a_netto']=number_format($ticket_a_netto, 0,',','.');
+  //     $value['ticket_b_netto']=number_format($ticket_b_netto, 0,',','.');
+  //     $value['ticket_b_a_netto']=block_negative($ticket_b_a_netto, 0);
+  //     $value['ticket_b_a_netto_persen_red']=abs($ticket_b_a_netto_persen) >= $limitSusut ? 'color:red;' : '';
+  //     $value['ticket_b_a_netto_persen']=block_negative($ticket_b_a_netto_persen, 2);
+  //     $value['amount']=number_format((float)$value["amount"], 0,',','.');
+  //     $value['pv_total']=number_format((float)$value["pv_total"], 0,',','.');
+  //     $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+  //     array_push($newDetails,$value);
+  //   }
+
+  //   list($total_b_a_bruto, $total_b_a_bruto_persen) =  $this->genPersen($total_a_bruto,$total_b_bruto);
+  //   list($total_b_a_tara, $total_b_a_tara_persen) =  $this->genPersen($total_a_tara,$total_b_tara);
+  //   list($total_b_a_netto, $total_b_a_netto_persen) =  $this->genPersen($total_a_netto,$total_b_netto);
     
-    $ttl_b_a_bruto_persen=block_negative($total_b_a_bruto_persen, 2);
-    $ttl_b_a_tara_persen=block_negative($total_b_a_tara_persen, 2);
-    $ttl_b_a_netto_persen=block_negative($total_b_a_netto_persen, 2);
 
-    // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+  //   $ttl_a_tara=number_format($total_a_tara, 0,',','.');
+  //   $ttl_a_bruto=number_format($total_a_bruto, 0,',','.');
+  //   $ttl_a_netto=number_format($total_a_netto, 0,',','.');
 
-    $date = new \DateTime();
-    $filename = $date->format("YmdHis");
-    Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
-    $pdf = PDF::loadView('pdf.trx_trp', ["data"=>$newDetails,"shows"=>$shows,"info"=>[
-      "from"=>date("d-m-Y",strtotime($request->date_from)),
-      "to"=>date("d-m-Y",strtotime($request->date_to)),
-      "now"=>date("d-m-Y H:i:s"),
-      "ttl_a_bruto"=>$ttl_a_bruto,
-      "ttl_a_tara"=>$ttl_a_tara,
-      "ttl_a_netto"=>$ttl_a_netto,
-      "ttl_b_bruto"=>$ttl_b_bruto,
-      "ttl_b_tara"=>$ttl_b_tara,
-      "ttl_b_netto"=>$ttl_b_netto,
-      "ttl_b_a_bruto"=>$ttl_b_a_bruto,
-      "ttl_b_a_tara"=>$ttl_b_a_tara,
-      "ttl_b_a_netto"=>$ttl_b_a_netto,
-      // "ttl_b_a_bruto_persen"=>$ttl_b_a_bruto_persen,
-      // "ttl_b_a_tara_persen"=>$ttl_b_a_tara_persen,
-      // "ttl_b_a_netto_persen"=>$ttl_b_a_netto_persen,
-    ]])->setPaper('a4', 'landscape');
+  //   $ttl_b_tara=number_format($total_b_tara, 0,',','.');
+  //   $ttl_b_bruto=number_format($total_b_bruto, 0,',','.');
+  //   $ttl_b_netto=number_format($total_b_netto, 0,',','.');
 
 
-    $mime = MyLib::mime("pdf");
-    $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
-
-    $result = [
-      "contentType" => $mime["contentType"],
-      "data" => $bs64,
-      "dataBase64" => $mime["dataBase64"] . $bs64,
-      "filename" => $filename . "." . $mime["ext"],
-    ];
-    return $result;
-  }
-
-  public function downloadExcel(Request $request){
-    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
-
-    set_time_limit(0);
-    $callGet = $this->index($request, true);
-    if ($callGet->getStatusCode() != 200) return $callGet;
-    $ori = json_decode(json_encode($callGet), true)["original"];
-    $data = $ori["data"];
+  //   $ttl_b_a_tara=block_negative($total_b_a_tara, 0);
+  //   $ttl_b_a_bruto=block_negative($total_b_a_bruto, 0);
+  //   $ttl_b_a_netto=block_negative($total_b_a_netto, 0);
     
-    $shows=["id","tanggal","no_pol","jenis","xto","amount"];
-    if($this->role != "Finance"){
-      $shows = array_merge($shows,[
-        'ticket_a_out_at','ticket_b_in_at',
-        'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
-        'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
-        'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
-      ]);
-    }
+  //   $ttl_b_a_bruto_persen=block_negative($total_b_a_bruto_persen, 2);
+  //   $ttl_b_a_tara_persen=block_negative($total_b_a_tara_persen, 2);
+  //   $ttl_b_a_netto_persen=block_negative($total_b_a_netto_persen, 2);
+
+  //   // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+
+  //   $date = new \DateTime();
+  //   $filename = $date->format("YmdHis");
+  //   Pdf::setOption(['dpi' => 150, 'defaultFont' => 'sans-serif']);
+  //   $pdf = PDF::loadView('pdf.trx_trp', ["data"=>$newDetails,"shows"=>$shows,"info"=>[
+  //     "from"=>date("d-m-Y",strtotime($request->date_from)),
+  //     "to"=>date("d-m-Y",strtotime($request->date_to)),
+  //     "now"=>date("d-m-Y H:i:s"),
+  //     "ttl_a_bruto"=>$ttl_a_bruto,
+  //     "ttl_a_tara"=>$ttl_a_tara,
+  //     "ttl_a_netto"=>$ttl_a_netto,
+  //     "ttl_b_bruto"=>$ttl_b_bruto,
+  //     "ttl_b_tara"=>$ttl_b_tara,
+  //     "ttl_b_netto"=>$ttl_b_netto,
+  //     "ttl_b_a_bruto"=>$ttl_b_a_bruto,
+  //     "ttl_b_a_tara"=>$ttl_b_a_tara,
+  //     "ttl_b_a_netto"=>$ttl_b_a_netto,
+  //     // "ttl_b_a_bruto_persen"=>$ttl_b_a_bruto_persen,
+  //     // "ttl_b_a_tara_persen"=>$ttl_b_a_tara_persen,
+  //     // "ttl_b_a_netto_persen"=>$ttl_b_a_netto_persen,
+  //   ]])->setPaper('a4', 'landscape');
+
+
+  //   $mime = MyLib::mime("pdf");
+  //   $bs64 = base64_encode($pdf->download($filename . "." . $mime["ext"]));
+
+  //   $result = [
+  //     "contentType" => $mime["contentType"],
+  //     "data" => $bs64,
+  //     "dataBase64" => $mime["dataBase64"] . $bs64,
+  //     "filename" => $filename . "." . $mime["ext"],
+  //   ];
+  //   return $result;
+  // }
+
+  // public function downloadExcel(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+
+  //   set_time_limit(0);
+  //   $callGet = $this->index($request, true);
+  //   if ($callGet->getStatusCode() != 200) return $callGet;
+  //   $ori = json_decode(json_encode($callGet), true)["original"];
+  //   $data = $ori["data"];
     
-    if($this->role == "Finance"){
-      $shows = array_merge($shows,[
-        "pv_no","pvr_no","pv_total","pv_datetime"
-      ]);
-    }
+  //   $shows=["id","tanggal","no_pol","jenis","xto","amount"];
+  //   if($this->role != "Finance"){
+  //     $shows = array_merge($shows,[
+  //       'ticket_a_out_at','ticket_b_in_at',
+  //       'ticket_a_bruto','ticket_b_bruto','ticket_b_a_bruto','ticket_b_a_bruto_persen',
+  //       'ticket_a_tara','ticket_b_tara','ticket_b_a_tara','ticket_b_a_tara_persen',
+  //       'ticket_a_netto','ticket_b_netto','ticket_b_a_netto','ticket_b_a_netto_persen',
+  //     ]);
+  //   }
+    
+  //   if($this->role == "Finance"){
+  //     $shows = array_merge($shows,[
+  //       "pv_no","pvr_no","pv_total","pv_datetime"
+  //     ]);
+  //   }
 
-    $newDetails = [];
+  //   $newDetails = [];
 
-    foreach ($ori["data"] as $key => $value) {
-      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
-      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
-      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
-      $ticket_a_tara = (float)$value["ticket_a_tara"];
-      $ticket_b_tara = (float)$value["ticket_b_tara"];
-      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
-      $ticket_a_netto = (float)$value["ticket_a_netto"];
-      $ticket_b_netto = (float)$value["ticket_b_netto"];
-      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
+  //   foreach ($ori["data"] as $key => $value) {
+  //     $ticket_a_bruto = (float)$value["ticket_a_bruto"];
+  //     $ticket_b_bruto = (float)$value["ticket_b_bruto"];
+  //     list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
+  //     $ticket_a_tara = (float)$value["ticket_a_tara"];
+  //     $ticket_b_tara = (float)$value["ticket_b_tara"];
+  //     list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
+  //     $ticket_a_netto = (float)$value["ticket_a_netto"];
+  //     $ticket_b_netto = (float)$value["ticket_b_netto"];
+  //     list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
 
-      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
-      $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
-      $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
-      $value['ticket_a_bruto']=$ticket_a_bruto;
-      $value['ticket_b_bruto']=$ticket_b_bruto;
-      $value['ticket_b_a_bruto']=$ticket_b_a_bruto;
-      $value['ticket_b_a_bruto_persen']=$ticket_b_a_bruto_persen;
-      $value['ticket_a_tara']=$ticket_a_tara;
-      $value['ticket_b_tara']=$ticket_b_tara;
-      $value['ticket_b_a_tara']=$ticket_b_a_tara;
-      $value['ticket_b_a_tara_persen']=$ticket_b_a_tara_persen;
-      $value['ticket_a_netto']=$ticket_a_netto;
-      $value['ticket_b_netto']=$ticket_b_netto;
-      $value['ticket_b_a_netto']=$ticket_b_a_netto;
-      $value['ticket_b_a_netto_persen']=$ticket_b_a_netto_persen;
-      $value['amount']=$value["amount"];
-      $value['pv_total']=$value["pv_total"];
-      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
-      array_push($newDetails,$value);
-    }
+  //     $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+  //     $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
+  //     $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
+  //     $value['ticket_a_bruto']=$ticket_a_bruto;
+  //     $value['ticket_b_bruto']=$ticket_b_bruto;
+  //     $value['ticket_b_a_bruto']=$ticket_b_a_bruto;
+  //     $value['ticket_b_a_bruto_persen']=$ticket_b_a_bruto_persen;
+  //     $value['ticket_a_tara']=$ticket_a_tara;
+  //     $value['ticket_b_tara']=$ticket_b_tara;
+  //     $value['ticket_b_a_tara']=$ticket_b_a_tara;
+  //     $value['ticket_b_a_tara_persen']=$ticket_b_a_tara_persen;
+  //     $value['ticket_a_netto']=$ticket_a_netto;
+  //     $value['ticket_b_netto']=$ticket_b_netto;
+  //     $value['ticket_b_a_netto']=$ticket_b_a_netto;
+  //     $value['ticket_b_a_netto_persen']=$ticket_b_a_netto_persen;
+  //     $value['amount']=$value["amount"];
+  //     $value['pv_total']=$value["pv_total"];
+  //     $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+  //     array_push($newDetails,$value);
+  //   }
 
-    // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
+  //   // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
 
-    $date = new \DateTime();
-    $filename=$date->format("YmdHis").'-trx_trp'."[".$request["date_from"]."-".$request["date_to"]."]";
+  //   $date = new \DateTime();
+  //   $filename=$date->format("YmdHis").'-trx_trp'."[".$request["date_from"]."-".$request["date_to"]."]";
 
-    $mime=MyLib::mime("xlsx");
-    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails,"shows"=>$shows],'excel.trx_trp'), $mime["exportType"]));
+  //   $mime=MyLib::mime("xlsx");
+  //   // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+  //   $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails,"shows"=>$shows],'excel.trx_trp'), $mime["exportType"]));
 
 
-    $result = [
-      "contentType" => $mime["contentType"],
-      "data" => $bs64,
-      "dataBase64" => $mime["dataBase64"] . $bs64,
-      "filename" => $filename . "." . $mime["ext"],
-    ];
-    return $result;
-  }
+  //   $result = [
+  //     "contentType" => $mime["contentType"],
+  //     "data" => $bs64,
+  //     "dataBase64" => $mime["dataBase64"] . $bs64,
+  //     "filename" => $filename . "." . $mime["ext"],
+  //   ];
+  //   return $result;
+  // }
 
   // public function validasi(Request $request){
   //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5','trp_trx.ticket.val_ticket']);

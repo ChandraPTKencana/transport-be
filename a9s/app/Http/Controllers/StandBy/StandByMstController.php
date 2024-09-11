@@ -30,7 +30,6 @@ use Illuminate\Support\Facades\DB;
 class StandbyMstController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
@@ -39,7 +38,6 @@ class StandbyMstController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
 
   }
@@ -370,8 +368,8 @@ class StandbyMstController extends Controller
       
       if(
         ($model_query->val==1 && $model_query->val1==1) || 
-        ($this->role=="PabrikTransport" && $model_query->val == 1) ||
-        ($this->role=="Logistic" && $model_query->val1 == 1)
+        (MyAdmin::checkScope($this->permissions, 'standby_mst.val',true) && $model_query->val == 1) ||
+        (MyAdmin::checkScope($this->permissions, 'standby_mst.val1',true) && $model_query->val1 == 1)
       ) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
       

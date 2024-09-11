@@ -33,7 +33,6 @@ use App\Models\MySql\StandbyTrx;
 class SalaryBonusController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
   private $syslog_db = 'salary_bonus';
@@ -42,7 +41,6 @@ class SalaryBonusController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
 
   }
@@ -223,7 +221,6 @@ class SalaryBonusController extends Controller
     // return response()->json([
     //   "message" => "Hanya yang membuat transaksi yang boleh melakukan pergantian atau konfirmasi data",
     // ], 400);
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
 
     $model_query = SalaryBonus::with([
     'employee'
@@ -236,7 +233,6 @@ class SalaryBonusController extends Controller
     //   ], 400);
     // }
     
-    // if($this->role=='ClientPabrik' || $this->role=='KTU')
     // MyAdmin::checkReturnOrFailLocation($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
 
     // if($model_query->ref_id!=null){
@@ -478,7 +474,6 @@ class SalaryBonusController extends Controller
       //   throw new \Exception("Hapus data ditolak. Data sudah dikonfirmasi",1);
       // }
       
-      // if($this->role=='ClientPabrik' || $this->role=='KTU')
       // MyAdmin::checkReturnOrFailLocation($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
   
       $model_query->deleted = 1;
@@ -630,7 +625,6 @@ use App\Models\MySql\StandbyTrx;
 class SalaryBonusController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
   private $syslog_db = 'salary_bonus';
@@ -639,7 +633,6 @@ class SalaryBonusController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
 
   }
@@ -820,7 +813,6 @@ class SalaryBonusController extends Controller
     // return response()->json([
     //   "message" => "Hanya yang membuat transaksi yang boleh melakukan pergantian atau konfirmasi data",
     // ], 400);
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
 
     $model_query = SalaryBonus::with([
     'employee'
@@ -833,8 +825,6 @@ class SalaryBonusController extends Controller
     //   ], 400);
     // }
     
-    // if($this->role=='ClientPabrik' || $this->role=='KTU')
-    // MyAdmin::checkReturnOrFailattachment_1($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
 
     // if($model_query->ref_id!=null){
     //   return response()->json([
@@ -1057,8 +1047,6 @@ class SalaryBonusController extends Controller
       //   throw new \Exception("Hapus data ditolak. Data sudah dikonfirmasi",1);
       // }
       
-      // if($this->role=='ClientPabrik' || $this->role=='KTU')
-      // MyAdmin::checkReturnOrFailattachment_1($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
   
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;

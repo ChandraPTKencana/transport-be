@@ -29,7 +29,6 @@ use App\Http\Resources\MySql\UjalanResource;
 class UjalanController extends Controller
 {
   private $admin;
-  private $role;
   private $admin_id;
   private $permissions;
 
@@ -37,7 +36,6 @@ class UjalanController extends Controller
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
     $this->permissions = $this->admin->the_user->listPermissions();
 
   }
@@ -208,7 +206,6 @@ class UjalanController extends Controller
     // return response()->json([
     //   "message" => "Hanya yang membuat transaksi yang boleh melakukan pergantian atau konfirmasi data",
     // ], 400);
-    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
 
     $model_query = Ujalan::with([
     'details'=>function($q){
@@ -227,8 +224,6 @@ class UjalanController extends Controller
     //   ], 400);
     // }
     
-    // if($this->role=='ClientPabrik' || $this->role=='KTU')
-    // MyAdmin::checkReturnOrFailLocation($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
 
     // if($model_query->ref_id!=null){
     //   return response()->json([
@@ -570,8 +565,8 @@ class UjalanController extends Controller
       
       if(
         ($model_query->val==1 && $model_query->val1==1) || 
-        ($this->role=="Logistic" && $model_query->val == 1) ||
-        ($this->role=="PabrikTransport" && $model_query->val1 == 1)
+        (MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && $model_query->val == 1) ||
+        (MyAdmin::checkScope($this->permissions, 'ujalan.val1',true) && $model_query->val1 == 1)
       ) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
@@ -636,8 +631,6 @@ class UjalanController extends Controller
       // }
 
       // $warehouse_id = $request->warehouse_id;
-      // if($this->role=='ClientPabrik' || $this->role=='KTU')
-      // $warehouse_id = MyAdmin::checkReturnOrFailLocation($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
   
       // $dt_before = $this->getLastDataConfirmed($warehouse_id,$request->item_id);
       // if($dt_before && $dt_before->id != $model_query->id){
@@ -1234,8 +1227,6 @@ class UjalanController extends Controller
       //   throw new \Exception("Hapus data ditolak. Data sudah dikonfirmasi",1);
       // }
       
-      // if($this->role=='ClientPabrik' || $this->role=='KTU')
-      // MyAdmin::checkReturnOrFailLocation($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
   
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;

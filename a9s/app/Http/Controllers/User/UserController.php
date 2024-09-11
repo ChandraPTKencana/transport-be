@@ -23,13 +23,11 @@ class UserController extends Controller
 {
   private $admin;
   private $admin_id;
-  private $role;
   private $permissions;
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
-    $this->role = $this->admin->the_user->hak_akses;
     $this->admin_id = $this->admin->the_user->id;
     $this->permissions = $this->admin->the_user->listPermissions();
 
@@ -94,13 +92,6 @@ class UserController extends Controller
         $model_query = $model_query->orderBy("username", $sort_lists["username"]);
         if (count($first_row) > 0) {
           $model_query = $model_query->where("username",$sort_symbol,$first_row["username"]);
-        }
-      }
-
-      if (isset($sort_lists["hak_akses"])) {
-        $model_query = $model_query->orderBy("hak_akses", $sort_lists["hak_akses"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("hak_akses",$sort_symbol,$first_row["hak_akses"]);
         }
       }
 
