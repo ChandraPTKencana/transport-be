@@ -310,6 +310,8 @@ class EmployeeController extends Controller
 
       $SYSOLD                     = clone($model_query);
 
+      $fileType = $model_query->attachment_1_type;
+
       if($request->hasFile('attachment_1')){
         $file = $request->file('attachment_1');
         $path = $file->getRealPath();
