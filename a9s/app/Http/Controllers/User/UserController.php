@@ -118,7 +118,7 @@ class UserController extends Controller
       //   },$sort_lists["auth"]);
       // }
     } else {
-      $model_query = $model_query->orderBy('id', 'ASC');
+      $model_query = $model_query->orderBy('username', 'ASC');
     }
     //======================================================================================================
     // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";

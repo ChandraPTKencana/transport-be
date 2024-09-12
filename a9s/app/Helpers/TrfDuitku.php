@@ -48,8 +48,8 @@ class TrfDuitku {
 
         $params_string = json_encode($params);
         MyLog::logging($params,"discheck");
-        //$url = 'https://passport.duitku.com/webapi/api/disbursement/inquiryclearing'
-        $url = 'https://sandbox.duitku.com/webapi/api/disbursement/inquiryclearingsandbox';
+        $url = 'https://passport.duitku.com/webapi/api/disbursement/inquiryclearing';
+        // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/inquiryclearingsandbox';
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, $url); 
@@ -127,8 +127,8 @@ class TrfDuitku {
         );
 
         $params_string = json_encode($params);
-        //$url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
-        $url = 'https://sandbox.duitku.com/webapi/api/disbursement/transferclearingsandbox';
+        $url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
+        // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/transferclearingsandbox';
     
         $ch = curl_init();
 

@@ -56,7 +56,7 @@ class RunCom extends Command
         // PaymentMethodDB::insert('insert into users (id, name) values (?, ?)', [1, 'Dayle'])
         PaymentMethod::insert([
             "name"=>"TRANSFER-DUITKU",
-            "account_code"=>"01.100.005",
+            "account_code"=>"01.111.018",
         ]);
 
         $this->info("Finish\n ");

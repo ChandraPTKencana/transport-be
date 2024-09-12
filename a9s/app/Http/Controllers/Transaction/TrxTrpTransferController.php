@@ -347,7 +347,7 @@ class TrxTrpTransferController extends Controller
   public function validasiAndTransfer(Request $request){
     $this->checkGATimeout();
 
-    MyAdmin::checkScope($this->permissions, 'trp_trx.val5');
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val4','trp_trx.val5']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -494,6 +494,13 @@ class TrxTrpTransferController extends Controller
       if((!isset($kernet) && $model_query->duitku_supir_trf_res_code=="00") || (isset($kernet) && $model_query->duitku_supir_trf_res_code=="00" && $model_query->duitku_kernet_trf_res_code=="00")){
         $model_query->received_payment=1;
 
+
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true)){
+          $model_query->val4 = 1;
+          $model_query->val4_user = $this->admin_id;
+          $model_query->val4_at = $t_stamp;
+        }
+
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true)){
           $model_query->val5 = 1;
           $model_query->val5_user = $this->admin_id;
@@ -517,8 +524,26 @@ class TrxTrpTransferController extends Controller
         }
       }
 
+      if($model_query->duitku_supir_trf_res_code!=="00"){
+        $msg = TrfDuitku::info_inv($model_query->duitku_supir_trf_res_code);
+        if($msg==""){
+          array_push($error,"Supir:Unknown Error");
+        }else{
+          array_push($error,"Supir:".$msg);
+        }
+      }
+
       if(isset($kernet) && $model_query->duitku_kernet_inv_res_code!=="00"){
         $msg = TrfDuitku::info_inv($model_query->duitku_kernet_inv_res_code);
+        if($msg==""){
+          array_push($error,"Kernet:Unknown Error");
+        }else{
+          array_push($error,"Kernet:".$msg);
+        }
+      }
+
+      if(isset($kernet) && $model_query->duitku_kernet_trf_res_code!=="00"){
+        $msg = TrfDuitku::info_inv($model_query->duitku_kernet_trf_res_code);
         if($msg==""){
           array_push($error,"Kernet:Unknown Error");
         }else{
@@ -534,6 +559,10 @@ class TrxTrpTransferController extends Controller
 
       return response()->json([
         "message" => "Proses validasi data berhasil",
+        "val4"=>$model_query->val4,
+        "val4_user"=>$model_query->val4_user,
+        "val4_at"=>$model_query->val4_at,
+        "val4_by"=>$model_query->val4_user ? new IsUserResource(IsUser::find($model_query->val4_user)) : null,
         "val5"=>$model_query->val5,
         "val5_user"=>$model_query->val5_user,
         "val5_at"=>$model_query->val5_at,
