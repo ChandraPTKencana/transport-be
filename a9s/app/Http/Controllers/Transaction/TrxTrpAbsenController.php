@@ -490,7 +490,6 @@ class TrxTrpAbsenController extends Controller
           "created_user"=>$this->admin_id,
           "is_manual"=>1,
         ]);
-
       }
 
       if($img_arrive && isset($blob_img_arrive)){
@@ -504,6 +503,9 @@ class TrxTrpAbsenController extends Controller
           "created_user"=>$this->admin_id,
           "is_manual"=>1,
         ]);
+      }elseif(!$img_arrive){
+        $OSYSNOTE.="Hapus Gambar Tiba \n";
+        TrxAbsen::where("status","T")->where('trx_trp_id',$model_query->id)->delete();
       }
 
       if($img_return && isset($blob_img_return)){
@@ -517,6 +519,9 @@ class TrxTrpAbsenController extends Controller
           "created_user"=>$this->admin_id,
           "is_manual"=>1,
         ]);
+      }elseif(!$img_return){
+        $OSYSNOTE.="Hapus Gambar Kembali \n";
+        TrxAbsen::where("status","K")->where('trx_trp_id',$model_query->id)->delete();
       }
 
       if($img_till && isset($blob_img_till)){
@@ -530,6 +535,9 @@ class TrxTrpAbsenController extends Controller
           "created_user"=>$this->admin_id,
           "is_manual"=>1,
         ]);
+      }elseif(!$img_till){
+        $OSYSNOTE.="Hapus Gambar Sampai \n";
+        TrxAbsen::where("status","S")->where('trx_trp_id',$model_query->id)->delete();
       }
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);

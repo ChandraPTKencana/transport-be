@@ -3117,6 +3117,8 @@ class TrxTrpTicketController extends Controller
                   
                   if($af['ticket_b_no'] && $af['ticket_b_no'] !== $gdt['TicketNo']){
                     break;
+                  }elseif($af['ticket_b_no'] && $af['ticket_b_no'] == $gdt['TicketNo']){
+                    array_shift( $get_data_tickets );
                   }elseif (!$af['ticket_b_no']) {
   
                     $trx_trp = TrxTrp::where("id",$af->id)->first();
@@ -3191,7 +3193,8 @@ class TrxTrpTicketController extends Controller
                 if($af['transition_type']!='To'){
 
                   if($af['ticket_a_no'] && $af['ticket_a_no'] !== $gdt['TicketNo']){
-                    break;
+                    continue;
+                    // break;
                   }elseif($af['ticket_a_no'] && $af['ticket_a_no'] == $gdt['TicketNo']){
                     array_shift( $get_data_tickets );
                   }elseif (!$af['ticket_a_no']) {
