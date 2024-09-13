@@ -204,7 +204,8 @@ class EmployeeController extends Controller
   public function store(EmployeeRequest $request)
   {
     MyAdmin::checkScope($this->permissions, 'employee.create');
-
+    set_time_limit(0);
+    
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
@@ -277,7 +278,7 @@ class EmployeeController extends Controller
   public function update(EmployeeRequest $request)
   {
     MyAdmin::checkScope($this->permissions, 'employee.modify');
-
+    set_time_limit(0);
     $t_stamp = date("Y-m-d H:i:s");
     $attachment_1_preview = $request->attachment_1_preview;
     $fileType = null;
