@@ -3570,7 +3570,7 @@ class TrxTrpTicketController extends Controller
 
     $table2 = DB::table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
 
-    $final = $table1->union($table2);
+    $final = $table1->unionAll($table2);
 
     $querySql = $final->toSql();
      
