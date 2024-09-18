@@ -2287,6 +2287,15 @@ class TrxTrpController extends Controller
 
     $sql = \App\Models\MySql\UjalanDetail2::selectRaw('SUM(qty*amount) as total')->where("id_uj",$trx_trp->id_uj)->first();
     $amount_paid = $sql->total; // call from child
+
+    // Admin Cost & Variable
+    if($trx_trp->payment_method->id==2){
+      $adm_cost = 2500;
+      $adm_qty = ($supir && $kernet) ? 2 : 1;
+
+      $amount_paid += ($adm_cost * $adm_qty);
+    }
+
     $exclude_in_ARAP = 0;
     $login_name = $this->admin->the_user->username;
     $expense_or_revenue_type_id=0;
@@ -2394,13 +2403,13 @@ class TrxTrpController extends Controller
     if($trx_trp->payment_method->id==2){
       $admin_cost_code=env("PVR_ADMIN_COST");
   
-      $admin_cost_db = DB::connection('sqlsrv')->table('FI_BankAccounts')
-      ->select('BankAccountID')
-      ->where("bankaccountcode",$admin_cost_code)
+      $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
+      ->select('AccountID')
+      ->where("AccountCode",$admin_cost_code)
       ->first();
-      if(!$admin_cost_db) throw new \Exception("Bank account code tidak terdaftar ,segera infokan ke tim IT",1);
+      if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
 
-      $adm_cost_id = $admin_cost_db->BankAccountID;
+      $adm_cost_id = $admin_cost_db->AccountID;
       $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
       ->select('VoucherID')
       ->where("VoucherID",$d_voucher_id)
@@ -2408,14 +2417,12 @@ class TrxTrpController extends Controller
       ->first();
 
       if(!$adm_fee_exists){
-        $adm_cost = 2500;
-  
-        $d_description = "Biaya Admin";
-        $d_amount = $adm_cost;
-        $d_account_id = $adm_cost_id;
-        $d_dept = '112';
-        $d_qty=1;
-        $d_unit_price=$adm_cost;
+        $d_description  = "Biaya Admin";
+        $d_account_id   = $adm_cost_id;
+        $d_dept         = '112';
+        $d_qty          = $adm_qty;
+        $d_unit_price   = $adm_cost;
+        $d_amount       = $d_qty * $d_unit_price;
   
         DB::connection('sqlsrv')->update("exec 
         USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
