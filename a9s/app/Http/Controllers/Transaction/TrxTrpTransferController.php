@@ -347,7 +347,7 @@ class TrxTrpTransferController extends Controller
   public function validasiAndTransfer(Request $request){
     $this->checkGATimeout();
 
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val4','trp_trx.val5']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.transfer.do_transfer']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
