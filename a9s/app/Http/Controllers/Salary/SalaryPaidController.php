@@ -539,7 +539,7 @@ class SalaryPaidController extends Controller
     $kerajinan_k=200000;
 
 
-    $employees = Employee::verified()->available()->where('name',"!=","BLANK")->get();
+    $employees = Employee::exclude(['attachment_1','attachment_2'])->verified()->available()->where('name',"!=","BLANK")->get();
     $dt_dtl = [];
 
     foreach ($employees as $v) {
@@ -630,7 +630,7 @@ class SalaryPaidController extends Controller
 
       if(count($dt_dtl)==0 || $search===false){
 
-        $emp = Employee::where("id",$v->employee_id)->first();
+        $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id",$v->employee_id)->first();
 
         array_push($dt_dtl,[
           "salary_paid_id" => $model_query->id,

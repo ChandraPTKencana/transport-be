@@ -24,7 +24,7 @@ class ExtraMoneyTrx extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id', 'id');
+        return $this->belongsTo(Employee::class, 'employee_id', 'id')->exclude(['attachment_1','attachment_2']);
     }
 
     public function val1_by()

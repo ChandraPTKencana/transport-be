@@ -48,7 +48,7 @@ class ExtraMoneyTrxController extends Controller
     $list_extra_money = \App\Models\MySql\ExtraMoney::selectRaw("*,qty * nominal as total")->where("deleted",0)->get();
     // $list_extra_money = \App\Models\MySql\ExtraMoney::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
-    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
+    $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
     
     return response()->json([
       "list_vehicle" => $list_vehicle,
@@ -309,7 +309,7 @@ class ExtraMoneyTrxController extends Controller
     try {
 
       $model_query                      = new ExtraMoneyTrx();
-      $employee = \App\Models\MySql\Employee::where("id",$request->employee_id)
+      $employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where("id",$request->employee_id)
       ->where("deleted",0)
       ->lockForUpdate()
       ->first();
@@ -398,7 +398,7 @@ class ExtraMoneyTrxController extends Controller
       if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
       
-      $employee = \App\Models\MySql\Employee::where("id",$request->employee_id)
+      $employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where("id",$request->employee_id)
       ->where("deleted",0)
       ->lockForUpdate()
       ->first();

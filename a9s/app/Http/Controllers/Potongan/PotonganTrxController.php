@@ -47,7 +47,7 @@ class PotonganTrxController extends Controller
     if(!$potongan_mst_id) 
     throw new MyException(["message" => "Silahkan refresh halaman terlebih dahulu"], 400);
 
-    if(!PotonganMst::where('id',$potongan_mst_id)->first())
+    if(!PotonganMst::exclude(['attachment_1','attachment_2'])->where('id',$potongan_mst_id)->first())
     throw new MyException(["message" => "Ada data yang tidak sesuai"], 400);
 
 
@@ -199,7 +199,7 @@ class PotonganTrxController extends Controller
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
-      $model_query1                = PotonganMst::where("id",$request->potongan_mst_id)->lockForUpdate()->first();
+      $model_query1                = PotonganMst::exclude(['attachment_1','attachment_2'])->where("id",$request->potongan_mst_id)->lockForUpdate()->first();
       $SYSOLD                      = clone($model_query1);
       if($model_query1->remaining_cut < $request->nominal_cut)
       {
@@ -258,7 +258,7 @@ class PotonganTrxController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query1               = PotonganMst::where("id",$request->potongan_mst_id)->lockForUpdate()->first();
+      $model_query1               = PotonganMst::exclude(['attachment_1','attachment_2'])->where("id",$request->potongan_mst_id)->lockForUpdate()->first();
       $SYSOLD1                    = clone($model_query1);
 
       $model_query                = PotonganTrx::where("id",$request->id)->lockForUpdate()->first();
@@ -385,14 +385,14 @@ class PotonganTrxController extends Controller
     if(!$id) 
     throw new MyException(["message" => "Silahkan refresh halaman terlebih dahulu"], 400);
     
-    if(!PotonganMst::where('id',$id)->first())
+    if(!PotonganMst::exclude(['attachment_1','attachment_2'])->where('id',$id)->first())
     throw new MyException(["message" => "Ada data yang tidak sesuai"], 400);
     $t_stamp=date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
       
 
-      $model_query = PotonganMst::where("id",$id)->lockForUpdate()->first();
+      $model_query = PotonganMst::exclude(['attachment_1','attachment_2'])->where("id",$id)->lockForUpdate()->first();
       $model_query1 = PotonganTrx::selectRaw('sum(nominal_cut) as paid')->where("potongan_mst_id",$id)->where("deleted",0)->lockForUpdate()->first();
       $paid = 0; 
       if($model_query1){

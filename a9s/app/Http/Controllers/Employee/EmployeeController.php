@@ -182,7 +182,8 @@ class EmployeeController extends Controller
     }
 
 
-    $model_query = $model_query->select("id","val","val_user","val_at","name","role","ktp_no","sim_no","bank_id","rek_no","rek_name","phone_number","created_at","updated_at","created_user","updated_user","attachment_1_type");
+    $model_query = $model_query->exclude(["attachment_1"]);
+
     $model_query = $model_query->where("deleted",0)->with('bank')->get();
 
     return response()->json([
@@ -211,14 +212,14 @@ class EmployeeController extends Controller
     try {
       $ktp_no = MyLib::emptyStrToNull($request->ktp_no);
       if($ktp_no!=null){
-        $emp = Employee::whereNotNull("ktp_no")->where('ktp_no',$ktp_no)->first();
+        $emp = Employee::exclude(['attachment_1','attachment_2'])->whereNotNull("ktp_no")->where('ktp_no',$ktp_no)->first();
         if($emp)
         throw new \Exception("No KTP Telah Terdaftar",1);
       }
 
       $sim_no = MyLib::emptyStrToNull($request->sim_no);
       if($sim_no!=null){
-        $emp = Employee::whereNotNull("sim_no")->where('sim_no',$sim_no)->first();
+        $emp = Employee::exclude(['attachment_1','attachment_2'])->whereNotNull("sim_no")->where('sim_no',$sim_no)->first();
         if($emp)
         throw new \Exception("No SIM Telah Terdaftar",1);
       }
@@ -288,14 +289,14 @@ class EmployeeController extends Controller
     try {
       $ktp_no = MyLib::emptyStrToNull($request->ktp_no);
       if($ktp_no!=null){
-        $emp = Employee::where("id","!=",$request->id)->whereNotNull("ktp_no")->where('ktp_no',$ktp_no)->first();
+        $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id","!=",$request->id)->whereNotNull("ktp_no")->where('ktp_no',$ktp_no)->first();
         if($emp)
         throw new \Exception("No KTP Telah Terdaftar",1);
       }
 
       $sim_no = MyLib::emptyStrToNull($request->sim_no);
       if($sim_no!=null){
-        $emp = Employee::where("id","!=",$request->id)->whereNotNull("sim_no")->where('sim_no',$sim_no)->first();
+        $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id","!=",$request->id)->whereNotNull("sim_no")->where('sim_no',$sim_no)->first();
         if($emp)
         throw new \Exception("No SIM Telah Terdaftar",1);
       }
@@ -382,7 +383,7 @@ class EmployeeController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
-      $model_query = Employee::where("id",$request->id)->lockForUpdate()->first();
+      $model_query = Employee::exclude(['attachment_1','attachment_2'])->where("id",$request->id)->lockForUpdate()->first();
 
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
@@ -455,7 +456,7 @@ class EmployeeController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = Employee::lockForUpdate()->find($request->id);
+      $model_query = Employee::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
       if($model_query->val){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }

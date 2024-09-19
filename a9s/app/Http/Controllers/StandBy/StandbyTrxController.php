@@ -48,7 +48,7 @@ class StandbyTrxController extends Controller
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');
 
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
-    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
+    $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
     
     return response()->json([
       "list_standby_mst" => $list_standby_mst,
@@ -336,13 +336,13 @@ class StandbyTrxController extends Controller
     try {
 
       if($request->supir_id){
-        $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+        $supir_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->supir_id)->available()->verified()->first();
         if(!$supir_dt)
         throw new \Exception("Supir tidak terdaftar",1);
       }
 
       if($request->kernet_id){
-        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        $kernet_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->kernet_id)->available()->verified()->first();
         if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
@@ -526,13 +526,13 @@ class StandbyTrxController extends Controller
     try {
 
       if($request->supir_id){
-        $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+        $supir_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->supir_id)->available()->verified()->first();
         if(!$supir_dt)
         throw new \Exception("Supir tidak terdaftar",1);
       }
 
       if($request->kernet_id){
-        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        $kernet_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->kernet_id)->available()->verified()->first();
         if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }

@@ -44,7 +44,7 @@ class PotonganMstController extends Controller
     MyAdmin::checkMultiScope($this->permissions, ['potongan_mst.create','potongan_mst.modify']);
 
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
-    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet'])->get();
+    $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet'])->get();
     
     return response()->json([
       "list_vehicle" => $list_vehicle,
@@ -185,7 +185,7 @@ class PotonganMstController extends Controller
       $model_query = $model_query->where("role", 'like', '%' . $request->role . '%');
     }
 
-    $model_query = $model_query->select("id","kejadian","employee_id","no_pol","nominal","nominal_cut","remaining_cut","created_at","updated_at","status","val","val_user","val_at","val1","val1_user","val1_at","attachment_1_type");
+    $model_query = $model_query->exclude(['attachment_1','attachment_2']);
     $model_query = $model_query->with('employee')->where("deleted",0)->get();
 
     return response()->json([
@@ -407,7 +407,7 @@ class PotonganMstController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
-      $model_query = PotonganMst::where("id",$request->id)->lockForUpdate()->first();
+      $model_query = PotonganMst::exclude(['attachment_1','attachment_2'])->where("id",$request->id)->lockForUpdate()->first();
 
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
@@ -480,7 +480,7 @@ class PotonganMstController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = PotonganMst::lockForUpdate()->find($request->id);
+      $model_query = PotonganMst::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
       if($model_query->val && $model_query->val1){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }

@@ -426,7 +426,7 @@ class TrxTrpTransferController extends Controller
       $kernet_money -= $ttl_pk;
 
       if($model_query->supir_id){
-        $supir = Employee::with('bank')->find($model_query->supir_id);
+        $supir = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($model_query->supir_id);
         if(!$supir->bank || !$supir->bank->code_duitku)
         throw new \Exception("Bank Belum Memiliki code duitku",1);
 
@@ -438,7 +438,7 @@ class TrxTrpTransferController extends Controller
       }
 
       if($model_query->kernet_id){
-        $kernet = Employee::with('bank')->find($model_query->kernet_id);
+        $kernet = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($model_query->kernet_id);
         if(!$kernet->bank || !$kernet->bank->code_duitku)
         throw new \Exception("Bank Belum Memiliki code duitku",1);
 

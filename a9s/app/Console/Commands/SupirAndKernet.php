@@ -56,7 +56,7 @@ class SupirAndKernet extends Command
             if(!preg_match('/[a-zA-Z0-9]/', $single))
             continue;
 
-            if(\App\Models\MySql\Employee::where("name",$single)->where("role","Supir")->first())
+            if(\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where("name",$single)->where("role","Supir")->first())
             continue;
 
             $this->info("=====Supir Loop Start".($key + 1)."=====\n ");
@@ -75,7 +75,7 @@ class SupirAndKernet extends Command
             if(!preg_match('/[a-zA-Z0-9]/', $single))
             continue;
 
-            if(\App\Models\MySql\Employee::where("name",$single)->where("role","Kernet")->first())
+            if(\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where("name",$single)->where("role","Kernet")->first())
             continue;
 
             $this->info("=====Kernet Loop Start".($key + 1)."=====\n ");

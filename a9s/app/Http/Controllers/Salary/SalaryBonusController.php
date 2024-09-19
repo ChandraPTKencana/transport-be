@@ -47,7 +47,7 @@ class SalaryBonusController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['salary_bonus.create','salary_bonus.modify']);
 
-    $list_employee = \App\Models\MySql\Employee::available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
+    $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
     
     return response()->json([
       "list_employee" => $list_employee,

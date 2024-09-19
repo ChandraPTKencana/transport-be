@@ -10,6 +10,10 @@ class PotonganMst extends Model
     use HasFactory;
 
     protected $table = 'potongan_mst';  
+
+    // protected $hidden = [
+    //     'attachment_1',
+    // ];
     // public $timestamps = false;
 
     // public function warehouse()
@@ -21,10 +25,20 @@ class PotonganMst extends Model
     // {
     //     return $this->belongsTo(\App\Models\HrmRevisiLokasi::class, "hrm_revisi_lokasi_source_id", 'id');
     // }
+    public function scopeExclude($query, $columns)
+    {
+        return $query->select(array_diff([
+            "id","kejadian","employee_id","no_pol","nominal","nominal_cut","remaining_cut",
+            "created_at","updated_at","val","val_user","val_at","val1","val1_user","val1_at","status",
+            "deleted","deleted_user","deleted_at","deleted_reason",
+            "attachment_1","attachment_1_type",
+            "attachment_2","attachment_2_type"
+        ], $columns));
+    }
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class, "employee_id", 'id');
+        return $this->belongsTo(Employee::class, "employee_id", 'id')->exclude(['attachment_1','attachment_2']);
     }
 
     public function trxs()

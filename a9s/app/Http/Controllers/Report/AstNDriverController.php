@@ -38,7 +38,7 @@ class AstNDriverController extends Controller
     MyAdmin::checkScope($this->permissions, 'report.ast_n_driver.download_file');
 
     $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->orderBy('xto','asc')->groupBy('xto')->get()->pluck('xto');
-    $list_employee = \App\Models\MySql\Employee::available()->orderBy('name','asc')->get();
+    $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->orderBy('name','asc')->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->orderBy('no_pol','asc')->get();
     return response()->json([
       "list_xto" => $list_xto,
@@ -105,7 +105,7 @@ class AstNDriverController extends Controller
     $kernet_list=[];
     if(count($list_employee)>0){
 
-      $employees = Employee::whereIn("id",$list_employee)->get()->toArray();
+      $employees = Employee::exclude(['attachment_1','attachment_2'])->whereIn("id",$list_employee)->get()->toArray();
 
       foreach ($employees as $k => $v) {
         if($v['role']=='Supir'){

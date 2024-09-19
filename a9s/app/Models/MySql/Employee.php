@@ -33,9 +33,9 @@ class Employee extends Authenticatable
     //  *
     //  * @var array<int, string>
     //  */
-    protected $hidden = [
-        'attachment_1',
-    ];
+    // protected $hidden = [
+    //     'attachment_1',
+    // ];
 
     // /**
     //  * The attributes that should be cast.
@@ -75,8 +75,21 @@ class Employee extends Authenticatable
         $builder->where('deleted',0);
     }
 
+    public function scopeExclude($query, $columns)
+    {
+        return $query->select(array_diff([
+            "id","name","role","created_user","updated_user","created_at","updated_at",
+            "deleted","deleted_user","deleted_at","deleted_reason",
+            "ktp_no","sim_no","rek_no","rek_name","phone_number",
+            "val","val_user","val_at",
+            "attachment_1","attachment_1_type",
+            "attachment_2","attachment_2_type",
+            "bank_id"
+        ], $columns));
+    }
+
     public function potongan(){
-        return $this->hasOne(PotonganMst::class,"employee_id","id")->select("id","kejadian","employee_id","no_pol","nominal","nominal_cut","remaining_cut","created_at","updated_at","status","val","val_user","val_at","val1","val1_user","val1_at","attachment_1_type")
+        return $this->hasOne(PotonganMst::class,"employee_id","id")->exclude(['attachment_1','attachment_2'])
         ->where('val1',1)->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
     }
 

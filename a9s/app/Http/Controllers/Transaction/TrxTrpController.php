@@ -476,12 +476,12 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
-      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+      $supir_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->supir_id)->available()->verified()->first();
       if(!$supir_dt)
       throw new \Exception("Supir tidak terdaftar",1);
 
       if($request->kernet_id){
-        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        $kernet_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->kernet_id)->available()->verified()->first();
         if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }
@@ -622,12 +622,12 @@ class TrxTrpController extends Controller
 
     DB::beginTransaction();
     try {
-      $supir_dt =\App\Models\MySql\Employee::where('id',$request->supir_id)->available()->verified()->first();
+      $supir_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->supir_id)->available()->verified()->first();
       if(!$supir_dt)
       throw new \Exception("Supir tidak terdaftar",1);
 
       if($request->kernet_id){
-        $kernet_dt =\App\Models\MySql\Employee::where('id',$request->kernet_id)->available()->verified()->first();
+        $kernet_dt =\App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where('id',$request->kernet_id)->available()->verified()->first();
         if(!$kernet_dt)
         throw new \Exception("Kernet tidak terdaftar",1);
       }

@@ -32,7 +32,7 @@ class PSPotonganTrx
             $employee_id = $v['employee_id'];
           
             // ambil dari method potongan karna perlu filter nya
-            $employee = Employee::where("id",$employee_id)->first();
+            $employee = Employee::exclude(['attachment_1','attachment_2'])->where("id",$employee_id)->first();
             if(!$employee){
               throw new \Exception("Tidak ditemukan data pekerja",1);
             }
@@ -51,7 +51,7 @@ class PSPotonganTrx
   }
 
   public static function loopCut($v,$emp,$t_stamp,$sisa_cut=0){
-    $potongan_mst   = PotonganMst::where('employee_id',$emp->id)->where('val1',1)
+    $potongan_mst   = PotonganMst::exclude(['attachment_1','attachment_2'])->where('employee_id',$emp->id)->where('val1',1)
     ->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc')
     ->lockForUpdate()
     ->first();
@@ -119,7 +119,7 @@ class PSPotonganTrx
       $SYSNOTE            = MyLib::compareChange($SYSOLD,$v);
       MyLog::sys("potongan_trx",$v->id,"update",$SYSNOTE);
 
-      $pm                 = PotonganMst::where("id",$v->potongan_mst_id)->lockForUpdate()->first();
+      $pm                 = PotonganMst::exclude(['attachment_1','attachment_2'])->where("id",$v->potongan_mst_id)->lockForUpdate()->first();
       $SYSOLD             = clone($pm);
       $pm->remaining_cut  = $pm->remaining_cut + $v->nominal_cut;
       $pm->save();

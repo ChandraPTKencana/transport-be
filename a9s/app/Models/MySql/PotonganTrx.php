@@ -24,7 +24,7 @@ class PotonganTrx extends Model
 
     public function potongan_mst()
     {
-        return $this->belongsTo(PotonganMst::class, "potongan_mst_id", 'id');
+        return $this->belongsTo(PotonganMst::class, "potongan_mst_id", 'id')->exclude(['attachment_1','attachment_2']);
     }
 
     // public function details()
