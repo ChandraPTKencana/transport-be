@@ -367,7 +367,7 @@ class TrxTrpTransferController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = TrxTrp::find($request->id);
+      $model_query = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
       // if($model_query->cost_center_code==""){
       //   throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
       // }
