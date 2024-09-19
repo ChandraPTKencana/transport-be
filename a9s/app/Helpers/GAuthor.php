@@ -19,7 +19,8 @@ class GAuthor {
 
         IsUser::where("username",$username)->update(["ga_secret_key"=>$secret]);
         
-        $qrCodeUrl = GoogleQrUrl::generate($username, $secret, 'Genk.'.env("app_name"));
+        // $qrCodeUrl = GoogleQrUrl::generate($username, $secret, 'Genk.'.env("app_name"));
+        $qrCodeUrl = GoogleQrUrl::generate($username, $secret, 'Genk.Logistik');
         
         // echo "<img src='https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl={$qrCodeUrl}'>";
 

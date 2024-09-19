@@ -3068,7 +3068,11 @@ class TrxTrpTicketController extends Controller
           $created_at = $empty_one['tanggal'];
           $all_afters = TrxTrp::where("no_pol",$vehicle->no_pol)->where("tanggal",">=",$created_at)->where('deleted',0)->where('req_deleted',0)->orderBy('tanggal','asc')->orderBy('created_at','asc')->get();
 
-          $get_data_tickets = DB::connection('sqlsrv')->table('palm_tickets')->where('VehicleNo',$vehicle->no_pol)->where('DateTimeIn',">",$created_at);
+          $no_pol = preg_replace('/\s+/', '', $vehicle->no_pol);
+          $get_data_tickets = DB::connection('sqlsrv')->table('palm_tickets')
+          ->select('VehicleNo','DateTimeIn','TicketNo','Void',"TicketID","Bruto","Tara","OriginalBruto","OriginalTara","NamaSupir","DateTimeOut")
+          ->whereRaw("REPLACE(VehicleNo, ' ', '')='".$no_pol."'")->where('DateTimeIn',">",$created_at);
+
           if(in_array($empty_one['jenis'],['PK','CPO'])){
             $get_data_tickets = $get_data_tickets->where('TicketNo','not like','%-%');
           }else{
@@ -3124,7 +3128,6 @@ class TrxTrpTicketController extends Controller
                     $trx_trp = TrxTrp::where("id",$af->id)->first();
                     $SYSOLD  = clone($trx_trp);
                     try {
-                      $trx_trp->ticket_b_id         = $gdt['TicketID'];
                       $trx_trp->ticket_b_id         = $gdt['TicketID'];
                       $trx_trp->ticket_b_no         = $gdt['TicketNo'];
                       $trx_trp->ticket_b_bruto      = (int)$gdt['Bruto'];
@@ -3202,7 +3205,6 @@ class TrxTrpTicketController extends Controller
                     $SYSOLD  = clone($trx_trp);
                     try {
                       $trx_trp->ticket_a_id         = $gdt['TicketID'];
-                      $trx_trp->ticket_a_id         = $gdt['TicketID'];
                       $trx_trp->ticket_a_no         = $gdt['TicketNo'];
                       $trx_trp->ticket_a_bruto      = (int)$gdt['Bruto'];
                       $trx_trp->ticket_a_tara       = (int)$gdt['Tara'];
@@ -3259,7 +3261,6 @@ class TrxTrpTicketController extends Controller
                     $trx_trp = TrxTrp::where("id",$af->id)->first();
                     $SYSOLD  = clone($trx_trp);
                     try {
-                      $trx_trp->ticket_a_id         = $gdt['TicketID'];
                       $trx_trp->ticket_a_id         = $gdt['TicketID'];
                       $trx_trp->ticket_a_no         = $gdt['TicketNo'];
                       $trx_trp->ticket_a_bruto      = (int)$gdt['Bruto'];
@@ -3332,7 +3333,6 @@ class TrxTrpTicketController extends Controller
                     $SYSOLD  = clone($trx_trp);
                     try {
                       $trx_trp->ticket_b_id         = $gdt['TicketID'];
-                      $trx_trp->ticket_b_id         = $gdt['TicketID'];
                       $trx_trp->ticket_b_no         = $gdt['TicketNo'];
                       $trx_trp->ticket_b_bruto      = (int)$gdt['Bruto'];
                       $trx_trp->ticket_b_tara       = (int)$gdt['Tara'];
@@ -3396,7 +3396,6 @@ class TrxTrpTicketController extends Controller
                     $SYSOLD  = clone($trx_trp);
                     try {
                       $trx_trp->ticket_b_id         = $gdt['TicketID'];
-                      $trx_trp->ticket_b_id         = $gdt['TicketID'];
                       $trx_trp->ticket_b_no         = $gdt['TicketNo'];
                       $trx_trp->ticket_b_bruto      = (int)$gdt['Bruto'];
                       $trx_trp->ticket_b_tara       = (int)$gdt['Tara'];
@@ -3455,7 +3454,6 @@ class TrxTrpTicketController extends Controller
                 $trx_trp = TrxTrp::where("id",$af->id)->first();
                   $SYSOLD  = clone($trx_trp);
                   try {
-                    $trx_trp->ticket_a_id         = $gdt['TicketID'];
                     $trx_trp->ticket_a_id         = $gdt['TicketID'];
                     $trx_trp->ticket_a_no         = $gdt['TicketNo'];
                     $trx_trp->ticket_a_bruto      = (int)$gdt['Bruto'];
