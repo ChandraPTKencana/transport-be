@@ -76,7 +76,8 @@ class Employee extends Authenticatable
     }
 
     public function potongan(){
-        return $this->hasOne(PotonganMst::class,"employee_id","id")->where('val1',1)->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
+        return $this->hasOne(PotonganMst::class,"employee_id","id")->select("id","kejadian","employee_id","no_pol","nominal","nominal_cut","remaining_cut","created_at","updated_at","status","val","val_user","val_at","val1","val1_user","val1_at","attachment_1_type")
+        ->where('val1',1)->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
     }
 
     public function bank(){
