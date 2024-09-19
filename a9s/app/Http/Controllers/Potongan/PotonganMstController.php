@@ -185,7 +185,7 @@ class PotonganMstController extends Controller
       $model_query = $model_query->where("role", 'like', '%' . $request->role . '%');
     }
 
-
+    $model_query = $model_query->select("id","kejadian","employee_id","no_pol","nominal","nominal_cut","remaining_cut","created_at","updated_at","status","val","val_user","val_at","val1","val1_user","val1_at","attachment_1_type");
     $model_query = $model_query->with('employee')->where("deleted",0)->get();
 
     return response()->json([
