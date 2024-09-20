@@ -4,12 +4,14 @@ namespace App\Models\MySql;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Excludable;
 
 class StandbyTrxDtl extends Model
 {
     use HasFactory;
+    use Excludable;
 
-    protected $table = 'standby_trx_dtl';  
+    protected $table = 'standby_trx_dtl';
     // public $timestamps = false;
 
     // public function warehouse()

@@ -207,7 +207,7 @@ class SalaryBonusController extends Controller
     // ==============
     // Model Filter
     // ==============
-    $model_query = $model_query->select("id","tanggal","type","nominal","note","val1","val1_user","val1_at","val2","val2_user","val2_at","created_user","updated_user","created_at","updated_at","attachment_1_type");
+    $model_query = $model_query->exclude(['attachment_1']);
     $model_query = $model_query->where('deleted',0)->with('employee')->get();
     return response()->json([
       "data" => SalaryBonusResource::collection($model_query),
@@ -409,7 +409,7 @@ class SalaryBonusController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
     
-      $model_query = SalaryBonus::where("id",$request->id)->lockForUpdate()->first();
+      $model_query = SalaryBonus::exclude(['attachment_1'])->where("id",$request->id)->lockForUpdate()->first();
       // if($model_query->requested_by != $this->admin_id){
       //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
       // }
@@ -487,7 +487,7 @@ class SalaryBonusController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = SalaryBonus::find($request->id);
+      $model_query = SalaryBonus::exclude(['attachment_1'])->lockForUpdate()->find($request->id);
       $run_val = 0;
       if(MyAdmin::checkScope($this->permissions, 'salary_bonus.val1',true) && !$model_query->val1){
         $run_val++;
