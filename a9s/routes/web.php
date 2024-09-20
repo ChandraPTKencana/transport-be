@@ -45,6 +45,9 @@ Route::put('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'up
 Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
 Route::put('/ujalan_validasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'validasi']);
 
+Route::get('/trx_trp_nologs', [\App\Http\Controllers\Transaction\TrxTrpNologController::class, 'index']);
+Route::get('/trx_trp_nolog', [\App\Http\Controllers\Transaction\TrxTrpNologController::class, 'show']);
+
 
 Route::get('/trx_trps', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'index']);
 Route::get('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'show']);

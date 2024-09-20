@@ -1936,7 +1936,7 @@ class TrxTrpController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5','trp_trx.ticket.val_ticket']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -1990,12 +1990,6 @@ class TrxTrpController extends Controller
         $model_query->val5 = 1;
         $model_query->val5_user = $this->admin_id;
         $model_query->val5_at = $t_stamp;
-      }
-
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$model_query->val_ticket){
-        $model_query->val_ticket = 1;
-        $model_query->val_ticket_user = $this->admin_id;
-        $model_query->val_ticket_at = $t_stamp;
       }
 
       $model_query->save();
