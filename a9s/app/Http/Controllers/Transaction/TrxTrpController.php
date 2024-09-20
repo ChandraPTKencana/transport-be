@@ -2141,7 +2141,18 @@ class TrxTrpController extends Controller
     $miniError="";
     $id="";
     try {
-      $trx_trps = TrxTrp::where(function($q1){$q1->where('pvr_had_detail',0)->orWhereNull("pvr_id");})->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val',1)->where('val1',1)->where('val2',1)->where("received_payment",1)->get();      
+      $trx_trps = TrxTrp::where(function($q1){$q1->where('pvr_had_detail',0)->orWhereNull("pvr_id");})->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val',1)->where('val1',1)->where('val2',1)
+      ->where(function ($q) {
+        $q->where(function ($q1){
+          $q1->where("payment_method_id",1);       
+          $q1->where("received_payment",0);                  
+        });
+
+        $q->orWhere(function ($q1){
+          $q1->where("payment_method_id",2);
+          $q1->where("received_payment",1);                 
+        });
+      })->get();      
       if(count($trx_trps)==0){
         throw new \Exception("Semua PVR sudah terisi",1);
       }
