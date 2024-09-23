@@ -319,9 +319,9 @@ class TrxTrpAbsenController extends Controller
       "img_arrive_ts"     => $model_query->ritase_arrive_at,
       "img_return_ts"     => $model_query->ritase_return_at,
       "img_till_ts"       => $model_query->ritase_till_at,
-  ];
+    ];
 
-  $data['img_leaves']=[];
+    $data['img_leaves']=[];
     foreach ($model_query->trx_absens as $k => $v) {
       // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
       $img = "data:image/png;base64,";

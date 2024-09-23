@@ -15,12 +15,20 @@ class TrxAbsenResource extends JsonResource
      */
     public function toArray($request)
     {
-        $imageData = base64_encode($this->gambar);
+        // $imageData = base64_encode($this->gambar);
+
+        $img = "data:image/png;base64,";
+        if(mb_detect_encoding($this->gambar)===false){
+            $img.=base64_encode($this->gambar);
+        }else{
+            $img.=$this->gambar;        
+        }
         // return parent::toArray($request);
         return [
             'id'                => $this->id,
             'trx_trp_id'        => $this->trx_trp_id,
-            'gambar'            => $this->gambar ? "data:image/png;base64,{$imageData}" : "",
+            // 'gambar'            => $this->gambar ? "data:image/png;base64,{$imageData}" : "",
+            'gambar'            => $this->gambar ? $img : "",
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
         ];
