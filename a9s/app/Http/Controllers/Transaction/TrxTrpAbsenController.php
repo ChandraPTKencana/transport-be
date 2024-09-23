@@ -33,7 +33,8 @@ use App\Exports\MyReport;
 use App\Http\Resources\MySql\TrxAbsenResource;
 use App\PS\PSPotonganTrx;
 use InvalidArgumentException;
-
+use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Encoders\AutoEncoder;
 class TrxTrpAbsenController extends Controller
 {
   private $admin;
@@ -358,6 +359,9 @@ class TrxTrpAbsenController extends Controller
     ], 200);
   }
 
+  private $height = 300;
+  private $quality = 70;
+
   public function update(TrxTrpAbsenRequest $request)
   {
     MyAdmin::checkScope($this->permissions, 'trp_trx.absen.modify');
@@ -380,7 +384,10 @@ class TrxTrpAbsenController extends Controller
       if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
       throw new MyException([ "img_leave" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
-      $blob_img_leave = base64_encode(file_get_contents($path));
+      // $blob_img_leave = base64_encode(file_get_contents($path));
+      $image = Image::read($path)->scale(height: $this->height);
+      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+      $blob_img_leave = base64_encode($compressedImageBinary);      
     }
 
     if (!$request->hasFile('img_leave_file') && $img_leave == null) {
@@ -403,7 +410,11 @@ class TrxTrpAbsenController extends Controller
       $fileType = $file->getClientMimeType();
       if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
       throw new MyException([ "img_arrive" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-      $blob_img_arrive = base64_encode(file_get_contents($path));
+      // $blob_img_arrive = base64_encode(file_get_contents($path));
+    
+      $image = Image::read($path)->scale(height: $this->height);
+      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+      $blob_img_arrive = base64_encode($compressedImageBinary);
     }
 
     if (!$request->hasFile('img_arrive_file') && $img_arrive == null) {
@@ -426,7 +437,11 @@ class TrxTrpAbsenController extends Controller
       $fileType = $file->getClientMimeType();
       if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
       throw new MyException([ "img_return" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-      $blob_img_return = base64_encode(file_get_contents($path));
+      // $blob_img_return = base64_encode(file_get_contents($path));
+    
+      $image = Image::read($path)->scale(height: $this->height);
+      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+      $blob_img_return = base64_encode($compressedImageBinary);
     }
 
     if (!$request->hasFile('img_return_file') && $img_return == null) {
@@ -450,7 +465,12 @@ class TrxTrpAbsenController extends Controller
       $fileType = $file->getClientMimeType();
       if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
       throw new MyException([ "img_till" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-      $blob_img_till = base64_encode(file_get_contents($path));
+      // $blob_img_till = base64_encode(file_get_contents($path));
+    
+      $image = Image::read($path)->scale(height: $this->height);
+      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+      $blob_img_till = base64_encode($compressedImageBinary);
+
     }
 
     if (!$request->hasFile('img_till_file') && $img_till == null) {
@@ -491,6 +511,10 @@ class TrxTrpAbsenController extends Controller
           "is_manual"=>1,
         ]);
       }
+      // elseif(!$img_leave){
+      //   $OSYSNOTE.="Hapus Gambar Berangkat \n";
+      //   TrxAbsen::where("status","B")->where('trx_trp_id',$model_query->id)->delete();
+      // }
 
       if($img_arrive && isset($blob_img_arrive)){
         $OSYSNOTE.="Tambah Gambar Tiba \n";

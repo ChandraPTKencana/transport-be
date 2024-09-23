@@ -4,10 +4,12 @@ namespace App\Models\MySql;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Excludable;
 
 class TrxAbsen extends Model
 {
     use HasFactory;
+    use Excludable;
 
     protected $table = 'trx_absen';
     // public $timestamps = false;

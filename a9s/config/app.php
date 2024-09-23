@@ -184,6 +184,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
+        Intervention\Image\Laravel\ServiceProvider::class,
         /*
          * Package Service Providers...
          */
