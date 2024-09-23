@@ -359,8 +359,8 @@ class TrxTrpAbsenController extends Controller
     ], 200);
   }
 
-  private $height = 300;
-  private $quality = 70;
+  private $height = 500;
+  private $quality = 100;
 
   public function update(TrxTrpAbsenRequest $request)
   {
