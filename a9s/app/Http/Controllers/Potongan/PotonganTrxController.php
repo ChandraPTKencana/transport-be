@@ -262,37 +262,39 @@ class PotonganTrxController extends Controller
       $SYSOLD1                    = clone($model_query1);
 
       $model_query                = PotonganTrx::where("id",$request->id)->lockForUpdate()->first();
-      if($model_query1->remaining_cut + $model_query->nominal_cut < $request->nominal_cut)
-      {
-        throw new \Exception("Potongan Melebihi Sisa Potongan",1);
-      }
-      
-      $model_query1->remaining_cut = $model_query1->remaining_cut + $model_query->nominal_cut - $request->nominal_cut;
-      
-      if($model_query->id_uj){
-        throw new \Exception("Izin Ubah Ditolak",1);
-      }
-
-      if($model_query->val==1)
+      $SYSOLD                     = clone($model_query);
+    
+      if($model_query->val1==1)
       throw new \Exception("Data sudah tervalidasi",1);
 
-      $SYSOLD                     = clone($model_query);
+      if(!$model_query->trx_trp_id){
 
+        if($model_query1->remaining_cut + $model_query->nominal_cut < $request->nominal_cut)
+        {
+          throw new \Exception("Potongan Melebihi Sisa Potongan",1);
+        }
+      
+        $model_query1->remaining_cut = $model_query1->remaining_cut + $model_query->nominal_cut - $request->nominal_cut;
+        $model_query->nominal_cut   = $request->nominal_cut;
+      }
+      
       $model_query->note          = $request->note;
-      $model_query->nominal_cut   = $request->nominal_cut;
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
       $model_query->save();
 
-      $model_query1->updated_at     = $t_stamp;
-      $model_query1->save();
+      if(!$model_query->trx_trp_id){
+        $model_query1->updated_at     = $t_stamp;
+        $model_query1->save();
+      }
 
-      
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys($this->syslog_db,$request->id,"update",$SYSNOTE);
 
-      $SYSNOTE1 = MyLib::compareChange($SYSOLD1,$model_query1); 
-      MyLog::sys("potongan_mst",$model_query1->id,"update",$SYSNOTE1);
+      if(!$model_query->trx_trp_id){
+        $SYSNOTE1 = MyLib::compareChange($SYSOLD1,$model_query1); 
+        MyLog::sys("potongan_mst",$model_query1->id,"update",$SYSNOTE1);
+      }
 
       DB::commit();
       return response()->json([
