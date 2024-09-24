@@ -358,6 +358,7 @@ class TrxTrpNologController extends Controller
 
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),
+      "pabrik_name"=>env("app_name")
     ], 200);
   }
 
