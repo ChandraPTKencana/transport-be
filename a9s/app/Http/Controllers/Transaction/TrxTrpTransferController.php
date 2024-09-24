@@ -338,7 +338,9 @@ class TrxTrpTransferController extends Controller
     $this->checkGATimeout();
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.transfer.view']);
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj_details','potongan'])->find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj_details','potongan','trx_absens'=>function($q) {
+      $q->select('*')->where("status","B");
+    }])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
