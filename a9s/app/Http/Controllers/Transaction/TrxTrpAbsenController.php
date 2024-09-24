@@ -183,9 +183,11 @@ class TrxTrpAbsenController extends Controller
                 }
 
                 if($r_val=='Done'){
-                  $q->whereNotNull("ritase_leave_at")->whereNotNull("ritase_arrive_at")->whereNotNull("ritase_return_at")->whereNotNull("ritase_till_at");
+                  $q->where("ritase_val2",1)->where("deleted",0)->where("req_deleted",0);
+                  // $q->whereNotNull("ritase_leave_at")->whereNotNull("ritase_arrive_at")->whereNotNull("ritase_return_at")->whereNotNull("ritase_till_at");
                 }else{
-                  $q->whereNull("ritase_leave_at")->orWhereNull("ritase_arrive_at")->orWhereNull("ritase_return_at")->orWhereNull("ritase_till_at");
+                  $q->where("ritase_val2",0)->where("deleted",0)->where("req_deleted",0);
+                  // $q->whereNull("ritase_leave_at")->orWhereNull("ritase_arrive_at")->orWhereNull("ritase_return_at")->orWhereNull("ritase_till_at");
                 }
               }
             }
@@ -217,14 +219,16 @@ class TrxTrpAbsenController extends Controller
     $filter_status = $request->filter_status;
     
     if($filter_status=='Done'){
-      $model_query = $model_query->where("deleted",0)->where(function ($q) {
-        $q->whereNotNull("ritase_leave_at")->whereNotNull("ritase_arrive_at")->whereNotNull("ritase_return_at")->whereNotNull("ritase_till_at");
-      });
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where("ritase_val2",1);
+      // ->where(function ($q) {
+      //   $q->whereNotNull("ritase_leave_at")->whereNotNull("ritase_arrive_at")->whereNotNull("ritase_return_at")->whereNotNull("ritase_till_at");
+      // });
 
     }elseif ($filter_status=="Undone") {
-      $model_query = $model_query->where("deleted",0)->where(function ($q) {
-        $q->whereNull("ritase_leave_at")->orWhereNull("ritase_arrive_at")->orWhereNull("ritase_return_at")->orWhereNull("ritase_till_at");
-      });
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where("ritase_val2",0);
+      // ->where(function ($q) {
+      //   $q->whereNull("ritase_leave_at")->orWhereNull("ritase_arrive_at")->orWhereNull("ritase_return_at")->orWhereNull("ritase_till_at");
+      // });
     }
 
     if($filter_status=="deleted"){
