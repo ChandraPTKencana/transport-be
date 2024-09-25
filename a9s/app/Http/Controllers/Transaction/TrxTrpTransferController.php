@@ -465,7 +465,7 @@ class TrxTrpTransferController extends Controller
 
         }
         
-        if($model_query->duitku_supir_disburseId && $model_query->duitku_supir_trf_res_code=="00"){
+        if($model_query->duitku_supir_disburseId && $model_query->duitku_supir_inv_res_code == "00" && $model_query->duitku_supir_trf_res_code!="00"){
           $result = TrfDuitku::generate_transfer($model_query->duitku_supir_disburseId,$supir->bank->code_duitku,$supir->rek_no,$supir_money,"UJ#".$model_query->id);
           if($result){
             $model_query->duitku_supir_trf_res_code = $result['responseCode'];
@@ -486,7 +486,7 @@ class TrxTrpTransferController extends Controller
           }
         }
         
-        if($model_query->duitku_kernet_disburseId && $model_query->duitku_kernet_trf_res_code=="00"){
+        if($model_query->duitku_kernet_disburseId && $model_query->duitku_kernet_inv_res_desc=="00" && $model_query->duitku_kernet_trf_res_code!="00"){
           $result = TrfDuitku::generate_transfer($model_query->duitku_kernet_disburseId,$kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,"UJ#".$model_query->id);
           if($result){
             $model_query->duitku_kernet_trf_res_code = $result['responseCode'];
