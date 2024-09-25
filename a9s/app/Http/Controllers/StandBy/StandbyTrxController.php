@@ -425,6 +425,24 @@ class StandbyTrxController extends Controller
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
 
+      $supir_id = (isset($supir_dt->id) ? $supir_dt->id : 0);
+      $kernet_id = (isset($kernet_dt->id) ? $kernet_dt->id : 0);
+
+      foreach ($details_in as $key => $value) {
+
+        $checks = StandbyTrxDtl::where('tanggal',$value['tanggal'])
+        ->whereHas('standby_trx',function ($q) use ($supir_id,$kernet_id) {
+          $q->where('deleted',0)->where('req_deleted',0)->where(function ($q1) use ($supir_id,$kernet_id) {            
+            if($supir_id>0) $q1->where('supir_id',$supir_id);
+            if($kernet_id>0) $q1->orwhere('kernet_id',$kernet_id);
+          });
+        })->get();
+
+        if(count($checks)>0)
+        throw new \Exception("Data telah ada di:".($checks->pluck('standby_trx_id')), 1);
+        
+      }
+
       $model_query->save();
 
       $rollback_id = $model_query->id - 1;
@@ -729,6 +747,9 @@ class StandbyTrxController extends Controller
         if(count($for_edits)==0 && count($for_adds)==0){
           throw new \Exception("Data List Harus Diisi",1);
         }
+        
+        $supir_id = (isset($supir_dt->id) ? $supir_dt->id : 0);
+        $kernet_id = (isset($kernet_dt->id) ? $kernet_dt->id : 0);
 
         foreach ($data_to_processes as $k => $v) {
           $index = false;
@@ -749,6 +770,17 @@ class StandbyTrxController extends Controller
             if ($index === false) {
               throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k,1);
             } else {
+              $checks = StandbyTrxDtl::where('tanggal',$v['tanggal'])
+              ->whereHas('standby_trx',function ($q)use($supir_id,$kernet_id) {
+                $q->where('deleted',0)->where('req_deleted',0)->where(function ($q1) use ($supir_id,$kernet_id) {            
+                  if($supir_id>0) $q1->where('supir_id',$supir_id);
+                  if($kernet_id>0) $q1->orwhere('kernet_id',$kernet_id);
+                });
+              })->where("standby_trx_id","!=",$model_query->id)->get();
+      
+              if(count($checks)>0)
+              throw new \Exception("Data telah ada di:".($checks->pluck('standby_trx_id')), 1);
+  
 
               $mq=StandbyTrxDtl::where("standby_trx_id", $model_query->id)
               ->where("ordinal", $v["key"])->where("p_change",false)->lockForUpdate()->first();
@@ -795,6 +827,18 @@ class StandbyTrxController extends Controller
             }
           } else if ($v["p_status"] == "Add") {     
             array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
+
+            $checks = StandbyTrxDtl::where('tanggal',$v['tanggal'])
+            ->whereHas('standby_trx',function ($q)use($supir_id,$kernet_id) {
+              $q->where('deleted',0)->where('req_deleted',0)->where(function ($q1) use ($supir_id,$kernet_id) {            
+                if($supir_id>0) $q1->where('supir_id',$supir_id);
+                if($kernet_id>0) $q1->orwhere('kernet_id',$kernet_id);
+              });
+            })->get();
+    
+            if(count($checks)>0)
+            throw new \Exception("Data telah ada di:".($checks->pluck('standby_trx_id')), 1);
+
 
             StandbyTrxDtl::insert([
                 'standby_trx_id'    => $model_query->id,

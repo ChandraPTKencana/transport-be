@@ -39,8 +39,8 @@ class StandbyTrxDtl extends Model
     //     return $this->hasOne(\App\Models\IsUser::class, 'id_user', "requested_by");
     // }
 
-    // public function confirmer()
-    // {
-    //     return $this->hasOne(\App\Models\IsUser::class, 'id_user', "confirmed_by");
-    // }
+    public function standby_trx()
+    {
+        return $this->belongsTo(\App\Models\MySql\StandbyTrx::class, 'standby_trx_id', "id");
+    }
 }
