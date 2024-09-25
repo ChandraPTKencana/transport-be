@@ -461,6 +461,8 @@ class TrxTrpTransferController extends Controller
             $model_query->duitku_supir_inv_res_code = $result['responseCode'];
             $model_query->duitku_supir_inv_res_desc = $result['responseDesc'];
           }
+          MyLog::logging($result);
+
         }
         
         if($model_query->duitku_supir_disburseId && $model_query->duitku_supir_trf_res_code=="00"){
@@ -469,6 +471,7 @@ class TrxTrpTransferController extends Controller
             $model_query->duitku_supir_trf_res_code = $result['responseCode'];
             $model_query->duitku_supir_trf_res_desc = $result['responseDesc'];
           }
+          MyLog::logging($result);
         }
       }
 
