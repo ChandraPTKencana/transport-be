@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 use Barryvdh\DomPDF\Facade\PDF;
 use Maatwebsite\Excel\Facades\Excel;
@@ -478,7 +479,7 @@ class TrxTrpTransferController extends Controller
             $model_query->duitku_kernet_disburseId   = $result['disburseId'];
             $model_query->duitku_kernet_inv_res_code = $result['responseCode'];
             $model_query->duitku_kernet_inv_res_desc = $result['responseDesc'];
-            MyLog::logging($result,"disbust");
+            // MyLog::logging($result,"disbust");
           }
         }
         
@@ -487,7 +488,7 @@ class TrxTrpTransferController extends Controller
           if($result){
             $model_query->duitku_kernet_trf_res_code = $result['responseCode'];
             $model_query->duitku_kernet_trf_res_desc = $result['responseDesc'];
-            MyLog::logging($result,"disbust");
+            // MyLog::logging($result,"disbust");
           }
         }
       }
@@ -588,4 +589,149 @@ class TrxTrpTransferController extends Controller
     }
 
   }
+
+  // public function generateCSVMandiri(Request $request){
+
+  //   set_time_limit(0);
+  //   $date = new \DateTime();
+  //   $filename=$date->format("YmdHis").'-transfer_mandiri';
+  //   $t_stamp = date("Y-m-d H:i:s");
+
+  //   $raw_data = TrxTrp::where("payment_method_id",2)
+  //   ->where("val",1)
+  //   ->where("val1",1)
+  //   ->where("val2",1)
+  //   ->where(function ($q){
+  //     $q->where("val4",1);
+  //     $q->orwhere("val5",1);
+  //   })
+  //   ->whereNull("pvr_no")
+  //   ->where("received_payment",0)
+  //   ->lockForUpdate()
+  //   ->get();
+
+  //   // return $raw_data;
+  //   $data = [];
+
+  //   foreach ($raw_data as $k => $v) {
+  //     $supir_id   = $v->supir_id;
+  //     $kernet_id  = $v->kernet_id;
+      
+
+  //     $ttl_ps     = 0;
+  //     $ttl_pk     = 0;
+
+  //     $supir_money = 0;
+  //     $kernet_money = 0;
+  //     foreach ($v->uj_details2 as $key => $val) {
+  //       if($val->xfor=='Kernet'){
+  //         $kernet_money+=$val->amount*$val->qty;
+  //       }else{
+  //         $supir_money+=$val->amount*$val->qty;
+  //       }
+  //     }
+
+  //     $ptg_ps_ids = "";
+  //     $ptg_pk_ids = "";
+  //     foreach ($v->potongan as $k => $val) {
+  //       if($val->potongan_mst->employee_id == $supir_id){
+  //         $ttl_ps+=$val->nominal_cut;
+  //         $ptg_ps_ids.="#".$val->potongan_mst->id." ";
+  //       }
+  
+  //       if($val->potongan_mst->employee_id == $kernet_id){
+  //         $ttl_pk+=$val->nominal_cut;
+  //         $ptg_pk_ids.="#".$val->potongan_mst->id." ";
+  //       }
+  //     }
+      
+  //     $supir_money -= $ttl_ps;
+  //     $kernet_money -= $ttl_pk;
+
+  //     if($v->supir_id){
+  //       $supir = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($v->supir_id);
+  //       if(!$supir->bank || !$supir->bank->code_duitku)
+  //       throw new \Exception("Bank Belum Memiliki code duitku",1);
+
+  //       if(!$supir->rek_no)
+  //       throw new \Exception("Supir Belum Memiliki rekening",1);
+
+  //       if($supir_money==0)
+  //       throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi supir atau semua berisikan kernet",1);
+
+  //       array_push($data,[
+  //         "rek_no"=>$v->supir_rek_no,
+  //         "rek_name"=>$v->supir_rek_name,
+  //         "nominal"=>$supir_money,
+  //         "id"=>$v->id
+  //       ]);
+
+  //     }
+
+  //     if($v->kernet_id){
+  //       $kernet = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($v->kernet_id);
+  //       if(!$kernet->bank || !$kernet->bank->code_duitku)
+  //       throw new \Exception("Bank Belum Memiliki code duitku",1);
+
+  //       if(!$kernet->rek_no)
+  //       throw new \Exception("Supir Belum Memiliki rekening",1);
+
+  //       if($kernet_money==0)
+  //       throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi kernet atau semua berisikan kernet",1);
+
+  //       array_push($data,[
+  //         "rek_no"=>$v->kernet_rek_no,
+  //         "rek_name"=>$v->kernet_rek_name,
+  //         "nominal"=>$kernet_money,
+  //         "id"=>$v->id
+  //       ]);
+
+  //     }
+
+  //     $v->received_payment=1;
+
+  //     // if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true)){
+  //     //   $v->val4 = 1;
+  //     //   $v->val4_user = $this->admin_id;
+  //     //   $v->val4_at = $t_stamp;
+  //     // }
+
+  //     // if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true)){
+  //     //   $v->val5 = 1;
+  //     //   $v->val5_user = $this->admin_id;
+  //     //   $v->val5_at = $t_stamp;
+  //     // }
+
+  //     // $v->save();
+  //   }
+  //   // return $data;
+
+  //   $csv_data = "";
+  //   foreach ($data as $k => $v) {      
+  //     $csv_data .= "{$v['rek_no']},{$v['rek_name']},,,,IDR,{$v['nominal']},,,IBU,,,,,,,N,,,,,Y,,,,,,,,,,,,,,,,,BEN,1,E,,,\n";
+  //   }
+
+  //   $total = array_reduce($data,function ($carry,$item) {
+  //     return $carry+=(int) $item['nominal'];      
+  //   });
+
+  //   $mime=MyLib::mime("csv");
+
+  //   $filePath = 'public/' . $filename . '.' . $mime["ext"];
+
+  //   $mandiri_bank_no =env('MANDIRI_BANK_NO');
+  //   $records = count($data);
+  //   $csv = "P,{$date->format('Ymd')},{$mandiri_bank_no},{$records},{$total}\n";
+
+  //   // foreach($data as $k=>$v) {
+  //   //   $csv .= str_replace('"', '', $v["supir"]) . "," . str_replace('"', '', $v["kernet"]) . "\n";
+  //   // }
+
+  //   Storage::put($filePath, $csv.$csv_data);
+
+  //   $result = [
+  //     "message" => "File saved successfully to " . $filePath,
+  //   ];
+  //   return $result;
+  // }
 }

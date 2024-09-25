@@ -55,7 +55,17 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
-
+        // 'ftp' => [
+        //     'driver' => 'ftp',
+        //     'host' => env('MFT_HOST'),
+        //     'username' => env('MFT_USERNAME'),
+        //     'password' => env('MFT_PASSWORD'),
+        //     'port' => env('MFT_PORT', 21),
+        //     'root' => env('MFT_ROOT', '/'),
+        //     'passive' => true,
+        //     'ssl' => true,
+        //     'timeout' => 30,
+        // ],
     ],
 
     /*

@@ -74,6 +74,8 @@ Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransfe
 Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'show']);
 Route::get('/trx_trp_preview_file_bt', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFileBT']);
 
+// Route::get('/trx_trp/transfer_mandiri', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'generateCSVMandiri']);
+
 
 Route::get('/trx_trp_tickets', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'index']);
 Route::put('/trx_trp_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'updateTicket']);
@@ -236,7 +238,7 @@ Route::get('/extra_money_trx_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\Ext
 Route::put('/extra_money_trx_validasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'validasi']);
 Route::get('/extra_money_trx_preview_file', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFile']);
 
-Route::get('/payment_methods', [\App\Http\Controllers\PaymentMethodController::class, 'index']);
+// Route::get('/payment_methods', [\App\Http\Controllers\PaymentMethodController::class, 'index']);
 Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);
 
 Route::get('/ga_qr', [\App\Http\Controllers\GAController::class, 'qr']);
@@ -244,3 +246,19 @@ Route::post('/ga_pin', [\App\Http\Controllers\GAController::class, 'pin']);
 
 
 Route::get('/temp_data/vehiclesAllowedUpdateTicket', [\App\Http\Controllers\TempDataController::class, 'vehiclesAllowedUpdateTicket']);
+
+
+// use Illuminate\Support\Facades\Storage;
+// use App\Helpers\MyLog;
+// Route::get('/testsend',function () {
+
+// $file = 'public/20240924112404-transfer_mandiri.csv';
+// $remotePath = 'public_html/testsendfile.csv';
+// try {
+//     // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
+//     Storage::disk('ftp')->put($remotePath,Storage::get($file));
+// } catch (\Exception $e) {
+//     // Handle the exception
+//     MyLog::logging($e->getMessage());
+// }
+// });
