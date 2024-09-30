@@ -1450,6 +1450,12 @@ class StandbyTrxController extends Controller
       if($model_query->val && $model_query->val1 && $model_query->val2){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
+
+    if(MyAdmin::checkScope($this->permissions, 'standby_trx.val',true) && !$model_query->val){
+      $model_query->val = 1;
+      $model_query->val_user = $this->admin_id;
+      $model_query->val_at = $t_stamp;
+    }
   
     if(MyAdmin::checkScope($this->permissions, 'standby_trx.val1',true) && !$model_query->val1){
         if($model_query->val==0){
@@ -1467,12 +1473,6 @@ class StandbyTrxController extends Controller
         $model_query->val2 = 1;
         $model_query->val2_user = $this->admin_id;
         $model_query->val2_at = $t_stamp;
-      }
-
-      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val',true) && !$model_query->val){
-        $model_query->val = 1;
-        $model_query->val_user = $this->admin_id;
-        $model_query->val_at = $t_stamp;
       }
 
       $model_query->save();

@@ -15,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('standby_trx', function (Blueprint $table) {
-            $table->foreignId('salary_paid_id')->nullable()->references('id')->on('employee_mst')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('salary_paid_id')->nullable()->references('id')->on('salary_paid')->onDelete('restrict')->onUpdate('cascade');
         });
 
         Schema::table('vehicle_mst', function (Blueprint $table) {
