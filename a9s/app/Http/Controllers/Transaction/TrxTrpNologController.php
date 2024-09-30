@@ -30,7 +30,6 @@ use App\Http\Resources\MySql\TrxTrpResource;
 use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
-use App\PS\PSPotonganTrx;
 
 class TrxTrpNologController extends Controller
 {

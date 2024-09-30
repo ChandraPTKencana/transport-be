@@ -31,7 +31,6 @@ use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
 use App\Http\Resources\MySql\TrxAbsenResource;
-use App\PS\PSPotonganTrx;
 use InvalidArgumentException;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;

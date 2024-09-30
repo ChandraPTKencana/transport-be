@@ -564,24 +564,20 @@ class TrxTrpController extends Controller
       $ptg_trx_dt=[];
       if($supir_dt->id!=1 && $supir_dt->potongan){
         array_push($ptg_trx_dt,[
-          "_source"     => "TRX_TRP",
           "employee_id" => $supir_dt->id,
           "user_id"     => $this->admin_id,
-          "trx_trp_id"  => $model_query->id,
         ]);
       }
 
       if(isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
         array_push($ptg_trx_dt,[
-          "_source"     => "TRX_TRP",
           "employee_id" => $kernet_dt->id,
           "user_id"     => $this->admin_id,
-          "trx_trp_id"  => $model_query->id,
         ]);
       }
 
       if(count($ptg_trx_dt) > 0)
-      PSPotonganTrx::insertData($ptg_trx_dt);
+      PSPotonganTrx::trpTrxInsert($model_query->id,$ptg_trx_dt);
     
       MyLog::sys("trx_trp",$model_query->id,"insert");
 
@@ -744,24 +740,20 @@ class TrxTrpController extends Controller
 
       if(($prev_supir_id == null || $prev_supir_id == 1 ) && $supir_dt->id!=1 && $supir_dt->potongan){
         array_push($ptg_trx_dt,[
-          "_source"     => "TRX_TRP",
           "employee_id" => $supir_dt->id,
           "user_id"     => $this->admin_id,
-          "trx_trp_id"  => $model_query->id,
         ]);
       }
 
       if(($prev_kernet_id == null || $prev_kernet_id == 1) && isset($kernet_dt) && $kernet_dt->id!=1 && $kernet_dt->potongan){
         array_push($ptg_trx_dt,[
-          "_source"     => "TRX_TRP",
           "employee_id" => $kernet_dt->id,
           "user_id"     => $this->admin_id,
-          "trx_trp_id"  => $model_query->id,
         ]);
       }
 
       if(count($ptg_trx_dt) > 0)
-      PSPotonganTrx::insertData($ptg_trx_dt);
+      PSPotonganTrx::trpTrxInsert($model_query->id,$ptg_trx_dt);
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys("trx_trp",$request->id,"update",$SYSNOTE);
@@ -976,9 +968,7 @@ class TrxTrpController extends Controller
       $model_query->deleted_reason  = $deleted_reason;
       $model_query->save();
 
-      PSPotonganTrx::deletePotongan([
-        "_source"         => "TRX_TRP",
-        "trx_trp_id"      => $model_query->id,
+      PSPotonganTrx::trpTrxDelete($model_query->id,[
         "deleted_user"    => $this->admin_id,
         "deleted_at"      => $t_stamp,
         "deleted_reason"  => $deleted_reason,
@@ -1126,9 +1116,7 @@ class TrxTrpController extends Controller
       $model_query->deleted_at      = $t_stamp;
       $model_query->deleted_reason  = $deleted_reason;
 
-      PSPotonganTrx::deletePotongan([
-        "_source"         => "TRX_TRP",
-        "trx_trp_id"      => $model_query->id,
+      PSPotonganTrx::trpTrxDelete($model_query->id,[
         "deleted_user"    => $this->admin_id,
         "deleted_at"      => $t_stamp,
         "deleted_reason"  => $deleted_reason,

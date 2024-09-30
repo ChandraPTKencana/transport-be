@@ -33,7 +33,6 @@ use App\Http\Resources\MySql\IsUserResource;
 use App\Exports\MyReport;
 use App\Helpers\TrfDuitku;
 use App\Models\MySql\Employee;
-use App\PS\PSPotonganTrx;
 
 class TrxTrpTransferController extends Controller
 {

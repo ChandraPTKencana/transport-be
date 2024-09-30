@@ -585,7 +585,7 @@ class TrxTrpTicketController extends Controller
   //     }
 
   //     if(count($ptg_trx_dt) > 0)
-  //     PSPotonganTrx::insertData($ptg_trx_dt);
+  //     PSPotonganTrx::trpTrxInsert($ptg_trx_dt);
     
   //     MyLog::sys("trx_trp",$model_query->id,"insert");
 
@@ -765,7 +765,7 @@ class TrxTrpTicketController extends Controller
   //     }
 
   //     if(count($ptg_trx_dt) > 0)
-  //     PSPotonganTrx::insertData($ptg_trx_dt);
+  //     PSPotonganTrx::trpTrxInsert($ptg_trx_dt);
 
   //     $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
   //     MyLog::sys("trx_trp",$request->id,"update",$SYSNOTE);
@@ -1130,9 +1130,7 @@ class TrxTrpTicketController extends Controller
       $model_query->deleted_at      = $t_stamp;
       $model_query->deleted_reason  = $deleted_reason;
 
-      PSPotonganTrx::deletePotongan([
-        "_source"         => "TRX_TRP",
-        "trx_trp_id"      => $model_query->id,
+      PSPotonganTrx::trpTrxDelete($model_query->id,[
         "deleted_user"    => $this->admin_id,
         "deleted_at"      => $t_stamp,
         "deleted_reason"  => $deleted_reason,

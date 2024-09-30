@@ -12,7 +12,7 @@ use App\Models\MySql\TrxTrp;
 class PSPotonganTrx
 {
 
-  public static function insertData($arrs=[]){
+  public static function trpTrxInsert($id,$arrs=[]){
     /*
         $arrs =[
             "employee_id"=>0,
@@ -27,30 +27,70 @@ class PSPotonganTrx
     }
     
     if(count($arrs)>0){
-        foreach ($arrs as $k => $v) {
-        
-            $employee_id = $v['employee_id'];
-          
-            // ambil dari method potongan karna perlu filter nya
-            $employee = Employee::exclude(['attachment_1','attachment_2'])->where("id",$employee_id)->first();
-            if(!$employee){
-              throw new \Exception("Tidak ditemukan data pekerja",1);
-            }
+      $trx_trp = TrxTrp::where("id",$id)->with('uj_details2')->first();
+      if(!$trx_trp) 
+      throw new \Exception("Data Trx Trp Tidak Ditemukan",1);
 
-            if($v["_source"]=='TRX_TRP' && isset($v['trx_trp_id'])){
-              $trx_trp = TrxTrp::where("id",$v['trx_trp_id'])->first();
-              if(!$trx_trp) 
-              throw new \Exception("Data Trx Trp Tidak Ditemukan",1);
-            }else{
-              throw new \Exception("Source Tidak Dikenali",1);
-            }
-            self::loopCut($v,$employee,date("Y-m-d H:i:s"));
+      $supir_money_to_tf = 0;
+      $kernet_money_to_tf = 0;
+      foreach ($trx_trp->uj_details2 as $ujdv) {
+        if($ujdv->xfor=='Kernet'){
+          $kernet_money_to_tf+=$ujdv->amount*$ujdv->qty;
+        }else{
+          $supir_money_to_tf+=$ujdv->amount*$ujdv->qty;
         }
+      }
+      
+      foreach ($arrs as $k => $v) {
+        
+        $employee_id = $v['employee_id'];
+      
+        // ambil dari method potongan karna perlu filter nya
+        $employee = Employee::exclude(['attachment_1','attachment_2'])->where("id",$employee_id)->first();
+        if(!$employee){
+          throw new \Exception("Tidak ditemukan data pekerja",1);
+        }
+
+        if($trx_trp->supir_id != $employee->id && $trx_trp->kernet_id != $employee->id )
+        throw new \Exception("Pekerja tidak cocok dengan data di Trx Trp",1);
+
+        $potongan_mst   = PotonganMst::exclude(['attachment_1','attachment_2'])->where('employee_id',$employee->id)->where('val1',1)
+        ->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc')
+        ->lockForUpdate()
+        ->first();
+
+        if($trx_trp->supir_id == $employee->id && $supir_money_to_tf - $potongan_mst->nominal_cut < 10000)
+        throw new \Exception("Dana Untuk Transfer Kesupir Minimal 10.000",1);
+
+        if($trx_trp->kernet_id == $employee->id && $kernet_money_to_tf - $potongan_mst->nominal_cut < 10000)
+        throw new \Exception("Dana Untuk Transfer Kekernet Minimal 10.000",1);
+
+      }
+
+      foreach ($arrs as $k => $v) {
+      
+          $employee_id = $v['employee_id'];
+        
+          // ambil dari method potongan karna perlu filter nya
+          $employee = Employee::exclude(['attachment_1','attachment_2'])->where("id",$employee_id)->first();
+          // if(!$employee){
+          //   throw new \Exception("Tidak ditemukan data pekerja",1);
+          // }
+
+          // if($v["_source"]=='TRX_TRP' && isset($v['trx_trp_id'])){
+          //   $trx_trp = TrxTrp::where("id",$v['trx_trp_id'])->first();
+          //   if(!$trx_trp) 
+          //   throw new \Exception("Data Trx Trp Tidak Ditemukan",1);
+          // }else{
+          //   throw new \Exception("Source Tidak Dikenali",1);
+          // }
+          self::trpTrxloopCut($id,$v,$employee,date("Y-m-d H:i:s"));
+      }
     }
 
   }
 
-  public static function loopCut($v,$emp,$t_stamp,$sisa_cut=0){
+  public static function trpTrxloopCut($id,$v,$emp,$t_stamp,$sisa_cut=0){
     $potongan_mst   = PotonganMst::exclude(['attachment_1','attachment_2'])->where('employee_id',$emp->id)->where('val1',1)
     ->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc')
     ->lockForUpdate()
@@ -74,9 +114,7 @@ class PSPotonganTrx
       $potongan_trx->val              = 1;
       $potongan_trx->val_user         = $v['user_id'];
       $potongan_trx->val_at           = $t_stamp;
-
-      if($v["_source"]=='TRX_TRP' && isset($v['trx_trp_id']))
-      $potongan_trx->trx_trp_id       = $v['trx_trp_id'];
+      $potongan_trx->trx_trp_id       = $id;
   
       $potongan_trx->save();
   
@@ -89,25 +127,18 @@ class PSPotonganTrx
       $SYSNOTE = MyLib::compareChange($SYSOLD,$potongan_mst);
       MyLog::sys("potongan_mst",$potongan_mst->id,"update",$SYSNOTE);
   
-      if($sisa_cut>0) self::loopCut($v,$emp,$t_stamp,$sisa_cut);
+      if($sisa_cut>0) self::trpTrxloopCut($id,$v,$emp,$t_stamp,$sisa_cut);
     }
     
   }
 
 
-  public static function deletePotongan($arr=[]) {
-
-
+  public static function trpTrxDelete($id,$arr=[]) {
     if(gettype($arr)!='array'){
       throw new \Exception("Tipe data tidak sesuai",1);
     }
 
-    if($arr["_source"]!='TRX_TRP'){
-      throw new \Exception("Tipe data tidak sesuai",1);
-    }
-
-
-    $potongan_trx = PotonganTrx::where('deleted',0)->where("trx_trp_id",$arr['trx_trp_id'])->lockForUpdate()->get();
+    $potongan_trx = PotonganTrx::where('deleted',0)->where("trx_trp_id",$id)->lockForUpdate()->get();
 
     foreach ($potongan_trx as $k => $v) {
       $SYSOLD             = clone($v);
