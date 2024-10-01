@@ -1950,7 +1950,12 @@ class TrxTrpController extends Controller
       }
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.val',true) && !$model_query->val){
+        $model_query->val = 1;
+        $model_query->val_user = $this->admin_id;
+        $model_query->val_at = $t_stamp;
+      }
 
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$model_query->val1){
         $trx_trp_before=TrxTrp::where("no_pol",$model_query->no_pol)
         ->where("deleted",0)
         ->where("req_deleted",0)
@@ -1961,11 +1966,6 @@ class TrxTrpController extends Controller
         if(count($trx_trp_before)==2 && !$trx_trp_before[1]->ritase_val2)
         throw new \Exception("Absen Belum Selesai",1);
 
-        $model_query->val = 1;
-        $model_query->val_user = $this->admin_id;
-        $model_query->val_at = $t_stamp;
-      }
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$model_query->val1){
         $model_query->val1 = 1;
         $model_query->val1_user = $this->admin_id;
         $model_query->val1_at = $t_stamp;
