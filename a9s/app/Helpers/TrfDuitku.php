@@ -47,7 +47,7 @@ class TrfDuitku {
         );
 
         $params_string = json_encode($params);
-        MyLog::logging($params,"discheck");
+        // MyLog::logging($params,"discheck");
         $url = 'https://passport.duitku.com/webapi/api/disbursement/inquiryclearing';
         // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/inquiryclearingsandbox';
         $ch = curl_init();
