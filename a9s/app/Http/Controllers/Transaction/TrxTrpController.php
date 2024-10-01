@@ -1220,7 +1220,7 @@ class TrxTrpController extends Controller
 
     $trx_trp = TrxTrp::find($request->id);
 
-    if($trx_trp->val1==0)
+    if($trx_trp->val==0)
     return response()->json([
       "message" => "Mandor harus Validasi Terlebih Dahulu",
     ], 400);
