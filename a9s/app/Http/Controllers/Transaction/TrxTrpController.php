@@ -432,6 +432,8 @@ class TrxTrpController extends Controller
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
   
+      $this->permit_continue_trx($model_query);
+
       $model_query->val1 = 1;
       $model_query->val1_user = $this->admin_id;
       $model_query->val1_at = $t_stamp;
@@ -1956,16 +1958,7 @@ class TrxTrpController extends Controller
       }
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$model_query->val1){
-        $trx_trp_before=TrxTrp::where("no_pol",$model_query->no_pol)
-        ->where("deleted",0)
-        ->where("req_deleted",0)
-        ->orderBy("tanggal","desc")
-        ->orderBy("id","desc")
-        ->limit(2)->get();
-        
-        if(count($trx_trp_before)==2 && !$trx_trp_before[1]->ritase_val2)
-        throw new \Exception("Absen Belum Selesai",1);
-
+        $this->permit_continue_trx($model_query);
         $model_query->val1 = 1;
         $model_query->val1_user = $this->admin_id;
         $model_query->val1_at = $t_stamp;
@@ -2802,6 +2795,22 @@ class TrxTrpController extends Controller
     }
   }
 
+
+  public function permit_continue_trx($trx_trp) {
+    $ttb=TrxTrp::where(function($q)use($trx_trp){
+      $q->where("supir_id",$trx_trp->supir_id);
+      $q->orWhere("kernet_id",$trx_trp->kernet_id);
+    })
+    ->where("deleted",0)
+    ->where("req_deleted",0)
+    ->orderBy("tanggal","desc")
+    ->orderBy("id","desc")
+    ->limit(2)->get();
+    
+    if(count($ttb)==2 && !$ttb[1]->ritase_val2)
+    throw new \Exception("Absen Belum Selesai",1);
+
+  }
 
   // public function indexold(Request $request, $download = false)
   // {
