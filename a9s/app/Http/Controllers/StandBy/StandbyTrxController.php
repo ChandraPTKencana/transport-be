@@ -329,7 +329,7 @@ class StandbyTrxController extends Controller
     }
 
     $t_stamp = date("Y-m-d H:i:s");
-    $online_status=$request->online_status;
+    // $online_status=$request->online_status;
     
     $rollback_id = -1;
     DB::beginTransaction();
@@ -405,19 +405,19 @@ class StandbyTrxController extends Controller
       $model_query->note_for_remarks    = $request->note_for_remarks;
       $model_query->ref                 = $request->ref;
       
-      if($online_status=="true"){
-        if($request->cost_center_code){
-          $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-          ->select('CostCenter','Description')
-          ->where('CostCenter',$request->cost_center_code)
-          ->first();
-          if(!$list_cost_center)
-          throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+      // if($online_status=="true"){
+      //   if($request->cost_center_code){
+      //     $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+      //     ->select('CostCenter','Description')
+      //     ->where('CostCenter',$request->cost_center_code)
+      //     ->first();
+      //     if(!$list_cost_center)
+      //     throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
         
-          $model_query->cost_center_code = $list_cost_center->CostCenter;
-          $model_query->cost_center_desc = $list_cost_center->Description;
-        }
-      }
+      //     $model_query->cost_center_code = $list_cost_center->CostCenter;
+      //     $model_query->cost_center_desc = $list_cost_center->Description;
+      //   }
+      // }
       
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
@@ -535,7 +535,7 @@ class StandbyTrxController extends Controller
     MyAdmin::checkScope($this->permissions, 'standby_trx.modify');
     
     $t_stamp        = date("Y-m-d H:i:s");
-    $online_status  = $request->online_status;
+    // $online_status  = $request->online_status;
 
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
@@ -625,28 +625,28 @@ class StandbyTrxController extends Controller
         $model_query->ref                 = $request->ref;
       }
 
-      if($request->cost_center_code!=$model_query->cost_center_code){
+      // if($request->cost_center_code!=$model_query->cost_center_code){
 
-        if($online_status!="true" && $request->cost_center_code)
-        throw new \Exception("Pengisian cost center harus dalam mode online", 1);
+      //   if($online_status!="true" && $request->cost_center_code)
+      //   throw new \Exception("Pengisian cost center harus dalam mode online", 1);
 
-        if($request->cost_center_code==""){
-          $model_query->cost_center_code =null;
-          $model_query->cost_center_desc =null;
-        }else{
-          if($model_query->pvr_id==null){
-            $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-            ->select('CostCenter','Description')
-            ->where('CostCenter',$request->cost_center_code)
-            ->first();
-            if(!$list_cost_center)
-            throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
+      //   if($request->cost_center_code==""){
+      //     $model_query->cost_center_code =null;
+      //     $model_query->cost_center_desc =null;
+      //   }else{
+      //     if($model_query->pvr_id==null){
+      //       $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+      //       ->select('CostCenter','Description')
+      //       ->where('CostCenter',$request->cost_center_code)
+      //       ->first();
+      //       if(!$list_cost_center)
+      //       throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
           
-            $model_query->cost_center_code = $list_cost_center->CostCenter;
-            $model_query->cost_center_desc = $list_cost_center->Description;
-          }
-        }
-      }
+      //       $model_query->cost_center_code = $list_cost_center->CostCenter;
+      //       $model_query->cost_center_desc = $list_cost_center->Description;
+      //     }
+      //   }
+      // }
       
 
       $model_query->updated_at      = $t_stamp;
@@ -1444,8 +1444,8 @@ class StandbyTrxController extends Controller
     try {
       $model_query = StandbyTrx::find($request->id);
       
-      if($model_query->cost_center_code=="")
-      throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
+      // if($model_query->cost_center_code=="")
+      // throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
 
       if($model_query->val && $model_query->val1 && $model_query->val2){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
@@ -1514,380 +1514,380 @@ class StandbyTrxController extends Controller
 
   }
 
-  public function doGenPVR(Request $request){
-    MyAdmin::checkScope($this->permissions, 'standby_trx.generate_pvr');
-    $rules = [
-      // 'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
-      'online_status' => "required",
-    ];
+  // public function doGenPVR(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'standby_trx.generate_pvr');
+  //   $rules = [
+  //     // 'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
+  //     'online_status' => "required",
+  //   ];
 
-    $messages = [
-      // 'id.required' => 'ID tidak boleh kosong',
-      // 'id.exists' => 'ID tidak terdaftar',
-    ];
+  //   $messages = [
+  //     // 'id.required' => 'ID tidak boleh kosong',
+  //     // 'id.exists' => 'ID tidak terdaftar',
+  //   ];
 
-    $validator = Validator::make($request->all(), $rules, $messages);
+  //   $validator = Validator::make($request->all(), $rules, $messages);
 
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
-    $online_status=$request->online_status;
-    if($online_status!="true")
-    return response()->json([
-      "message" => "Mode Harus Online",
-    ], 400);
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
+  //   $online_status=$request->online_status;
+  //   if($online_status!="true")
+  //   return response()->json([
+  //     "message" => "Mode Harus Online",
+  //   ], 400);
 
-    $miniError="";
-    $id="";
-    try {
-      $standby_trxs = StandbyTrx::where(function($q1){$q1->where('pvr_had_detail',0)->orWhereNull("pvr_id");})->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val1',1)->get();
-      if(count($standby_trxs)==0){
-        throw new \Exception("Semua PVR sudah terisi",1);
-      }
-      $changes=[];
-      foreach ($standby_trxs as $key => $tt) {
-        $id=$tt->id;
-        $callGet = $this->genPVR($id);
-        array_push($changes,$callGet);
-      }
-      if(count($changes)>0){
-        $ids = array_map(function ($x) {
-          return $x["id"];
-        },$changes);
-        MyLog::sys("standby_trx",null,"generate_pvr",implode(",",$ids));
-      }
-      return response()->json($changes, 200);
-    } catch (\Exception $e) {
-      if(isset($changes) && count($changes)>0){
-        $ids = array_map(function ($x) {
-          return $x["id"];
-        },$changes);
-        MyLog::sys("standby_trx",null,"generate_pvr",implode(",",$ids));
-      }
+  //   $miniError="";
+  //   $id="";
+  //   try {
+  //     $standby_trxs = StandbyTrx::where(function($q1){$q1->where('pvr_had_detail',0)->orWhereNull("pvr_id");})->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val1',1)->get();
+  //     if(count($standby_trxs)==0){
+  //       throw new \Exception("Semua PVR sudah terisi",1);
+  //     }
+  //     $changes=[];
+  //     foreach ($standby_trxs as $key => $tt) {
+  //       $id=$tt->id;
+  //       $callGet = $this->genPVR($id);
+  //       array_push($changes,$callGet);
+  //     }
+  //     if(count($changes)>0){
+  //       $ids = array_map(function ($x) {
+  //         return $x["id"];
+  //       },$changes);
+  //       MyLog::sys("standby_trx",null,"generate_pvr",implode(",",$ids));
+  //     }
+  //     return response()->json($changes, 200);
+  //   } catch (\Exception $e) {
+  //     if(isset($changes) && count($changes)>0){
+  //       $ids = array_map(function ($x) {
+  //         return $x["id"];
+  //       },$changes);
+  //       MyLog::sys("standby_trx",null,"generate_pvr",implode(",",$ids));
+  //     }
 
-      if ($e->getCode() == 1) {
-        if($id!=""){
-          $miniError.="Trx-".$id.".";
-        }
-        $miniError.="PVR Batal Dibuat: ".$e->getMessage();
-      }else{
-        if($id!=""){
-          $miniError.="Trx-".$id.".";
-        }
-        $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
-      }
-      return response()->json([
-        "message" => $miniError,
-      ], 400);
-    }
-  }
+  //     if ($e->getCode() == 1) {
+  //       if($id!=""){
+  //         $miniError.="Trx-".$id.".";
+  //       }
+  //       $miniError.="PVR Batal Dibuat: ".$e->getMessage();
+  //     }else{
+  //       if($id!=""){
+  //         $miniError.="Trx-".$id.".";
+  //       }
+  //       $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
+  //     }
+  //     return response()->json([
+  //       "message" => $miniError,
+  //     ], 400);
+  //   }
+  // }
 
-  public function genPVR($standby_trx_id){
+  // public function genPVR($standby_trx_id){
 
-    $t_stamp = date("Y-m-d H:i:s");
+  //   $t_stamp = date("Y-m-d H:i:s");
 
-    $time = microtime(true);
-    $mSecs = sprintf('%03d', ($time - floor($time)) * 1000);
-    $t_stamp_ms = date("Y-m-d H:i:s",strtotime($t_stamp)).".".$mSecs;
+  //   $time = microtime(true);
+  //   $mSecs = sprintf('%03d', ($time - floor($time)) * 1000);
+  //   $t_stamp_ms = date("Y-m-d H:i:s",strtotime($t_stamp)).".".$mSecs;
 
-    $standby_trx = StandbyTrx::where("id",$standby_trx_id)->first();
-    if(!$standby_trx){
-      throw new \Exception("Karna Transaksi tidak ditemukan",1);
-    }
+  //   $standby_trx = StandbyTrx::where("id",$standby_trx_id)->first();
+  //   if(!$standby_trx){
+  //     throw new \Exception("Karna Transaksi tidak ditemukan",1);
+  //   }
 
-    if($standby_trx->pvr_had_detail==1) throw new \Exception("Karna PVR sudah selesai dibuat",1);
-    if($standby_trx->cost_center_code==null) throw new \Exception("Cost Center Code belum diisi",1);
-    if($standby_trx->pv_id!=null) throw new \Exception("Karna PV sudah diisi",1);
+  //   if($standby_trx->pvr_had_detail==1) throw new \Exception("Karna PVR sudah selesai dibuat",1);
+  //   if($standby_trx->cost_center_code==null) throw new \Exception("Cost Center Code belum diisi",1);
+  //   if($standby_trx->pv_id!=null) throw new \Exception("Karna PV sudah diisi",1);
       
-    $supir = $standby_trx->supir;
-    $no_pol = $standby_trx->no_pol;
-    $kernet = $standby_trx->kernet;
-    $associate_name=($supir?"(S) ".$supir." ":"(Tanpa Supir) ").($kernet?"(K) ".$kernet." ":"(Tanpa Kernet) ").$no_pol; // max 80char
+  //   $supir = $standby_trx->supir;
+  //   $no_pol = $standby_trx->no_pol;
+  //   $kernet = $standby_trx->kernet;
+  //   $associate_name=($supir?"(S) ".$supir." ":"(Tanpa Supir) ").($kernet?"(K) ".$kernet." ":"(Tanpa Kernet) ").$no_pol; // max 80char
 
-    $standby_mst = StandbyMst::where("id",$standby_trx->standby_mst_id)->first();
-    $standby_mst_dtl = StandbyDtl::where("standby_mst_id",$standby_mst->id)->get();
-    if(count($standby_mst_dtl)==0)
-    throw new \Exception("Master Standby Detail Harus diisi terlebih dahulu",1);
+  //   $standby_mst = StandbyMst::where("id",$standby_trx->standby_mst_id)->first();
+  //   $standby_mst_dtl = StandbyDtl::where("standby_mst_id",$standby_mst->id)->get();
+  //   if(count($standby_mst_dtl)==0)
+  //   throw new \Exception("Master Standby Detail Harus diisi terlebih dahulu",1);
     
-    $standby_trx_dtl = StandbyTrxDtl::where("standby_trx_id",$standby_trx->id)->get();
-    if(count($standby_trx_dtl)==0)
-    throw new \Exception("Transaksi Standby Detail Harus diisi terlebih dahulu",1);
+  //   $standby_trx_dtl = StandbyTrxDtl::where("standby_trx_id",$standby_trx->id)->get();
+  //   if(count($standby_trx_dtl)==0)
+  //   throw new \Exception("Transaksi Standby Detail Harus diisi terlebih dahulu",1);
 
-    $arrRemarks = [];
-    array_push($arrRemarks,"#".$standby_trx->id.($standby_trx->transition_type!=''?" (P) " : " ").$associate_name.".");
-    array_push($arrRemarks,$standby_mst->name." ".($standby_trx->xto ? env("app_name")."-".$standby_trx->xto : "")).".";
-    $pertanggal = "";
-    foreach ($standby_trx_dtl as $key => $value) {
-      if($key > 0) $pertanggal .= ",";
+  //   $arrRemarks = [];
+  //   array_push($arrRemarks,"#".$standby_trx->id.($standby_trx->transition_type!=''?" (P) " : " ").$associate_name.".");
+  //   array_push($arrRemarks,$standby_mst->name." ".($standby_trx->xto ? env("app_name")."-".$standby_trx->xto : "")).".";
+  //   $pertanggal = "";
+  //   foreach ($standby_trx_dtl as $key => $value) {
+  //     if($key > 0) $pertanggal .= ",";
 
-      $pertanggal .= " P/".date("d-m-y",strtotime($value->tanggal));
-    }
-    array_push($arrRemarks,$pertanggal);
+  //     $pertanggal .= " P/".date("d-m-y",strtotime($value->tanggal));
+  //   }
+  //   array_push($arrRemarks,$pertanggal);
 
-    if($standby_trx->note_for_remarks!=null){
-      $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $standby_trx->note_for_remarks);
-      $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
-    }
+  //   if($standby_trx->note_for_remarks!=null){
+  //     $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $standby_trx->note_for_remarks);
+  //     $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
+  //   }
     
-    $remarks = implode(chr(10),$arrRemarks);
-    array_push($arrRemarks,";");
+  //   $remarks = implode(chr(10),$arrRemarks);
+  //   array_push($arrRemarks,";");
 
-    if(strlen($associate_name)>80){
-      $associate_name = substr($associate_name,0,80);
-    }
+  //   if(strlen($associate_name)>80){
+  //     $associate_name = substr($associate_name,0,80);
+  //   }
 
-    $bank_account_code=env("PVR_BANK_ACCOUNT_CODE");
+  //   $bank_account_code=env("PVR_BANK_ACCOUNT_CODE");
     
-    $bank_acccount_db = DB::connection('sqlsrv')->table('FI_BankAccounts')
-    ->select('BankAccountID')
-    ->where("bankaccountcode",$bank_account_code)
-    ->first();
-    if(!$bank_acccount_db) throw new \Exception("Bank account code tidak terdaftar ,segera infokan ke tim IT",1);
+  //   $bank_acccount_db = DB::connection('sqlsrv')->table('FI_BankAccounts')
+  //   ->select('BankAccountID')
+  //   ->where("bankaccountcode",$bank_account_code)
+  //   ->first();
+  //   if(!$bank_acccount_db) throw new \Exception("Bank account code tidak terdaftar ,segera infokan ke tim IT",1);
 
-    $bank_account_id = $bank_acccount_db->BankAccountID;
+  //   $bank_account_id = $bank_acccount_db->BankAccountID;
     
-    // @VoucherID INT = 0,
-    $voucher_no = "(AUTO)";
-    $voucher_type = "TRP";
-    $voucher_date = date("Y-m-d");
+  //   // @VoucherID INT = 0,
+  //   $voucher_no = "(AUTO)";
+  //   $voucher_type = "TRP";
+  //   $voucher_date = date("Y-m-d");
 
-    $income_or_expense = 1;
-    $currency_id = 1;
-    $payment_method="Cash";
-    $check_no=$bank_name=$account_no= '';
-    $check_due_date= null;
+  //   $income_or_expense = 1;
+  //   $currency_id = 1;
+  //   $payment_method="Cash";
+  //   $check_no=$bank_name=$account_no= '';
+  //   $check_due_date= null;
 
-    $amount_paid = $standby_mst->amount * count($standby_trx_dtl); // call from child
-    $exclude_in_ARAP = 0;
-    $login_name = $this->admin->the_user->username;
-    $expense_or_revenue_type_id=0;
-    $confidential=1;
-    $PVR_source = 'gt_standby'; // digenerate melalui program
-    $PVR_source_id = $standby_trx_id; //ambil id trx
-      // DB::select("exec USP_FI_APRequest_Update(0,'(AUTO)','TRP',1,1,1,0,)",array($ts,$param2));
-    $VoucherID = -1;
+  //   $amount_paid = $standby_mst->amount * count($standby_trx_dtl); // call from child
+  //   $exclude_in_ARAP = 0;
+  //   $login_name = $this->admin->the_user->username;
+  //   $expense_or_revenue_type_id=0;
+  //   $confidential=1;
+  //   $PVR_source = 'gt_standby'; // digenerate melalui program
+  //   $PVR_source_id = $standby_trx_id; //ambil id trx
+  //     // DB::select("exec USP_FI_APRequest_Update(0,'(AUTO)','TRP',1,1,1,0,)",array($ts,$param2));
+  //   $VoucherID = -1;
 
-    $pvr= DB::connection('sqlsrv')->table('FI_APRequest')
-    ->select('VoucherID','VoucherNo','AmountPaid')
-    ->where("PVRSource",$PVR_source)
-    ->where("PVRSourceID",$standby_trx->id)
-    ->where("Void",0)
-    ->first();
+  //   $pvr= DB::connection('sqlsrv')->table('FI_APRequest')
+  //   ->select('VoucherID','VoucherNo','AmountPaid')
+  //   ->where("PVRSource",$PVR_source)
+  //   ->where("PVRSourceID",$standby_trx->id)
+  //   ->where("Void",0)
+  //   ->first();
 
-    if(!$pvr){
-      // $myData = DB::connection('sqlsrv')->update("SET NOCOUNT ON;exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
-      $myData = DB::connection('sqlsrv')->update("exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
-      @VoucherDate=:voucher_date,@IncomeOrExpense=:income_or_expense,@CurrencyID=:currency_id,@AssociateName=:associate_name,
-      @BankAccountID=:bank_account_id,@PaymentMethod=:payment_method,@CheckNo=:check_no,@CheckDueDate=:check_due_date,
-      @BankName=:bank_name,@AmountPaid=:amount_paid,@AccountNo=:account_no,@Remarks=:remarks,@ExcludeInARAP=:exclude_in_ARAP,
-      @LoginName=:login_name,@ExpenseOrRevenueTypeID=:expense_or_revenue_type_id,@Confidential=:confidential,
-      @PVRSource=:PVR_source,@PVRSourceID=:PVR_source_id",[
-        ":voucher_no"=>$voucher_no,
-        ":voucher_type"=>$voucher_type,
-        ":voucher_date"=>$voucher_date,
-        ":income_or_expense"=>$income_or_expense,
-        ":currency_id"=>$currency_id,
-        ":associate_name"=>$associate_name,
-        ":bank_account_id"=>$bank_account_id,
-        ":payment_method"=>$payment_method,
-        ":check_no"=>$check_no,
-        ":check_due_date"=>$check_due_date,
-        ":bank_name"=>$bank_name,
-        ":amount_paid"=>$amount_paid,
-        ":account_no"=>$account_no,
-        ":remarks"=>$remarks,
-        ":exclude_in_ARAP"=>$exclude_in_ARAP,
-        ":login_name"=>$login_name,
-        ":expense_or_revenue_type_id"=>$expense_or_revenue_type_id,
-        ":confidential"=>$confidential,
-        ":PVR_source"=>$PVR_source,
-        ":PVR_source_id"=>$PVR_source_id,
-      ]);
-      if(!$myData)
-      throw new \Exception("Data yang diperlukan tidak terpenuhi",1);
+  //   if(!$pvr){
+  //     // $myData = DB::connection('sqlsrv')->update("SET NOCOUNT ON;exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
+  //     $myData = DB::connection('sqlsrv')->update("exec USP_FI_APRequest_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
+  //     @VoucherDate=:voucher_date,@IncomeOrExpense=:income_or_expense,@CurrencyID=:currency_id,@AssociateName=:associate_name,
+  //     @BankAccountID=:bank_account_id,@PaymentMethod=:payment_method,@CheckNo=:check_no,@CheckDueDate=:check_due_date,
+  //     @BankName=:bank_name,@AmountPaid=:amount_paid,@AccountNo=:account_no,@Remarks=:remarks,@ExcludeInARAP=:exclude_in_ARAP,
+  //     @LoginName=:login_name,@ExpenseOrRevenueTypeID=:expense_or_revenue_type_id,@Confidential=:confidential,
+  //     @PVRSource=:PVR_source,@PVRSourceID=:PVR_source_id",[
+  //       ":voucher_no"=>$voucher_no,
+  //       ":voucher_type"=>$voucher_type,
+  //       ":voucher_date"=>$voucher_date,
+  //       ":income_or_expense"=>$income_or_expense,
+  //       ":currency_id"=>$currency_id,
+  //       ":associate_name"=>$associate_name,
+  //       ":bank_account_id"=>$bank_account_id,
+  //       ":payment_method"=>$payment_method,
+  //       ":check_no"=>$check_no,
+  //       ":check_due_date"=>$check_due_date,
+  //       ":bank_name"=>$bank_name,
+  //       ":amount_paid"=>$amount_paid,
+  //       ":account_no"=>$account_no,
+  //       ":remarks"=>$remarks,
+  //       ":exclude_in_ARAP"=>$exclude_in_ARAP,
+  //       ":login_name"=>$login_name,
+  //       ":expense_or_revenue_type_id"=>$expense_or_revenue_type_id,
+  //       ":confidential"=>$confidential,
+  //       ":PVR_source"=>$PVR_source,
+  //       ":PVR_source_id"=>$PVR_source_id,
+  //     ]);
+  //     if(!$myData)
+  //     throw new \Exception("Data yang diperlukan tidak terpenuhi",1);
     
-      $pvr= DB::connection('sqlsrv')->table('FI_APRequest')
-      ->select('VoucherID','VoucherNo','AmountPaid')
-      ->where("PVRSource",$PVR_source)
-      ->where("PVRSourceID",$standby_trx->id)
-      ->where("Void",0)
-      ->first();
-      if(!$pvr)
-      throw new \Exception("Akses Ke Jaringan Gagal",1);
-    }
+  //     $pvr= DB::connection('sqlsrv')->table('FI_APRequest')
+  //     ->select('VoucherID','VoucherNo','AmountPaid')
+  //     ->where("PVRSource",$PVR_source)
+  //     ->where("PVRSourceID",$standby_trx->id)
+  //     ->where("Void",0)
+  //     ->first();
+  //     if(!$pvr)
+  //     throw new \Exception("Akses Ke Jaringan Gagal",1);
+  //   }
 
-    $standby_trx->pvr_id = $pvr->VoucherID;
-    $standby_trx->pvr_no = $pvr->VoucherNo;
-    $standby_trx->pvr_total = $pvr->AmountPaid;
-    $standby_trx->save();
+  //   $standby_trx->pvr_id = $pvr->VoucherID;
+  //   $standby_trx->pvr_no = $pvr->VoucherNo;
+  //   $standby_trx->pvr_total = $pvr->AmountPaid;
+  //   $standby_trx->save();
     
-    $d_voucher_id = $pvr->VoucherID;
-    $d_voucher_extra_item_id = 0;
-    $d_type = 0;
+  //   $d_voucher_id = $pvr->VoucherID;
+  //   $d_voucher_extra_item_id = 0;
+  //   $d_type = 0;
 
-    $pvr_detail= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
-    ->select('VoucherID')
-    ->where("VoucherID",$d_voucher_id)
-    ->get();
+  //   $pvr_detail= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+  //   ->select('VoucherID')
+  //   ->where("VoucherID",$d_voucher_id)
+  //   ->get();
 
-    if(count($pvr_detail)==0 || count($pvr_detail) < count($standby_mst_dtl)){
-      $start = count($pvr_detail);
-      foreach ($standby_mst_dtl as $key => $v) {
-        if($key < $start){ continue; }
-        $d_description = $v->description;
-        $d_amount = count($standby_trx_dtl) * $v->amount;
-        $d_account_id = $v->ac_account_id;
-        $d_dept = $standby_trx->cost_center_code;
-        $d_qty=count($standby_trx_dtl);
-        $d_unit_price=$v->amount;
-        $details = DB::connection('sqlsrv')->update("exec 
-        USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
-        @VoucherExtraItemID=:d_voucher_extra_item_id,
-        @Description=:d_description,@Amount=:d_amount,
-        @AccountID=:d_account_id,@TypeID=:d_type,
-        @Department=:d_dept,@LoginName=:login_name,
-        @Qty=:d_qty,@UnitPrice=:d_unit_price",[
-          ":d_voucher_id"=>$d_voucher_id,
-          ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
-          ":d_description"=>$d_description,
-          ":d_amount"=>$d_amount,
-          ":d_account_id"=>$d_account_id,
-          ":d_type"=>$d_type,
-          ":d_dept"=>$d_dept,
-          ":login_name"=>$login_name,
-          ":d_qty"=>$d_qty,
-          ":d_unit_price"=>$d_unit_price
-        ]);
-      }
-    }
+  //   if(count($pvr_detail)==0 || count($pvr_detail) < count($standby_mst_dtl)){
+  //     $start = count($pvr_detail);
+  //     foreach ($standby_mst_dtl as $key => $v) {
+  //       if($key < $start){ continue; }
+  //       $d_description = $v->description;
+  //       $d_amount = count($standby_trx_dtl) * $v->amount;
+  //       $d_account_id = $v->ac_account_id;
+  //       $d_dept = $standby_trx->cost_center_code;
+  //       $d_qty=count($standby_trx_dtl);
+  //       $d_unit_price=$v->amount;
+  //       $details = DB::connection('sqlsrv')->update("exec 
+  //       USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+  //       @VoucherExtraItemID=:d_voucher_extra_item_id,
+  //       @Description=:d_description,@Amount=:d_amount,
+  //       @AccountID=:d_account_id,@TypeID=:d_type,
+  //       @Department=:d_dept,@LoginName=:login_name,
+  //       @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+  //         ":d_voucher_id"=>$d_voucher_id,
+  //         ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+  //         ":d_description"=>$d_description,
+  //         ":d_amount"=>$d_amount,
+  //         ":d_account_id"=>$d_account_id,
+  //         ":d_type"=>$d_type,
+  //         ":d_dept"=>$d_dept,
+  //         ":login_name"=>$login_name,
+  //         ":d_qty"=>$d_qty,
+  //         ":d_unit_price"=>$d_unit_price
+  //       ]);
+  //     }
+  //   }
 
-    $tocheck = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->first();
+  //   $tocheck = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->first();
 
-    if(!$tocheck)
-    throw new \Exception("Voucher Tidak terdaftar",1);
+  //   if(!$tocheck)
+  //   throw new \Exception("Voucher Tidak terdaftar",1);
 
-    $checked2 = IsUser::where("id",$standby_trx->val1_user)->first();
-    if(!$checked2)
-    throw new \Exception("User Tidak terdaftar",1);
-    if($tocheck->Checked==0){
-      DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoCheck @VoucherID=:voucher_no,
-      @CheckedBy=:login_name",[
-        ":voucher_no"=>$d_voucher_id,
-        ":login_name"=>$login_name,
-      ]);
-    }
+  //   $checked2 = IsUser::where("id",$standby_trx->val1_user)->first();
+  //   if(!$checked2)
+  //   throw new \Exception("User Tidak terdaftar",1);
+  //   if($tocheck->Checked==0){
+  //     DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoCheck @VoucherID=:voucher_no,
+  //     @CheckedBy=:login_name",[
+  //       ":voucher_no"=>$d_voucher_id,
+  //       ":login_name"=>$login_name,
+  //     ]);
+  //   }
 
-    if($tocheck->Approved==0){
-      DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoApprove @VoucherID=:voucher_no,
-      @ApprovedBy=:login_name",[
-        ":voucher_no"=>$d_voucher_id,
-        ":login_name"=>$checked2->username,
-      ]);
-    }
+  //   if($tocheck->Approved==0){
+  //     DB::connection('sqlsrv')->update("exec USP_FI_APRequest_DoApprove @VoucherID=:voucher_no,
+  //     @ApprovedBy=:login_name",[
+  //       ":voucher_no"=>$d_voucher_id,
+  //       ":login_name"=>$checked2->username,
+  //     ]);
+  //   }
 
-    $standby_trx->pvr_had_detail = 1;
-    $standby_trx->save();
+  //   $standby_trx->pvr_had_detail = 1;
+  //   $standby_trx->save();
 
-    return [
-      "message" => "PVR berhasil dibuat",
-      "id"=>$standby_trx->id,
-      "pvr_id" => $standby_trx->pvr_id,
-      "pvr_no" => $standby_trx->pvr_no,
-      "pvr_total" => $standby_trx->pvr_total,
-      "pvr_had_detail" => $standby_trx->pvr_had_detail,
-      "updated_at"=>$t_stamp
-    ];
-  }
+  //   return [
+  //     "message" => "PVR berhasil dibuat",
+  //     "id"=>$standby_trx->id,
+  //     "pvr_id" => $standby_trx->pvr_id,
+  //     "pvr_no" => $standby_trx->pvr_no,
+  //     "pvr_total" => $standby_trx->pvr_total,
+  //     "pvr_had_detail" => $standby_trx->pvr_had_detail,
+  //     "updated_at"=>$t_stamp
+  //   ];
+  // }
 
-  public function doUpdatePV(Request $request){
-    MyAdmin::checkScope($this->permissions, 'standby_trx.get_pv');
-    $rules = [
-      'online_status' => "required",
-    ];
+  // public function doUpdatePV(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'standby_trx.get_pv');
+  //   $rules = [
+  //     'online_status' => "required",
+  //   ];
 
-    $messages = [
-      'id.exists' => 'ID tidak terdaftar',
-    ];
+  //   $messages = [
+  //     'id.exists' => 'ID tidak terdaftar',
+  //   ];
 
-    $validator = Validator::make($request->all(), $rules, $messages);
+  //   $validator = Validator::make($request->all(), $rules, $messages);
 
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
-    $online_status=$request->online_status;
-    if($online_status!="true")
-    return response()->json([
-      "message" => "Mode Harus Online",
-    ], 400);
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
+  //   $online_status=$request->online_status;
+  //   if($online_status!="true")
+  //   return response()->json([
+  //     "message" => "Mode Harus Online",
+  //   ], 400);
 
-    $miniError="";
-    try {
-      $t_stamp = date("Y-m-d H:i:s");
-      $standby_trxs = StandbyTrx::whereNotNull("pvr_id")->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->get();
-      if(count($standby_trxs)==0){
-        throw new \Exception("Semua PVR yang ada ,PV ny sudah terisi",1);
-      }
+  //   $miniError="";
+  //   try {
+  //     $t_stamp = date("Y-m-d H:i:s");
+  //     $standby_trxs = StandbyTrx::whereNotNull("pvr_id")->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->get();
+  //     if(count($standby_trxs)==0){
+  //       throw new \Exception("Semua PVR yang ada ,PV ny sudah terisi",1);
+  //     }
 
-      $pvr_nos=$standby_trxs->pluck('pvr_no');
-      // $pvr_nos=['KPN/PV-R/2404/0951','KPN/PV-R/2404/1000'];
-      $get_data_pvs = DB::connection('sqlsrv')->table('FI_ARAPINFO')
-      ->selectRaw('fi_arap.VoucherID,fi_arap.VoucherDate,Sources,fi_arap.VoucherNo,FI_APRequest.PVRSourceID,fi_arap.AmountPaid')
-      ->join('fi_arap',function ($join){
-        $join->on("fi_arap.VoucherID","FI_ARAPINFO.VoucherID");        
-      })
-      ->join('FI_APRequest',function ($join){
-        $join->on("FI_APRequest.VoucherNo","FI_ARAPINFO.Sources");        
-      })
-      ->whereIn("sources",$pvr_nos)
-      ->get();
+  //     $pvr_nos=$standby_trxs->pluck('pvr_no');
+  //     // $pvr_nos=['KPN/PV-R/2404/0951','KPN/PV-R/2404/1000'];
+  //     $get_data_pvs = DB::connection('sqlsrv')->table('FI_ARAPINFO')
+  //     ->selectRaw('fi_arap.VoucherID,fi_arap.VoucherDate,Sources,fi_arap.VoucherNo,FI_APRequest.PVRSourceID,fi_arap.AmountPaid')
+  //     ->join('fi_arap',function ($join){
+  //       $join->on("fi_arap.VoucherID","FI_ARAPINFO.VoucherID");        
+  //     })
+  //     ->join('FI_APRequest',function ($join){
+  //       $join->on("FI_APRequest.VoucherNo","FI_ARAPINFO.Sources");        
+  //     })
+  //     ->whereIn("sources",$pvr_nos)
+  //     ->get();
 
-      $get_data_pvs=MyLib::objsToArray($get_data_pvs);
-      $changes=[];
-      foreach ($get_data_pvs as $key => $v) {
-        $ud_standby_trx=StandbyTrx::where("id", $v["PVRSourceID"])->where("pvr_no", $v["Sources"])->first();
-        if(!$ud_standby_trx) continue;
-        $ud_standby_trx->pv_id=$v["VoucherID"];
-        $ud_standby_trx->pv_no=$v["VoucherNo"];
-        $ud_standby_trx->pv_total=$v["AmountPaid"];
-        $ud_standby_trx->pv_datetime=$v["VoucherDate"];
-        $ud_standby_trx->updated_at=$t_stamp;
-        $ud_standby_trx->save();
-        array_push($changes,[
-          "id"=>$ud_standby_trx->id,
-          "pv_id"=>$ud_standby_trx->pv_id,
-          "pv_no"=>$ud_standby_trx->pv_no,
-          "pv_total"=>$ud_standby_trx->pv_total,
-          "pv_datetime"=>$ud_standby_trx->pv_datetime,
-          "updated_at"=>$t_stamp
-        ]);
-      }
+  //     $get_data_pvs=MyLib::objsToArray($get_data_pvs);
+  //     $changes=[];
+  //     foreach ($get_data_pvs as $key => $v) {
+  //       $ud_standby_trx=StandbyTrx::where("id", $v["PVRSourceID"])->where("pvr_no", $v["Sources"])->first();
+  //       if(!$ud_standby_trx) continue;
+  //       $ud_standby_trx->pv_id=$v["VoucherID"];
+  //       $ud_standby_trx->pv_no=$v["VoucherNo"];
+  //       $ud_standby_trx->pv_total=$v["AmountPaid"];
+  //       $ud_standby_trx->pv_datetime=$v["VoucherDate"];
+  //       $ud_standby_trx->updated_at=$t_stamp;
+  //       $ud_standby_trx->save();
+  //       array_push($changes,[
+  //         "id"=>$ud_standby_trx->id,
+  //         "pv_id"=>$ud_standby_trx->pv_id,
+  //         "pv_no"=>$ud_standby_trx->pv_no,
+  //         "pv_total"=>$ud_standby_trx->pv_total,
+  //         "pv_datetime"=>$ud_standby_trx->pv_datetime,
+  //         "updated_at"=>$t_stamp
+  //       ]);
+  //     }
 
-      if(count($changes)==0)
-      throw new \Exception("PV Tidak ada yang di Update",1);
+  //     if(count($changes)==0)
+  //     throw new \Exception("PV Tidak ada yang di Update",1);
 
 
-      $ids = array_map(function ($x) {
-        return $x["id"];
-      }, $changes);
+  //     $ids = array_map(function ($x) {
+  //       return $x["id"];
+  //     }, $changes);
 
-      MyLog::sys("standby_trx",null,"update_pv",implode(",",$ids));
+  //     MyLog::sys("standby_trx",null,"update_pv",implode(",",$ids));
 
-      return response()->json([
-        "message" => "PV Berhasil di Update",
-        "data" => $changes,
-      ], 200);
+  //     return response()->json([
+  //       "message" => "PV Berhasil di Update",
+  //       "data" => $changes,
+  //     ], 200);
       
-    } catch (\Exception $e) {
-      if ($e->getCode() == 1) {
-        $miniError="PV Batal Update: ".$e->getMessage();
-      }else{
-        $miniError="PV Batal Update. Akses Jaringan Gagal";
-      }
-      return response()->json([
-        "message" => $miniError,
-      ], 400);
-    }
-  }
+  //   } catch (\Exception $e) {
+  //     if ($e->getCode() == 1) {
+  //       $miniError="PV Batal Update: ".$e->getMessage();
+  //     }else{
+  //       $miniError="PV Batal Update. Akses Jaringan Gagal";
+  //     }
+  //     return response()->json([
+  //       "message" => $miniError,
+  //     ], 400);
+  //   }
+  // }
 
 
   // public function indexold(Request $request, $download = false)
