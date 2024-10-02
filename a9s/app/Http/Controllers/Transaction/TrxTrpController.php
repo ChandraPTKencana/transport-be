@@ -2798,7 +2798,10 @@ class TrxTrpController extends Controller
 
   public function permit_continue_trx($trx_trp) {
     $ttb=TrxTrp::where(function($q)use($trx_trp){
+      if($trx_trp->supir_id)
       $q->where("supir_id",$trx_trp->supir_id);
+
+      if($trx_trp->kernet_id)
       $q->orWhere("kernet_id",$trx_trp->kernet_id);
     })
     ->where("deleted",0)
