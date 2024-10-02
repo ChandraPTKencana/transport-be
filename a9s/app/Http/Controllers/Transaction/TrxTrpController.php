@@ -2798,11 +2798,8 @@ class TrxTrpController extends Controller
 
   public function permit_continue_trx($trx_trp) {
     $ttb=TrxTrp::where(function($q)use($trx_trp){
-      if($trx_trp->supir_id)
       $q->where("supir_id",$trx_trp->supir_id);
-
-      if($trx_trp->kernet_id)
-      $q->orWhere("kernet_id",$trx_trp->kernet_id);
+      $q->orWhere("kernet_id",$trx_trp->supir_id);
     })
     ->where("deleted",0)
     ->where("req_deleted",0)
@@ -2811,8 +2808,24 @@ class TrxTrpController extends Controller
     ->limit(2)->get();
     
     if(count($ttb)==2 && !$ttb[1]->ritase_val2)
-    throw new \Exception("Absen Belum Selesai",1);
+    throw new \Exception("Absen Belum Selesai [ID:".$ttb[1]->id."]",1);
 
+
+    if($trx_trp->kernet_id){
+      $ttb=TrxTrp::where(function($q)use($trx_trp){
+          $q->where("supir_id",$trx_trp->kernet_id);
+          $q->orWhere("kernet_id",$trx_trp->kernet_id);
+      })
+      ->where("deleted",0)
+      ->where("req_deleted",0)
+      ->orderBy("tanggal","desc")
+      ->orderBy("id","desc")
+      ->limit(2)->get();
+      
+      if(count($ttb)==2 && !$ttb[1]->ritase_val2)
+      throw new \Exception("Absen Kernet Belum Selesai [ID:".$ttb[1]->id."]",1);
+    }
+    
   }
 
   // public function indexold(Request $request, $download = false)
