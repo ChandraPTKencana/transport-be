@@ -2797,7 +2797,7 @@ class TrxTrpController extends Controller
 
 
   public function permit_continue_trx($trx_trp) {
-    $ttb=TrxTrp::where(function($q)use($trx_trp){
+    $supir_absen=TrxTrp::where(function($q)use($trx_trp){
       $q->where("supir_id",$trx_trp->supir_id);
       $q->orWhere("kernet_id",$trx_trp->supir_id);
     })
@@ -2807,12 +2807,12 @@ class TrxTrpController extends Controller
     ->orderBy("id","desc")
     ->limit(2)->get();
     
-    if(count($ttb)==2 && !$ttb[1]->ritase_val2)
-    throw new \Exception("Absen Belum Selesai [ID:".$ttb[1]->id."]",1);
+    if(count($supir_absen)==2 && !$supir_absen[1]->ritase_val2)
+    throw new \Exception("Absen Belum Selesai [ID:".$supir_absen[1]->id."]",1);
 
 
     if($trx_trp->kernet_id){
-      $ttb=TrxTrp::where(function($q)use($trx_trp){
+      $kernet_absen=TrxTrp::where(function($q)use($trx_trp){
           $q->where("supir_id",$trx_trp->kernet_id);
           $q->orWhere("kernet_id",$trx_trp->kernet_id);
       })
@@ -2822,8 +2822,8 @@ class TrxTrpController extends Controller
       ->orderBy("id","desc")
       ->limit(2)->get();
       
-      if(count($ttb)==2 && !$ttb[1]->ritase_val2)
-      throw new \Exception("Absen Kernet Belum Selesai [ID:".$ttb[1]->id."]",1);
+      if(count($kernet_absen)==2 && !$kernet_absen[1]->ritase_val2)
+      throw new \Exception("Absen Kernet Belum Selesai [ID:".$kernet_absen[1]->id."]",1);
     }
     
   }
