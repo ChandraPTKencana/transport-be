@@ -371,8 +371,46 @@ class TrxTrpController extends Controller
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
+    $resources = TrxTrpResource::collection($model_query);
+
+    if ($filter_status == "pv_not_done") {
+        $resources = $resources->map(function ($resource) {
+            $newResource = $resource->resource; // Create a new array
+            $supir_absen = TrxTrp::where(function($q)use($resource){
+                $q->where("supir_id",$resource['supir_id']);
+                $q->orWhere("kernet_id",$resource['supir_id']);
+            })
+            ->where("deleted",0)
+            ->where("req_deleted",0)
+            ->orderBy("tanggal","desc")
+            ->orderBy("id","desc")
+            ->limit(2)->get();
+            
+            $return = [];
+            if(count($supir_absen)==2 && !$supir_absen[1]->ritase_val2)
+            array_push($return,$supir_absen[1]->id);
+          
+            if($resource['kernet_id']){
+                $kernet_absen=TrxTrp::where(function($q)use($resource){
+                    $q->where("supir_id",$resource['kernet_id']);
+                    $q->orWhere("kernet_id",$resource['kernet_id']);
+                })
+                ->where("deleted",0)
+                ->where("req_deleted",0)
+                ->orderBy("tanggal","desc")
+                ->orderBy("id","desc")
+                ->limit(2)->get();
+                
+                if(count($kernet_absen)==2 && !$kernet_absen[1]->ritase_val2)
+                array_push($return,$kernet_absen[1]->id);
+            }
+            $newResource['absen_not_done'] = $return; // Assign the modified values to the new array
+            return $newResource; // Return the new array
+        });
+    }
+
     return response()->json([
-      "data" => TrxTrpResource::collection($model_query),
+      "data" => $resources,
     ], 200);
   }
 

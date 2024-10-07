@@ -10,17 +10,20 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class MyReport implements FromView,ShouldAutoSize
+class MyReport implements FromView,ShouldAutoSize, WithColumnFormatting
 {
     use Exportable;
     public $data;
     public $report_view;
+    public $columnFormats;
 
-    public function __construct($data,$report_view)
+    public function __construct($data,$report_view, $columnFormats = [])
     {
         $this->data = $data;
         $this->report_view = $report_view;
+        $this->columnFormats = $columnFormats;
     }
 
     public function view(): View
@@ -28,6 +31,10 @@ class MyReport implements FromView,ShouldAutoSize
         return view( $this->report_view, $this->data);
     }
 
+    public function columnFormats(): array
+    {
+        return $this->columnFormats;
+    }
 
 }
 ?>

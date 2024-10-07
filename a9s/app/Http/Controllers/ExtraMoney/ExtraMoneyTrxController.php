@@ -45,15 +45,17 @@ class ExtraMoneyTrxController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['extra_money_trx.create','extra_money_trx.modify']);
 
-    $list_extra_money = \App\Models\MySql\ExtraMoney::selectRaw("*,qty * nominal as total")->where("deleted",0)->get();
+    $list_extra_money = \App\Models\MySql\ExtraMoney::selectRaw("*,qty * nominal as total")->where('val1',1)->where('val2',1)->where("deleted",0)->get();
     // $list_extra_money = \App\Models\MySql\ExtraMoney::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
     $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
+    $list_payment_methods = \App\Models\MySql\PaymentMethod::get();
     
     return response()->json([
       "list_vehicle" => $list_vehicle,
       "list_employee" => $list_employee,
       "list_extra_money" => $list_extra_money,
+      "list_payment_methods"  => $list_payment_methods,
     ], 200);
   }
 
@@ -280,7 +282,7 @@ class ExtraMoneyTrxController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee'])->get();
+    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee','payment_method'])->get();
 
     return response()->json([
       "data" => ExtraMoneyTrxResource::collection($model_query),
@@ -291,7 +293,7 @@ class ExtraMoneyTrxController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'extra_money_trx.view');
 
-    $model_query = ExtraMoneyTrx::with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee'])->find($request->id);
+    $model_query = ExtraMoneyTrx::with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee','payment_method'])->find($request->id);
     return response()->json([
       "data" => new ExtraMoneyTrxResource($model_query),
     ], 200);
@@ -302,7 +304,6 @@ class ExtraMoneyTrxController extends Controller
     MyAdmin::checkScope($this->permissions, 'extra_money_trx.create');
 
     $t_stamp = date("Y-m-d H:i:s");
-    $online_status=$request->online_status;
     
     $rollback_id = -1;
     DB::beginTransaction();
@@ -314,33 +315,38 @@ class ExtraMoneyTrxController extends Controller
       ->lockForUpdate()
       ->first();
 
+      if(!$employee)
+      throw new \Exception("Pekerja tidak terdaftar",1);
+
+      if($request->payment_method_id == 2){
+        if(!$employee->rek_no && $employee->id != 1)
+        throw new \Exception("Tidak ada no rekening pekerja",1);
+      }
+
+      $extra_money = \App\Models\MySql\ExtraMoney::where("id",$request->extra_money_id)
+      ->where("deleted",0)
+      ->lockForUpdate()
+      ->first();
+
+      if(!$extra_money) 
+      throw new \Exception("Silahkan Isi Data Uang Tambahan Dengan Benar",1);
+
       $model_query->extra_money_id      = $request->extra_money_id;
       $model_query->tanggal             = $request->tanggal;
       $model_query->employee_id         = $employee->id;
       $model_query->employee_rek_no     = $employee->rek_no;
       $model_query->employee_rek_name   = $employee->rek_name;
       $model_query->no_pol              = $request->no_pol;
-      $model_query->note                = $request->note;
+      $model_query->note_for_remarks    = $request->note_for_remarks;
       
-      if($online_status=="true"){
-        if($request->cost_center_code){
-          $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-          ->select('CostCenter','Description')
-          ->where('CostCenter',$request->cost_center_code)
-          ->first();
-          if(!$list_cost_center)
-          throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
-        
-          $model_query->cost_center_code = $list_cost_center->CostCenter;
-          $model_query->cost_center_desc = $list_cost_center->Description;
-        }
-      }
+      // $model_query->payment_method_id   = $request->payment_method_id;
+      $model_query->payment_method_id   = 2;
       
-      $model_query->created_at      = $t_stamp;
-      $model_query->created_user    = $this->admin_id;
+      $model_query->created_at          = $t_stamp;
+      $model_query->created_user        = $this->admin_id;
 
-      $model_query->updated_at      = $t_stamp;
-      $model_query->updated_user    = $this->admin_id;
+      $model_query->updated_at          = $t_stamp;
+      $model_query->updated_user        = $this->admin_id;
 
       $model_query->save();
 
@@ -385,9 +391,7 @@ class ExtraMoneyTrxController extends Controller
     MyAdmin::checkScope($this->permissions, 'extra_money_trx.modify');
     
     $t_stamp        = date("Y-m-d H:i:s");
-    $online_status  = $request->online_status;
 
-   
     DB::beginTransaction();
     try {
       $SYSNOTES=[];
@@ -402,6 +406,23 @@ class ExtraMoneyTrxController extends Controller
       ->where("deleted",0)
       ->lockForUpdate()
       ->first();
+
+      if(!$employee)
+      throw new \Exception("Pekerja tidak terdaftar",1);
+
+      if($request->payment_method_id == 2){
+        if(!$employee->rek_no && $employee->id != 1)
+        throw new \Exception("Tidak ada no rekening pekerja",1);
+      }
+
+      $extra_money = \App\Models\MySql\ExtraMoney::where("id",$request->extra_money_id)
+      ->where("deleted",0)
+      ->lockForUpdate()
+      ->first();
+
+      if(!$extra_money) 
+      throw new \Exception("Silahkan Isi Data Uang Tambahan Dengan Benar",1);
+
       
       $model_query->extra_money_id      = $request->extra_money_id;
       $model_query->tanggal             = $request->tanggal;
@@ -409,31 +430,9 @@ class ExtraMoneyTrxController extends Controller
       $model_query->employee_rek_no     = $employee->rek_no;
       $model_query->employee_rek_name   = $employee->rek_name;
       $model_query->no_pol              = $request->no_pol;
-      $model_query->note                = $request->note;
+      $model_query->note_for_remarks    = $request->note_for_remarks;
 
-      if($request->cost_center_code!=$model_query->cost_center_code){
-
-        if($online_status!="true" && $request->cost_center_code)
-        throw new \Exception("Pengisian cost center harus dalam mode online", 1);
-
-        if($request->cost_center_code==""){
-          $model_query->cost_center_code =null;
-          $model_query->cost_center_desc =null;
-        }else{
-          if($model_query->pvr_id==null){
-            $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-            ->select('CostCenter','Description')
-            ->where('CostCenter',$request->cost_center_code)
-            ->first();
-            if(!$list_cost_center)
-            throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
-          
-            $model_query->cost_center_code = $list_cost_center->CostCenter;
-            $model_query->cost_center_desc = $list_cost_center->Description;
-          }
-        }
-      }
-      
+      $model_query->payment_method_id   = 2;
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
@@ -1010,8 +1009,8 @@ class ExtraMoneyTrxController extends Controller
     try {
       $model_query = ExtraMoneyTrx::find($request->id);
       
-      if($model_query->cost_center_code=="")
-      throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
+      // if($model_query->cost_center_code=="")
+      // throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
 
       $run_val = 0; 
   
@@ -1135,7 +1134,18 @@ class ExtraMoneyTrxController extends Controller
     $miniError="";
     $id="";
     try {
-      $extra_money_trxs = ExtraMoneyTrx::where(function($q1){$q1->where('pvr_complete',0)->orWhereNull("pvr_id");})->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val1',1)->get();
+      $extra_money_trxs = ExtraMoneyTrx::where(function($q1){$q1->where('pvr_complete',0)->orWhereNull("pvr_id");})->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->where('val1',1)->where('val2',1)
+      ->where(function ($q) {
+        $q->where(function ($q1){
+          $q1->where("payment_method_id",1);       
+          $q1->where("received_payment",0);                  
+        });
+
+        $q->orWhere(function ($q1){
+          $q1->where("payment_method_id",2);
+          $q1->where("received_payment",1);                 
+        });
+      })->get();
       if(count($extra_money_trxs)==0){
         throw new \Exception("Semua PVR sudah terisi",1);
       }
@@ -1191,9 +1201,25 @@ class ExtraMoneyTrxController extends Controller
     }
 
     if($extra_money_trx->pvr_complete==1) throw new \Exception("Karna PVR sudah selesai dibuat",1);
-    if($extra_money_trx->cost_center_code==null) throw new \Exception("Cost Center Code belum diisi",1);
+    // if($extra_money_trx->cost_center_code==null) throw new \Exception("Cost Center Code belum diisi",1);
     if($extra_money_trx->pv_id!=null) throw new \Exception("Karna PV sudah diisi",1);
-      
+    
+    if($extra_money_trx->cost_center_code==null){
+      $extra_money_trx->cost_center_code = '112';
+      $extra_money_trx->cost_center_desc = 'Transport';      
+  
+      $get_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
+      ->select('CostCenter','Description')
+      ->where('CostCenter','like', '112%')
+      ->where('Description','like', '%'.trim($extra_money_trx->no_pol))
+      ->first();
+  
+      if($get_cost_center){
+        $extra_money_trx->cost_center_code = $get_cost_center->CostCenter;
+        $extra_money_trx->cost_center_desc = $get_cost_center->Description;
+      }
+    }
+
     $employee_name = $extra_money_trx->employee->name;
     $no_pol = $extra_money_trx->no_pol;
     $associate_name=($employee_name?"(S) ".$employee_name." ":"(Tanpa Supir) ").$no_pol; // max 80char
@@ -1205,10 +1231,10 @@ class ExtraMoneyTrxController extends Controller
     array_push($arrRemarks,$extra_money->description." ".($extra_money->xto ? env("app_name")."-".$extra_money->xto : "")).".";
     array_push($arrRemarks," P/".date("d-m-y",strtotime($extra_money_trx->tanggal)));
 
-    // if($extra_money_trx->note_for_remarks!=null){
-    //   $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $extra_money_trx->note_for_remarks);
-    //   $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
-    // }
+    if($extra_money_trx->note_for_remarks!=null){
+      $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $extra_money_trx->note_for_remarks);
+      $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
+    }
     
     $remarks = implode(chr(10),$arrRemarks);
     array_push($arrRemarks,";");
@@ -1217,7 +1243,8 @@ class ExtraMoneyTrxController extends Controller
       $associate_name = substr($associate_name,0,80);
     }
 
-    $bank_account_code=env("PVR_BANK_ACCOUNT_CODE");
+    // $bank_account_code=env("PVR_BANK_ACCOUNT_CODE");
+    $bank_account_code=$extra_money_trx->payment_method->account_code;
     
     $bank_acccount_db = DB::connection('sqlsrv')->table('FI_BankAccounts')
     ->select('BankAccountID')
@@ -1239,6 +1266,14 @@ class ExtraMoneyTrxController extends Controller
     $check_due_date= null;
 
     $amount_paid = $extra_money->nominal * $extra_money->qty; // call from child
+
+    if($extra_money_trx->payment_method->id==2){
+      $adm_cost = 2500;
+      $adm_qty = 1;
+
+      $amount_paid += ($adm_cost * $adm_qty);
+    }
+
     $exclude_in_ARAP = 0;
     $login_name = $this->admin->the_user->username;
     $expense_or_revenue_type_id=0;
@@ -1340,6 +1375,51 @@ class ExtraMoneyTrxController extends Controller
           ":d_unit_price"=>$d_unit_price
         ]);
       // }
+    }
+
+    if($extra_money_trx->payment_method->id==2){
+      $admin_cost_code=env("PVR_ADMIN_COST");
+  
+      $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
+      ->select('AccountID')
+      ->where("AccountCode",$admin_cost_code)
+      ->first();
+      if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
+
+      $adm_cost_id = $admin_cost_db->AccountID;
+      $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+      ->select('VoucherID')
+      ->where("VoucherID",$d_voucher_id)
+      ->where("AccountID",$adm_cost_id)
+      ->first();
+
+      if(!$adm_fee_exists){
+        $d_description  = "Biaya Admin";
+        $d_account_id   = $adm_cost_id;
+        $d_dept         = '112';
+        $d_qty          = $adm_qty;
+        $d_unit_price   = $adm_cost;
+        $d_amount       = $d_qty * $d_unit_price;
+  
+        DB::connection('sqlsrv')->update("exec 
+        USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+        @VoucherExtraItemID=:d_voucher_extra_item_id,
+        @Description=:d_description,@Amount=:d_amount,
+        @AccountID=:d_account_id,@TypeID=:d_type,
+        @Department=:d_dept,@LoginName=:login_name,
+        @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+          ":d_voucher_id"=>$d_voucher_id,
+          ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+          ":d_description"=>$d_description,
+          ":d_amount"=>$d_amount,
+          ":d_account_id"=>$d_account_id,
+          ":d_type"=>$d_type,
+          ":d_dept"=>$d_dept,
+          ":login_name"=>$login_name,
+          ":d_qty"=>$d_qty,
+          ":d_unit_price"=>$d_unit_price
+        ]);
+      }
     }
 
     $tocheck = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->first();

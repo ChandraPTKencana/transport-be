@@ -238,6 +238,11 @@ class RunPermit extends Command
 
             ["permit"=>'trp_trx.absen.remove',"to"=>['SuperAdmin','PabrikMandor','PabrikTransport']],
 
+            ["permit"=>'trp_trx.transfer.views',"to"=>['SuperAdmin','ViewOnly','SPVLogistik']],
+            ["permit"=>'trp_trx.transfer.view',"to"=>['SuperAdmin','ViewOnly','SPVLogistik']],
+            ["permit"=>'trp_trx.transfer.do_transfer',"to"=>['SuperAdmin','SPVLogistik']],
+
+
             ["permit"=>'srv.cost_center.views',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'srv.palm_ticket.views',"to"=>['SuperAdmin','Logistic','PabrikTransport','PabrikMandor']],
 

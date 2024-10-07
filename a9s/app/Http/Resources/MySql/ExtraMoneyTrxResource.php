@@ -31,7 +31,7 @@ class ExtraMoneyTrxResource extends JsonResource
             'no_pol'            => $this->no_pol,
             
             'xto'               => $this->xto ?? "",
-            'note'              => $this->note ?? '',
+            'note_for_remarks'  => $this->note_for_remarks ?? '',
             'ref'               => $this->ref ?? '',
 
             'cost_center_code'  => $this->cost_center_code ?? "",
@@ -101,6 +101,12 @@ class ExtraMoneyTrxResource extends JsonResource
             'updated_at'        => $this->updated_at,
 
             'extra_money'       => new ExtraMoneyResource($this->whenLoaded('extra_money')),
+        
+            'payment_method'    => new PaymentMethodResource($this->whenLoaded('payment_method')),
+            'payment_method_id' => $this->payment_method_id,
+
+            'received_payment'  => $this->received_payment,
+
         ];
     }
 }

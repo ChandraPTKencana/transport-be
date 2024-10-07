@@ -15,6 +15,7 @@ class MyLib
   // public static $correct_value = 1;
   // public static $incorrect_value = 0;
   public static $list_pabrik = ["KPN","KAS","KUS","ARP","KAP","SMP"];
+  public static $min_transfer = 10000;
 
   public static function checkScope($user, $allowed_scopes = [], $msg = "Forbidden", $return = false)
   {

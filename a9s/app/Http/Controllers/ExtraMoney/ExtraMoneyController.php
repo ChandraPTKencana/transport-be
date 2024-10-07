@@ -223,11 +223,11 @@ class ExtraMoneyController extends Controller
     $filter_status = $request->filter_status;
     
     if($filter_status=="available"){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where("val1",1)->where("val2",1);
+      $model_query = $model_query->where("deleted",0)->where("val1",1)->where("val2",1);
     }
 
     if($filter_status=="unapprove"){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function($q){
+      $model_query = $model_query->where("deleted",0)->where(function($q){
        $q->where("val1",0)->orwhere("val2",0); 
       });
     }
@@ -237,7 +237,7 @@ class ExtraMoneyController extends Controller
     }
 
     if($filter_status=="req_deleted"){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
+      $model_query = $model_query->where("deleted",0);
     }
 
     $model_query = $model_query->with(['val1_by','val2_by','deleted_by','req_deleted_by'])
@@ -463,149 +463,149 @@ class ExtraMoneyController extends Controller
     }
   }
 
-  public function reqDelete(Request $request)
-  {
-    MyAdmin::checkScope($this->permissions, 'extra_money.request_remove');
+  // public function reqDelete(Request $request)
+  // {
+  //   MyAdmin::checkScope($this->permissions, 'extra_money.request_remove');
 
-    DB::beginTransaction();
+  //   DB::beginTransaction();
 
-    try {
-      $model_query = ExtraMoney::where("id",$request->id)->lockForUpdate()->first();
-      // if($model_query->requested_by != $this->admin_id){
-      //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
-      // }
-      if (!$model_query) {
-        throw new \Exception("Data tidak terdaftar", 1);
-      }
+  //   try {
+  //     $model_query = ExtraMoney::where("id",$request->id)->lockForUpdate()->first();
+  //     // if($model_query->requested_by != $this->admin_id){
+  //     //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
+  //     // }
+  //     if (!$model_query) {
+  //       throw new \Exception("Data tidak terdaftar", 1);
+  //     }
       
-      if($model_query->val2)
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+  //     if($model_query->val2)
+  //     throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
-      if($model_query->deleted==1 || $model_query->req_deleted==1 )
-      throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);
+  //     if($model_query->deleted==1 || $model_query->req_deleted==1 )
+  //     throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);
 
-      if($model_query->pvr_id=="" || $model_query->pvr_id==null)
-      throw new \Exception("Harap Lakukan Penghapusan",1);
+  //     if($model_query->pvr_id=="" || $model_query->pvr_id==null)
+  //     throw new \Exception("Harap Lakukan Penghapusan",1);
 
-      $req_deleted_reason = $request->req_deleted_reason;
-      if(!$req_deleted_reason)
-      throw new \Exception("Sertakan Alasan Penghapusan",1);
+  //     $req_deleted_reason = $request->req_deleted_reason;
+  //     if(!$req_deleted_reason)
+  //     throw new \Exception("Sertakan Alasan Penghapusan",1);
 
-      $model_query->req_deleted = 1;
-      $model_query->req_deleted_user = $this->admin_id;
-      $model_query->req_deleted_at = date("Y-m-d H:i:s");
-      $model_query->req_deleted_reason = $req_deleted_reason;
-      $model_query->save();
+  //     $model_query->req_deleted = 1;
+  //     $model_query->req_deleted_user = $this->admin_id;
+  //     $model_query->req_deleted_at = date("Y-m-d H:i:s");
+  //     $model_query->req_deleted_reason = $req_deleted_reason;
+  //     $model_query->save();
 
-      MyLog::sys("extra_money",$request->id,"delete","Request Delete (Void)");
+  //     MyLog::sys("extra_money",$request->id,"delete","Request Delete (Void)");
 
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses Permintaan Hapus data berhasil",
-        "req_deleted"=>$model_query->req_deleted,
-        "req_deleted_user"=>$model_query->req_deleted_user,
-        "req_deleted_by"=>$model_query->req_deleted_user ? new IsUserResource(IsUser::find($model_query->req_deleted_user)) : null,
-        "req_deleted_at"=>$model_query->req_deleted_at,
-        "req_deleted_reason"=>$model_query->req_deleted_reason,
-      ], 200);
-    } catch (\Exception  $e) {
-      DB::rollback();
-      if ($e->getCode() == "23000")
-        return response()->json([
-          "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
-        ], 400);
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses Permintaan Hapus data berhasil",
+  //       "req_deleted"=>$model_query->req_deleted,
+  //       "req_deleted_user"=>$model_query->req_deleted_user,
+  //       "req_deleted_by"=>$model_query->req_deleted_user ? new IsUserResource(IsUser::find($model_query->req_deleted_user)) : null,
+  //       "req_deleted_at"=>$model_query->req_deleted_at,
+  //       "req_deleted_reason"=>$model_query->req_deleted_reason,
+  //     ], 200);
+  //   } catch (\Exception  $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == "23000")
+  //       return response()->json([
+  //         "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
+  //       ], 400);
 
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses hapus data gagal",
-      ], 400);
-      //throw $th;
-    }
-  }
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses hapus data gagal",
+  //     ], 400);
+  //     //throw $th;
+  //   }
+  // }
 
-  public function approveReqDelete(Request $request)
-  {
-    MyAdmin::checkScope($this->permissions, 'extra_money.approve_request_remove');
+  // public function approveReqDelete(Request $request)
+  // {
+  //   MyAdmin::checkScope($this->permissions, 'extra_money.approve_request_remove');
 
-    $time = microtime(true);
-    $mSecs = sprintf('%03d', ($time - floor($time)) * 1000);
-    $t_stamp_ms = date("Y-m-d H:i:s").".".$mSecs;
+  //   $time = microtime(true);
+  //   $mSecs = sprintf('%03d', ($time - floor($time)) * 1000);
+  //   $t_stamp_ms = date("Y-m-d H:i:s").".".$mSecs;
 
-    DB::beginTransaction();
+  //   DB::beginTransaction();
 
-    try {
-      $model_query = ExtraMoney::where("id",$request->id)->lockForUpdate()->first();
-      // if($model_query->requested_by != $this->admin_id){
-      //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
-      // }
-      if (!$model_query) {
-        throw new \Exception("Data tidak terdaftar", 1);
-      }
+  //   try {
+  //     $model_query = ExtraMoney::where("id",$request->id)->lockForUpdate()->first();
+  //     // if($model_query->requested_by != $this->admin_id){
+  //     //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
+  //     // }
+  //     if (!$model_query) {
+  //       throw new \Exception("Data tidak terdaftar", 1);
+  //     }
       
-      if($model_query->val2)
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+  //     if($model_query->val2)
+  //     throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
-      if($model_query->deleted==1 )
-      throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);
+  //     if($model_query->deleted==1 )
+  //     throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);
 
-      if($model_query->pvr_id=="" || $model_query->pvr_id==null)
-      throw new \Exception("Harap Lakukan Penghapusan",1);
+  //     if($model_query->pvr_id=="" || $model_query->pvr_id==null)
+  //     throw new \Exception("Harap Lakukan Penghapusan",1);
 
-      $deleted_reason = $model_query->req_deleted_reason;
-      if(!$deleted_reason)
-      throw new \Exception("Sertakan Alasan Penghapusan",1);
+  //     $deleted_reason = $model_query->req_deleted_reason;
+  //     if(!$deleted_reason)
+  //     throw new \Exception("Sertakan Alasan Penghapusan",1);
 
-      $model_query->deleted = 1;
-      $model_query->deleted_user = $this->admin_id;
-      $model_query->deleted_at = date("Y-m-d H:i:s");
-      $model_query->deleted_reason = $deleted_reason;
+  //     $model_query->deleted = 1;
+  //     $model_query->deleted_user = $this->admin_id;
+  //     $model_query->deleted_at = date("Y-m-d H:i:s");
+  //     $model_query->deleted_reason = $deleted_reason;
       
-      $model_query->save();
+  //     $model_query->save();
 
-      MyLog::sys("extra_money",$request->id,"delete","Approve Request Delete (Void)");
+  //     MyLog::sys("extra_money",$request->id,"delete","Approve Request Delete (Void)");
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses Hapus data berhasil",
-        "deleted"=>$model_query->deleted,
-        "deleted_user"=>$model_query->deleted_user,
-        "deleted_by"=>$model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
-        "deleted_at"=>$model_query->deleted_at,
-        "deleted_reason"=>$model_query->deleted_reason,
-      ], 200);
-    } catch (\Exception  $e) {
-      DB::rollback();
-      if ($e->getCode() == "23000")
-        return response()->json([
-          "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
-        ], 400);
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses Hapus data berhasil",
+  //       "deleted"=>$model_query->deleted,
+  //       "deleted_user"=>$model_query->deleted_user,
+  //       "deleted_by"=>$model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
+  //       "deleted_at"=>$model_query->deleted_at,
+  //       "deleted_reason"=>$model_query->deleted_reason,
+  //     ], 200);
+  //   } catch (\Exception  $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == "23000")
+  //       return response()->json([
+  //         "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
+  //       ], 400);
 
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses hapus data gagal",
-      ], 400);
-      //throw $th;
-    }
-  } 
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses hapus data gagal",
+  //     ], 400);
+  //     //throw $th;
+  //   }
+  // } 
 
   // public function previewFile(Request $request){
   //   MyAdmin::checkScope($this->permissions, 'extra_money.preview_file');

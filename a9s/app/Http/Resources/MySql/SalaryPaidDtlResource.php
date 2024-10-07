@@ -19,7 +19,9 @@ class SalaryPaidDtlResource extends JsonResource
         return [
             'employee_id'           => $this->employee_id,
             'employee'              => new EmployeeResource($this->whenLoaded('employee')),
-            'standby_nominal'       => $this->standby_nominal,
+            // 'standby_nominal'       => $this->standby_nominal,
+            'sb_gaji'               => $this->sb_gaji,
+            'sb_makan'              => $this->sb_makan,
             'salary_bonus_nominal'  => $this->salary_bonus_nominal,
         ];
     }

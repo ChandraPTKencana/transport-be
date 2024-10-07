@@ -5,7 +5,7 @@ namespace App\Http\Resources\MySql;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\IsUserResource;
 
-class TrxTrpResource extends JsonResource
+class TrxTrpResourcex extends JsonResource
 {
     /**
      * Transform the resource into an array.

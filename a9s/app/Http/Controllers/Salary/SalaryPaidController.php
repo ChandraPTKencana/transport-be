@@ -143,7 +143,7 @@ class SalaryPaidController extends Controller
     //   $model_query = $model_query->orderBy('period_start', 'DESC');
     // }
     
-    $model_query = $model_query->orderBy('period_end', 'DESC');
+    $model_query = $model_query->orderBy('period_end','DESC')->orderBy('period_part', 'DESC');
 
     //======================================================================================================
     // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
@@ -255,13 +255,23 @@ class SalaryPaidController extends Controller
     $rollback_id = -1;
     $t_stamp = date("Y-m-d H:i:s");
 
-    $date = new \DateTime($request->period_end."-01");
-    $date->modify('last day of this month');
-    $last_day_of_month=$date->format('Y-m-d');
-
-    if(SalaryPaid::where('period_end',$last_day_of_month)->first()){
-      throw new MyException([ "period_end" => ["Periode Sudah Terdaftar"] ], 422);
+    $period_part = $request->period_part;
+    if($period_part==1){
+      $date = new \DateTime($request->period_end."-13");
+      // $date->modify('last day of this month');
+      $last_day_of_month=$date->format('Y-m-d');        
+    }else{
+      $date = new \DateTime($request->period_end."-01");
+      $date->modify('last day of this month');
+      $last_day_of_month=$date->format('Y-m-d');
     }
+
+    $sp_before=SalaryPaid::orderBy("id","desc")->first();
+    if($sp_before && $sp_before->val1==0)
+    throw new MyException([ "message" => "Harap Validasi Periode Sebelumnya" ], 400);
+
+    if(SalaryPaid::where('period_end',$last_day_of_month)->where("period_part",$period_part)->first())
+    throw new MyException([ "period_end" => ["Periode Sudah Terdaftar"] ], 422);
 
     DB::beginTransaction();
     try {
@@ -271,6 +281,7 @@ class SalaryPaidController extends Controller
       $model_query                  = new SalaryPaid();
 
       $model_query->period_end      = $last_day_of_month;
+      $model_query->period_part     = $period_part;
 
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
@@ -480,19 +491,19 @@ class SalaryPaidController extends Controller
         $model_query->val1_at = $t_stamp;
       }
 
-      if(MyAdmin::checkScope($this->permissions, 'salary_paid.val2',true) && !$model_query->val2){
-        $run_val++;
-        $model_query->val2 = 1;
-        $model_query->val2_user = $this->admin_id;
-        $model_query->val2_at = $t_stamp;
-      }
+      // if(MyAdmin::checkScope($this->permissions, 'salary_paid.val2',true) && !$model_query->val2){
+      //   $run_val++;
+      //   $model_query->val2 = 1;
+      //   $model_query->val2_user = $this->admin_id;
+      //   $model_query->val2_at = $t_stamp;
+      // }
 
-      if(MyAdmin::checkScope($this->permissions, 'salary_paid.val3',true) && !$model_query->val3){
-        $run_val++;
-        $model_query->val3 = 1;
-        $model_query->val3_user = $this->admin_id;
-        $model_query->val3_at = $t_stamp;
-      }
+      // if(MyAdmin::checkScope($this->permissions, 'salary_paid.val3',true) && !$model_query->val3){
+      //   $run_val++;
+      //   $model_query->val3 = 1;
+      //   $model_query->val3_user = $this->admin_id;
+      //   $model_query->val3_at = $t_stamp;
+      // }
 
       
       $model_query->save();
@@ -506,14 +517,14 @@ class SalaryPaidController extends Controller
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,
         "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
-        "val2"=>$model_query->val2,
-        "val2_user"=>$model_query->val2_user,
-        "val2_at"=>$model_query->val2_at,
-        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null, 
-        "val3"=>$model_query->val3,
-        "val3_user"=>$model_query->val3_user,
-        "val3_at"=>$model_query->val3_at,
-        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null, 
+        // "val2"=>$model_query->val2,
+        // "val2_user"=>$model_query->val2_user,
+        // "val2_at"=>$model_query->val2_at,
+        // "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null, 
+        // "val3"=>$model_query->val3,
+        // "val3_user"=>$model_query->val3_user,
+        // "val3_at"=>$model_query->val3_at,
+        // "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null, 
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -534,10 +545,124 @@ class SalaryPaidController extends Controller
 
   }
 
-  function reInsertDetails($model_query){
-    $kerajinan_s=400000;
-    $kerajinan_k=200000;
+  // function reInsertDetails($model_query){
+  //   $kerajinan_s=($model_query->period_part==2) ? 400000 : 0;
+  //   $kerajinan_k=($model_query->period_part==2) ? 200000 : 0;
 
+  //   $employees = Employee::exclude(['attachment_1','attachment_2'])->verified()->available()->where('name',"!=","BLANK")->get();
+  //   $dt_dtl = [];
+
+  //   foreach ($employees as $v) {
+  //     array_push($dt_dtl,[
+  //       "salary_paid_id" => $model_query->id,
+  //       "employee_id" => $v->id,
+  //       "standby_nominal" => 0,
+  //       "salary_bonus_nominal" => $v->role == 'Supir' ? $kerajinan_s : $kerajinan_k,
+  //     ]);
+  //   }
+
+  //   $sts = StandbyTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
+  //   ->where('val2',1)->whereNull('salary_paid_id')->with('details')->lockForUpdate()->get();
+
+  //   foreach ($sts as $k => $v) {
+  //     $smd = $v->standby_mst->details;
+
+  //     $nominal_s = 0;
+  //     $nominal_k = 0;
+
+  //     foreach ($smd as $k1 => $v1) {
+  //       if($v1->xfor == 'Supir'){
+  //         $nominal_s += $v1->amount * count($v->details);
+  //       }
+
+  //       if($v1->xfor == 'Kernet'){
+  //         $nominal_k += $v1->amount * count($v->details);
+  //       }
+  //     }
+
+
+  //     if($v->supir_id){
+
+  //       $map_s = array_map(function($x){
+  //         return $x['employee_id'];
+  //       },$dt_dtl);
+
+  //       $search = array_search($v->supir_id,$map_s);
+
+  //       if(count($dt_dtl)==0 || $search===false){
+  //         array_push($dt_dtl,[
+  //           "salary_paid_id" => $model_query->id,
+  //           "employee_id" => $v->supir_id,
+  //           "standby_nominal" => $nominal_s,
+  //           "salary_bonus_nominal" => $kerajinan_s,
+  //         ]);
+  //       }else{
+  //         $dt_dtl[$search]['standby_nominal']+=$nominal_s;
+  //       }
+  //     }
+
+  //     if($v->kernet_id){
+
+  //       $map_k = array_map(function($x){
+  //         return $x['employee_id'];
+  //       },$dt_dtl);
+
+  //       $search = array_search($v->kernet_id,$map_k);
+
+  //       if(count($dt_dtl)==0 || $search===false){
+  //         array_push($dt_dtl,[
+  //           "salary_paid_id" => $model_query->id,
+  //           "employee_id" => $v->kernet_id,
+  //           "standby_nominal" => $nominal_k,
+  //           "salary_bonus_nominal" => $kerajinan_k,
+  //         ]);
+  //       }else{
+  //         $dt_dtl[$search]['standby_nominal']+=$nominal_k;
+  //       }
+  //     }
+
+  //     $v->salary_paid_id = $model_query->id;
+  //     $v->save();
+  //   }
+  //   if($model_query->period_part==2){
+  //     $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
+  //     ->where('val2',1)->whereNull('salary_paid_id')->lockForUpdate()->get();
+      
+  //     foreach($sbs as $v){
+  
+  //       $map_e = array_map(function($x){
+  //         return $x['employee_id'];
+  //       },$dt_dtl);
+  
+  //       $search = array_search($v->employee_id,$map_e);
+  
+  //       if(count($dt_dtl)==0 || $search===false){
+  
+  //         $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id",$v->employee_id)->first();
+  
+  //         array_push($dt_dtl,[
+  //           "salary_paid_id" => $model_query->id,
+  //           "employee_id" => $v->employee_id,
+  //           "standby_nominal" => 0,
+  //           "salary_bonus_nominal" => ($emp->role == 'Supir' ? $kerajinan_s : $kerajinan_k) + $v->nominal,
+  //         ]);
+  //       }else{
+  //         $dt_dtl[$search]['salary_bonus_nominal']+=$v->nominal;
+  //       }
+  //       $v->salary_paid_id = $model_query->id;
+  //       $v->save();
+  //     }
+  //   }
+
+  //   foreach ($dt_dtl as $k => $v) {
+  //     SalaryPaidDtl::insert($v);
+  //   }
+
+  // }
+
+  function reInsertDetails($model_query){
+    $kerajinan_s=($model_query->period_part==2) ? 400000 : 0;
+    $kerajinan_k=($model_query->period_part==2) ? 200000 : 0;
 
     $employees = Employee::exclude(['attachment_1','attachment_2'])->verified()->available()->where('name',"!=","BLANK")->get();
     $dt_dtl = [];
@@ -546,12 +671,12 @@ class SalaryPaidController extends Controller
       array_push($dt_dtl,[
         "salary_paid_id" => $model_query->id,
         "employee_id" => $v->id,
-        "standby_nominal" => 0,
+        // "standby_nominal" => 0,
+        "sb_gaji"=>0,
+        "sb_makan"=>0,
         "salary_bonus_nominal" => $v->role == 'Supir' ? $kerajinan_s : $kerajinan_k,
       ]);
     }
-
-
 
     $sts = StandbyTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
     ->where('val2',1)->whereNull('salary_paid_id')->with('details')->lockForUpdate()->get();
@@ -560,15 +685,25 @@ class SalaryPaidController extends Controller
       $smd = $v->standby_mst->details;
 
       $nominal_s = 0;
+      $sb_gaji_s = 0;
+      $sb_makan_s = 0;
+
       $nominal_k = 0;
+      $sb_gaji_k = 0;
+      $sb_makan_k = 0;
 
       foreach ($smd as $k1 => $v1) {
+        $amount = $v1->amount * count($v->details);
         if($v1->xfor == 'Supir'){
-          $nominal_s += $v1->amount * count($v->details);
+          $nominal_s += $amount;
+          if($v1->ac_account_code=='01.510.001') $sb_gaji_s += $amount;
+          if($v1->ac_account_code=='01.510.005') $sb_makan_s += $amount;
         }
 
         if($v1->xfor == 'Kernet'){
-          $nominal_k += $v1->amount * count($v->details);
+          $nominal_k += $amount;
+          if($v1->ac_account_code=='01.510.001') $sb_gaji_k += $amount;
+          if($v1->ac_account_code=='01.510.005') $sb_makan_k += $amount;          
         }
       }
 
@@ -583,13 +718,17 @@ class SalaryPaidController extends Controller
 
         if(count($dt_dtl)==0 || $search===false){
           array_push($dt_dtl,[
-            "salary_paid_id" => $model_query->id,
-            "employee_id" => $v->supir_id,
-            "standby_nominal" => $nominal_s,
-            "salary_bonus_nominal" => $kerajinan_s,
+            "salary_paid_id"        => $model_query->id,
+            "employee_id"           => $v->supir_id,
+            // "standby_nominal"       => $nominal_s,
+            "sb_gaji"               => $sb_gaji_s,
+            "sb_makan"              => $sb_makan_s,
+            "salary_bonus_nominal"  => $kerajinan_s,
           ]);
         }else{
-          $dt_dtl[$search]['standby_nominal']+=$nominal_s;
+          // $dt_dtl[$search]['standby_nominal']+=$nominal_s;
+          $dt_dtl[$search]['sb_gaji']+=$sb_gaji_s;
+          $dt_dtl[$search]['sb_makan']+=$sb_makan_s;
         }
       }
 
@@ -603,46 +742,53 @@ class SalaryPaidController extends Controller
 
         if(count($dt_dtl)==0 || $search===false){
           array_push($dt_dtl,[
-            "salary_paid_id" => $model_query->id,
-            "employee_id" => $v->kernet_id,
-            "standby_nominal" => $nominal_k,
-            "salary_bonus_nominal" => $kerajinan_k,
+            "salary_paid_id"        => $model_query->id,
+            "employee_id"           => $v->kernet_id,
+            // "standby_nominal"       => $nominal_k,
+            "sb_gaji"               => $sb_gaji_k,
+            "sb_makan"              => $sb_makan_k,
+            "salary_bonus_nominal"  => $kerajinan_k,
           ]);
         }else{
-          $dt_dtl[$search]['standby_nominal']+=$nominal_k;
+          // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
+          $dt_dtl[$search]['sb_gaji']+=$sb_gaji_k;
+          $dt_dtl[$search]['sb_makan']+=$sb_makan_k;
         }
       }
 
       $v->salary_paid_id = $model_query->id;
       $v->save();
     }
-
-    $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
-    ->where('val2',1)->whereNull('salary_paid_id')->lockForUpdate()->get();
-    
-    foreach($sbs as $v){
-
-      $map_e = array_map(function($x){
-        return $x['employee_id'];
-      },$dt_dtl);
-
-      $search = array_search($v->employee_id,$map_e);
-
-      if(count($dt_dtl)==0 || $search===false){
-
-        $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id",$v->employee_id)->first();
-
-        array_push($dt_dtl,[
-          "salary_paid_id" => $model_query->id,
-          "employee_id" => $v->employee_id,
-          "standby_nominal" => 0,
-          "salary_bonus_nominal" => ($emp->role == 'Supir' ? $kerajinan_s : $kerajinan_k) + $v->nominal,
-        ]);
-      }else{
-        $dt_dtl[$search]['salary_bonus_nominal']+=$v->nominal;
+    if($model_query->period_part==2){
+      $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
+      ->where('val2',1)->whereNull('salary_paid_id')->lockForUpdate()->get();
+      
+      foreach($sbs as $v){
+  
+        $map_e = array_map(function($x){
+          return $x['employee_id'];
+        },$dt_dtl);
+  
+        $search = array_search($v->employee_id,$map_e);
+  
+        if(count($dt_dtl)==0 || $search===false){
+  
+          $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id",$v->employee_id)->first();
+  
+          array_push($dt_dtl,[
+            "salary_paid_id"        => $model_query->id,
+            "employee_id"           => $v->employee_id,
+            // "standby_nominal"       => 0,
+            "sb_gaji"               => 0,
+            "sb_makan"              => 0,
+            "salary_bonus_nominal"  => ($emp->role == 'Supir' ? $kerajinan_s : $kerajinan_k) + $v->nominal,
+          ]);
+        }else{
+          $dt_dtl[$search]['salary_bonus_nominal']+=$v->nominal;
+        }
+        $v->salary_paid_id = $model_query->id;
+        $v->save();
       }
-      $v->salary_paid_id = $model_query->id;
-      $v->save();
     }
 
     foreach ($dt_dtl as $k => $v) {
@@ -666,28 +812,33 @@ class SalaryPaidController extends Controller
     },'asc')->get()->toArray();
 
     $info = [
-      "ttl_standby"=>0,
+      "ttl_sb_gaji"=>0,
+      "ttl_sb_makan"=>0,
       "ttl_bonus"=>0,
       "ttl_all"=>0,
       "now"=>date("d-m-Y H:i:s"),
-      "periode"=>date("m-Y",strtotime($sp->period_end))
+      "periode"=>"[".$sp->period_part."]".date("m-Y",strtotime($sp->period_end))
     ];
 
     foreach ($data as $k => $v) {
-      $sn = $data[$k]["standby_nominal"];
+      $sg = $data[$k]["sb_gaji"];
+      $sm = $data[$k]["sb_makan"];
       $sbn = $data[$k]["salary_bonus_nominal"];
-      $ttl = $sn + $sbn;
+      $ttl = $sg + $sm + $sbn;
 
-      $info["ttl_standby"] += $sn;
+      $info["ttl_sb_gaji"] += $sg;
+      $info["ttl_sb_makan"] += $sm;
       $info["ttl_bonus"] += $sbn;
       $info["ttl_all"] += $ttl;
       
-      $data[$k]["standby_nominal"] = number_format($sn,0,",",".");
+      $data[$k]["sb_gaji"] = number_format($sg,0,",",".");
+      $data[$k]["sb_makan"] = number_format($sm,0,",",".");
       $data[$k]["salary_bonus_nominal"] = number_format($sbn,0,",",".");
       $data[$k]["total"] = number_format($ttl,0,",",".");
     }
     
-    $info["ttl_standby"]=number_format($info["ttl_standby"],0,",",".");
+    $info["ttl_sb_gaji"]=number_format($info["ttl_sb_gaji"],0,",",".");
+    $info["ttl_sb_makan"]=number_format($info["ttl_sb_makan"],0,",",".");
     $info["ttl_bonus"]=number_format($info["ttl_bonus"],0,",",".");
     $info["ttl_all"]=number_format($info["ttl_all"],0,",",".");
 
@@ -726,35 +877,45 @@ class SalaryPaidController extends Controller
     },'asc')->get()->toArray();
 
     $info = [
-      "ttl_standby"=>0,
+      "ttl_sb_gaji"=>0,
+      "ttl_sb_makan"=>0,
       "ttl_bonus"=>0,
       "ttl_all"=>0,
       "now"=>date("d-m-Y H:i:s"),
-      "periode"=>date("m-Y",strtotime($sp->period_end))
+      "periode"=>date("m-Y",strtotime($sp->period_end))."[".$sp->period_part."]"
     ];
 
     foreach ($data as $k => $v) {
-      $sn = $data[$k]["standby_nominal"];
+      $sg = $data[$k]["sb_gaji"];
+      $sm = $data[$k]["sb_makan"];
       $sbn = $data[$k]["salary_bonus_nominal"];
-      $ttl = $sn + $sbn;
+      $ttl = $sg + $sm + $sbn;
 
-      $info["ttl_standby"] += $sn;
+      $info["ttl_sb_gaji"] += $sg;
+      $info["ttl_sb_makan"] += $sm;
       $info["ttl_bonus"] += $sbn;
       $info["ttl_all"] += $ttl;
 
       $data[$k]["total"] =$ttl;
-
     }
     
 
     $date = new \DateTime();
-    $filename=$date->format("YmdHis").'-salary_paid'."[".$info["periode"]."]";
+    $filename=$date->format("YmdHis").'-salary_paid-'.$info["periode"];
 
     $mime=MyLib::mime("xlsx");
 
     $blade= 'excel.salary_paid';
 
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade), $mime["exportType"]));
+    $columnFormats = [
+        'D' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+        'E' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+        // 'D' => '@',
+        // 'E' => '@',
+        // Add more columns as needed
+    ];
+
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
 
     $result = [
       "contentType" => $mime["contentType"],

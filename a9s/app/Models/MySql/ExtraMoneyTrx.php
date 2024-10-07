@@ -67,4 +67,9 @@ class ExtraMoneyTrx extends Model
         return $this->hasOne(IsUser::class, 'id', "req_deleted_user");
     }
 
+    public function payment_method()
+    {
+        return $this->belongsTo(PaymentMethod::class, "payment_method_id", 'id');
+    }
+
 }

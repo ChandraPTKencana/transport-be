@@ -66,6 +66,7 @@
       <thead class="text-center" style="background-color: #B0A4A4;">
         <tr>
           <th style="border: 1px solid black;">No</th>
+          <th style="border: 1px solid black;">Jabatan</th>
           <th style="border: 1px solid black;">Nama Pekerja</th>
           <th style="border: 1px solid black;">No KTP</th>
           <th style="border: 1px solid black;">No SIM</th>
@@ -81,8 +82,9 @@
         
         @foreach($data as $k=>$v)
         <tr>
-          <td>{{$loop->iteration}}</td>
-          <td>{{ $v["employee"]["name"] }}</td>
+          <td >{{$loop->iteration}}</td>
+          <td >{{ $v["employee"]["role"] }}</td>
+          <td >{{ $v["employee"]["name"] }}</td>
           <td class="text-right p-1">{{ $v["employee"]["ktp_no"] }}</td>
           <td class="text-right p-1">{{ $v["employee"]["sim_no"] }}</td>
           <td class="text-right p-1">{{ $v["employee"]["rek_no"] }}</td>
@@ -94,7 +96,7 @@
         </tr>
         @endforeach
         <tr>
-          <td colspan="7" style="text-align: right;"> Grand Total</td>
+          <td colspan="8" style="text-align: right;"> Grand Total</td>
           <td class="p-1" > {{$info['ttl_standby']}}</td>
           <td class="p-1" > {{$info['ttl_bonus']}}</td>
           <td class="p-1" > {{$info['ttl_all']}}</td>

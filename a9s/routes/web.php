@@ -74,7 +74,9 @@ Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransfe
 Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'show']);
 Route::get('/trx_trp_preview_file_bt', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFileBT']);
 
-// Route::get('/trx_trp/transfer_mandiri', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'generateCSVMandiri']);
+Route::get('/trx_trp/transfers_mandiri', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'indexMandiri']);
+Route::put('/trx_trp/transfer_mandiri', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransferMandiri']);
+Route::put('/trx_trp/gen_csv_mandiri', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'generateCSVMandiri']);
 
 
 Route::get('/trx_trp_tickets', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'index']);
@@ -237,6 +239,11 @@ Route::get('/extra_money_trx_load_local', [\App\Http\Controllers\ExtraMoney\Extr
 Route::get('/extra_money_trx_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'loadSqlSrv']);
 Route::put('/extra_money_trx_validasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'validasi']);
 Route::get('/extra_money_trx_preview_file', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFile']);
+
+Route::get('/extra_money_trx/transfers', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'index']);
+Route::put('/extra_money_trx/transfer', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'validasiAndTransfer']);
+Route::get('/extra_money_trx/transfer/detail', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'show']);
+Route::get('/extra_money_trx_preview_file_bt', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'previewFileBT']);
 
 // Route::get('/payment_methods', [\App\Http\Controllers\PaymentMethodController::class, 'index']);
 Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);

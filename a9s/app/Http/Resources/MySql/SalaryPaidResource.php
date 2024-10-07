@@ -20,6 +20,7 @@ class SalaryPaidResource extends JsonResource
         return [
             'id'                => $this->id,
             'period_end'        => $this->period_end,
+            'period_part'       => $this->period_part,
             
             'val1'              => $this->val1,
             'val1_user'         => $this->val1_user ?? "",
