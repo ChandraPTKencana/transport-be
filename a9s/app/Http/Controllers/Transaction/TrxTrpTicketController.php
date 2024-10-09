@@ -371,7 +371,7 @@ class TrxTrpTicketController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -384,7 +384,7 @@ class TrxTrpTicketController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
-    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function ($q){
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function ($q){
       $q->where("status","B");
     },'potongan'])->find($request->id);
     return response()->json([
@@ -396,7 +396,7 @@ class TrxTrpTicketController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'trp_trx.ritase.views');
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -1111,7 +1111,7 @@ class TrxTrpTicketController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val_ticket]))
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val6,$model_query->val_ticket]))
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->deleted==1 )

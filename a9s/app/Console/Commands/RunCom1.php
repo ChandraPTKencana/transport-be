@@ -40,7 +40,8 @@ class RunCom1 extends Command
         
         $this->info("=====Begin trx=====\n ");
 
-        DB::update('update trx_trp set val4 = val_ticket , val4_user = val_ticket_user , val4_at = val_ticket_at');
+        DB::update('UPDATE trx_trp set `rp_kernet_user` = `val5_user` , `rp_kernet_at` = `val5_at` where kernet_id is not null and payment_method_id =2 and received_payment=1');
+        DB::update('UPDATE trx_trp set `rp_supir_user` = `val5_user` , `rp_supir_at` = `val5_at` where payment_method_id =2 and received_payment=1');
 
         $this->info("=====End trx=====\n ");
 

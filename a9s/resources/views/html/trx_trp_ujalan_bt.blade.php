@@ -46,7 +46,7 @@
           <td> Tanggal Transfer </td>
           <td> : </td>
           <td >
-          {{ date('d-m-Y H:i:s',strtotime($tanggal)) }}
+          {{ date('d-m-Y H:i:s',strtotime($tanggal_supir)) }}
           </td>
         </tr>
         <tr>
@@ -92,7 +92,7 @@
           <td> Tanggal Transfer </td>
           <td> : </td>
           <td >
-          {{ date('d-m-Y H:i:s',strtotime($tanggal)) }}
+          {{ date('d-m-Y H:i:s',strtotime($tanggal_kernet)) }}
           </td>
         </tr>
         <tr>

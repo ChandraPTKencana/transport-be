@@ -326,7 +326,7 @@ class TrxTrpFinanceController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method'])->get();
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method'])->get();
 
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),

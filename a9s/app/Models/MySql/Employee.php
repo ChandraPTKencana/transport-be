@@ -9,11 +9,12 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Str;
 use Illuminate\Database\Eloquent\Builder;
+use App\Traits\Excludable;
 
 class Employee extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-
+    use Excludable;
     protected $table = 'employee_mst';
     // protected $primaryKey = "id_user";
 
@@ -75,18 +76,18 @@ class Employee extends Authenticatable
         $builder->where('deleted',0);
     }
 
-    public function scopeExclude($query, $columns)
-    {
-        return $query->select(array_diff([
-            "id","name","role","created_user","updated_user","created_at","updated_at",
-            "deleted","deleted_user","deleted_at","deleted_reason",
-            "ktp_no","sim_no","rek_no","rek_name","phone_number",
-            "val","val_user","val_at",
-            "attachment_1","attachment_1_type",
-            "attachment_2","attachment_2_type",
-            "bank_id"
-        ], $columns));
-    }
+    // public function scopeExclude($query, $columns)
+    // {
+    //     return $query->select(array_diff([
+    //         "id","name","role","created_user","updated_user","created_at","updated_at",
+    //         "deleted","deleted_user","deleted_at","deleted_reason",
+    //         "ktp_no","sim_no","rek_no","rek_name","phone_number",
+    //         "val","val_user","val_at",
+    //         "attachment_1","attachment_1_type",
+    //         "attachment_2","attachment_2_type",
+    //         "bank_id"
+    //     ], $columns));
+    // }
 
     public function potongan(){
         return $this->hasOne(PotonganMst::class,"employee_id","id")->exclude(['attachment_1','attachment_2'])

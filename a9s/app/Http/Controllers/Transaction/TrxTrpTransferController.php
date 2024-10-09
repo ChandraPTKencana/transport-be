@@ -324,7 +324,7 @@ class TrxTrpTransferController extends Controller
     
     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val',1)->where('val1',1)->where('val2',1)->where('received_payment',0);
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -338,7 +338,7 @@ class TrxTrpTransferController extends Controller
     $this->checkGATimeout();
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.transfer.view']);
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj_details','potongan','trx_absens'=>function($q) {
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj_details','potongan','trx_absens'=>function($q) {
       $q->select('*')->where("status","B");
     }])->find($request->id);
     return response()->json([
@@ -479,6 +479,11 @@ class TrxTrpTransferController extends Controller
           }
           // MyLog::logging($result);
         }
+
+        if($model_query->duitku_supir_disburseId && $model_query->duitku_supir_trf_res_code=="00" && !$model_query->rp_supir_user){
+          $model_query->rp_supir_user = $this->admin_id;               
+          $model_query->rp_supir_at   = $t_stamp;               
+        }
       }
 
       if(isset($kernet) && $kernet_money > 0){
@@ -500,6 +505,11 @@ class TrxTrpTransferController extends Controller
             // MyLog::logging($result,"disbust");
           }
         }
+
+        if($model_query->duitku_kernet_disburseId && $model_query->duitku_kernet_trf_res_code=="00" && !$model_query->rp_kernet_user){
+          $model_query->rp_kernet_user = $this->admin_id;               
+          $model_query->rp_kernet_at   = $t_stamp;    
+        }
       }
 
 
@@ -507,16 +517,22 @@ class TrxTrpTransferController extends Controller
         $model_query->received_payment=1;
 
 
-        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true)){
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$model_query->val4){
           $model_query->val4 = 1;
           $model_query->val4_user = $this->admin_id;
           $model_query->val4_at = $t_stamp;
         }
 
-        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true)){
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && !$model_query->val5){
           $model_query->val5 = 1;
           $model_query->val5_user = $this->admin_id;
           $model_query->val5_at = $t_stamp;
+        }
+
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true) && !$model_query->val6){
+          $model_query->val6 = 1;
+          $model_query->val6_user = $this->admin_id;
+          $model_query->val6_at = $t_stamp;
         }
       }
 
@@ -579,6 +595,10 @@ class TrxTrpTransferController extends Controller
         "val5_user"=>$model_query->val5_user,
         "val5_at"=>$model_query->val5_at,
         "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
+        "val6"=>$model_query->val6,
+        "val6_user"=>$model_query->val6_user,
+        "val6_at"=>$model_query->val6_at,
+        "val6_by"=>$model_query->val6_user ? new IsUserResource(IsUser::find($model_query->val6_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

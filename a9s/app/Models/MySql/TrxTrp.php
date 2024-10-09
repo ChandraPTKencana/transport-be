@@ -67,6 +67,11 @@ class TrxTrp extends Model
         return $this->hasOne(IsUser::class, 'id', "val5_user");
     }
 
+    public function val6_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val6_user");
+    }
+
     public function ritase_val_by()
     {
         return $this->hasOne(IsUser::class, 'id', "ritase_val_user");

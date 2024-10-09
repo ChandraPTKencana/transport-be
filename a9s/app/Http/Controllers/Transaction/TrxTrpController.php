@@ -367,7 +367,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -418,7 +418,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
-    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function ($q){
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function ($q){
       $q->where("status","B");
     },'potongan'])->find($request->id);
     return response()->json([
@@ -430,7 +430,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'trp_trx.ritase.views');
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -991,7 +991,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val_ticket]) || $model_query->req_deleted==1  || $model_query->deleted==1) 
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val6,$model_query->val_ticket]) || $model_query->req_deleted==1  || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->pvr_id!="" || $model_query->pvr_id!=null)
@@ -1064,7 +1064,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val_ticket]))
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val6,$model_query->val_ticket]))
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->deleted==1 || $model_query->req_deleted==1 )
@@ -1137,7 +1137,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val_ticket]))
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val6,$model_query->val_ticket]))
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->deleted==1 )
@@ -1399,7 +1399,8 @@ class TrxTrpController extends Controller
       "kernet_rek_no" => $trx_trp->kernet_rek_no,
       "nominal1"      => $kernet_money,
       
-      "tanggal"       => $trx_trp->val5_at,
+      "tanggal_supir"   => $trx_trp->rp_supir_at,
+      "tanggal_kernet"  => $trx_trp->rp_kernet_at,
     ];   
     $html = view("html.trx_trp_ujalan_bt",$sendData);  
     $result = [
@@ -1964,7 +1965,7 @@ class TrxTrpController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5','trp_trx.val6']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -1985,7 +1986,7 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5 && $model_query->val_ticket){
+      if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5 && $model_query->val6 && $model_query->val_ticket){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
@@ -2022,6 +2023,12 @@ class TrxTrpController extends Controller
         $model_query->val5_at = $t_stamp;
       }
 
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true) && !$model_query->val6){
+        $model_query->val6 = 1;
+        $model_query->val6_user = $this->admin_id;
+        $model_query->val6_at = $t_stamp;
+      }
+
       $model_query->save();
 
       MyLog::sys("trx_trp",$request->id,"approve");
@@ -2053,6 +2060,10 @@ class TrxTrpController extends Controller
         "val5_user"=>$model_query->val5_user,
         "val5_at"=>$model_query->val5_at,
         "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
+        "val6"=>$model_query->val6,
+        "val6_user"=>$model_query->val6_user,
+        "val6_at"=>$model_query->val6_at,
+        "val6_by"=>$model_query->val6_user ? new IsUserResource(IsUser::find($model_query->val6_user)) : null,
         "val_ticket"=>$model_query->val_ticket,
         "val_ticket_user"=>$model_query->val_ticket_user,
         "val_ticket_at"=>$model_query->val_ticket_at,

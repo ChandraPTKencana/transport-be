@@ -92,6 +92,11 @@ class TrxTrpResource extends JsonResource
             'val5_by'           => new IsUserResource($this->whenLoaded('val5_by')),
             'val5_at'           => $this->val5_at ?? "",
 
+            'val6'              => $this->val6,
+            'val6_user'         => $this->val6_user ?? "",
+            'val6_by'           => new IsUserResource($this->whenLoaded('val6_by')),
+            'val6_at'           => $this->val6_at ?? "",
+
             'val_ticket'        => $this->val_ticket,
             'val_ticket_user'   => $this->val_ticket_user ?? "",
             'val_ticket_by'     => new IsUserResource($this->whenLoaded('val_ticket_by')),

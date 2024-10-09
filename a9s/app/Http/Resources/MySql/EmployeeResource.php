@@ -37,6 +37,11 @@ class EmployeeResource extends JsonResource
             'attachment_1'          => null,
             'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
             'attachment_1_type'     => $this->attachment_1_type,
+            'birth_date'            => $this->birth_date ?? "",
+            'birth_place'           => $this->birth_place ?? "",
+            'tmk'                   => $this->tmk ?? "",
+            'address'               => $this->address ?? "",
+            'status'                => $this->status ?? "",
         ];
     }
 }

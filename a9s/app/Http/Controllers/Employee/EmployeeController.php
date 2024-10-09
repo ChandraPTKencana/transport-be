@@ -247,6 +247,13 @@ class EmployeeController extends Controller
       $model_query->created_user  = $this->admin_id;
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
+
+      $model_query->birth_date    = MyLib::emptyStrToNull($request->birth_date);
+      $model_query->birth_place   = MyLib::emptyStrToNull($request->birth_place);
+      $model_query->tmk           = MyLib::emptyStrToNull($request->tmk);
+      $model_query->address       = MyLib::emptyStrToNull($request->address);
+      $model_query->status        = MyLib::emptyStrToNull($request->status);
+
       $model_query->save();
 
       MyLog::sys($this->syslog_db,$model_query->id,"insert");
@@ -340,6 +347,13 @@ class EmployeeController extends Controller
       $model_query->phone_number  = MyLib::emptyStrToNull($request->phone_number);
       $model_query->updated_at    = $t_stamp;
       $model_query->updated_user  = $this->admin_id;
+
+      $model_query->birth_date    = MyLib::emptyStrToNull($request->birth_date);
+      $model_query->birth_place   = MyLib::emptyStrToNull($request->birth_place);
+      $model_query->tmk           = MyLib::emptyStrToNull($request->tmk);
+      $model_query->address       = MyLib::emptyStrToNull($request->address);
+      $model_query->status        = MyLib::emptyStrToNull($request->status);
+
       $model_query->save();
       
       if($change){

@@ -38,7 +38,9 @@ class EmployeeRequest extends FormRequest
             $rules['name'] = 'required|max:50';
             $rules['role'] = 'required|in:Supir,Kernet';
             $rules['bank_id'] = 'nullable|exists:App\Models\MySql\Bank,id';
-
+            // $rules['birth_date']  = 'required|date_format:Y-m-d';
+            // $rules['birth_place']  = 'required|max:100';
+            
             // $rules['ktp_no'] = 'required_with:id_type';
             // $rules['id_type'] = 'required_with:id_no';
         }

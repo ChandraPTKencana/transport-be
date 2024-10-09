@@ -18,7 +18,7 @@ class RunPermit extends Command
      *
      * @var string
      */
-    protected $signature = 'run_2';
+    protected $signature = 'runx_2';
 
     /**
      * The console command description.
