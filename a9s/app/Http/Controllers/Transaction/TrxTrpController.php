@@ -367,7 +367,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','potongan','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 

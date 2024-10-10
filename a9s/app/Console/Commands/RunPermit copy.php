@@ -327,6 +327,42 @@ class RunPermit extends Command
             ["permit"=>'extra_money_trx.generate_pvr',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
             ["permit"=>'extra_money_trx.get_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
 
+
+            ["permit"=>'extra_money_trx.transfer.views',"to"=>['SuperAdmin','ViewOnly','Logistic','SPVLogistik','MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money_trx.transfer.view',"to"=>['SuperAdmin','ViewOnly','Logistic','SPVLogistik','MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money_trx.transfer.do_transfer',"to"=>['SuperAdmin','Logistic','SPVLogistik','MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money_trx.val4',"to"=>['SuperAdmin','Logistic','SPVLogistik','MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.view',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.val6',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.view',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.create',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.modify',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.val1',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.val2',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.generate_detail',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_paid.detail.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_bonus.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_bonus.view',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_bonus.val2',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'salary_bonus.detail.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.absen.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.absen.view',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.absen.modify',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money.view',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money.val2',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money_trx.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money_trx.view',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'extra_money_trx.val6',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.transfer.views',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.transfer.view',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.transfer.do_transfer',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.absen.val2',"to"=>['MANAGER_LOGISTIC']],
+            ["permit"=>'potongan_mst.val1',"to"=>['MANAGER_LOGISTIC']],
+
+            
         ];
         $this->info("pass3\n ");
 
