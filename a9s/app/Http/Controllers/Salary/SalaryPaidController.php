@@ -679,7 +679,7 @@ class SalaryPaidController extends Controller
     }
 
     $sts = StandbyTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
-    ->where('val2',1)->whereNull('salary_paid_id')->with('details')->lockForUpdate()->get();
+    ->where('val2',1)->whereNull('salary_paid_id')->where('req_deleted',0)->where('deleted',0)->with('details')->lockForUpdate()->get();
 
     foreach ($sts as $k => $v) {
       $smd = $v->standby_mst->details;
@@ -761,7 +761,7 @@ class SalaryPaidController extends Controller
     }
     if($model_query->period_part==2){
       $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
-      ->where('val2',1)->whereNull('salary_paid_id')->lockForUpdate()->get();
+      ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)->lockForUpdate()->get();
       
       foreach($sbs as $v){
   
