@@ -2103,6 +2103,8 @@ class TrxTrpController extends Controller
           $v->val_ticket = 1;
           $v->val_ticket_user = $this->admin_id;
           $v->val_ticket_at = $t_stamp;
+          $v->updated_user = $this->admin_id;
+          $v->updated_at = $t_stamp;
           $v->save();
           array_push($valList,[
             "id"=>$v->id,
@@ -2110,6 +2112,7 @@ class TrxTrpController extends Controller
             "val_ticket_user"=>$v->val_ticket_user,
             "val_ticket_at"=>$v->val_ticket_at,
             "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
+            "updated_at"=>$v->updated_at,
           ]);
         }
       }
@@ -2138,7 +2141,68 @@ class TrxTrpController extends Controller
       //   "message" => $e->getMessage(),
       // ], 400);
       return response()->json([
-        "message" => "Proses ubah data gagal",
+        "message" => "Proses validasi data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function clearTickets(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
+
+    $ids = json_decode($request->ids, true);
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_querys = TrxTrp::whereIn("id",$ids)->where('val_ticket',0)->get();
+      $clearList = [];
+
+      foreach ($model_querys as $key => $v) {
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+          $v->ticket_a_id = null;
+          $v->ticket_a_no = null;
+          $v->ticket_b_id = null;
+          $v->ticket_b_no = null;
+          $v->updated_user = $this->admin_id;
+          $v->updated_at = $t_stamp;
+
+          $v->save();
+          array_push($clearList,[
+            "id"=>$v->id,
+            "ticket_a_id"=>$v->ticket_a_id,
+            "ticket_a_no"=>$v->ticket_a_no,
+            "ticket_b_id"=>$v->ticket_b_id,
+            "ticket_b_no"=>$v->ticket_b_no,
+            "updated_at"=>$v->updated_at,
+          ]);
+        }
+      }
+
+      $nids = array_map(function($x) {
+        return $x['id'];        
+      },$clearList);
+
+      MyLog::sys("trx_trp",null,"clear_tickets",implode(",",$nids));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses clear tiket berhasil",
+        "clear_lists"=>$clearList
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses clear tiket gagal",
       ], 400);
     }
 

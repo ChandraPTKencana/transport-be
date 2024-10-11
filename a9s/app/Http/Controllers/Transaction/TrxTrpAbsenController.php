@@ -298,10 +298,11 @@ class TrxTrpAbsenController extends Controller
       'transition_type'   => $model_query->transition_type ?? "",
       // 'trx_absens'        => $model_query->trx_absens,
 
-      // 'ritase_leave_at'   => $model_query->ritase_leave_at ?? "",
-      // 'ritase_arrive_at'  => $model_query->ritase_arrive_at ?? "",
-      // 'ritase_return_at'  => $model_query->ritase_return_at ?? "",
-      // 'ritase_till_at'    => $model_query->ritase_till_at ?? "",
+      'ritase_leave_at'   => $model_query->ritase_leave_at ?? "",
+      'ritase_arrive_at'  => $model_query->ritase_arrive_at ?? "",
+      'ritase_return_at'  => $model_query->ritase_return_at ?? "",
+      'ritase_till_at'    => $model_query->ritase_till_at ?? "",
+      
       'ritase_note'       => $model_query->ritase_note ?? "",
       
       'ritase_val'        => $model_query->ritase_val,
