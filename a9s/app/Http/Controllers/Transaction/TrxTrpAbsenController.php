@@ -682,4 +682,64 @@ class TrxTrpAbsenController extends Controller
     }
 
   }
+
+  public function clearValVal1(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.clear_valval1']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = TrxTrp::find($request->id);
+      if($model_query->ritase_val2){
+        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      }
+      
+      $model_query->ritase_val        = 0;
+      $model_query->ritase_val1       = 0;
+      $model_query->updated_at        = $t_stamp;
+      $model_query->updated_user      = $this->admin_id;
+
+      $model_query->save();
+
+      MyLog::sys("trx_trp",$request->id,"unval_absen");
+
+      DB::commit();
+      return response()->json([
+        "message"         => "Proses clear validasi berhasil",
+        "ritase_val"      => 0,
+        "ritase_val1"     => 0,
+        ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses clear validasi gagal",
+      ], 400);
+    }
+
+  }
 }

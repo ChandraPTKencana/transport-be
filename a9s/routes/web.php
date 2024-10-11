@@ -102,6 +102,7 @@ Route::get('/trx_trp/absens', [\App\Http\Controllers\Transaction\TrxTrpAbsenCont
 Route::get('/trx_trp/absen', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'show']);
 Route::put('/trx_trp/absen', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'update']);
 Route::put('/trx_trp/absen/validasi', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'validasi']);
+Route::put('/trx_trp/absen/clear_valval1', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'clearValVal1']);
 
 Route::get('/users', [\App\Http\Controllers\User\UserController::class, 'index']);
 Route::get('/user', [\App\Http\Controllers\User\UserController::class, 'show']);

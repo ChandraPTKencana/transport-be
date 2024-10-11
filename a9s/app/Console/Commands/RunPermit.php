@@ -122,36 +122,8 @@ class RunPermit extends Command
 
 
         $re_lists = [
-            ["permit"=>'rpt_salary.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'rpt_salary.view',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'rpt_salary.create',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'rpt_salary.modify',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'rpt_salary.val1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'rpt_salary.generate_detail',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'rpt_salary.detail.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'rpt_salary.preview_file',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-
-            ["permit"=>'salary_paid.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_paid.view',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_paid.create',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_paid.modify',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            // ["permit"=>'salary_paid.remove',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_paid.val1',"to"=>['SuperAdmin','Logistic']],
-            ["permit"=>'salary_paid.val2',"to"=>['SuperAdmin','SPVlogistik']],
-            ["permit"=>'salary_paid.val3',"to"=>['SuperAdmin','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_paid.generate_detail',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_paid.preview_file',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_paid.detail.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-
-            ["permit"=>'salary_bonus.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_bonus.view',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_bonus.create',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_bonus.modify',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_bonus.remove',"to"=>['SuperAdmin']],
-            ["permit"=>'salary_bonus.val1',"to"=>['SuperAdmin','Logistic']],
-            ["permit"=>'salary_bonus.val2',"to"=>['SuperAdmin','SPVlogistik','MANAGER_LOGISTIC']],
-
-            ["permit"=>'salary_bonus.detail.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
+           ["permit"=>'trp_trx.absen.clear_valval1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
+            // ["permit"=>'standby_trx.detail.decide_paid',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
         ];
 
         foreach ($re_lists as $k => $v) {

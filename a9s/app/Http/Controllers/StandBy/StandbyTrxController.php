@@ -268,7 +268,7 @@ class StandbyTrxController extends Controller
 
     $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','details'=>function($q) {
       $q->orderBy("tanggal","asc");
-      $q->select("id", "tanggal","standby_trx_id");
+      $q->select("id", "tanggal","standby_trx_id","attachment_1_type");
     }])
     ->withCount('details')->get();
 
@@ -759,6 +759,7 @@ class StandbyTrxController extends Controller
           }
   
           if ($v["p_status"] == "Remove") {
+            // !!! NOT ALLOWED TO DELETE
             if ($index === false) {
               throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
             } else {
@@ -795,7 +796,8 @@ class StandbyTrxController extends Controller
               }
 
               $mq->ordinal            = $v["ordinal"];
-              $mq->tanggal            = $v["tanggal"];
+              // !!! IZIN EDIT TANGGAL TIDAK LAGI DIPERBOLEHKAN
+              $mq->tanggal            = $v["tanggal"]; 
               $mq->note               = $v["note"];
 
               if($change)
@@ -892,6 +894,7 @@ class StandbyTrxController extends Controller
 
   public function delete(Request $request)
   {
+    // !!! NOT ALLOWED TO DELETE
     MyAdmin::checkScope($this->permissions, 'standby_trx.remove');
 
     DB::beginTransaction();
@@ -961,6 +964,8 @@ class StandbyTrxController extends Controller
 
   public function reqDelete(Request $request)
   {
+    // !!! NOT ALLOWED TO DELETE
+
     MyAdmin::checkScope($this->permissions, 'standby_trx.request_remove');
 
     DB::beginTransaction();
