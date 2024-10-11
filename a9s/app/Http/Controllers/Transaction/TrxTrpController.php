@@ -2920,7 +2920,7 @@ class TrxTrpController extends Controller
     ->orderBy("id","desc")
     ->limit(2)->get();
     
-    if(count($supir_absen)==2 && !$supir_absen[1]->ritase_val1)
+    if(count($supir_absen)==2 && !$supir_absen[1]->ritase_val2)
     throw new \Exception("Absen Belum Selesai [ID:".$supir_absen[1]->id."]",1);
 
 
@@ -2935,7 +2935,7 @@ class TrxTrpController extends Controller
       ->orderBy("id","desc")
       ->limit(2)->get();
       
-      if(count($kernet_absen)==2 && !$kernet_absen[1]->ritase_val1)
+      if(count($kernet_absen)==2 && !$kernet_absen[1]->ritase_val2)
       throw new \Exception("Absen Kernet Belum Selesai [ID:".$kernet_absen[1]->id."]",1);
     }
     

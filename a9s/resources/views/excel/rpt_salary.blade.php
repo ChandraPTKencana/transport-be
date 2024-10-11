@@ -2,7 +2,7 @@
       <thead class="text-center" style="background-color: #B0A4A4;">
         
       <tr>
-        <th colspan="11" style="text-align: center; font-weight:bold;">
+        <th colspan="20" style="text-align: center; font-weight:bold;">
           Laporan Uang Gaji Dan Makan Standby,Uang Gaji Dan Makan Trip, Potongan, Serta Bonus Periode {{$info['periode']}}
         </th>
       </tr>
@@ -21,6 +21,8 @@
           <th colspan="2" style="border: 1px solid black; font-weight:bold;">Standby</th>
           <th colspan="2" style="border: 1px solid black; font-weight:bold;">Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS JAMSOS</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">U.Kerajinan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Grand Total</th>
         </tr>
@@ -52,6 +54,8 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">0</td>
+          <td style="border: 1px solid black;" class="text-right p-1">0</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["total"] }}</td>
         </tr>
@@ -63,6 +67,8 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_gaji']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_makan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_nominal_cut']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 0 </td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 0 </td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bonus']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_all']}}</td>
         </tr>
