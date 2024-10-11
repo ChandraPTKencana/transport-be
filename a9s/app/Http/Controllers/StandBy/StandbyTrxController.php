@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Exceptions\MyException;
 use Exception;
 
+use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Encoders\AutoEncoder;
+
 use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
@@ -317,6 +320,9 @@ class StandbyTrxController extends Controller
     }
   }
 
+  private $height = 500;
+  private $quality = 100;
+
   public function store(StandbyTrxRequest $request)
   {
     MyAdmin::checkScope($this->permissions, 'standby_trx.create');
@@ -468,7 +474,11 @@ class StandbyTrxController extends Controller
           if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
           throw new Exception("Baris #" . ($key + 1) . ".Tipe File Harus berupa jpg,jpeg, atau png", 1);
 
-          $blobFile = base64_encode(file_get_contents($path));
+          // $blobFile = base64_encode(file_get_contents($path));
+          $image = Image::read($path)->scale(height: $this->height);
+          $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));    
+          $blobFile = base64_encode($compressedImageBinary);      
+
         }
 
         $blobFiles[$key]=$blobFile;
@@ -671,7 +681,11 @@ class StandbyTrxController extends Controller
           if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
           throw new Exception("Baris #" . ($key + 1) . ".Tipe File Harus berupa jpg,jpeg, atau png", 1);
 
-          $blobFile = base64_encode(file_get_contents($path));
+          // $blobFile = base64_encode(file_get_contents($path));
+          $image = Image::read($path)->scale(height: $this->height);
+          $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+          $blobFile = base64_encode($compressedImageBinary);      
+    
         }
 
         $blobFiles[$key]=$blobFile;
