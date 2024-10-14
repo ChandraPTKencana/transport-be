@@ -1064,8 +1064,8 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val6,$model_query->val_ticket]))
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+      if(in_array(1,[$model_query->val_ticket]))
+      throw new \Exception("Data Sudah Divalidasi (Tiket) Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->deleted==1 || $model_query->req_deleted==1 )
       throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);

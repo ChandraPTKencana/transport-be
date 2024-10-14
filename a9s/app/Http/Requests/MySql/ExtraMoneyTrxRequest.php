@@ -25,10 +25,10 @@ class ExtraMoneyTrxRequest extends FormRequest
     {
         $rules = [];
         if (request()->isMethod('get')) {
-            $rules['id'] = 'required|exists:App\Models\MySql\ExtraMoney,id';
+            $rules['id'] = 'required|exists:App\Models\MySql\ExtraMoneyTrx,id';
         }
         if (request()->isMethod('put')) {
-            $rules['id'] = 'required|exists:App\Models\MySql\ExtraMoney,id';
+            $rules['id'] = 'required|exists:App\Models\MySql\ExtraMoneyTrx,id';
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['extra_money_id']        = 'required|exists:App\Models\MySql\ExtraMoney,id';

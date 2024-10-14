@@ -339,8 +339,7 @@ class ExtraMoneyTrxController extends Controller
       $model_query->no_pol              = $request->no_pol;
       $model_query->note_for_remarks    = $request->note_for_remarks;
       
-      // $model_query->payment_method_id   = $request->payment_method_id;
-      $model_query->payment_method_id   = 2;
+      $model_query->payment_method_id   = $request->payment_method_id;
       
       $model_query->created_at          = $t_stamp;
       $model_query->created_user        = $this->admin_id;
@@ -432,7 +431,7 @@ class ExtraMoneyTrxController extends Controller
       $model_query->no_pol              = $request->no_pol;
       $model_query->note_for_remarks    = $request->note_for_remarks;
 
-      $model_query->payment_method_id   = 2;
+      $model_query->payment_method_id   = $request->payment_method_id;
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
