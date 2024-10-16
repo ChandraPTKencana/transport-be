@@ -95,6 +95,7 @@ class StandbyTrxResource extends JsonResource
             'details'           => StandbyTrxDtlResource::collection($this->whenLoaded('details')),
             'details_count'     => $this->details_count,
 
+            'salary_paid_id'    => $this->salary_paid_id,
         ];
     }
 }

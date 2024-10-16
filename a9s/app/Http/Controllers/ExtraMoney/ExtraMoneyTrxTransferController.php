@@ -324,7 +324,7 @@ class ExtraMoneyTrxTransferController extends Controller
     
     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val1',1)->where('val2',1)->where('val3',1)->where('received_payment',0);
 
-    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method'])->get();
+    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method','extra_money','employee'])->get();
 
     return response()->json([
       "data" => ExtraMoneyTrxResource::collection($model_query),
@@ -336,7 +336,7 @@ class ExtraMoneyTrxTransferController extends Controller
     $this->checkGATimeout();
     MyAdmin::checkMultiScope($this->permissions, ['extra_money_trx.transfer.view']);
 
-    $model_query = ExtraMoneyTrx::where("deleted",0)->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method'])->find($request->id);
+    $model_query = ExtraMoneyTrx::where("deleted",0)->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method','extra_money','employee'])->find($request->id);
     return response()->json([
       "data" => new ExtraMoneyTrxResource($model_query),
     ], 200);
@@ -395,10 +395,10 @@ class ExtraMoneyTrxTransferController extends Controller
       $ttl_pk     = 0;
 
       $em = $model_query->extra_money;
-      $employee_money = $em->amount * $em->qty;
+      $employee_money = $em->nominal * $em->qty;
 
       if($employee_money < MyLib::$min_transfer)
-      throw new \Exception("Nilai yang akan di transfer kurang dari nilai minimal transfer",1);
+      throw new \Exception("Nilai yang akan di transfer kurang dari nilai minimal transfer".$employee_money,1);
 
       if($model_query->employee_id){
         $employee = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($model_query->employee_id);

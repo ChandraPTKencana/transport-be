@@ -254,11 +254,19 @@ class StandbyTrxController extends Controller
     $filter_status = $request->filter_status;
 
     if($filter_status=="trx_done"){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no");
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)
+      ->where(function ($q){
+        $q->whereNotNull("pv_no");
+        $q->orWhereNotNull("salary_paid_id");
+      });
     }
 
     if($filter_status=="trx_not_done"){
-      $model_query = $model_query->where("deleted",0)->whereNull("pv_no")->where("req_deleted",0);
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)
+      ->where(function ($q){
+        $q->whereNull("pv_no");
+        $q->WhereNull("salary_paid_id");
+      });
     }
 
     if($filter_status=="deleted"){

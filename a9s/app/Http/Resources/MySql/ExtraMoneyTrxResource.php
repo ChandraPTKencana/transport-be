@@ -5,6 +5,7 @@ namespace App\Http\Resources\MySql;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\IsUserResource;
 use App\Models\MySql\Employee;
+use Illuminate\Support\Facades\File;
 
 class ExtraMoneyTrxResource extends JsonResource
 {
@@ -106,6 +107,12 @@ class ExtraMoneyTrxResource extends JsonResource
             'payment_method_id' => $this->payment_method_id,
 
             'received_payment'  => $this->received_payment,
+
+            'attachment_1'          => null,
+            'attachment_1_preview'  => $this->attachment_1_loc && File::exists(files_path($this->attachment_1_loc)) ? "data:".$this->attachment_1_type.";base64,".base64_encode(File::get(files_path($this->attachment_1_loc))) :"",
+            // 'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+            'attachment_1_type'     => $this->attachment_1_type,
+            // 'attachment_1_loc'     => $this->attachment_1_loc,
 
         ];
     }
