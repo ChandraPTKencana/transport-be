@@ -483,6 +483,7 @@ class UjalanController extends Controller
       //start for details2      
       $temp_amount_details2=0;
       $ordinal2=0;
+      $asst_opt="TANPA KERNET";
       foreach ($details_in2 as $key => $value) {
         $ordinal2 = $key + 1;
         $detail2                     = new UjalanDetail2();
@@ -509,11 +510,14 @@ class UjalanController extends Controller
         $detail2->updated_at      = $t_stamp;
         $detail2->updated_user    = $this->admin_id;  
         $detail2->save();
+
+        if($value["xfor"]=="Kernet") $asst_opt = "DENGAN KERNET";
       }
       //end for details2
       if($ordinal2 > 0 && $model_query->harga!=$temp_amount_details2)
       throw new \Exception("Total Tidak Cocok harap Periksa Kembali",1);
 
+      $model_query->asst_opt = $asst_opt;
       $model_query->save();
       MyLog::sys("ujalan_mst",$model_query->id,"insert");
 
@@ -975,6 +979,7 @@ class UjalanController extends Controller
         $data_to_processes2 = array_merge($for_deletes2, $for_edits2, $for_adds2);
         
         $temp_amount_details2=0;
+        $asst_opt="TANPA KERNET";
   
         foreach ($data_to_processes2 as $k => $v) {
           $index2 = false;
@@ -1079,6 +1084,9 @@ class UjalanController extends Controller
                 $mq->ac_account_code    = $ac_account_code;
                 $mq->description        = $v["description"];
                 $mq->xfor               = $v["xfor"];
+                
+                if($v["xfor"]=="Kernet") $asst_opt = "DENGAN KERNET";
+
                 $mq->p_change           = true;
                 $mq->updated_at         = $t_stamp;
                 $mq->updated_user       = $this->admin_id;
@@ -1143,6 +1151,9 @@ class UjalanController extends Controller
                   'updated_at'        => $t_stamp,
                   'updated_user'      => $this->admin_id,
               ]);
+
+              if($v["xfor"]=="Kernet") $asst_opt = "DENGAN KERNET";
+
               // $ordinal++;
           }
         }
@@ -1152,6 +1163,7 @@ class UjalanController extends Controller
       }
 
       if(MyAdmin::checkScope($this->permissions,'ujalan.modify',true)){
+        $model_query->asst_opt = $asst_opt;
         $model_query->save();
       }
 

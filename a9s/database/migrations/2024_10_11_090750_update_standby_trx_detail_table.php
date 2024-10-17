@@ -14,11 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::table('is_uj', function (Blueprint $table) {        
-            $table->boolean('with_asst')->default(0);
+            $table->string('asst_opt',13)->default("TANPA KERNET");
         });
 
-        Schema::table('standby_trx', function (Blueprint $table) {        
-            $table->tinyInteger('driver_asst_opt')->default(0);
+        Schema::table('standby_mst', function (Blueprint $table) {        
+            $table->string('driver_asst_opt',12)->default("SUPIR"); // Supir,Kernet,Supir Kernet
         });
 
         Schema::table('standby_trx_dtl', function (Blueprint $table) {        
@@ -38,10 +38,10 @@ return new class extends Migration
     public function down()
     {
         Schema::table('is_uj', function (Blueprint $table) {
-            $table->dropColumn('with_asst');
+            $table->dropColumn('asst_opt');
         });
         
-        Schema::table('standby_trx', function (Blueprint $table) {
+        Schema::table('standby_mst', function (Blueprint $table) {
             $table->dropColumn('driver_asst_opt');
         });
 

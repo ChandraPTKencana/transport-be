@@ -289,6 +289,9 @@ class StandbyMstController extends Controller
       $rollback_id = $model_query->id - 1;
 
       $ordinal=0;
+      $there_supir=0;
+      $there_kernet=0;
+
       foreach ($details_in as $key => $value) {
         $ordinal = $key + 1;
         $detail                     = new StandbyDtl();
@@ -313,8 +316,20 @@ class StandbyMstController extends Controller
         $detail->updated_at         = $t_stamp;
         $detail->updated_user       = $this->admin_id;  
         $detail->save();
+
+        if($value['xfor']=="Kernet") $there_kernet=1;
+        if($value['xfor']=="Supir") $there_supir=1;
       }
       //end for details2
+
+
+      if($there_kernet && $there_supir){
+        $model_query->driver_asst_opt = "SUPIR KERNET";
+      } elseif ($there_kernet && !$there_supir) {
+        $model_query->driver_asst_opt = "KERNET";      
+      } elseif (!$there_kernet && $there_supir) {
+        $model_query->driver_asst_opt = "SUPIR";
+      }
 
       $model_query->save();
       MyLog::sys("standby_mst",$model_query->id,"insert");
@@ -483,6 +498,9 @@ class StandbyMstController extends Controller
         throw new \Exception("Data List Harus Diisi",1);
       }
 
+      $there_supir=0;
+      $there_kernet=0;
+
       foreach ($data_to_processes as $k => $v) {
         $index = false;
 
@@ -535,6 +553,8 @@ class StandbyMstController extends Controller
               $mq->updated_user    = $this->admin_id;
               $mq->save();
 
+              if($v['xfor']=="Kernet") $there_kernet=1;
+              if($v['xfor']=="Supir") $there_supir=1;
               
               $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
               array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
@@ -585,8 +605,19 @@ class StandbyMstController extends Controller
                 'updated_at'      => $t_stamp,
                 'updated_user'    => $this->admin_id,
             ]);
+            if($v['xfor']=="Kernet") $there_kernet=1;
+            if($v['xfor']=="Supir") $there_supir=1;
         }
       }
+
+      if($there_kernet && $there_supir){
+        $model_query->driver_asst_opt = "SUPIR KERNET";
+      } elseif ($there_kernet && !$there_supir) {
+        $model_query->driver_asst_opt = "KERNET";      
+      } elseif (!$there_kernet && $there_supir) {
+        $model_query->driver_asst_opt = "SUPIR";
+      }
+
       $model_query->save();
         //start for details2
       StandbyDtl::where('standby_mst_id',$model_query->id)->update(["p_change"=>false]);
