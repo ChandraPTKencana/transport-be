@@ -13,6 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::table('is_uj', function (Blueprint $table) {        
+            $table->boolean('with_asst')->default(0);
+        });
+
+        Schema::table('standby_trx', function (Blueprint $table) {        
+            $table->tinyInteger('driver_asst_opt')->default(0);
+        });
+
         Schema::table('standby_trx_dtl', function (Blueprint $table) {        
             $table->boolean('be_paid')->default(0);
         });
@@ -29,6 +37,14 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('is_uj', function (Blueprint $table) {
+            $table->dropColumn('with_asst');
+        });
+        
+        Schema::table('standby_trx', function (Blueprint $table) {
+            $table->dropColumn('driver_asst_opt');
+        });
+
         Schema::table('standby_trx_dtl', function (Blueprint $table) {
             $table->dropColumn('be_paid');
         });
