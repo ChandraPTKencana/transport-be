@@ -32,9 +32,11 @@ class RptSalaryDtlResource extends JsonResource
             // 'standby_nominal'       => $this->standby_nominal,
             'sb_gaji'               => $this->sb_gaji,
             'sb_makan'              => $this->sb_makan,
+            'sb_dinas'              => $this->sb_dinas,
 
             'uj_gaji'               => $this->uj_gaji,
             'uj_makan'              => $this->uj_makan,
+            'uj_dinas'              => $this->uj_dinas,
 
             'nominal_cut'           => $this->nominal_cut,
             'salary_bonus_nominal'  => $this->salary_bonus_nominal,

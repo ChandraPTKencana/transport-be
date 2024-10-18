@@ -2,7 +2,7 @@
       <thead class="text-center" style="background-color: #B0A4A4;">
         
       <tr>
-        <th colspan="20" style="text-align: center; font-weight:bold;">
+        <th colspan="22" style="text-align: center; font-weight:bold;">
           Laporan Uang Gaji Dan Makan Standby,Uang Gaji Dan Makan Trip, Potongan, Serta Bonus Periode {{$info['periode']}}
         </th>
       </tr>
@@ -18,8 +18,8 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Status</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">No Rek</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Bank</th>
-          <th colspan="2" style="border: 1px solid black; font-weight:bold;">Standby</th>
-          <th colspan="2" style="border: 1px solid black; font-weight:bold;">Trip</th>
+          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby</th>
+          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS JAMSOS</th>
@@ -30,8 +30,10 @@
         <tr>
           <th style="border: 1px solid black; font-weight:bold;">SB.Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">SB.Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">SB.Dinas</th>
           <th style="border: 1px solid black; font-weight:bold;">UJ.Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">UJ.Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">UJ.Dinas</th>
         </tr>
       </thead>
       <tbody>
@@ -51,8 +53,10 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bank_name"]}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">0</td>
           <td style="border: 1px solid black;" class="text-right p-1">0</td>
@@ -64,8 +68,10 @@
           <td colspan="11" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_gaji']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_makan']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_dinas']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_gaji']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_makan']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_dinas']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_nominal_cut']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 0 </td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 0 </td>

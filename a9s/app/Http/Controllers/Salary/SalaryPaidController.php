@@ -674,6 +674,7 @@ class SalaryPaidController extends Controller
         // "standby_nominal" => 0,
         "sb_gaji"=>0,
         "sb_makan"=>0,
+        "sb_dinas"=>0,
         "salary_bonus_nominal" => $v->role == 'Supir' ? $kerajinan_s : $kerajinan_k,
       ]);
     }
@@ -687,10 +688,12 @@ class SalaryPaidController extends Controller
       $nominal_s = 0;
       $sb_gaji_s = 0;
       $sb_makan_s = 0;
+      $sb_dinas_s = 0;
 
       $nominal_k = 0;
       $sb_gaji_k = 0;
       $sb_makan_k = 0;
+      $sb_dinas_k = 0;
 
       foreach ($smd as $k1 => $v1) {
         $amount = $v1->amount * count($v->details);
@@ -698,12 +701,14 @@ class SalaryPaidController extends Controller
           $nominal_s += $amount;
           if($v1->ac_account_code=='01.510.001') $sb_gaji_s += $amount;
           if($v1->ac_account_code=='01.510.005') $sb_makan_s += $amount;
+          if($v1->ac_account_code=='01.575.002') $sb_dinas_s += $amount;
         }
 
         if($v1->xfor == 'Kernet'){
           $nominal_k += $amount;
           if($v1->ac_account_code=='01.510.001') $sb_gaji_k += $amount;
-          if($v1->ac_account_code=='01.510.005') $sb_makan_k += $amount;          
+          if($v1->ac_account_code=='01.510.005') $sb_makan_k += $amount;
+          if($v1->ac_account_code=='01.575.002') $sb_dinas_k += $amount;
         }
       }
 
@@ -723,12 +728,14 @@ class SalaryPaidController extends Controller
             // "standby_nominal"       => $nominal_s,
             "sb_gaji"               => $sb_gaji_s,
             "sb_makan"              => $sb_makan_s,
+            "sb_dinas"              => $sb_dinas_s,
             "salary_bonus_nominal"  => $kerajinan_s,
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_s;
           $dt_dtl[$search]['sb_gaji']+=$sb_gaji_s;
           $dt_dtl[$search]['sb_makan']+=$sb_makan_s;
+          $dt_dtl[$search]['sb_dinas']+=$sb_dinas_s;
         }
       }
 
@@ -747,12 +754,14 @@ class SalaryPaidController extends Controller
             // "standby_nominal"       => $nominal_k,
             "sb_gaji"               => $sb_gaji_k,
             "sb_makan"              => $sb_makan_k,
+            "sb_dinas"              => $sb_dinas_k,
             "salary_bonus_nominal"  => $kerajinan_k,
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
           $dt_dtl[$search]['sb_gaji']+=$sb_gaji_k;
           $dt_dtl[$search]['sb_makan']+=$sb_makan_k;
+          $dt_dtl[$search]['sb_dinas']+=$sb_dinas_k;
         }
       }
 
@@ -781,6 +790,7 @@ class SalaryPaidController extends Controller
             // "standby_nominal"       => 0,
             "sb_gaji"               => 0,
             "sb_makan"              => 0,
+            "sb_dinas"              => 0,
             "salary_bonus_nominal"  => ($emp->role == 'Supir' ? $kerajinan_s : $kerajinan_k) + $v->nominal,
           ]);
         }else{
@@ -814,6 +824,7 @@ class SalaryPaidController extends Controller
     $info = [
       "ttl_sb_gaji"=>0,
       "ttl_sb_makan"=>0,
+      "ttl_sb_dinas"=>0,
       "ttl_bonus"=>0,
       "ttl_all"=>0,
       "now"=>date("d-m-Y H:i:s"),
@@ -823,22 +834,26 @@ class SalaryPaidController extends Controller
     foreach ($data as $k => $v) {
       $sg = $data[$k]["sb_gaji"];
       $sm = $data[$k]["sb_makan"];
+      $sd = $data[$k]["sb_dinas"];
       $sbn = $data[$k]["salary_bonus_nominal"];
-      $ttl = $sg + $sm + $sbn;
+      $ttl = $sg + $sm + $sd + $sbn;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
+      $info["ttl_sb_dinas"] += $sd;
       $info["ttl_bonus"] += $sbn;
       $info["ttl_all"] += $ttl;
       
       $data[$k]["sb_gaji"] = number_format($sg,0,",",".");
       $data[$k]["sb_makan"] = number_format($sm,0,",",".");
+      $data[$k]["sb_dinas"] = number_format($sm,0,",",".");
       $data[$k]["salary_bonus_nominal"] = number_format($sbn,0,",",".");
       $data[$k]["total"] = number_format($ttl,0,",",".");
     }
     
     $info["ttl_sb_gaji"]=number_format($info["ttl_sb_gaji"],0,",",".");
     $info["ttl_sb_makan"]=number_format($info["ttl_sb_makan"],0,",",".");
+    $info["ttl_sb_dinas"]=number_format($info["ttl_sb_dinas"],0,",",".");
     $info["ttl_bonus"]=number_format($info["ttl_bonus"],0,",",".");
     $info["ttl_all"]=number_format($info["ttl_all"],0,",",".");
 
@@ -879,6 +894,7 @@ class SalaryPaidController extends Controller
     $info = [
       "ttl_sb_gaji"=>0,
       "ttl_sb_makan"=>0,
+      "ttl_sb_dinas"=>0,
       "ttl_bonus"=>0,
       "ttl_all"=>0,
       "now"=>date("d-m-Y H:i:s"),
@@ -888,11 +904,13 @@ class SalaryPaidController extends Controller
     foreach ($data as $k => $v) {
       $sg = $data[$k]["sb_gaji"];
       $sm = $data[$k]["sb_makan"];
+      $sd = $data[$k]["sb_dinas"];
       $sbn = $data[$k]["salary_bonus_nominal"];
-      $ttl = $sg + $sm + $sbn;
+      $ttl = $sg + $sm + $sd + $sbn;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
+      $info["ttl_sb_dinas"] += $sd;
       $info["ttl_bonus"] += $sbn;
       $info["ttl_all"] += $ttl;
 
@@ -908,10 +926,12 @@ class SalaryPaidController extends Controller
     $blade= 'excel.salary_paid';
 
     $columnFormats = [
-        'D' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
-        'E' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+        // 'D' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+        // 'E' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
         // 'D' => '@',
         // 'E' => '@',
+        'D' => '0',
+        'E' => '0',
         // Add more columns as needed
     ];
 

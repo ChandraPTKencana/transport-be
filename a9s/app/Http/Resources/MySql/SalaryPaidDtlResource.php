@@ -22,6 +22,7 @@ class SalaryPaidDtlResource extends JsonResource
             // 'standby_nominal'       => $this->standby_nominal,
             'sb_gaji'               => $this->sb_gaji,
             'sb_makan'              => $this->sb_makan,
+            'sb_dinas'              => $this->sb_dinas,
             'salary_bonus_nominal'  => $this->salary_bonus_nominal,
         ];
     }

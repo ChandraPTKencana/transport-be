@@ -500,14 +500,17 @@ class RptSalaryController extends Controller
             
             "sb_gaji"               => $spd->sb_gaji,
             "sb_makan"              => $spd->sb_makan,
+            "sb_dinas"              => $spd->sb_dinas,
             "uj_gaji"               => 0,
             "uj_makan"              => 0,
+            "uj_dinas"              => 0,
             "nominal_cut"           => 0,
             "salary_bonus_nominal"  => $spd->salary_bonus_nominal
           ]);
         }else{
           $data[$search]["sb_gaji"] += $spd->sb_gaji;
           $data[$search]["sb_makan"] += $spd->sb_makan;
+          $data[$search]["sb_dinas"] += $spd->sb_dinas;
           $data[$search]["salary_bonus_nominal"] += $spd->salary_bonus_nominal;
         }
 
@@ -551,10 +554,12 @@ class RptSalaryController extends Controller
       $nominal_s = 0;
       $uj_gaji_s = 0;
       $uj_makan_s = 0;
+      $uj_dinas_s = 0;
 
       $nominal_k = 0;
       $uj_gaji_k = 0;
       $uj_makan_k = 0;
+      $uj_dinas_k = 0;
 
       foreach ($smd as $k1 => $v1) {
         $amount = $v1->amount * count($v->details);
@@ -562,12 +567,14 @@ class RptSalaryController extends Controller
           $nominal_s += $amount;
           if($v1->ac_account_code=='01.510.001') $uj_gaji_s += $amount;
           if($v1->ac_account_code=='01.510.005') $uj_makan_s += $amount;
+          if($v1->ac_account_code=='01.575.002') $uj_dinas_s += $amount;
         }
 
         if($v1->xfor == 'Kernet'){
           $nominal_k += $amount;
           if($v1->ac_account_code=='01.510.001') $uj_gaji_k += $amount;
           if($v1->ac_account_code=='01.510.005') $uj_makan_k += $amount;          
+          if($v1->ac_account_code=='01.575.002') $uj_dinas_k += $amount;          
         }
       }
 
@@ -599,8 +606,10 @@ class RptSalaryController extends Controller
             
             "sb_gaji"               => 0,
             "sb_makan"              => 0,
+            "sb_dinas"              => 0,
             "uj_gaji"               => $uj_gaji_s,
-            "uj_makan"              => $uj_gaji_s,
+            "uj_makan"              => $uj_makan_s,
+            "uj_dinas"              => $uj_dinas_s,
             "nominal_cut"           => 0,
             "salary_bonus_nominal"  => 0
           ]);
@@ -608,6 +617,7 @@ class RptSalaryController extends Controller
           // $dt_dtl[$search]['standby_nominal']+=$nominal_s;
           $data[$search]['uj_gaji']+=$uj_gaji_s;
           $data[$search]['uj_makan']+=$uj_makan_s;
+          $data[$search]['uj_dinas']+=$uj_dinas_s;
         }
       }
 
@@ -637,8 +647,10 @@ class RptSalaryController extends Controller
             
             "sb_gaji"               => 0,
             "sb_makan"              => 0,
+            "sb_dinas"              => 0,
             "uj_gaji"               => $uj_gaji_k,
-            "uj_makan"              => $uj_gaji_k,
+            "uj_makan"              => $uj_makan_k,
+            "uj_dinas"              => $uj_dinas_k,
             "nominal_cut"           => 0,
             "salary_bonus_nominal"  => 0
           ]);
@@ -646,6 +658,7 @@ class RptSalaryController extends Controller
           // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
           $data[$search]['uj_gaji']+=$uj_gaji_k;
           $data[$search]['uj_makan']+=$uj_makan_k;
+          $data[$search]['uj_dinas']+=$uj_dinas_k;
         }
       }
     }
@@ -685,8 +698,10 @@ class RptSalaryController extends Controller
           
           "sb_gaji"               => 0,
           "sb_makan"              => 0,
+          "sb_dinas"              => 0,
           "uj_gaji"               => 0,
           "uj_makan"              => 0,
+          "uj_dinas"              => 0,
           "nominal_cut"           => $v->nominal_cut,
           "salary_bonus_nominal"  => 0
         ]);
@@ -719,8 +734,10 @@ class RptSalaryController extends Controller
     $info = [
       "ttl_sb_gaji"     => 0,
       "ttl_sb_makan"    => 0,
+      "ttl_sb_dinas"    => 0,
       "ttl_uj_gaji"     => 0,
       "ttl_uj_makan"    => 0,
+      "ttl_uj_dinas"    => 0,
       "ttl_nominal_cut" => 0,
       "ttl_bonus"       => 0,
       "ttl_all"         => 0,
@@ -731,16 +748,20 @@ class RptSalaryController extends Controller
     foreach ($data as $k => $v) {
       $sg = $data[$k]["sb_gaji"];
       $sm = $data[$k]["sb_makan"];
+      $sd = $data[$k]["sb_dinas"];
       $ug = $data[$k]["uj_gaji"];
       $um = $data[$k]["uj_makan"];
+      $ud = $data[$k]["uj_dinas"];
       $nc = $data[$k]["nominal_cut"];
       $sbn = $data[$k]["salary_bonus_nominal"];
-      $ttl = $sg + $sm + $sbn + $ug + $um - $nc;
+      $ttl = $sg + $sm + $sd + $ug + $um + $ud - $nc + $sbn;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
+      $info["ttl_sb_dinas"] += $sd;
       $info["ttl_uj_gaji"] += $ug;
       $info["ttl_uj_makan"] += $um;
+      $info["ttl_uj_dinas"] += $ud;
       $info["ttl_nominal_cut"] += $nc;
       $info["ttl_bonus"] += $sbn;
       $info["ttl_all"] += $ttl;
@@ -757,11 +778,8 @@ class RptSalaryController extends Controller
     $blade= 'excel.rpt_salary';
 
     $columnFormats = [
-        'G' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
-        'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
-        // 'D' => '@',
-        // 'E' => '@',
-        // Add more columns as needed
+      'G' => '0',
+      'J' => '0',
     ];
 
     $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
