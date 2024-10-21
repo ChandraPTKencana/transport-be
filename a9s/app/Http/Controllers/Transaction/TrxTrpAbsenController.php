@@ -705,12 +705,13 @@ class TrxTrpAbsenController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->ritase_val2){
-        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
-      }
+      // if($model_query->ritase_val2){
+      //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      // }
       
       $model_query->ritase_val        = 0;
       $model_query->ritase_val1       = 0;
+      $model_query->ritase_val2       = 0;
       $model_query->updated_at        = $t_stamp;
       $model_query->updated_user      = $this->admin_id;
 
