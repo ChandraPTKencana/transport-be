@@ -506,6 +506,11 @@ class StandbyTrxController extends Controller
 
         $detail->tanggal            = $value['tanggal'];
         $detail->note               = $value['note'];
+
+        if(MyAdmin::checkScope($this->permissions, 'standby_trx.detail.decide_paid',true)){
+          $detail->be_paid          = $value['be_paid'];
+        }
+
         $detail->created_at         = $t_stamp;
         $detail->created_user       = $this->admin_id;
   
@@ -822,6 +827,10 @@ class StandbyTrxController extends Controller
               $mq->tanggal            = $v["tanggal"]; 
               $mq->note               = $v["note"];
 
+              if(MyAdmin::checkScope($this->permissions, 'standby_trx.detail.decide_paid',true)){
+                $mq->be_paid          = $v['be_paid'];
+              }
+
               if($change)
               $mq->attachment_1_type  = $fileTypes[$v["ordinal"]-1];
 
@@ -864,19 +873,25 @@ class StandbyTrxController extends Controller
             throw new \Exception("Data telah ada di:".($checks->pluck('standby_trx_id')), 1);
 
 
-            StandbyTrxDtl::insert([
-                'standby_trx_id'    => $model_query->id,
-                'ordinal'           => $v["ordinal"],
-                "tanggal"           => $v["tanggal"],
-                "note"              => $v["note"],
-                "attachment_1"      => $blobFiles[$v["ordinal"]-1],
-                "attachment_1_type" => $fileTypes[$v["ordinal"]-1],
-                "p_change"          => true,
-                'created_at'        => $t_stamp,
-                'created_user'      => $this->admin_id,
-                'updated_at'        => $t_stamp,
-                'updated_user'      => $this->admin_id,
-            ]);
+            $mq_data = [
+              'standby_trx_id'    => $model_query->id,
+              'ordinal'           => $v["ordinal"],
+              "tanggal"           => $v["tanggal"],
+              "note"              => $v["note"],
+              "attachment_1"      => $blobFiles[$v["ordinal"]-1],
+              "attachment_1_type" => $fileTypes[$v["ordinal"]-1],
+              "p_change"          => true,
+              'created_at'        => $t_stamp,
+              'created_user'      => $this->admin_id,
+              'updated_at'        => $t_stamp,
+              'updated_user'      => $this->admin_id,
+            ];
+
+            if(MyAdmin::checkScope($this->permissions, 'standby_trx.detail.decide_paid',true)){
+              $mq_data['be_paid']  = $v['be_paid'];
+            }
+
+            StandbyTrxDtl::insert($mq_data);
           }
         }
       }
