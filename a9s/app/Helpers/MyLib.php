@@ -407,7 +407,7 @@ class MyLib
       }
     }
 
-    if(array_search($value['type'],['select'])!==false && $value['value_1']){ 
+    if(array_search($value['type'],['select'])!==false && $value['value_1']!==''){ 
       if($value["operator"]=='exactly_same'){
         $q->Where($key, $value["value_1"]);
       }
