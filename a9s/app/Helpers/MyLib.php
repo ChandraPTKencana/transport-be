@@ -323,7 +323,7 @@ class MyLib
 
 
   public static function queryCheck($value,$key,$q,$request=""){
-    if(array_search($value['type'],['string','number'])!==false && $value['value_1']){
+    if(array_search($value['type'],['string','number'])!==false && $value['value_1']!==''){
   
       if($value["operator"]=='exactly_same'){
         $q->Where($key, $value["value_1"]);
