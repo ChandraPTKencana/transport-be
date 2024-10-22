@@ -1322,7 +1322,7 @@ class ExtraMoneyTrxController extends Controller
     $arrRemarks = [];
     array_push($arrRemarks,"#".$extra_money_trx->id.($extra_money->transition_type!=''?" (P) " : " ").$associate_name.".");
     array_push($arrRemarks,$extra_money->description." ".($extra_money->xto ? env("app_name")."-".$extra_money->xto : "")).".";
-    array_push($arrRemarks," P/".date("d-m-y",strtotime($extra_money_trx->tanggal)));
+    // array_push($arrRemarks," P/".date("d-m-y",strtotime($extra_money_trx->tanggal)));
 
     if($extra_money_trx->note_for_remarks!=null){
       $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $extra_money_trx->note_for_remarks);
