@@ -686,45 +686,61 @@ class TrxTrpAbsenController extends Controller
   public function clearValVal1(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.clear_valval1']);
 
-    $rules = [
-      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
-    ];
-
-    $messages = [
-      'id.required' => 'ID tidak boleh kosong',
-      'id.exists' => 'ID tidak terdaftar',
-    ];
-
-    $validator = Validator::make($request->all(), $rules, $messages);
-
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
-
+    $ids = json_decode($request->ids, true);
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = TrxTrp::find($request->id);
-      // if($model_query->ritase_val2){
-      //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
-      // }
+      $model_query = TrxTrp::whereIn("id",$ids)->lockForUpdate()->get();
+      $valList = [];
       
-      $model_query->ritase_val        = 0;
-      $model_query->ritase_val1       = 0;
-      $model_query->ritase_val2       = 0;
-      $model_query->updated_at        = $t_stamp;
-      $model_query->updated_user      = $this->admin_id;
+      foreach ($model_query as $key => $v) {
+          $change=0;
+          if($v->ritase_val != 0){
+            $v->ritase_val        = 0;
+            $change++;
+          }
+          if($v->ritase_val1 != 0){
+            $v->ritase_val1       = 0;
+            $change++;
+          }
+          if($v->ritase_val2 != 0){
+            $v->ritase_val2       = 0;
+            $change++;
+          }
+          if($change > 0){
+            $v->updated_at        = $t_stamp;
+            $v->updated_user      = $this->admin_id;
+    
+            $v->save();
 
-      $model_query->save();
+            array_push($valList,[
+              "id"          => $v->id,
+              "ritase_val"  => $v->ritase_val,
+              "ritase_val1" => $v->ritase_val1,
+              "ritase_val2" => $v->ritase_val2,
+              "updated_at"  => $v->updated_at,
+            ]);
+          }
+      }
 
-      MyLog::sys("trx_trp",$request->id,"unval_absen");
+      $nids = array_map(function($x) {
+        return $x['id'];        
+      },$valList);
+      
+      MyLog::sys("trx_trp",null,"unval_absen",implode(",",$nids));
 
       DB::commit();
-      return response()->json([
-        "message"         => "Proses clear validasi berhasil",
-        "ritase_val"      => 0,
-        "ritase_val1"     => 0,
+      if(count($nids) == 0 ){
+        return response()->json([
+          "message"   => "Tidak Ada Data Yang Di proses",
+          "val_lists" => $valList
+          ], 400);  
+      }else{
+        return response()->json([
+          "message"   => "Proses clear validasi berhasil",
+          "val_lists" => $valList
         ], 200);
+      }
     } catch (\Exception $e) {
       DB::rollback();
       if ($e->getCode() == 1) {
