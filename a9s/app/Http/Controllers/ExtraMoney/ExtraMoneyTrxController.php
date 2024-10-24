@@ -1708,8 +1708,8 @@ class ExtraMoneyTrxController extends Controller
     $extra_money_trx->pv_total    = $pv->AmountPaid;
     $extra_money_trx->save();
     
-    $d_voucher_id       = $pv->VoucherID;
-    $d_voucher_extra_item_id = 0;
+    $d_voucher_id                 = $pv->VoucherID;
+    $d_voucher_extra_item_id      = 0;
 
     $pvr_detail= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
     ->select('VoucherID','VoucherExtraItemID','Description','Amount','AccountID','TypeID','Department','Qty','UnitPrice')
@@ -1746,6 +1746,13 @@ class ExtraMoneyTrxController extends Controller
           ":pvr_voucher_extra_item_id"  => $v->VoucherExtraItemID
         ]);
       }
+    }
+
+    if($pv){
+      $arapinfo = DB::connection('sqlsrv')->update("exec 
+      USP_FI_ARAPInfo_Update @VoucherID=:d_voucher_id",[
+        ":d_voucher_id"               => $d_voucher_id,
+      ]);
     }
 
     $extra_money_trx->pv_complete = 1;
