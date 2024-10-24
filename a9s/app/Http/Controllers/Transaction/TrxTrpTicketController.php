@@ -3076,7 +3076,7 @@ class TrxTrpTicketController extends Controller
           }else{
             $get_data_tickets = $get_data_tickets->where('Void',0);
           }
-          $get_data_tickets = $get_data_tickets->orderBy("TicketID","asc")->get();
+          $get_data_tickets = $get_data_tickets->orderBy("DateTimeIn","asc")->get();
 
           $get_data_tickets = MyLib::objsToArray($get_data_tickets);
 
