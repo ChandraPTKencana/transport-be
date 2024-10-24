@@ -1645,7 +1645,7 @@ class ExtraMoneyTrxController extends Controller
     if($extra_money_trx->pvr_id==null) throw new \Exception("Karna PVR Masih Kosong",1);
 
     $pvr_dt = DB::connection('sqlsrv')->table('FI_APRequest')
-    ->select('BankAccountID','AmountPaid','VoucherID','AssociateName','Remarks','VoucherType','IncomeOrExpense','CurrencyID','PaymentMethod','CheckNo','CheckDueDate','BankName','AccountNo','ExcludeInARAP','ExpenseOrRevenueTypeID','Confidential')
+    ->select('BankAccountID','AmountPaid','VoucherID','AssociateName','Remarks','VoucherType','IncomeOrExpense','CurrencyID','PaymentMethod','CheckNo','CheckDueDate','BankName','AccountNo','ExcludeInARAP','ExpenseOrRevenueTypeID','Confidential','AssociateName')
     ->where("VoucherID",$extra_money_trx->pvr_id)
     ->first();
 
@@ -1675,7 +1675,7 @@ class ExtraMoneyTrxController extends Controller
         ":voucher_date"               => $voucher_date,
         ":income_or_expense"          => $pvr_dt->IncomeOrExpense,
         ":currency_id"                => $pvr_dt->CurrencyID,
-        ":associate_name"             => $pvr_dt->associate_name,
+        ":associate_name"             => $pvr_dt->AssociateName,
         ":bank_account_id"            => $pvr_dt->BankAccountID,
         ":payment_method"             => $pvr_dt->PaymentMethod,
         ":check_no"                   => $pvr_dt->CheckNo,
@@ -1683,7 +1683,7 @@ class ExtraMoneyTrxController extends Controller
         ":bank_name"                  => $pvr_dt->BankName,
         ":amount_paid"                => $pvr_dt->AmountPaid,
         ":account_no"                 => $pvr_dt->AccountNo,
-        ":remarks"                    => $pvr_dt->remarks,
+        ":remarks"                    => $pvr_dt->Remarks,
         ":exclude_in_ARAP"            => $pvr_dt->ExcludeInARAP,
         ":login_name"                 => $login_name,
         ":expense_or_revenue_type_id" => $pvr_dt->ExpenseOrRevenueTypeID,
