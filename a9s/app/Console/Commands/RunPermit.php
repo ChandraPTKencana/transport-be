@@ -18,7 +18,7 @@ class RunPermit extends Command
      *
      * @var string
      */
-    protected $signature = 'run_2';
+    protected $signature = 'run_permit';
 
     /**
      * The console command description.
@@ -122,8 +122,10 @@ class RunPermit extends Command
 
 
         $re_lists = [
-        //    ["permit"=>'trp_trx.absen.clear_valval1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'standby_trx.detail.decide_paid',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
+            // ["permit"=>'trp_trx.absen.clear_valval1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
+            // ["permit"=>'standby_trx.detail.decide_paid',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
+            ["permit"=>'trp_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'extra_money_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
         ];
 
         foreach ($re_lists as $k => $v) {

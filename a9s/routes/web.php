@@ -89,6 +89,7 @@ Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxT
 Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFile']);
 Route::put('/trx_trp_validasi', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'validasi']);
 Route::post('/trx_trp_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);
+Route::post('/trx_trp_do_gen_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPV']);
 Route::post('/trx_trp_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
 Route::put('/trx_trp_val_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'valTickets']);
 Route::put('/trx_trp_clear_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'clearTickets']);
@@ -250,6 +251,7 @@ Route::get('/extra_money_trx_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\Ext
 Route::put('/extra_money_trx_validasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'validasi']);
 Route::get('/extra_money_trx_preview_file', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFile']);
 Route::post('/extra_money_trx_do_gen_pvr', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doGenPVR']);
+Route::post('/extra_money_trx_do_gen_pv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doGenPV']);
 Route::post('/extra_money_trx_do_update_pv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doUpdatePV']);
 
 Route::get('/extra_money_trx/transfers', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'index']);

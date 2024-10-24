@@ -47,12 +47,12 @@ class ExtraMoneyTrxResource extends JsonResource
             'pv_no'             => $this->pv_no ?? "",
             'pv_total'          => $this->pv_total ?? "",
             'pv_datetime'       => $this->pv_datetime ?? "",
+            'pv_complete'       => $this->pv_complete ?? "",
 
-            'rv_id'            => $this->rv_id ?? "",
-            'rv_no'            => $this->rv_no ?? "",
-            'rv_total'         => $this->rv_total ?? "",
-            'rv_had_detail'    => $this->rv_had_detail ?? "",
-
+            'rv_id'             => $this->rv_id ?? "",
+            'rv_no'             => $this->rv_no ?? "",
+            'rv_total'          => $this->rv_total ?? "",
+            'rv_had_detail'     => $this->rv_had_detail ?? "",
             
             'val1'              => $this->val1,
             'val1_user'         => $this->val1_user ?? "",

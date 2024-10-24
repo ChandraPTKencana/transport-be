@@ -2594,6 +2594,217 @@ class TrxTrpController extends Controller
     ];
   }
 
+
+  public function doGenPV(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.generate_pv');
+    $rules = [
+      // 'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+      'online_status' => "required",
+    ];
+
+    $messages = [
+      // 'id.required' => 'ID tidak boleh kosong',
+      // 'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+    $online_status=$request->online_status;
+    if($online_status!="true")
+    return response()->json([
+      "message" => "Mode Harus Online",
+    ], 400);
+
+    $miniError="";
+    $id="";
+    try {
+      $trx_trps = TrxTrp::where(function($q1){$q1->where('pv_complete',0)->orWhereNull("pv_id");})->whereNotNull("pvr_id")->where("req_deleted",0)->where("deleted",0)->where('val',1)->where('val1',1)->where('val2',1)
+      ->where(function ($q) {
+        $q->where(function ($q1){
+          $q1->where("payment_method_id",1);       
+          $q1->where("received_payment",0);                  
+        });
+
+        $q->orWhere(function ($q1){
+          $q1->where("payment_method_id",2);
+          $q1->where("received_payment",1);                 
+        });
+      })->get();      
+      if(count($trx_trps)==0){
+        throw new \Exception("Semua PV sudah terisi",1);
+      }
+      $changes=[];
+      foreach ($trx_trps as $key => $tt) {
+        $id=$tt->id;
+        $callGet = $this->genPV($id);
+        array_push($changes,$callGet);
+      }
+      if(count($changes)>0){
+        $ids = array_map(function ($x) {
+          return $x["id"];
+        },$changes);
+        MyLog::sys("trx_trp",null,"generate_pv",implode(",",$ids));
+      }
+      return response()->json($changes, 200);
+    } catch (\Exception $e) {
+      if(isset($changes) && count($changes)>0){
+        $ids = array_map(function ($x) {
+          return $x["id"];
+        },$changes);
+        MyLog::sys("trx_trp",null,"generate_pv",implode(",",$ids));
+      }
+
+      if ($e->getCode() == 1) {
+        if($id!=""){
+          $miniError.="Trx-".$id.".";
+        }
+        $miniError.="PV Batal Dibuat: ".$e->getMessage();
+      }else{
+        if($id!=""){
+          $miniError.="Trx-".$id.".";
+        }
+        $miniError.="PV Batal Dibuat. Akses Jaringan Gagal";
+      }
+      return response()->json([
+        "message" => $miniError,
+      ], 400);
+    }
+  }
+
+  public function genPV($trx_trp_id){
+
+    $t_stamp = date("Y-m-d H:i:s");
+
+    $trx_trp = TrxTrp::where("id",$trx_trp_id)->first();
+    if(!$trx_trp){
+      throw new \Exception("Karna Transaksi tidak ditemukan",1);
+    }
+
+    if($trx_trp->pv_complete==1) throw new \Exception("Karna PV sudah selesai dibuat",1);
+    if($trx_trp->pvr_id==null) throw new \Exception("Karna PVR Masih Kosong",1);
+
+    $pvr_dt = DB::connection('sqlsrv')->table('FI_APRequest')
+    ->select('BankAccountID','AmountPaid','VoucherID','AssociateName','Remarks','VoucherType','IncomeOrExpense','CurrencyID','PaymentMethod','CheckNo','CheckDueDate','BankName','AccountNo','ExcludeInARAP','ExpenseOrRevenueTypeID','Confidential')
+    ->where("VoucherID",$trx_trp->pvr_id)
+    ->first();
+
+    if(!$pvr_dt) throw new \Exception("PVR tidak terdaftar ,segera infokan ke tim IT",1);
+    
+    $voucher_no = "(AUTO)";
+    $voucher_date = date("Y-m-d");
+
+    $login_name = $this->admin->the_user->username;
+    $sourceVoucherId = $trx_trp->pvr_id; //ambil pvr id trx
+
+    $pv= DB::connection('sqlsrv')->table('FI_ARAP')
+    ->select('VoucherID','VoucherDate','VoucherNo','AmountPaid','SourceVoucherId')
+    ->where("SourceVoucherId",$sourceVoucherId)
+    ->where("Void",0)
+    ->first();
+
+    if(!$pv){
+      $myData = DB::connection('sqlsrv')->update("exec USP_FI_ARAP_Update @VoucherNo=:voucher_no,@VoucherType=:voucher_type,
+      @VoucherDate=:voucher_date,@IncomeOrExpense=:income_or_expense,@CurrencyID=:currency_id,@AssociateName=:associate_name,
+      @BankAccountID=:bank_account_id,@PaymentMethod=:payment_method,@CheckNo=:check_no,@CheckDueDate=:check_due_date,
+      @BankName=:bank_name,@AmountPaid=:amount_paid,@AccountNo=:account_no,@Remarks=:remarks,@ExcludeInARAP=:exclude_in_ARAP,
+      @LoginName=:login_name,@ExpenseOrRevenueTypeID=:expense_or_revenue_type_id,@Confidential=:confidential,
+      @SourceVoucherId=:sourceVoucherId",[
+        ":voucher_no"                 => $voucher_no,
+        ":voucher_type"               => $pvr_dt->VoucherType,
+        ":voucher_date"               => $voucher_date,
+        ":income_or_expense"          => $pvr_dt->IncomeOrExpense,
+        ":currency_id"                => $pvr_dt->CurrencyID,
+        ":associate_name"             => $pvr_dt->associate_name,
+        ":bank_account_id"            => $pvr_dt->BankAccountID,
+        ":payment_method"             => $pvr_dt->PaymentMethod,
+        ":check_no"                   => $pvr_dt->CheckNo,
+        ":check_due_date"             => $pvr_dt->CheckDueDate,
+        ":bank_name"                  => $pvr_dt->BankName,
+        ":amount_paid"                => $pvr_dt->AmountPaid,
+        ":account_no"                 => $pvr_dt->AccountNo,
+        ":remarks"                    => $pvr_dt->remarks,
+        ":exclude_in_ARAP"            => $pvr_dt->ExcludeInARAP,
+        ":login_name"                 => $login_name,
+        ":expense_or_revenue_type_id" => $pvr_dt->ExpenseOrRevenueTypeID,
+        ":confidential"               => $pvr_dt->Confidential,
+        ":sourceVoucherId"            => $sourceVoucherId,
+      ]);
+      if(!$myData)
+      throw new \Exception("Data yang diperlukan tidak terpenuhi",1);
+    
+      $pv= DB::connection('sqlsrv')->table('FI_ARAP')
+      ->select('VoucherID','VoucherDate','VoucherNo','AmountPaid','SourceVoucherId')
+      ->where("SourceVoucherId",$sourceVoucherId)
+      ->where("Void",0)
+      ->first();
+      if(!$pv)
+      throw new \Exception("Akses Ke Jaringan Gagal",1);
+    }
+
+    $trx_trp->pv_id       = $pv->VoucherID;
+    $trx_trp->pv_datetime = $pv->VoucherDate;
+    $trx_trp->pv_no       = $pv->VoucherNo;
+    $trx_trp->pv_total    = $pv->AmountPaid;
+    $trx_trp->save();
+    
+    $d_voucher_id       = $pv->VoucherID;
+    $d_voucher_extra_item_id = 0;
+
+    $pvr_detail= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+    ->select('VoucherID','VoucherExtraItemID','Description','Amount','AccountID','TypeID','Department','Qty','UnitPrice')
+    ->where("VoucherID",$pvr_dt->VoucherID)
+    ->get();
+
+
+    $pv_detail= DB::connection('sqlsrv')->table('FI_ARAPExtraItems')
+    ->select('VoucherID')
+    ->where("VoucherID",$d_voucher_id)
+    ->get();
+
+    if(count($pv_detail)==0 || count($pv_detail) < count($pvr_detail)){
+      $start = count($pv_detail);
+      foreach ($pvr_detail as $key => $v) {
+        if($key < $start){ continue; }
+        $details = DB::connection('sqlsrv')->update("exec 
+        USP_FI_ARAPExtraItems_Update @VoucherID=:d_voucher_id,
+        @VoucherExtraItemID=:d_voucher_extra_item_id,
+        @Description=:d_description,@Amount=:d_amount,
+        @AccountID=:d_account_id,@TypeID=:d_type,
+        @Department=:d_dept,@LoginName=:login_name,
+        @Qty=:d_qty,@UnitPrice=:d_unit_price,@PVRVoucherExtraItemID=:pvr_voucher_extra_item_id",[
+          ":d_voucher_id"               => $d_voucher_id,
+          ":d_voucher_extra_item_id"    => $d_voucher_extra_item_id,
+          ":d_description"              => $v->Description,
+          ":d_amount"                   => $v->Amount,
+          ":d_account_id"               => $v->AccountID,
+          ":d_type"                     => $v->TypeID,
+          ":d_dept"                     => $v->Department,
+          ":login_name"                 => $login_name,
+          ":d_qty"                      => $v->Qty,
+          ":d_unit_price"               => $v->UnitPrice,
+          ":pvr_voucher_extra_item_id"  => $v->VoucherExtraItemID
+        ]);
+      }
+    }
+
+    $trx_trp->pv_complete = 1;
+    $trx_trp->save();
+
+    return [
+      "message"     => "PVR berhasil dibuat",
+      "id"          => $trx_trp->id,
+      "pv_id"       => $trx_trp->pv_id,
+      "pv_no"       => $trx_trp->pv_no,
+      "pv_datetime" => $trx_trp->pv_datetime,
+      "pv_total"    => $trx_trp->pv_total,
+      "pv_complete" => $trx_trp->pv_complete,
+      "updated_at"  => $t_stamp
+    ];
+  }
+
   public function doUpdatePV(Request $request){
     MyAdmin::checkScope($this->permissions, 'trp_trx.get_pv');
     $rules = [

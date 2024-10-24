@@ -65,9 +65,12 @@ class RunData extends Command
         // }
 
 
-        $standby_trx_dtl = \App\Models\MySql\StandbyTrxDtl::whereHas("standby_trx",function ($q){
-            $q->where('val',1);            
-        })->update(['be_paid'=>1]);
+        // $standby_trx_dtl = \App\Models\MySql\StandbyTrxDtl::whereHas("standby_trx",function ($q){
+        //     $q->where('val',1);            
+        // })->update(['be_paid'=>1]);
+
+        $trx_trps = \App\Models\MySql\TrxTrp::whereNotNull("pv_id")->update(['pv_complete'=>1]);
+        $extra_moneys = \App\Models\MySql\ExtraMoneyTrx::whereNotNull("pv_id")->update(['pv_complete'=>1]);
 
 
         $this->info("Finish\n ");
