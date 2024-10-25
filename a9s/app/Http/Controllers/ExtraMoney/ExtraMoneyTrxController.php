@@ -442,7 +442,10 @@ class ExtraMoneyTrxController extends Controller
 
       if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
-      
+
+      if($model_query->trx_trp_id) 
+      throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
+
       $employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where("id",$request->employee_id)
       ->where("deleted",0)
       ->lockForUpdate()
@@ -583,6 +586,9 @@ class ExtraMoneyTrxController extends Controller
       if($model_query->pvr_id!="" || $model_query->pvr_id!=null)
       throw new \Exception("Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
 
+      if($model_query->trx_trp_id) 
+      throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
+
       $deleted_reason = $request->deleted_reason;
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
@@ -651,6 +657,9 @@ class ExtraMoneyTrxController extends Controller
 
       if($model_query->pvr_id=="" || $model_query->pvr_id==null)
       throw new \Exception("Harap Lakukan Penghapusan",1);
+
+      if($model_query->trx_trp_id) 
+      throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
 
       $req_deleted_reason = $request->req_deleted_reason;
       if(!$req_deleted_reason)
@@ -1360,12 +1369,12 @@ class ExtraMoneyTrxController extends Controller
 
     $amount_paid = $extra_money->nominal * $extra_money->qty; // call from child
 
-    if($extra_money_trx->payment_method->id==2){
-      $adm_cost = 2500;
-      $adm_qty = 1;
+    // if($extra_money_trx->payment_method->id==2){
+    //   $adm_cost = 2500;
+    //   $adm_qty = 1;
 
-      $amount_paid += ($adm_cost * $adm_qty);
-    }
+    //   $amount_paid += ($adm_cost * $adm_qty);
+    // }
 
     $exclude_in_ARAP = 0;
     $login_name = $this->admin->the_user->username;
@@ -1470,50 +1479,50 @@ class ExtraMoneyTrxController extends Controller
       // }
     }
 
-    if($extra_money_trx->payment_method->id==2){
-      $admin_cost_code=env("PVR_ADMIN_COST");
+    // if($extra_money_trx->payment_method->id==2){
+    //   $admin_cost_code=env("PVR_ADMIN_COST");
   
-      $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
-      ->select('AccountID')
-      ->where("AccountCode",$admin_cost_code)
-      ->first();
-      if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
+    //   $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
+    //   ->select('AccountID')
+    //   ->where("AccountCode",$admin_cost_code)
+    //   ->first();
+    //   if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
 
-      $adm_cost_id = $admin_cost_db->AccountID;
-      $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
-      ->select('VoucherID')
-      ->where("VoucherID",$d_voucher_id)
-      ->where("AccountID",$adm_cost_id)
-      ->first();
+    //   $adm_cost_id = $admin_cost_db->AccountID;
+    //   $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+    //   ->select('VoucherID')
+    //   ->where("VoucherID",$d_voucher_id)
+    //   ->where("AccountID",$adm_cost_id)
+    //   ->first();
 
-      if(!$adm_fee_exists){
-        $d_description  = "Biaya Admin";
-        $d_account_id   = $adm_cost_id;
-        $d_dept         = '112';
-        $d_qty          = $adm_qty;
-        $d_unit_price   = $adm_cost;
-        $d_amount       = $d_qty * $d_unit_price;
+    //   if(!$adm_fee_exists){
+    //     $d_description  = "Biaya Admin";
+    //     $d_account_id   = $adm_cost_id;
+    //     $d_dept         = '112';
+    //     $d_qty          = $adm_qty;
+    //     $d_unit_price   = $adm_cost;
+    //     $d_amount       = $d_qty * $d_unit_price;
   
-        DB::connection('sqlsrv')->update("exec 
-        USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
-        @VoucherExtraItemID=:d_voucher_extra_item_id,
-        @Description=:d_description,@Amount=:d_amount,
-        @AccountID=:d_account_id,@TypeID=:d_type,
-        @Department=:d_dept,@LoginName=:login_name,
-        @Qty=:d_qty,@UnitPrice=:d_unit_price",[
-          ":d_voucher_id"=>$d_voucher_id,
-          ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
-          ":d_description"=>$d_description,
-          ":d_amount"=>$d_amount,
-          ":d_account_id"=>$d_account_id,
-          ":d_type"=>$d_type,
-          ":d_dept"=>$d_dept,
-          ":login_name"=>$login_name,
-          ":d_qty"=>$d_qty,
-          ":d_unit_price"=>$d_unit_price
-        ]);
-      }
-    }
+    //     DB::connection('sqlsrv')->update("exec 
+    //     USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+    //     @VoucherExtraItemID=:d_voucher_extra_item_id,
+    //     @Description=:d_description,@Amount=:d_amount,
+    //     @AccountID=:d_account_id,@TypeID=:d_type,
+    //     @Department=:d_dept,@LoginName=:login_name,
+    //     @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+    //       ":d_voucher_id"=>$d_voucher_id,
+    //       ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+    //       ":d_description"=>$d_description,
+    //       ":d_amount"=>$d_amount,
+    //       ":d_account_id"=>$d_account_id,
+    //       ":d_type"=>$d_type,
+    //       ":d_dept"=>$d_dept,
+    //       ":login_name"=>$login_name,
+    //       ":d_qty"=>$d_qty,
+    //       ":d_unit_price"=>$d_unit_price
+    //     ]);
+    //   }
+    // }
 
     $tocheck = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->first();
 
@@ -1821,6 +1830,7 @@ class ExtraMoneyTrxController extends Controller
         $ud_extra_money_trx->pv_no=$v["VoucherNo"];
         $ud_extra_money_trx->pv_total=$v["AmountPaid"];
         $ud_extra_money_trx->pv_datetime=$v["VoucherDate"];
+        $ud_extra_money_trx->pv_complete=1;
         $ud_extra_money_trx->updated_at=$t_stamp;
         $ud_extra_money_trx->save();
         array_push($changes,[
@@ -1829,6 +1839,7 @@ class ExtraMoneyTrxController extends Controller
           "pv_no"=>$ud_extra_money_trx->pv_no,
           "pv_total"=>$ud_extra_money_trx->pv_total,
           "pv_datetime"=>$ud_extra_money_trx->pv_datetime,
+          "pv_complete"=>$ud_extra_money_trx->pv_complete,
           "updated_at"=>$t_stamp
         ]);
       }

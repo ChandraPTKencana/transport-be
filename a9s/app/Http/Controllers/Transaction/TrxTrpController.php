@@ -1357,6 +1357,9 @@ class TrxTrpController extends Controller
     $ttl_ps     = 0;
     $ttl_pk     = 0;
 
+    $supir_remarks  = "UJ#".$trx_trp->id;
+    $kernet_remarks = "UJ#".$trx_trp->id;
+
     $supir_money = 0;
     $kernet_money = 0;
     foreach ($trx_trp->uj_details2 as $key => $val) {
@@ -1384,23 +1387,51 @@ class TrxTrpController extends Controller
 
     $supir_money -= $ttl_ps;
     $kernet_money -= $ttl_pk;
+
+    $sem_remarks="";
+    $kem_remarks="";
+    foreach ($trx_trp->extra_money_trxs as $k => $emt) {
+      if($emt->employee_id == $supir_id){
+        $supir_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+        if($sem_remarks=="")
+          $sem_remarks="EM#".$emt->id;
+        else
+          $sem_remarks.=",".$emt->id;
+      }
+
+      if($emt->employee_id == $kernet_id){
+        $kernet_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+        if($kem_remarks=="")
+          $kem_remarks="EM#".$emt->id;
+        else
+          $kem_remarks.=",".$emt->id;
+      }
+    }
+
+    if($sem_remarks!="") $supir_remarks.=",".$sem_remarks;
+    if($kem_remarks!="") $kernet_remarks.=",".$kem_remarks;
+
   
     $sendData = [
       "id"            => $trx_trp->id,
       "id_uj"         => $trx_trp->id_uj,
       "logo"          => File::exists(files_path("/duitku.png")) ? "data:image/png;base64,".base64_encode(File::get(files_path("/duitku.png"))) :"",
+
       "ref_no0"       => $trx_trp->duitku_supir_disburseId,
       "supir"         => $trx_trp->supir,
       "supir_rek_no"  => $trx_trp->supir_rek_no,
       "nominal0"      => $supir_money,
+      "tanggal_supir" => $trx_trp->rp_supir_at,
+      "supir_remarks" => $supir_remarks,
 
       "ref_no1"       => $trx_trp->duitku_kernet_disburseId,
       "kernet"        => $trx_trp->kernet,
       "kernet_rek_no" => $trx_trp->kernet_rek_no,
       "nominal1"      => $kernet_money,
+      "tanggal_kernet" => $trx_trp->rp_kernet_at,
+      "kernet_remarks" => $kernet_remarks,
+
       
-      "tanggal_supir"   => $trx_trp->rp_supir_at,
-      "tanggal_kernet"  => $trx_trp->rp_kernet_at,
     ];   
     $html = view("html.trx_trp_ujalan_bt",$sendData);  
     $result = [
@@ -2856,6 +2887,7 @@ class TrxTrpController extends Controller
         $ud_trx_trp->pv_no=$v["VoucherNo"];
         $ud_trx_trp->pv_total=$v["AmountPaid"];
         $ud_trx_trp->pv_datetime=$v["VoucherDate"];
+        $ud_trx_trp->pv_complete=1;
         $ud_trx_trp->updated_at=$t_stamp;
         $ud_trx_trp->save();
         array_push($changes,[
@@ -2864,6 +2896,7 @@ class TrxTrpController extends Controller
           "pv_no"=>$ud_trx_trp->pv_no,
           "pv_total"=>$ud_trx_trp->pv_total,
           "pv_datetime"=>$ud_trx_trp->pv_datetime,
+          "pv_complete"=>$ud_trx_trp->pv_complete,
           "updated_at"=>$t_stamp
         ]);
       }

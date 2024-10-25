@@ -33,6 +33,7 @@ use App\Http\Resources\MySql\IsUserResource;
 use App\Exports\MyReport;
 use App\Helpers\TrfDuitku;
 use App\Models\MySql\Employee;
+use App\Models\MySql\ExtraMoneyTrx;
 
 class TrxTrpTransferController extends Controller
 {
@@ -328,6 +329,16 @@ class TrxTrpTransferController extends Controller
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
+
+    foreach ($model_query as $key => $mq) {
+      ExtraMoneyTrx::where(function ($q)use($mq){
+        $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
+      })->where("payment_method_id",2)->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)->where('val1',1)->where('val2',1)->where('val3',1)
+      ->update([
+        'trx_trp_id'=>$mq->id
+      ]);
+    }
+
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),
     ], 200);
@@ -338,7 +349,11 @@ class TrxTrpTransferController extends Controller
     $this->checkGATimeout();
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.transfer.view']);
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj_details','potongan','trx_absens'=>function($q) {
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by',
+    'val_ticket_by','deleted_by','req_deleted_by','payment_method',
+    'uj_details','potongan','extra_money_trxs'=>function ($q){
+      $q->with(['employee','extra_money']);
+    },'trx_absens'=>function($q) {
       $q->select('*')->where("status","B");
     }])->find($request->id);
     return response()->json([
@@ -398,6 +413,8 @@ class TrxTrpTransferController extends Controller
       $kernet_id  = $model_query->kernet_id;
       $ttl_ps     = 0;
       $ttl_pk     = 0;
+      $supir_remarks  = "UJ#".$model_query->id;
+      $kernet_remarks = "UJ#".$model_query->id;
 
       $supir_money = 0;
       $kernet_money = 0;
@@ -425,6 +442,30 @@ class TrxTrpTransferController extends Controller
       
       $supir_money -= $ttl_ps;
       $kernet_money -= $ttl_pk;
+
+
+      $sem_remarks="";
+      $kem_remarks="";
+      foreach ($model_query->extra_money_trxs as $k => $emt) {
+        if($emt->employee_id == $supir_id){
+          $supir_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+          if($sem_remarks=="")
+            $sem_remarks="EM#".$emt->id;
+          else
+            $sem_remarks.=",".$emt->id;
+        }
+  
+        if($emt->employee_id == $kernet_id){
+          $kernet_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+          if($kem_remarks=="")
+            $kem_remarks="EM#".$emt->id;
+          else
+            $kem_remarks.=",".$emt->id;
+        }
+      }
+
+      if($sem_remarks!="") $supir_remarks.=",".$sem_remarks;
+      if($kem_remarks!="") $kernet_remarks.=",".$kem_remarks;
 
       if($model_query->supir_id){
         $supir = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($model_query->supir_id);
@@ -461,7 +502,7 @@ class TrxTrpTransferController extends Controller
 
       if(isset($supir) && $supir_money > 0){
         if(!$model_query->duitku_supir_disburseId){
-          $result = TrfDuitku::generate_invoice($supir->bank->code_duitku,$supir->rek_no,$supir_money,"UJ#".$model_query->id);
+          $result = TrfDuitku::generate_invoice($supir->bank->code_duitku,$supir->rek_no,$supir_money,$supir_remarks);
           if($result){
             $model_query->duitku_supir_disburseId   = $result['disburseId'];
             $model_query->duitku_supir_inv_res_code = $result['responseCode'];
@@ -472,7 +513,7 @@ class TrxTrpTransferController extends Controller
         }
         
         if($model_query->duitku_supir_disburseId && $model_query->duitku_supir_inv_res_code == "00" && $model_query->duitku_supir_trf_res_code!="00"){
-          $result = TrfDuitku::generate_transfer($model_query->duitku_supir_disburseId,$supir->bank->code_duitku,$supir->rek_no,$supir_money,"UJ#".$model_query->id);
+          $result = TrfDuitku::generate_transfer($model_query->duitku_supir_disburseId,$supir->bank->code_duitku,$supir->rek_no,$supir_money,$supir_remarks);
           if($result){
             $model_query->duitku_supir_trf_res_code = $result['responseCode'];
             $model_query->duitku_supir_trf_res_desc = $result['responseDesc'];
@@ -488,7 +529,7 @@ class TrxTrpTransferController extends Controller
 
       if(isset($kernet) && $kernet_money > 0){
         if(!$model_query->duitku_kernet_disburseId){
-          $result = TrfDuitku::generate_invoice($kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,"UJ#".$model_query->id);
+          $result = TrfDuitku::generate_invoice($kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,$kernet_remarks);
           if($result){
             $model_query->duitku_kernet_disburseId   = $result['disburseId'];
             $model_query->duitku_kernet_inv_res_code = $result['responseCode'];
@@ -498,7 +539,7 @@ class TrxTrpTransferController extends Controller
         }
         
         if($model_query->duitku_kernet_disburseId && $model_query->duitku_kernet_inv_res_code=="00" && $model_query->duitku_kernet_trf_res_code!="00"){
-          $result = TrfDuitku::generate_transfer($model_query->duitku_kernet_disburseId,$kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,"UJ#".$model_query->id);
+          $result = TrfDuitku::generate_transfer($model_query->duitku_kernet_disburseId,$kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,$kernet_remarks);
           if($result){
             $model_query->duitku_kernet_trf_res_code = $result['responseCode'];
             $model_query->duitku_kernet_trf_res_desc = $result['responseDesc'];
@@ -515,7 +556,33 @@ class TrxTrpTransferController extends Controller
 
       if((!isset($kernet) && $model_query->duitku_supir_trf_res_code=="00") || (isset($kernet) && $model_query->duitku_supir_trf_res_code=="00" && $model_query->duitku_kernet_trf_res_code=="00")){
         $model_query->received_payment=1;
+        $model_query->supir_rek_no = $supir->rek_no;
+        $model_query->kernet_rek_no = $kernet->rek_no;
 
+        foreach ($model_query->extra_money_trxs as $key => $emt) {
+          $emt->received_payment=1;
+          
+          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$emt->val4){
+            $emt->val4 = 1;
+            $emt->val4_user = $this->admin_id;
+            $emt->val4_at = $t_stamp;
+          }
+  
+          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && !$emt->val5){
+            $emt->val5 = 1;
+            $emt->val5_user = $this->admin_id;
+            $emt->val5_at = $t_stamp;
+          }
+  
+          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true) && !$emt->val6){
+            $emt->val6 = 1;
+            $emt->val6_user = $this->admin_id;
+            $emt->val6_at = $t_stamp;
+          }
+          
+          $emt->save();
+          MyLog::sys("extra_money_trx",$emt->id,"transfer");
+        }
 
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$model_query->val4){
           $model_query->val4 = 1;

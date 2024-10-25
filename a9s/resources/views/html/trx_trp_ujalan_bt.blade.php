@@ -52,7 +52,7 @@
         <tr>
           <td > CustomerRef </td>
           <td> : </td>
-          <td> UJ#{{$id}} </td>
+          <td> {{$supir_remarks}} </td>
         </tr>
         <tr>
           <td > No Rek </td>
@@ -98,7 +98,7 @@
         <tr>
           <td > CustomerRef </td>
           <td> : </td>
-          <td> UJ#{{$id}} </td>
+          <td> {{$kernet_remarks}} </td>
         </tr>
         <tr>
           <td > No Rek </td>

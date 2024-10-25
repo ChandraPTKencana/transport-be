@@ -143,4 +143,10 @@ class TrxTrp extends Model
         return $this->belongsTo(Employee::class, "kernet_id", 'id')->exclude(['attachment_1','attachment_2']);
     }
 
+
+    public function extra_money_trxs()
+    {
+        return $this->hasMany(ExtraMoneyTrx::class, "trx_trp_id", 'id');
+    }
+
 }

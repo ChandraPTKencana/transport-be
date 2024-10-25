@@ -160,7 +160,7 @@ class TrxTrpResource extends JsonResource
             'payment_method_id' => $this->payment_method_id,
 
             'received_payment'  => $this->received_payment,
-
+            'extra_money_trxs'  => ExtraMoneyTrxResource::collection($this->whenLoaded('extra_money_trxs')),
         ];
     }
 }
