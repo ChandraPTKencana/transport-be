@@ -37,7 +37,8 @@ return new class extends Migration
 
         Schema::table('extra_money_trx', function (Blueprint $table) {
             $table->foreignId('trx_trp_id')->nullable()->references('id')->on('trx_trp')->onDelete('restrict')->onUpdate('cascade');
-        
+            $table->foreignId('prev_trx_trp_id')->nullable()->references('id')->on('trx_trp')->onDelete('restrict')->onUpdate('cascade');
+            
             $table->dropColumn('duitku_employee_disburseId');
             $table->dropColumn('duitku_employee_inv_res_code');
             $table->dropColumn('duitku_employee_inv_res_desc');
@@ -79,6 +80,9 @@ return new class extends Migration
         Schema::table('extra_money_trx', function (Blueprint $table) {
             $table->dropForeign(["trx_trp_id"]);
             $table->dropColumn('trx_trp_id');
+
+            $table->dropForeign(["prev_trx_trp_id"]);
+            $table->dropColumn('prev_trx_trp_id');
 
             $table->bigInteger('duitku_employee_disburseId')->nullable();
             $table->string('duitku_employee_inv_res_code',8)->nullable();

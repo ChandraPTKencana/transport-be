@@ -31,6 +31,7 @@ use App\Http\Requests\MySql\ExtraMoneyTrxRequest;
 use App\Http\Resources\MySql\ExtraMoneyTrxResource;
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\ExtraMoney;
+use App\Models\MySql\TrxTrp;
 
 class ExtraMoneyTrxController extends Controller
 {
@@ -338,6 +339,10 @@ class ExtraMoneyTrxController extends Controller
       if(!$extra_money) 
       throw new \Exception("Silahkan Isi Data Uang Tambahan Dengan Benar",1);
 
+      $trx_trp = TrxTrp::where("id",$request->prev_trx_trp_id)->where("supir_id",$employee->id)->first();
+      if(!$trx_trp) 
+      throw new \Exception("Trx Trp Pekerja Tidak Sesuai",1);
+
       $model_query->extra_money_id      = $request->extra_money_id;
       $model_query->tanggal             = $request->tanggal;
       $model_query->employee_id         = $employee->id;
@@ -346,6 +351,7 @@ class ExtraMoneyTrxController extends Controller
       $model_query->no_pol              = $request->no_pol;
       $model_query->note_for_remarks    = $request->note_for_remarks;
       
+      $model_query->prev_trx_trp_id     = $request->prev_trx_trp_id;
       $model_query->payment_method_id   = $request->payment_method_id;
       
       $model_query->created_at          = $t_stamp;
@@ -467,6 +473,9 @@ class ExtraMoneyTrxController extends Controller
       if(!$extra_money) 
       throw new \Exception("Silahkan Isi Data Uang Tambahan Dengan Benar",1);
 
+      $trx_trp = TrxTrp::where("id",$request->prev_trx_trp_id)->where("supir_id",$employee->id)->first();
+      if(!$trx_trp) 
+      throw new \Exception("Trx Trp Pekerja Tidak Sesuai",1);
 
       if($request->hasFile('attachment_1')){
         $file = $request->file('attachment_1');
@@ -524,6 +533,7 @@ class ExtraMoneyTrxController extends Controller
       $model_query->no_pol              = $request->no_pol;
       $model_query->note_for_remarks    = $request->note_for_remarks;
 
+      $model_query->prev_trx_trp_id     = $request->prev_trx_trp_id;
       $model_query->payment_method_id   = $request->payment_method_id;
 
       $model_query->updated_at      = $t_stamp;
@@ -1111,8 +1121,8 @@ class ExtraMoneyTrxController extends Controller
     try {
       $model_query = ExtraMoneyTrx::find($request->id);
       
-      // if($model_query->cost_center_code=="")
-      // throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
+      if(!$model_query->attachment_1_loc)
+      throw new \Exception("Harap Mengisi Attachment Terlebih dahulu",1);
 
       $run_val = 0; 
   
@@ -1329,7 +1339,7 @@ class ExtraMoneyTrxController extends Controller
     $extra_money = $extra_money_trx->extra_money;
   
     $arrRemarks = [];
-    array_push($arrRemarks,"#".$extra_money_trx->id.($extra_money->transition_type!=''?" (P) " : " ").$associate_name.".");
+    array_push($arrRemarks,"EM#".$extra_money_trx->id.($extra_money_trx->prev_trx_trp_id?" UJ#".$extra_money_trx->prev_trx_trp_id:"").($extra_money->transition_type!=''?" (P) " : " ").$associate_name.".");
     array_push($arrRemarks,$extra_money->description." ".($extra_money->xto ? env("app_name")."-".$extra_money->xto : "")).".";
     // array_push($arrRemarks," P/".date("d-m-y",strtotime($extra_money_trx->tanggal)));
 

@@ -32,6 +32,7 @@ class ExtraMoneyTrxRequest extends FormRequest
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['extra_money_id']        = 'required|exists:App\Models\MySql\ExtraMoney,id';
+            $rules['prev_trx_trp_id']       = 'required|exists:App\Models\MySql\TrxTrp,id';
             $rules['tanggal']               = 'required|date_format:Y-m-d';
             $rules['employee_id']           = 'required|exists:App\Models\MySql\Employee,id';
             $rules['no_pol']                = 'required|exists:App\Models\MySql\Vehicle,no_pol';
@@ -50,6 +51,9 @@ class ExtraMoneyTrxRequest extends FormRequest
 
             'extra_money_id.required'   => 'ID Uang Tambahan tidak boleh kosong',
             'extra_money_id.exists'     => 'ID Uang Tambahan tidak terdaftar',
+
+            'prev_trx_trp_id.required'  => 'ID Trx Trp tidak boleh kosong',
+            'prev_trx_trp_id.exists'    => 'ID Trx Trp tidak terdaftar',
 
             'tanggal.required'          => 'Tanggal tidak boleh kosong',
             'tanggal.date_format'       => 'Format tanggal salah',

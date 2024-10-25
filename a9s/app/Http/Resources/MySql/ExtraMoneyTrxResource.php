@@ -113,7 +113,7 @@ class ExtraMoneyTrxResource extends JsonResource
             // 'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
             'attachment_1_type'     => $this->attachment_1_type,
             // 'attachment_1_loc'     => $this->attachment_1_loc,
-
+            'prev_trx_trp_id'       => $this->prev_trx_trp_id,
         ];
     }
 }
