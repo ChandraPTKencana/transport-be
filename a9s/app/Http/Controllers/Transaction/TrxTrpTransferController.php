@@ -557,7 +557,9 @@ class TrxTrpTransferController extends Controller
       if((!isset($kernet) && $model_query->duitku_supir_trf_res_code=="00") || (isset($kernet) && $model_query->duitku_supir_trf_res_code=="00" && $model_query->duitku_kernet_trf_res_code=="00")){
         $model_query->received_payment=1;
         $model_query->supir_rek_no = $supir->rek_no;
-        $model_query->kernet_rek_no = $kernet->rek_no;
+        if(isset($kernet)){
+          $model_query->kernet_rek_no = $kernet->rek_no;
+        }
 
         foreach ($model_query->extra_money_trxs as $key => $emt) {
           $emt->received_payment=1;
