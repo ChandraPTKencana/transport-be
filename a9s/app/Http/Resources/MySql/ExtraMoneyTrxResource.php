@@ -41,7 +41,7 @@ class ExtraMoneyTrxResource extends JsonResource
             'pvr_id'            => $this->pvr_id ?? "",
             'pvr_no'            => $this->pvr_no ?? "",
             'pvr_total'         => $this->pvr_total ?? "",
-            'pvr_had_detail'    => $this->pvr_had_detail ?? "",
+            'pvr_complete'      => $this->pvr_complete ?? "",
 
             'pv_id'             => $this->pv_id ?? "",
             'pv_no'             => $this->pv_no ?? "",
