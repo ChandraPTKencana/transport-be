@@ -146,7 +146,7 @@ class TrxTrp extends Model
 
     public function extra_money_trxs()
     {
-        return $this->hasMany(ExtraMoneyTrx::class, "trx_trp_id", 'id');
+        return $this->hasMany(ExtraMoneyTrx::class, "trx_trp_id", 'id')->exclude(['attachment_1_loc']);
     }
 
 }
