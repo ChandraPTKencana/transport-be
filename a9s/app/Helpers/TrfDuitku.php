@@ -151,7 +151,7 @@ class TrfDuitku {
         {
             $result = json_decode($request, true);
                      
-            if($result['responseCode']=="-142" || $result['responseDesc']=="In Progress"){
+            if($result['responseCode']=="-142" || trim($result['responseDesc'])=="In Progress"){
                 $result['responseCode']=="00";
             }
             // //header('location: '. $result['paymentUrl']);
