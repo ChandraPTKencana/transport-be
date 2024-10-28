@@ -287,7 +287,7 @@ class ExtraMoneyTrxController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee','payment_method'])->get();
+    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee','payment_method'])->exclude(['attachment_1_loc'])->get();
 
     return response()->json([
       "data" => ExtraMoneyTrxResource::collection($model_query),
@@ -1769,8 +1769,14 @@ class ExtraMoneyTrxController extends Controller
 
     if($pv){
       $arapinfo = DB::connection('sqlsrv')->update("exec 
-      USP_FI_ARAPInfo_Update @VoucherID=:d_voucher_id",[
+      USP_FI_ARAP_UpdateAmountAllocated @VoucherID=:d_voucher_id",[
         ":d_voucher_id"               => $d_voucher_id,
+      ]);
+
+      $arapinfo = DB::connection('sqlsrv')->update("exec 
+      USP_FI_ARAPSources_Update @VoucherID=:d_voucher_id, @PVRVoucherID=:d_pvr_voucher_id",[
+        ":d_voucher_id"               => $d_voucher_id,
+        ":d_pvr_voucher_id"           => $pvr_dt->VoucherID,
       ]);
     }
 
