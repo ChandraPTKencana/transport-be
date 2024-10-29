@@ -1768,15 +1768,21 @@ class ExtraMoneyTrxController extends Controller
     }
 
     if($pv){
-      $arapinfo = DB::connection('sqlsrv')->update("exec 
+      DB::connection('sqlsrv')->update("exec 
       USP_FI_ARAP_UpdateAmountAllocated @VoucherID=:d_voucher_id",[
         ":d_voucher_id"               => $d_voucher_id,
       ]);
 
-      $arapinfo = DB::connection('sqlsrv')->update("exec 
+      DB::connection('sqlsrv')->update("exec 
       USP_FI_ARAPSources_Update @VoucherID=:d_voucher_id, @PVRVoucherID=:d_pvr_voucher_id",[
         ":d_voucher_id"               => $d_voucher_id,
         ":d_pvr_voucher_id"           => $pvr_dt->VoucherID,
+      ]);
+
+      DB::connection('sqlsrv')->update("exec 
+      USP_FI_ARAP_BatchPostingToGL @VoucherID=:d_voucher_id, @LoginName=:login_name",[
+        ":d_voucher_id"               => $d_voucher_id,
+        ":login_name"                 => $login_name,
       ]);
     }
 

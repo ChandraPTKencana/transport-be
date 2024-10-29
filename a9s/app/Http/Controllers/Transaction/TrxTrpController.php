@@ -2748,7 +2748,7 @@ class TrxTrpController extends Controller
         ":voucher_date"               => $voucher_date,
         ":income_or_expense"          => $pvr_dt->IncomeOrExpense,
         ":currency_id"                => $pvr_dt->CurrencyID,
-        ":associate_name"             => $pvr_dt->associate_name,
+        ":associate_name"             => $pvr_dt->AssociateName,
         ":bank_account_id"            => $pvr_dt->BankAccountID,
         ":payment_method"             => $pvr_dt->PaymentMethod,
         ":check_no"                   => $pvr_dt->CheckNo,
@@ -2756,7 +2756,7 @@ class TrxTrpController extends Controller
         ":bank_name"                  => $pvr_dt->BankName,
         ":amount_paid"                => $pvr_dt->AmountPaid,
         ":account_no"                 => $pvr_dt->AccountNo,
-        ":remarks"                    => $pvr_dt->remarks,
+        ":remarks"                    => $pvr_dt->Remarks,
         ":exclude_in_ARAP"            => $pvr_dt->ExcludeInARAP,
         ":login_name"                 => $login_name,
         ":expense_or_revenue_type_id" => $pvr_dt->ExpenseOrRevenueTypeID,
@@ -2819,6 +2819,25 @@ class TrxTrpController extends Controller
           ":pvr_voucher_extra_item_id"  => $v->VoucherExtraItemID
         ]);
       }
+    }
+
+    if($pv){
+      DB::connection('sqlsrv')->update("exec 
+      USP_FI_ARAP_UpdateAmountAllocated @VoucherID=:d_voucher_id",[
+        ":d_voucher_id"               => $d_voucher_id,
+      ]);
+
+      DB::connection('sqlsrv')->update("exec 
+      USP_FI_ARAPSources_Update @VoucherID=:d_voucher_id, @PVRVoucherID=:d_pvr_voucher_id",[
+        ":d_voucher_id"               => $d_voucher_id,
+        ":d_pvr_voucher_id"           => $pvr_dt->VoucherID,
+      ]);
+
+      DB::connection('sqlsrv')->update("exec 
+      USP_FI_ARAP_BatchPostingToGL @VoucherID=:d_voucher_id, @LoginName=:login_name",[
+        ":d_voucher_id"               => $d_voucher_id,
+        ":login_name"                 => $login_name,
+      ]);
     }
 
     $trx_trp->pv_complete = 1;
