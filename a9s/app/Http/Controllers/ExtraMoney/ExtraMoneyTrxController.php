@@ -146,7 +146,7 @@ class ExtraMoneyTrxController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      $list_to_like = ["id","employee_name","no_pol","pvr_id","pvr_no","pv_id","pv_no",
+      $list_to_like = ["id","employee_rek_no","no_pol","pvr_id","pvr_no","pv_id","pv_no",
       "cost_center_code","cost_center_desc"];
 
       $list_to_like_user = [
@@ -166,7 +166,8 @@ class ExtraMoneyTrxController extends Controller
 
       $list_to_like_extra_money = [
         ["extra_money_xto","xto"],
-        ["extra_money_jenis","jenis"]
+        ["extra_money_jenis","jenis"],
+        ["extra_money_desc","description"]
       ];
 
       if(count($like_lists) > 0){
@@ -197,8 +198,8 @@ class ExtraMoneyTrxController extends Controller
 
           foreach ($list_to_like_employee as $key => $v) {
             if (isset($like_lists[$v[0]])) {
-              $q->orWhereIn('extra_money_trx_id', function($q2)use($like_lists,$v) {
-                $q2->from('extra_money_trx')
+              $q->orWhereIn('employee_id', function($q2)use($like_lists,$v) {
+                $q2->from('employee_mst')
                 ->select('id')->where($v[1],'like',$like_lists[$v[0]]);
               });
             }
@@ -242,6 +243,10 @@ class ExtraMoneyTrxController extends Controller
           if(!isset($value['type'])) continue;
 
           if(array_search($key,['status'])!==false){
+          }else if(array_search($key,['extra_money_xto','extra_money_jenis','extra_money_desc','extra_money_transition_target','extra_money_transition_type'])!==false){
+            MyLib::queryCheckL1("extra_money",$value,$key,$q);
+          }else if(array_search($key,['employee_name'])!==false){
+            MyLib::queryCheckL1("employee",$value,$key,$q,'employee_mst');
           }else{
             MyLib::queryCheck($value,$key,$q);
           }
