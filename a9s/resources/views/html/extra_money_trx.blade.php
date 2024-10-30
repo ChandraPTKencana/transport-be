@@ -64,6 +64,14 @@
           <td> : </td>
           <td> Rp. {{ number_format($extra_money['nominal'] * $extra_money['qty'] , 0,',','.') }} </td>
         </tr>
+
+        @if($note_for_remarks)
+        <tr>
+          <td> Remarks Note </td>
+          <td> : </td>
+          <td> {{$note_for_remarks}} </td>
+        </tr>
+        @endif
       </table>
       <table style="width:100%; font-size: 12px; ">
         <tr>

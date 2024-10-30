@@ -833,6 +833,7 @@ class ExtraMoneyTrxController extends Controller
       "created_at"=>$extra_money_trx->created_at,
       "id"=>$extra_money_trx->id,
       "tanggal"=>$extra_money_trx->tanggal,
+      "note_for_remarks"=>$extra_money_trx->note_for_remarks,
       "extra_money"=>$extra_money,
       // "extra_money_id"=>$extra_money_trx->extra_money_id,
       // "extra_money_xto"=>$extra_money_trx->extra_money->xto,
