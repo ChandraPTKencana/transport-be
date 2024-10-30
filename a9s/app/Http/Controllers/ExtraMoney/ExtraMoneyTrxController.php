@@ -244,9 +244,9 @@ class ExtraMoneyTrxController extends Controller
 
           if(array_search($key,['status'])!==false){
           }else if(array_search($key,['extra_money_xto','extra_money_jenis','extra_money_desc','extra_money_transition_target','extra_money_transition_type'])!==false){
-            MyLib::queryCheckL1("extra_money",$value,$key,$q);
+            MyLib::queryCheckP1("extra_money",$value,$key,$q);
           }else if(array_search($key,['employee_name'])!==false){
-            MyLib::queryCheckL1("employee",$value,$key,$q,'employee_mst');
+            MyLib::queryCheckP1("employee",$value,$key,$q,'employee_mst');
           }else{
             MyLib::queryCheck($value,$key,$q);
           }

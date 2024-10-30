@@ -418,7 +418,7 @@ class MyLib
     }
   }
 
-  public static function queryCheckL1($alias,$value,$key,$q,$table=""){
+  public static function queryCheckP1($alias,$value,$key,$q,$table=""){
     $nkey = str_replace($alias."_","",$key);
     if($table=="") $table = $alias;
 
@@ -549,6 +549,141 @@ class MyLib
         $q->whereIn($alias.'_id', function($q1)use($table,$nkey,$value) {
           $q1->from($table)
           ->select('id')->where($nkey,"!=",$value['value_1']);          
+        });
+      }
+    }
+  }
+
+  public static function queryCheckC1($table,$alias,$value,$key,$q){
+    $nkey = str_replace($table."_","",$key);
+
+    if(array_search($value['type'],['string','number'])!==false && $value['value_1']!==''){
+  
+      if($value["operator"]=='exactly_same'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,$value['value_1']);          
+        });
+      }
+
+      if($value["operator"]=='exactly_not_same'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,'!=',$value['value_1']);          
+        });
+      }
+
+      if($value["operator"]=='same'){
+        $v_val1=explode(",",$value["value_1"]);
+
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$v_val1) {
+          $q1->from($table)->select($alias.'_id');
+          $q1->where(function ($q2)use($v_val1,$nkey){
+            foreach ($v_val1 as $k1 => $v1) {
+              $q2->orwhere($nkey,"like", '%'.$v1.'%');
+            }
+          });          
+        });
+      }
+
+      if($value["operator"]=='not_same'){
+        $v_val1=explode(",",$value["value_1"]);
+
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$v_val1) {
+          $q1->from($table)->select($alias.'_id');
+          $q1->where(function ($q2)use($v_val1,$nkey){
+            foreach ($v_val1 as $k1 => $v1) {
+              $q2->orwhere($nkey,"not like", '%'.$v1.'%');
+            }
+          });          
+        });
+      }
+
+      if($value["operator"]=='more_then'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,'>',$value['value_1']);          
+        });
+      }
+      
+      if($value["operator"]=='more_and'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,'>=',$value['value_1']);          
+        });
+      }
+
+      if($value["operator"]=='less_then'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,'<',$value['value_1']);          
+        });
+      }
+
+      if($value["operator"]=='less_and'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,'<=',$value['value_1']);          
+        });
+      }
+    }
+
+    if(array_search($value['type'],['date','datetime'])!==false){
+      if($value['value_1'] || $value['value_2']){
+        $date_from = $value['value_1'];
+        if(!$date_from)
+        throw new MyException([ "message" => "Date From pada ".$value['label']." harus diisi" ], 400);
+  
+        if(!strtotime($date_from))
+        throw new MyException(["message"=>"Format Date pada ".$value['label']." From Tidak Cocok"], 400);
+
+      
+        $date_to = $value['value_2'];                
+        if(!$date_to)
+        throw new MyException([ "message" => "Date To pada ".$value['label']." harus diisi" ], 400);
+      
+        if(!strtotime($date_to))
+        throw new MyException(["message"=>"Format Date To pada ".$value['label']." Tidak Cocok"], 400);
+    
+        if($value['operator']=="specific"){
+          $date_from = date($value['type']=='datetime'?"Y-m-d H:i:s.v" :"Y-m-d",strtotime($date_from));
+          $date_to = date($value['type']=='datetime'?"Y-m-d H:i:s.v" :"Y-m-d",strtotime($date_to));
+          if(strtotime($date_from)>strtotime($date_to))
+          throw new MyException(["message"=>"Pada ".$value['label']." Ada kesalahan, Cek kembali Date From dan To"], 400);
+          
+          $q->whereIn('id', function($q1)use($table,$alias,$nkey,$date_from,$date_to) {
+            $q1->from($table)
+            ->select($alias.'_id')->whereBetween($nkey,[$date_from,$date_to]);          
+          });
+        }
+        
+        if($value['operator']=="fullday"){
+          $date_from = date("Y-m-d",strtotime($date_from))." 00:00:00.000";
+          $date_to = date("Y-m-d",strtotime($date_to))." 23:59:59.999";
+
+          if(strtotime($date_from)>strtotime($date_to))
+          throw new MyException(["message"=>"Pada ".$value['label']." Ada kesalahan, Cek kembali Date From dan To"], 400);
+
+          $q->whereIn('id', function($q1)use($table,$alias,$nkey,$date_from,$date_to) {
+            $q1->from($table)
+            ->select($alias.'_id')->where($nkey,">=",$date_from)->where($nkey,"<=",$date_to);          
+          });
+        }
+      }
+    }
+
+    if(array_search($value['type'],['select'])!==false && $value['value_1']!==''){ 
+      if($value["operator"]=='exactly_same'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,$value['value_1']);          
+        });
+      }
+
+      if($value["operator"]=='exactly_not_same'){
+        $q->whereIn('id', function($q1)use($table,$alias,$nkey,$value) {
+          $q1->from($table)
+          ->select($alias.'_id')->where($nkey,"!=",$value['value_1']);          
         });
       }
     }
