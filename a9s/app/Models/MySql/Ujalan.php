@@ -47,6 +47,11 @@ class Ujalan extends Model
         return $this->hasOne(IsUser::class, 'id', "val1_user");
     }
 
+    public function deleted_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "deleted_user");
+    }
+
     // public function requester()
     // {
     //     return $this->hasOne(\App\Models\IsUser::class, 'id_user', "requested_by");
