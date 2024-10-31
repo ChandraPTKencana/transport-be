@@ -93,6 +93,7 @@ class RampController extends Controller
 
     $acc_ugaji = '01.510.001';
     $acc_umakan = '01.510.005';
+    $acc_udinas = '01.575.002';
     foreach ($model_query as $k => $v) {
 
       $id_uj = $v->id_uj;
@@ -121,15 +122,19 @@ class RampController extends Controller
       });
       $u_gaji_supir = 0;
       $u_gaji_kernet = 0;
+      $u_dinas_supir = 0;
       $u_makan_supir = 0;
       $u_makan_kernet = 0;
+      $u_dinas_kernet = 0;
       
       foreach ($ujalan_pvr_dtls as $uk => $uv) {
         $ttl = $uv['amount'] * $uv['qty'];
         if($uv['xfor']=="Supir" && $uv['ac_account_code']==$acc_ugaji){ $u_gaji_supir = $ttl; }
         if($uv['xfor']=="Supir" &&  $uv['ac_account_code']==$acc_umakan){ $u_makan_supir = $ttl; }
+        if($uv['xfor']=="Supir" &&  $uv['ac_account_code']==$acc_udinas){ $u_dinas_supir = $ttl; }
         if($uv['xfor']=="Kernet" && $uv['ac_account_code']==$acc_ugaji){ $u_gaji_kernet = $ttl;}
         if($uv['xfor']=="Kernet" && $uv['ac_account_code']==$acc_umakan){ $u_makan_kernet = $ttl; }
+        if($uv['xfor']=="Kernet" && $uv['ac_account_code']==$acc_udinas){ $u_dinas_kernet = $ttl; }
       }
 
       $data_xtos = array_map(function($x){
@@ -148,6 +153,7 @@ class RampController extends Controller
               "name" => $supir,
               "ugaji" => $u_gaji_supir,
               "umakan" => $u_makan_supir,
+              "udinas" => $u_dinas_supir,
             ]
           ]
         ];
@@ -158,6 +164,7 @@ class RampController extends Controller
             "name"=>$kernet,
             "ugaji" => $u_gaji_kernet,
             "umakan" => $u_makan_kernet,
+            "udinas" => $u_dinas_kernet,
             ]
           ];
         }else{
@@ -179,10 +186,12 @@ class RampController extends Controller
             "name" => $supir,
             "ugaji" => $u_gaji_supir,
             "umakan" => $u_makan_supir,
+            "udinas" => $u_dinas_supir,
           ]);
         }else{
           $data[$index]["supirs"][$supir_find]["ugaji"] += $u_gaji_supir;
           $data[$index]["supirs"][$supir_find]["umakan"] += $u_makan_supir;
+          $data[$index]["supirs"][$supir_find]["udinas"] += $u_dinas_supir;
         }
 
         if(!$kernet) continue;
@@ -203,10 +212,12 @@ class RampController extends Controller
             "name" => $kernet,
             "ugaji" => $u_gaji_kernet,
             "umakan" => $u_makan_kernet,
+            "udinas" => $u_dinas_kernet,
           ]);
         }else{
           $data[$index]["kernets"][$kernet_find]["ugaji"] += $u_gaji_kernet;
           $data[$index]["kernets"][$kernet_find]["umakan"] += $u_makan_kernet;
+          $data[$index]["kernets"][$kernet_find]["udinas"] += $u_dinas_kernet;
         }
       }
     }
@@ -216,8 +227,10 @@ class RampController extends Controller
       "ttl_kernet"=>0,
       "ttl_gaji_supir"=>0,
       "ttl_makan_supir"=>0,
+      "ttl_dinas_supir"=>0,
       "ttl_gaji_kernet"=>0,
       "ttl_makan_kernet"=>0,
+      "ttl_dinas_kernet"=>0,
       "ttl_tonase"=>0,
       "ttl_rt_tonase"=>0,
       "ttl_trip"=>0,
@@ -242,12 +255,20 @@ class RampController extends Controller
         $res+=$dt["umakan"];
         return $res;
       },0);
+      $data[$k]["z_dinas_supir"] = array_reduce($data[$k]["supirs"],function($res,$dt){
+        $res+=$dt["udinas"];
+        return $res;
+      },0);
       $data[$k]["z_gaji_kernet"] = array_reduce($data[$k]["kernets"],function($res,$dt){
         $res+=$dt["ugaji"];
         return $res;
       },0);
       $data[$k]["z_makan_kernet"] = array_reduce($data[$k]["kernets"],function($res,$dt){
         $res+=$dt["umakan"];
+        return $res;
+      },0);
+      $data[$k]["z_dinas_kernet"] = array_reduce($data[$k]["kernets"],function($res,$dt){
+        $res+=$dt["udinas"];
         return $res;
       },0);
 
@@ -257,6 +278,8 @@ class RampController extends Controller
       $info["ttl_gaji_kernet"]+=$data[$k]["z_gaji_kernet"];
       $info["ttl_makan_supir"]+=$data[$k]["z_makan_supir"];
       $info["ttl_makan_kernet"]+=$data[$k]["z_makan_kernet"];
+      $info["ttl_dinas_supir"]+=$data[$k]["z_dinas_supir"];
+      $info["ttl_dinas_kernet"]+=$data[$k]["z_dinas_kernet"];
       $info["ttl_tonase"]+=$data[$k]["tonase"];
       $info["ttl_rt_tonase"]+=$data[$k]["z_rt_tonase"];
       $info["ttl_trip"]+=$data[$k]["trip"];
@@ -290,14 +313,18 @@ class RampController extends Controller
       $data[$k]["z_kernet"] = number_format($data[$k]["z_kernet"],0,",",".");
       $data[$k]["z_gaji_supir"] = number_format($data[$k]["z_gaji_supir"],0,",",".");
       $data[$k]["z_makan_supir"] = number_format($data[$k]["z_makan_supir"],0,",",".");
+      $data[$k]["z_dinas_supir"] = number_format($data[$k]["z_dinas_supir"],0,",",".");
       $data[$k]["z_gaji_kernet"] = number_format($data[$k]["z_gaji_kernet"],0,",",".");
       $data[$k]["z_makan_kernet"] = number_format($data[$k]["z_makan_kernet"],0,",",".");
+      $data[$k]["z_dinas_kernet"] = number_format($data[$k]["z_dinas_kernet"],0,",",".");
     }
 
     $info["ttl_gaji_supir"]=number_format($info["ttl_gaji_supir"],0,",",".");
     $info["ttl_gaji_kernet"]=number_format($info["ttl_gaji_kernet"],0,",",".");
     $info["ttl_makan_supir"]=number_format($info["ttl_makan_supir"],0,",",".");
     $info["ttl_makan_kernet"]=number_format($info["ttl_makan_kernet"],0,",",".");
+    $info["ttl_dinas_supir"]=number_format($info["ttl_dinas_supir"],0,",",".");
+    $info["ttl_dinas_kernet"]=number_format($info["ttl_dinas_kernet"],0,",",".");
     $info["ttl_tonase"]=number_format($info["ttl_tonase"],0,",",".");
     $info["ttl_rt_tonase"]=number_format($info["ttl_rt_tonase"],2,",",".");
     $info["ttl_trip"]=number_format($info["ttl_trip"],0,",",".");

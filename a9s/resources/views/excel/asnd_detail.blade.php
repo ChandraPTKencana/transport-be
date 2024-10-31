@@ -9,8 +9,10 @@
       <th style="border: 1px solid black;">Lokasi</th>
       <th style="border: 1px solid black;">UJ.Gaji</th>
       <th style="border: 1px solid black;">UJ.Makan</th>
+      <th style="border: 1px solid black;">UJ.Dinas</th>
       <th style="border: 1px solid black;">SB.Gaji</th>
       <th style="border: 1px solid black;">SB.Makan</th>
+      <th style="border: 1px solid black;">SB.Dinas</th>
       <th style="border: 1px solid black;">Total</th>
     </tr>
   </thead>
@@ -25,8 +27,10 @@
       <td class="text-right p-1">{{ $v["lokasi"] }}</td>
       <td class="text-right p-1">{{ $v['tipe'] == 'UJ' ? $v["gaji"] : '' }}</td>
       <td class="text-right p-1">{{ $v['tipe'] == 'UJ' ? $v["makan"] : '' }}</td>
+      <td class="text-right p-1">{{ $v['tipe'] == 'UJ' ? $v["dinas"] : '' }}</td>
       <td class="text-right p-1">{{ $v['tipe'] == 'SB' ? $v["gaji"] : '' }}</td>
       <td class="text-right p-1">{{ $v['tipe'] == 'SB' ? $v["makan"] : '' }}</td>
+      <td class="text-right p-1">{{ $v['tipe'] == 'SB' ? $v["dinas"] : '' }}</td>
       <td class="text-right p-1">{{ $v["total"] }}</td>
     </tr>
     @endforeach
@@ -34,8 +38,10 @@
       <td colspan="6" style="text-align: right;"> Grand Total</td>
       <td > {{$info['uj_gaji']}}</td>
       <td > {{$info['uj_makan']}}</td>
+      <td > {{$info['uj_dinas']}}</td>
       <td > {{$info['sb_gaji']}}</td>
-      <td > {{$info['sb_gaji']}}</td>
+      <td > {{$info['sb_makan']}}</td>
+      <td > {{$info['sb_dinas']}}</td>
       <td > {{$info['total']}}</td>
     </tr>
   </tbody>

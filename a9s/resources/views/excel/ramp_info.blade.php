@@ -9,6 +9,8 @@
       <th style="border: 1px solid black;">Gaji Kernet</th>
       <th style="border: 1px solid black;">U.Makan Supir</th>
       <th style="border: 1px solid black;">U.Makan Kernet</th>
+      <th style="border: 1px solid black;">Dinas Supir</th>
+      <th style="border: 1px solid black;">Dinas Kernet</th>
       <th style="border: 1px solid black;">Tonase</th>
       <th style="border: 1px solid black;">Rata2 Tonase</th>
       <th style="border: 1px solid black;">Trip</th>
@@ -25,6 +27,8 @@
       <td class="text-right p-1">{{ $v["z_gaji_kernet"] }}</td>
       <td class="text-right p-1">{{ $v["z_makan_supir"] }}</td>
       <td class="text-right p-1">{{ $v["z_makan_kernet"] }}</td>
+      <td class="text-right p-1">{{ $v["z_dinas_supir"] }}</td>
+      <td class="text-right p-1">{{ $v["z_dinas_kernet"] }}</td>
       <td class="text-right p-1">{{ $v["tonase"] }}</td>
       <td class="text-right p-1">{{ $v["z_rt_tonase"] }}</td>
       <td class="text-right p-1">{{ $v["trip"] }}</td>

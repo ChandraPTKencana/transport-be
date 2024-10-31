@@ -156,8 +156,11 @@ class AstNDriverController extends Controller
     trx_trp.kernet as kernet,
     sum(if(is_ujdetails2.xfor = 'Supir' and is_ujdetails2.ac_account_code = '01.510.001', is_ujdetails2.qty * is_ujdetails2.amount, 0)) as gajis,
     sum(if(is_ujdetails2.xfor = 'Supir' and is_ujdetails2.ac_account_code = '01.510.005', is_ujdetails2.qty * is_ujdetails2.amount, 0)) as makans,
+    sum(if(is_ujdetails2.xfor = 'Supir' and is_ujdetails2.ac_account_code = '01.575.002', is_ujdetails2.qty * is_ujdetails2.amount, 0)) as dinass,
     sum(if(is_ujdetails2.xfor = 'Kernet' and is_ujdetails2.ac_account_code = '01.510.001', is_ujdetails2.qty * is_ujdetails2.amount, 0)) as gajik,
-    sum(if(is_ujdetails2.xfor = 'Kernet' and is_ujdetails2.ac_account_code = '01.510.005', is_ujdetails2.qty * is_ujdetails2.amount, 0)) as makank")
+    sum(if(is_ujdetails2.xfor = 'Kernet' and is_ujdetails2.ac_account_code = '01.510.005', is_ujdetails2.qty * is_ujdetails2.amount, 0)) as makank,
+    sum(if(is_ujdetails2.xfor = 'Kernet' and is_ujdetails2.ac_account_code = '01.575.002', is_ujdetails2.qty * is_ujdetails2.amount, 0)) as dinask",
+    )
     ->join('is_uj',function ($join){
       $join->on("is_uj.id","trx_trp.id_uj");   
     })
@@ -177,8 +180,10 @@ class AstNDriverController extends Controller
     sum(if(standby_trx_dtl.standby_trx_id = standby_trx.id, 1, 0)) as qty,
     sum(if(standby_dtl.xfor = 'Supir' and standby_dtl.ac_account_code = '01.510.001', standby_dtl.amount, 0)) as gajis,
     sum(if(standby_dtl.xfor = 'Supir' and standby_dtl.ac_account_code = '01.510.005', standby_dtl.amount, 0)) as makans,
+    sum(if(standby_dtl.xfor = 'Supir' and standby_dtl.ac_account_code = '01.575.002', standby_dtl.amount, 0)) as dinass,
     sum(if(standby_dtl.xfor = 'Kernet' and standby_dtl.ac_account_code = '01.510.001', standby_dtl.amount, 0)) as gajik,
-    sum(if(standby_dtl.xfor = 'Kernet' and standby_dtl.ac_account_code = '01.510.005', standby_dtl.amount, 0)) as makank")
+    sum(if(standby_dtl.xfor = 'Kernet' and standby_dtl.ac_account_code = '01.510.005', standby_dtl.amount, 0)) as makank,
+    sum(if(standby_dtl.xfor = 'Kernet' and standby_dtl.ac_account_code = '01.575.002', standby_dtl.amount, 0)) as dinask")
     ->join('standby_trx_dtl',function ($join){
       $join->on("standby_trx_dtl.standby_trx_id","standby_trx.id");   
     })
@@ -210,8 +215,10 @@ class AstNDriverController extends Controller
     $info["now"]=date("d-m-Y H:i:s");
     $info["uj_gaji"] = 0;
     $info["uj_makan"] = 0;
+    $info["uj_dinas"] = 0;
     $info["sb_gaji"] = 0;
     $info["sb_makan"] = 0;
+    $info["sb_dinas"] = 0;
     $info["total"] = 0;
 
     foreach ($uj_trx as $k => $v) {      
@@ -225,7 +232,8 @@ class AstNDriverController extends Controller
         "nama"=>$v->supir,
         "gaji"=>$v->gajis,
         "makan"=>$v->makans,
-        "total"=>(int)$v->gajis + (int)$v->makans,
+        "dinas"=>$v->dinass,
+        "total"=>(int)$v->gajis + (int)$v->makans + (int)$v->dinass,
       ];
 
       $kernet = [
@@ -238,17 +246,20 @@ class AstNDriverController extends Controller
         "nama"=>$v->kernet,
         "gaji"=>$v->gajik,
         "makan"=>$v->makank,
-        "total"=>(int)$v->gajik + (int)$v->makank,
+        "dinas"=>$v->dinask,
+        "total"=>(int)$v->gajik + (int)$v->makank + (int)$v->dinask,
       ];
 
       if($v->supir && ( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
         $info['uj_gaji'] += (int)$v->gajis;
         $info['uj_makan'] += (int)$v->makans;
+        $info['uj_dinas'] += (int)$v->dinass;
       }
 
       if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
         $info['uj_gaji'] += (int)$v->gajik;
         $info['uj_makan'] += (int)$v->makank;
+        $info['uj_dinas'] += (int)$v->dinask;
       }
 
       if(count($data_all) == 0 )
@@ -292,7 +303,8 @@ class AstNDriverController extends Controller
         "nama"=>$v->supir,
         "gaji"=>$v->gajis,
         "makan"=>$v->makans,
-        "total"=>(int)$v->gajis + (int)$v->makans,
+        "dinas"=>$v->dinass,
+        "total"=>(int)$v->gajis + (int)$v->makans + (int)$v->dinass,
       ];
 
       $kernet = [
@@ -305,17 +317,20 @@ class AstNDriverController extends Controller
         "nama"=>$v->kernet,
         "gaji"=>$v->gajik,
         "makan"=>$v->makank,
-        "total"=>(int)$v->gajik + (int)$v->makank,
+        "dinas"=>$v->dinask,
+        "total"=>(int)$v->gajik + (int)$v->makank + (int)$v->dinask,
       ];
 
       if($v->supir &&( count($supir_list) == 0 || array_search($v->supir,$supir_list)!==false )){
         $info['sb_gaji'] += (int)$v->gajis;
         $info['sb_makan'] += (int)$v->makans;
+        $info['sb_dinas'] += (int)$v->dinass;
       }
 
       if($v->kernet && ( count($kernet_list) == 0 || array_search($v->kernet,$kernet_list)!==false )){
         $info['sb_gaji'] += (int)$v->gajik;
         $info['sb_makan'] += (int)$v->makank;
+        $info['sb_dinas'] += (int)$v->dinask;
       }
 
       if(count($data_all) == 0 )
@@ -347,7 +362,7 @@ class AstNDriverController extends Controller
         }
       }
     }
-    $info["total"] = $info['uj_gaji']+$info['uj_makan']+$info['sb_gaji']+$info['sb_makan'];
+    $info["total"] = $info['uj_gaji']+$info['uj_makan']+$info['uj_dinas']+$info['sb_gaji']+$info['sb_makan']+$info['sb_dinas'];
 
     ksort($data_all);
     
@@ -368,9 +383,11 @@ class AstNDriverController extends Controller
           "jabatan"=>"",
           "uj_gaji"=>0,
           "uj_makan"=>0,
+          "uj_dinas"=>0,
           "uj_total"=>0,
           "sb_gaji"=>0,
           "sb_makan"=>0,          
+          "sb_dinas"=>0,          
           "sb_total"=>0,
           "total"=>0
         ];
@@ -384,11 +401,13 @@ class AstNDriverController extends Controller
           if($v1['tipe']=='UJ'){
             $dt['uj_gaji']+=$v1['gaji'];
             $dt['uj_makan']+=$v1['makan'];
-            $dt['uj_total']+=$v1['gaji']+$v1['makan'];
+            $dt['uj_dinas']+=$v1['dinas'];
+            $dt['uj_total']+=$v1['gaji']+$v1['makan']+$v1['dinas'];
           }else{
             $dt['sb_gaji']+=$v1['gaji'];
             $dt['sb_makan']+=$v1['makan'];
-            $dt['sb_total']+=$v1['gaji']+$v1['makan'];
+            $dt['sb_dinas']+=$v1['dinas'];
+            $dt['sb_total']+=$v1['gaji']+$v1['makan']+$v1['dinas'];
           }
         }
         $dt['total'] += $dt['uj_total'] + $dt['sb_total'];
@@ -417,6 +436,7 @@ class AstNDriverController extends Controller
       foreach ($data as $k => $v) {
         $data[$k]["gaji"] = number_format($data[$k]["gaji"],0,",",".");
         $data[$k]["makan"] = number_format($data[$k]["makan"],0,",",".");
+        $data[$k]["dinas"] = number_format($data[$k]["dinas"],0,",",".");
         $data[$k]["total"] = number_format($data[$k]["total"],2,",",".");
       }
   
@@ -424,9 +444,11 @@ class AstNDriverController extends Controller
       foreach ($data as $k => $v) {
         $data[$k]["uj_gaji"] = number_format($data[$k]["uj_gaji"],0,",",".");
         $data[$k]["uj_makan"] = number_format($data[$k]["uj_makan"],0,",",".");
+        $data[$k]["uj_dinas"] = number_format($data[$k]["uj_dinas"],0,",",".");
         $data[$k]["uj_total"] = number_format($data[$k]["uj_total"],2,",",".");
         $data[$k]["sb_gaji"] = number_format($data[$k]["sb_gaji"],0,",",".");
         $data[$k]["sb_makan"] = number_format($data[$k]["sb_makan"],0,",",".");
+        $data[$k]["sb_dinas"] = number_format($data[$k]["sb_dinas"],0,",",".");
         $data[$k]["sb_total"] = number_format($data[$k]["sb_total"],0,",",".");
         $data[$k]["total"] = number_format($data[$k]["total"],0,",",".");
       }
@@ -434,8 +456,10 @@ class AstNDriverController extends Controller
 
     $info["uj_gaji"]=number_format($info["uj_gaji"],0,",",".");
     $info["uj_makan"]=number_format($info["uj_makan"],0,",",".");
+    $info["uj_dinas"]=number_format($info["uj_dinas"],0,",",".");
     $info["sb_gaji"]=number_format($info["sb_gaji"],0,",",".");
     $info["sb_makan"]=number_format($info["sb_makan"],0,",",".");
+    $info["sb_dinas"]=number_format($info["sb_dinas"],0,",",".");
     $info["total"]=number_format($info["total"],0,",",".");
 
     $blade= ($request->type=='detail'?'pdf.asnd_detail':'pdf.asnd_header');
