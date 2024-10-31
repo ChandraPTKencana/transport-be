@@ -23,7 +23,7 @@ class SalaryBonusResource extends JsonResource
             'type'                  => $this->type,
             'employee'              => new EmployeeResource($this->whenLoaded('employee')),
             'nominal'               => $this->nominal,
-            'note'                  => $this->note,
+            'note'                  => $this->note ?? "",
             
             'val1'                  => $this->val1,
             'val1_user'             => $this->val1_user ?? "",

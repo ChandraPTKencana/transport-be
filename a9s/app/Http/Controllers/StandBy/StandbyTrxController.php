@@ -281,7 +281,7 @@ class StandbyTrxController extends Controller
 
     $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','details'=>function($q) {
       $q->orderBy("tanggal","asc");
-      $q->select("id", "tanggal","standby_trx_id","attachment_1_type");
+      $q->select("id", "tanggal","standby_trx_id","attachment_1_type","be_paid");
     }])
     ->withCount('details')->get();
 

@@ -105,7 +105,7 @@ class UjalanController extends Controller
       
 
       if(count($like_lists) > 0){
-        $model_query = $model_query->where(function ($q)use($like_lists,$list_to_like,$list_to_like_user){
+        $model_query = $model_query->where(function ($q)use($like_lists,$list_to_like){
           foreach ($list_to_like as $key => $v) {
             if (isset($like_lists[$v])) {
               $q->orWhere($v, "like", $like_lists[$v]);

@@ -291,6 +291,7 @@ class SalaryBonusController extends Controller
         "id"=>$model_query->id,
         "created_at" => $t_stamp,
         "updated_at" => $t_stamp,
+        "attachment_1_type"=>$model_query->attachment_1_type
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -377,6 +378,7 @@ class SalaryBonusController extends Controller
       return response()->json([
         "message" => "Proses Generate data berhasil",
         "updated_at"=>$t_stamp,
+        "attachment_1_type"=>$model_query->attachment_1_type
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
