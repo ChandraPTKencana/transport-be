@@ -279,7 +279,7 @@ class StandbyTrxController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','details'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','salary_paid','details'=>function($q) {
       $q->orderBy("tanggal","asc");
       $q->select("id", "tanggal","standby_trx_id","attachment_1_type","be_paid");
     }])

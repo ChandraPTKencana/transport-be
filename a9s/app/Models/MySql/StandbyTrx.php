@@ -46,4 +46,9 @@ class StandbyTrx extends Model
     {
         return $this->belongsTo(StandbyMst::class, "standby_mst_id", 'id');
     }
+
+    public function salary_paid()
+    {
+        return $this->belongsTo(SalaryPaid::class, "salary_paid_id", 'id');
+    }
 }

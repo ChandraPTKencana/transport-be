@@ -96,6 +96,7 @@ class StandbyTrxResource extends JsonResource
             'details_count'     => $this->details_count,
 
             'salary_paid_id'    => $this->salary_paid_id,
+            'salary_paid'       => new SalaryPaidResource($this->whenLoaded('salary_paid')),
         ];
     }
 }
