@@ -711,6 +711,13 @@ class RptSalaryController extends Controller
     }
 
     foreach ($data as $k => $v) {
+      $kerajinan_s=400000;
+      $kerajinan_k=200000;
+
+      if($v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
+        $v['salary_bonus_nominal'] = $v['employee_role']=='Supir' ? $kerajinan_s : $kerajinan_k;
+      }
+
       RptSalaryDtl::insert($v);
     }
   }
