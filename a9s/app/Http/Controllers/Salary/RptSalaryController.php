@@ -770,6 +770,7 @@ class RptSalaryController extends Controller
       "ttl_nominal_cut" => 0,
       "ttl_bonus"       => 0,
       "ttl_all"         => 0,
+      "ttl_periode_2"   => 0,
       "now"             => date("d-m-Y H:i:s"),
       "periode"         => date("m-Y",strtotime($sp->period_end))
     ];
@@ -787,6 +788,7 @@ class RptSalaryController extends Controller
       $nc = $data[$k]["nominal_cut"];
       $sbn = $data[$k]["salary_bonus_nominal"];
       $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn;
+      $ttl2 = $sg2 + $sm2 + $sd2 + $sbn;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
@@ -800,8 +802,10 @@ class RptSalaryController extends Controller
       $info["ttl_nominal_cut"] += $nc;
       $info["ttl_bonus"] += $sbn;
       $info["ttl_all"] += $ttl;
+      $info["ttl_periode_2"] += $ttl2;
 
       $data[$k]["total"] = $ttl;
+      $data[$k]["total_2"] = $ttl2;
     }
     
 
