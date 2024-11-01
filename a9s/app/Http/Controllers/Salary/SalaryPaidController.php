@@ -731,7 +731,7 @@ class SalaryPaidController extends Controller
             "sb_gaji"               => $sb_gaji_s,
             "sb_makan"              => $sb_makan_s,
             "sb_dinas"              => $sb_dinas_s,
-            "salary_bonus_nominal"  => $kerajinan_s,
+            "salary_bonus_nominal"  => ($sb_dinas_s) || ($sb_gaji_s==0 && $sb_makan_s==0) ? 0 : $kerajinan_s,
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_s;
@@ -757,7 +757,7 @@ class SalaryPaidController extends Controller
             "sb_gaji"               => $sb_gaji_k,
             "sb_makan"              => $sb_makan_k,
             "sb_dinas"              => $sb_dinas_k,
-            "salary_bonus_nominal"  => $kerajinan_k,
+            "salary_bonus_nominal"  => ($sb_dinas_k) || ($sb_gaji_k==0 && $sb_makan_k==0) ? 0 : $kerajinan_k,
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
