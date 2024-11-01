@@ -26,6 +26,8 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS JAMSOS</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">U.Kerajinan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Grand Total</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;"></th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Total Periode 2</th>
         </tr>
 
         <tr>
