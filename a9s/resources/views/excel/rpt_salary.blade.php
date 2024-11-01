@@ -67,7 +67,7 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["total"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1"></td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['total_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$v['total_2']}}</td>
         </tr>
         @endforeach
         <tr>
