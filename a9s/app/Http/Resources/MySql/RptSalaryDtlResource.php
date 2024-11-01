@@ -34,6 +34,10 @@ class RptSalaryDtlResource extends JsonResource
             'sb_makan'              => $this->sb_makan,
             'sb_dinas'              => $this->sb_dinas,
 
+            'sb_gaji_2'             => $this->sb_gaji_2,
+            'sb_makan_2'            => $this->sb_makan_2,
+            'sb_dinas_2'            => $this->sb_dinas_2,
+
             'uj_gaji'               => $this->uj_gaji,
             'uj_makan'              => $this->uj_makan,
             'uj_dinas'              => $this->uj_dinas,
