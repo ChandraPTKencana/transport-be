@@ -18,7 +18,8 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Status</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">No Rek</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Bank</th>
-          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby</th>
+          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 1</th>
+          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 2</th>
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
@@ -54,6 +55,9 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji_2"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan_2"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
@@ -69,6 +73,9 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_gaji']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_makan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_dinas']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_gaji_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_makan_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_dinas_2']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_gaji']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_makan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_dinas']}}</td>

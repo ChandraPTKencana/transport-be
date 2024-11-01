@@ -473,7 +473,7 @@ class RptSalaryController extends Controller
 
     $data = [];
     $smp_bulan = substr($model_query->period_end,0,7);
-    $salary_paid = SalaryPaid::where("period_end","like",$smp_bulan.'%')->where('val1',1)->get();
+    $salary_paid = SalaryPaid::where("period_end","like",$smp_bulan.'%')->where('val1',1)->orderBy("id","asc")->get();
     foreach ($salary_paid as $key => $sp) {
       foreach ($sp->details as $key => $spd) {
         $map_e = array_map(function($x){
@@ -498,9 +498,12 @@ class RptSalaryController extends Controller
             "employee_rek_no"       => $emp->rek_no,
             "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
             
-            "sb_gaji"               => $spd->sb_gaji,
-            "sb_makan"              => $spd->sb_makan,
-            "sb_dinas"              => $spd->sb_dinas,
+            "sb_gaji"               => $sp->period_part==1 ? $spd->sb_gaji : 0,
+            "sb_makan"              => $sp->period_part==1 ? $spd->sb_makan : 0,
+            "sb_dinas"              => $sp->period_part==1 ? $spd->sb_dinas : 0,
+            "sb_gaji_2"             => $sp->period_part==2 ? $spd->sb_gaji : 0,
+            "sb_makan_2"            => $sp->period_part==2 ? $spd->sb_makan : 0,
+            "sb_dinas_2"            => $sp->period_part==2 ? $spd->sb_dinas : 0,
             "uj_gaji"               => 0,
             "uj_makan"              => 0,
             "uj_dinas"              => 0,
@@ -508,9 +511,14 @@ class RptSalaryController extends Controller
             "salary_bonus_nominal"  => $spd->salary_bonus_nominal
           ]);
         }else{
-          $data[$search]["sb_gaji"] += $spd->sb_gaji;
-          $data[$search]["sb_makan"] += $spd->sb_makan;
-          $data[$search]["sb_dinas"] += $spd->sb_dinas;
+          $data[$search]["sb_gaji"] += $sp->period_part==1 ? $spd->sb_gaji:0;
+          $data[$search]["sb_makan"] += $sp->period_part==1 ? $spd->sb_makan:0;
+          $data[$search]["sb_dinas"] += $sp->period_part==1 ?$spd->sb_dinas:0;
+
+          $data[$search]["sb_gaji_2"] += $sp->period_part==2 ? $spd->sb_gaji :0;
+          $data[$search]["sb_makan_2"] += $sp->period_part==2 ? $spd->sb_makan :0;
+          $data[$search]["sb_dinas_2"] += $sp->period_part==2 ? $spd->sb_dinas :0;
+
           $data[$search]["salary_bonus_nominal"] += $spd->salary_bonus_nominal;
         }
 
@@ -607,6 +615,9 @@ class RptSalaryController extends Controller
             "sb_gaji"               => 0,
             "sb_makan"              => 0,
             "sb_dinas"              => 0,
+            "sb_gaji_2"             => 0,
+            "sb_makan_2"            => 0,
+            "sb_dinas_2"            => 0,
             "uj_gaji"               => $uj_gaji_s,
             "uj_makan"              => $uj_makan_s,
             "uj_dinas"              => $uj_dinas_s,
@@ -648,6 +659,9 @@ class RptSalaryController extends Controller
             "sb_gaji"               => 0,
             "sb_makan"              => 0,
             "sb_dinas"              => 0,
+            "sb_gaji_2"             => 0,
+            "sb_makan_2"            => 0,
+            "sb_dinas_2"            => 0,
             "uj_gaji"               => $uj_gaji_k,
             "uj_makan"              => $uj_makan_k,
             "uj_dinas"              => $uj_dinas_k,
@@ -699,6 +713,9 @@ class RptSalaryController extends Controller
           "sb_gaji"               => 0,
           "sb_makan"              => 0,
           "sb_dinas"              => 0,
+          "sb_gaji_2"             => 0,
+          "sb_makan_2"            => 0,
+          "sb_dinas_2"            => 0,
           "uj_gaji"               => 0,
           "uj_makan"              => 0,
           "uj_dinas"              => 0,
@@ -714,10 +731,10 @@ class RptSalaryController extends Controller
       $kerajinan_s=400000;
       $kerajinan_k=200000;
 
-      if($v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
+      if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
         $empx = Employee::where("id",$v['employee_id'])->exclude(['attachement_1','attachement_2'])->first();
         if($empx->deleted==0)
-        $v['salary_bonus_nominal'] = $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
+        $v['salary_bonus_nominal'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
       }
 
       RptSalaryDtl::insert($v);
