@@ -562,7 +562,7 @@ class RptSalaryController extends Controller
       $uj_dinas_k = 0;
 
       foreach ($smd as $k1 => $v1) {
-        $amount = $v1->amount * count($v->details);
+        $amount = $v1->amount * $v1->qty;
         if($v1->xfor == 'Supir'){
           $nominal_s += $amount;
           if($v1->ac_account_code=='01.510.001') $uj_gaji_s += $amount;
