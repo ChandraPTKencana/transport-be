@@ -761,6 +761,9 @@ class RptSalaryController extends Controller
       "ttl_sb_gaji"     => 0,
       "ttl_sb_makan"    => 0,
       "ttl_sb_dinas"    => 0,
+      "ttl_sb_gaji_2"   => 0,
+      "ttl_sb_makan_2"  => 0,
+      "ttl_sb_dinas_2"  => 0,
       "ttl_uj_gaji"     => 0,
       "ttl_uj_makan"    => 0,
       "ttl_uj_dinas"    => 0,
@@ -775,16 +778,22 @@ class RptSalaryController extends Controller
       $sg = $data[$k]["sb_gaji"];
       $sm = $data[$k]["sb_makan"];
       $sd = $data[$k]["sb_dinas"];
+      $sg2 = $data[$k]["sb_gaji_2"];
+      $sm2 = $data[$k]["sb_makan_2"];
+      $sd2 = $data[$k]["sb_dinas_2"];
       $ug = $data[$k]["uj_gaji"];
       $um = $data[$k]["uj_makan"];
       $ud = $data[$k]["uj_dinas"];
       $nc = $data[$k]["nominal_cut"];
       $sbn = $data[$k]["salary_bonus_nominal"];
-      $ttl = $sg + $sm + $sd + $ug + $um + $ud - $nc + $sbn;
+      $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
       $info["ttl_sb_dinas"] += $sd;
+      $info["ttl_sb_gaji_2"] += $sg2;
+      $info["ttl_sb_makan_2"] += $sm2;
+      $info["ttl_sb_dinas_2"] += $sd2;
       $info["ttl_uj_gaji"] += $ug;
       $info["ttl_uj_makan"] += $um;
       $info["ttl_uj_dinas"] += $ud;
