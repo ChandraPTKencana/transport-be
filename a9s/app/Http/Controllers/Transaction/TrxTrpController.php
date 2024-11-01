@@ -2017,7 +2017,7 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5 && $model_query->val6 && $model_query->val_ticket){
+      if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5 && $model_query->val6){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
@@ -2095,6 +2095,65 @@ class TrxTrpController extends Controller
         "val6_user"=>$model_query->val6_user,
         "val6_at"=>$model_query->val6_at,
         "val6_by"=>$model_query->val6_user ? new IsUserResource(IsUser::find($model_query->val6_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function valTicket(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val_ticket']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = TrxTrp::find($request->id);
+      if($model_query->val_ticket){
+        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val_ticket',true) && !$model_query->val_ticket){
+        $model_query->val_ticket = 1;
+        $model_query->val_ticket_user = $this->admin_id;
+        $model_query->val_ticket_at = $t_stamp;
+      }
+
+      $model_query->save();
+
+      MyLog::sys("trx_trp",$request->id,"approve ticket");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
         "val_ticket"=>$model_query->val_ticket,
         "val_ticket_user"=>$model_query->val_ticket_user,
         "val_ticket_at"=>$model_query->val_ticket_at,
