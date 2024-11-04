@@ -737,7 +737,12 @@ class RptSalaryController extends Controller
         $v['salary_bonus_nominal'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
       }
 
-      RptSalaryDtl::insert($v);
+      if(
+        !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 
+        $v["sb_gaji_2"]==0 && $v["sb_makan_2"]==0 && $v["sb_dinas_2"]==0 && 
+        $v["uj_gaji"]==0 && $v["uj_makan"]==0 && $v["uj_dinas"]==0 && 
+        $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0) 
+        ) RptSalaryDtl::insert($v);
     }
   }
 
