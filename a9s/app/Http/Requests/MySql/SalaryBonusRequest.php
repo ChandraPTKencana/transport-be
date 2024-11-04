@@ -35,7 +35,7 @@ class SalaryBonusRequest extends FormRequest
             $rules['type']          = 'required|in:Kerajinan';
             $rules['employee_id']   = 'required|exists:App\Models\MySql\Employee,id';
             $rules['nominal']       = 'required|numeric';
-            $rules['attachment_1']  = 'nullable|mimes:jpeg,jpg,png,pdf|max:2048';
+            // $rules['attachment_1']  = 'nullable|mimes:jpeg,jpg,png,pdf|max:2048';
         }
         return $rules;
     }
