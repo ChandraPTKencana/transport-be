@@ -1487,7 +1487,9 @@ class StandbyTrxController extends Controller
     DB::beginTransaction();
     try {
       $model_query = StandbyTrx::find($request->id);
-      
+      if($model_query->salary_paid_id){
+        throw new \Exception("Standby Sudah Generate Salary Paid Tidak Dapat Divalidasi lagi",1);
+      }
       // if($model_query->cost_center_code=="")
       // throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
 
