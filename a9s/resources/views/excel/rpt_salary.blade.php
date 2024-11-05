@@ -40,8 +40,10 @@
         </tr>
       </thead>
       <tbody>
-        
         @foreach($data as $k=>$v)
+        @php
+        $spasi=mb_strtoupper("'".$v["employee_ktp_no"],'UTF-8');
+        @endphp
         <tr>
           <td style="border: 1px solid black;">{{$loop->iteration}}</td>
           <td style="border: 1px solid black;">{{ $v["employee_name"] }}</td>
@@ -49,7 +51,7 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_birth_place"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_birth_date"] ? date("d-m-Y",strtotime($v["employee_birth_date"])) : '' }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_tmk"] ? date("d-m-Y",strtotime($v["employee_tmk"])) : '' }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_ktp_no"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $spasi }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_address"]}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_status"]}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_rek_no"]}}</td>

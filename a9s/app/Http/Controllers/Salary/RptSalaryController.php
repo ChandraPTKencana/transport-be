@@ -823,7 +823,13 @@ class RptSalaryController extends Controller
 
     $columnFormats = [
       'G' => '0',
+      // 'G' => '###############',
+      // 'G' => '₹#,##0.00',
       'J' => '0',
+            // 'G' => '0',
+      // 'J' => '0',
+      // 'G' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+      // 'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
     ];
 
     $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
@@ -833,6 +839,7 @@ class RptSalaryController extends Controller
       "data" => $bs64,
       "dataBase64" => $mime["dataBase64"] . $bs64,
       "filename" => $filename . "." . $mime["ext"],
+      // "ex"=>\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT
     ];
     return $result;
   }
