@@ -923,7 +923,7 @@ class SalaryPaidController extends Controller
     
 
     $date = new \DateTime();
-    $filename=$date->format("YmdHis").'-salary_paid-'.$info["periode"];
+    $filename=env("app_name").'-salary_paid-'.$info["periode"]."-".$date->format("YmdHis");
 
     $mime=MyLib::mime("xlsx");
 

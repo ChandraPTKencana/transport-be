@@ -815,7 +815,7 @@ class RptSalaryController extends Controller
     
 
     $date = new \DateTime();
-    $filename=$date->format("YmdHis").'-rpt_salary-'.$info["periode"];
+    $filename=env("app_name").'-rpt_salary-'.$info["periode"]."-".$date->format("YmdHis");
 
     $mime=MyLib::mime("xlsx");
 
