@@ -822,10 +822,10 @@ class RptSalaryController extends Controller
     $blade= 'excel.rpt_salary';
 
     $columnFormats = [
-      'G' => '0',
+      'H' => '0',
       // 'G' => '###############',
       // 'G' => '₹#,##0.00',
-      'J' => '0',
+      // 'J' => '0',
             // 'G' => '0',
       // 'J' => '0',
       // 'G' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,

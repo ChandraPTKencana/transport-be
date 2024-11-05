@@ -8,6 +8,7 @@
       </tr>
       <tr>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">No</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">ID</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Pekerja</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Jabatan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Tmpt Lahir</th>
@@ -46,6 +47,7 @@
         @endphp
         <tr>
           <td style="border: 1px solid black;">{{$loop->iteration}}</td>
+          <td style="border: 1px solid black;">{{ $v["employee_id"] }}</td>
           <td style="border: 1px solid black;">{{ $v["employee_name"] }}</td>
           <td style="border: 1px solid black;">{{ $v["employee_role"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_birth_place"] }}</td>
@@ -75,7 +77,7 @@
         </tr>
         @endforeach
         <tr>
-          <td colspan="11" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
+          <td colspan="12" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_gaji']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_makan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_dinas']}}</td>
