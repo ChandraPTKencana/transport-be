@@ -32,12 +32,15 @@
         </tr>
 
         <tr>
-          <th style="border: 1px solid black; font-weight:bold;">SB.Gaji</th>
-          <th style="border: 1px solid black; font-weight:bold;">SB.Makan</th>
-          <th style="border: 1px solid black; font-weight:bold;">SB.Dinas</th>
-          <th style="border: 1px solid black; font-weight:bold;">UJ.Gaji</th>
-          <th style="border: 1px solid black; font-weight:bold;">UJ.Makan</th>
-          <th style="border: 1px solid black; font-weight:bold;">UJ.Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
         </tr>
       </thead>
       <tbody>
@@ -68,8 +71,8 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">0</td>
-          <td style="border: 1px solid black;" class="text-right p-1">0</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["total"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1"></td>
@@ -88,8 +91,8 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_makan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_dinas']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_nominal_cut']}}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 0 </td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 0 </td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_kesehatan']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_jamsos']}} </td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bonus']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_all']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > </td>

@@ -487,16 +487,16 @@ class RptSalaryController extends Controller
           array_push($data,[
             "rpt_salary_id"         => $model_query->id,
             "employee_id"           => $emp->id,
-            "employee_name"         => $emp->name,
-            "employee_role"         => $emp->role,
-            "employee_birth_place"  => $emp->birth_place,
-            "employee_birth_date"   => $emp->birth_date,
-            "employee_tmk"          => $emp->tmk,
-            "employee_ktp_no"       => $emp->ktp_no,
-            "employee_address"      => $emp->address,
-            "employee_status"       => $emp->status,
-            "employee_rek_no"       => $emp->rek_no,
-            "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
+            // "employee_name"         => $emp->name,
+            // "employee_role"         => $emp->role,
+            // "employee_birth_place"  => $emp->birth_place,
+            // "employee_birth_date"   => $emp->birth_date,
+            // "employee_tmk"          => $emp->tmk,
+            // "employee_ktp_no"       => $emp->ktp_no,
+            // "employee_address"      => $emp->address,
+            // "employee_status"       => $emp->status,
+            // "employee_rek_no"       => $emp->rek_no,
+            // "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
             
             "sb_gaji"               => $sp->period_part==1 ? $spd->sb_gaji : 0,
             "sb_makan"              => $sp->period_part==1 ? $spd->sb_makan : 0,
@@ -601,16 +601,16 @@ class RptSalaryController extends Controller
           array_push($data,[
             "rpt_salary_id"         => $model_query->id,
             "employee_id"           => $emp->id,
-            "employee_name"         => $emp->name,
-            "employee_role"         => $emp->role,
-            "employee_birth_place"  => $emp->birth_place,
-            "employee_birth_date"   => $emp->birth_date,
-            "employee_tmk"          => $emp->tmk,
-            "employee_ktp_no"       => $emp->ktp_no,
-            "employee_address"      => $emp->address,
-            "employee_status"       => $emp->status,
-            "employee_rek_no"       => $emp->rek_no,
-            "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
+            // "employee_name"         => $emp->name,
+            // "employee_role"         => $emp->role,
+            // "employee_birth_place"  => $emp->birth_place,
+            // "employee_birth_date"   => $emp->birth_date,
+            // "employee_tmk"          => $emp->tmk,
+            // "employee_ktp_no"       => $emp->ktp_no,
+            // "employee_address"      => $emp->address,
+            // "employee_status"       => $emp->status,
+            // "employee_rek_no"       => $emp->rek_no,
+            // "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
             
             "sb_gaji"               => 0,
             "sb_makan"              => 0,
@@ -645,16 +645,16 @@ class RptSalaryController extends Controller
           array_push($data,[
             "rpt_salary_id"         => $model_query->id,
             "employee_id"           => $emp->id,
-            "employee_name"         => $emp->name,
-            "employee_role"         => $emp->role,
-            "employee_birth_place"  => $emp->birth_place,
-            "employee_birth_date"   => $emp->birth_date,
-            "employee_tmk"          => $emp->tmk,
-            "employee_ktp_no"       => $emp->ktp_no,
-            "employee_address"      => $emp->address,
-            "employee_status"       => $emp->status,
-            "employee_rek_no"       => $emp->rek_no,
-            "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
+            // "employee_name"         => $emp->name,
+            // "employee_role"         => $emp->role,
+            // "employee_birth_place"  => $emp->birth_place,
+            // "employee_birth_date"   => $emp->birth_date,
+            // "employee_tmk"          => $emp->tmk,
+            // "employee_ktp_no"       => $emp->ktp_no,
+            // "employee_address"      => $emp->address,
+            // "employee_status"       => $emp->status,
+            // "employee_rek_no"       => $emp->rek_no,
+            // "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
             
             "sb_gaji"               => 0,
             "sb_makan"              => 0,
@@ -699,16 +699,16 @@ class RptSalaryController extends Controller
         array_push($data,[
           "rpt_salary_id"         => $model_query->id,
           "employee_id"           => $emp->id,
-          "employee_name"         => $emp->name,
-          "employee_role"         => $emp->role,
-          "employee_birth_place"  => $emp->birth_place,
-          "employee_birth_date"   => $emp->birth_date,
-          "employee_tmk"          => $emp->tmk,
-          "employee_ktp_no"       => $emp->ktp_no,
-          "employee_address"      => $emp->address,
-          "employee_status"       => $emp->status,
-          "employee_rek_no"       => $emp->rek_no,
-          "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
+          // "employee_name"         => $emp->name,
+          // "employee_role"         => $emp->role,
+          // "employee_birth_place"  => $emp->birth_place,
+          // "employee_birth_date"   => $emp->birth_date,
+          // "employee_tmk"          => $emp->tmk,
+          // "employee_ktp_no"       => $emp->ktp_no,
+          // "employee_address"      => $emp->address,
+          // "employee_status"       => $emp->status,
+          // "employee_rek_no"       => $emp->rek_no,
+          // "employee_bank_name"    => $emp->bank ? $emp->bank->code : "",
           
           "sb_gaji"               => 0,
           "sb_makan"              => 0,
@@ -731,8 +731,23 @@ class RptSalaryController extends Controller
       $kerajinan_s=400000;
       $kerajinan_k=200000;
 
+      $empx = Employee::where("id",$v['employee_id'])->exclude(['attachement_1','attachement_2'])->first();
+      if($empx){
+        $v["employee_name"]           = $empx->name;
+        $v["employee_role"]           = $empx->role;
+        $v["employee_birth_place"]    = $empx->birth_place;
+        $v["employee_birth_date"]     = $empx->birth_date;
+        $v["employee_tmk"]            = $empx->tmk;
+        $v["employee_ktp_no"]         = $empx->ktp_no;
+        $v["employee_address"]        = $empx->address;
+        $v["employee_status"]         = $empx->status;
+        $v["employee_rek_no"]         = $empx->rek_no;
+        $v["employee_bank_name"]      = $empx->bank ? $emp->bank->code : "";
+        $v["employee_bpjs_kesehatan"] = $empx->bpjs_kesehatan;
+        $v["employee_bpjs_jamsos"]    = $empx->bpjs_jamsos;
+      }
+
       if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
-        $empx = Employee::where("id",$v['employee_id'])->exclude(['attachement_1','attachement_2'])->first();
         if($empx->deleted==0)
         $v['salary_bonus_nominal'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
       }
@@ -763,21 +778,23 @@ class RptSalaryController extends Controller
     $data = RptSalaryDtl::where('rpt_salary_id',$request->id)->orderBy("employee_name",'asc')->get()->toArray();
 
     $info = [
-      "ttl_sb_gaji"     => 0,
-      "ttl_sb_makan"    => 0,
-      "ttl_sb_dinas"    => 0,
-      "ttl_sb_gaji_2"   => 0,
-      "ttl_sb_makan_2"  => 0,
-      "ttl_sb_dinas_2"  => 0,
-      "ttl_uj_gaji"     => 0,
-      "ttl_uj_makan"    => 0,
-      "ttl_uj_dinas"    => 0,
-      "ttl_nominal_cut" => 0,
-      "ttl_bonus"       => 0,
-      "ttl_all"         => 0,
-      "ttl_periode_2"   => 0,
-      "now"             => date("d-m-Y H:i:s"),
-      "periode"         => date("m-Y",strtotime($sp->period_end))
+      "ttl_sb_gaji"         => 0,
+      "ttl_sb_makan"        => 0,
+      "ttl_sb_dinas"        => 0,
+      "ttl_sb_gaji_2"       => 0,
+      "ttl_sb_makan_2"      => 0,
+      "ttl_sb_dinas_2"      => 0,
+      "ttl_uj_gaji"         => 0,
+      "ttl_uj_makan"        => 0,
+      "ttl_uj_dinas"        => 0,
+      "ttl_bpjs_kesehatan"  => 0,
+      "ttl_bpjs_jamsos"     => 0,
+      "ttl_nominal_cut"     => 0,
+      "ttl_bonus"           => 0,
+      "ttl_all"             => 0,
+      "ttl_periode_2"       => 0,
+      "now"                 => date("d-m-Y H:i:s"),
+      "periode"             => date("m-Y",strtotime($sp->period_end))
     ];
 
     foreach ($data as $k => $v) {
@@ -792,6 +809,10 @@ class RptSalaryController extends Controller
       $ud = $data[$k]["uj_dinas"];
       $nc = $data[$k]["nominal_cut"];
       $sbn = $data[$k]["salary_bonus_nominal"];
+
+      $ebk = $data[$k]["employee_bpjs_kesehatan"];
+      $ebj = $data[$k]["employee_bpjs_jamsos"];
+
       $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn;
       $ttl2 = $sg2 + $sm2 + $sd2 + $sbn;
 
@@ -806,6 +827,8 @@ class RptSalaryController extends Controller
       $info["ttl_uj_dinas"] += $ud;
       $info["ttl_nominal_cut"] += $nc;
       $info["ttl_bonus"] += $sbn;
+      $info["ttl_bpjs_kesehatan"] += $ebk;
+      $info["ttl_bpjs_jamsos"] += $ebj;
       $info["ttl_all"] += $ttl;
       $info["ttl_periode_2"] += $ttl2;
 
