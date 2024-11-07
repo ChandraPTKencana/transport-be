@@ -772,37 +772,35 @@ class SalaryPaidController extends Controller
       $v->salary_paid_id = $model_query->id;
       $v->save();
     }
-    if($model_query->period_part==2){
-      $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
-      ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)->lockForUpdate()->get();
+    $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
+    ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)->lockForUpdate()->get();
       
-      foreach($sbs as $v){
-  
-        $map_e = array_map(function($x){
-          return $x['employee_id'];
-        },$dt_dtl);
-  
-        $search = array_search($v->employee_id,$map_e);
-  
-        if(count($dt_dtl)==0 || $search===false){
-  
-          $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id",$v->employee_id)->first();
-  
-          array_push($dt_dtl,[
-            "salary_paid_id"        => $model_query->id,
-            "employee_id"           => $v->employee_id,
-            // "standby_nominal"       => 0,
-            "sb_gaji"               => 0,
-            "sb_makan"              => 0,
-            "sb_dinas"              => 0,
-            "salary_bonus_nominal"  => 0 + $v->nominal,
-          ]);
-        }else{
-          $dt_dtl[$search]['salary_bonus_nominal']+=$v->nominal;
-        }
-        $v->salary_paid_id = $model_query->id;
-        $v->save();
+    foreach($sbs as $v){
+
+      $map_e = array_map(function($x){
+        return $x['employee_id'];
+      },$dt_dtl);
+
+      $search = array_search($v->employee_id,$map_e);
+
+      if(count($dt_dtl)==0 || $search===false){
+
+        $emp = Employee::exclude(['attachment_1','attachment_2'])->where("id",$v->employee_id)->first();
+
+        array_push($dt_dtl,[
+          "salary_paid_id"        => $model_query->id,
+          "employee_id"           => $v->employee_id,
+          // "standby_nominal"       => 0,
+          "sb_gaji"               => 0,
+          "sb_makan"              => 0,
+          "sb_dinas"              => 0,
+          "salary_bonus_nominal"  => 0 + $v->nominal,
+        ]);
+      }else{
+        $dt_dtl[$search]['salary_bonus_nominal']+=$v->nominal;
       }
+      $v->salary_paid_id = $model_query->id;
+      $v->save();
     }
 
     foreach ($dt_dtl as $k => $v) {
