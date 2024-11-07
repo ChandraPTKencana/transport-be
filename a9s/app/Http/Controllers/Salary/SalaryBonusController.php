@@ -331,11 +331,11 @@ class SalaryBonusController extends Controller
         // $model_query->attachment_1_type = $fileType;
       $fileType     = $model_query->attachment_1_type;
       
-      if( $model_query->val==1 )
+      if( $model_query->val3==1 )
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
-      if($model_query->salary_paid_id) 
-      throw new \Exception("Data Sudah Digunakan Dan Tidak Dapat Di Ubah",1);
+      // if($model_query->salary_paid_id) 
+      // throw new \Exception("Data Sudah Digunakan Dan Tidak Dapat Di Ubah",1);
 
       if($request->hasFile('attachment_1')){
         $file = $request->file('attachment_1');
@@ -353,11 +353,13 @@ class SalaryBonusController extends Controller
 
       $model_query->attachment_1_type = $fileType;
 
-      $model_query->tanggal           = $request->tanggal;
-      $model_query->type              = $request->type;
-      $model_query->employee_id       = $request->employee_id;
-      $model_query->nominal           = $request->nominal;
-      $model_query->note              = $request->note;
+      if($model_query->val2=="0"){
+        $model_query->tanggal           = $request->tanggal;
+        $model_query->type              = $request->type;
+        $model_query->employee_id       = $request->employee_id;
+        $model_query->nominal           = $request->nominal;
+        $model_query->note              = $request->note;
+      }
 
       $model_query->updated_at        = $t_stamp;
       $model_query->updated_user      = $this->admin_id;
@@ -422,6 +424,9 @@ class SalaryBonusController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
 
+      if($model_query->val3==1)
+      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+
       if($model_query->salary_paid_id) 
       throw new \Exception("Data Sudah Digunakan Dan Tidak Dapat Di Hapus",1);
 
@@ -469,7 +474,7 @@ class SalaryBonusController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['salary_bonus.val1','salary_bonus.val2']);
+    MyAdmin::checkMultiScope($this->permissions, ['salary_bonus.val1','salary_bonus.val2','salary_bonus.val3']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\SalaryBonus,id",
@@ -503,6 +508,13 @@ class SalaryBonusController extends Controller
         $model_query->val2 = 1;
         $model_query->val2_user = $this->admin_id;
         $model_query->val2_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'salary_bonus.val3',true) && !$model_query->val3){
+        $run_val++;
+        $model_query->val3 = 1;
+        $model_query->val3_user = $this->admin_id;
+        $model_query->val3_at = $t_stamp;
       }
 
       $model_query->save();

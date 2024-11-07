@@ -124,8 +124,8 @@ class RunPermit extends Command
         $re_lists = [
             // ["permit"=>'trp_trx.absen.clear_valval1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
             // ["permit"=>'standby_trx.detail.decide_paid',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'trp_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-            ["permit"=>'extra_money_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
+            ["permit"=>'salary_bonus.val3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'extra_money_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
         ];
 
         foreach ($re_lists as $k => $v) {
