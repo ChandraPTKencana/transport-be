@@ -532,6 +532,10 @@ class SalaryBonusController extends Controller
         "val2_user"=>$model_query->val2_user,
         "val2_at"=>$model_query->val2_at,
         "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
