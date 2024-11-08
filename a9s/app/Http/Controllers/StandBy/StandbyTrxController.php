@@ -1516,6 +1516,19 @@ class StandbyTrxController extends Controller
         if($model_query->val1==0){
           throw new \Exception("Mandor Harus Memvalidasi Terlebih Dahulu",1);
         }
+        if(MyAdmin::checkScope($this->permissions, 'standby_trx.detail.decide_paid',true)){
+          $details_in = json_decode($request->details, true);
+          // $this->validateItems($details_in);
+
+          foreach ($details_in as $key => $value) {
+            StandbyTrxDtl::where("standby_trx_id",$model_query->id)
+            ->where("ordinal",$value['ordinal'])
+            ->update([
+              "be_paid"=>$value['be_paid']
+            ]);
+          }
+        }
+
         $model_query->val2 = 1;
         $model_query->val2_user = $this->admin_id;
         $model_query->val2_at = $t_stamp;
