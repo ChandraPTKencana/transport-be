@@ -46,6 +46,7 @@ class RptSalaryDtlResource extends JsonResource
 
             'nominal_cut'               => $this->nominal_cut,
             'salary_bonus_nominal'      => $this->salary_bonus_nominal,
+            'kerajinan'                 => $this->kerajinan,
         ];
     }
 }

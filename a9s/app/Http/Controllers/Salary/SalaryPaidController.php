@@ -348,7 +348,7 @@ class SalaryPaidController extends Controller
 
       array_push( $SYSNOTES ,"Change salary_paid_id ".$model_query->id." field in standby trx and salary bonus to null \n");
       StandbyTrx::where('salary_paid_id',$model_query->id)->lockForUpdate()->update(['salary_paid_id'=>null]);
-      SalaryBonus::exclude(['attachment_1'])->where('salary_paid_id',$model_query->id)->lockForUpdate()->update(['salary_paid_id'=>null]);
+      SalaryBonus::exclude(['attachment_1'])->where('salary_paid_id',$model_query->id)->where("type","!=","Kerajinan")->lockForUpdate()->update(['salary_paid_id'=>null]);
 
       array_push( $SYSNOTES ,"Remove All Details \n");
       SalaryPaidDtl::where('salary_paid_id',$model_query->id)->lockForUpdate()->delete();
@@ -773,7 +773,9 @@ class SalaryPaidController extends Controller
       $v->save();
     }
     $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
-    ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)->lockForUpdate()->get();
+    ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)
+    ->where("type","!=","Kerajinan")
+    ->lockForUpdate()->get();
       
     foreach($sbs as $v){
 

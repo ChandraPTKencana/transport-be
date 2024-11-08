@@ -345,6 +345,11 @@ class RptSalaryController extends Controller
 
       array_push( $SYSNOTES ,"Remove All Details \n");
       RptSalaryDtl::where('rpt_salary_id',$model_query->id)->lockForUpdate()->delete();
+      SalaryBonus::exclude(['attachment_1'])->where('salary_paid_id',function ($q)use($model_query){
+        $q->select("id");
+        $q->from('salary_paid');
+        $q->where('period_end',$model_query->period_end);
+      })->where("type","Kerajinan")->lockForUpdate()->update(['salary_paid_id'=>null]);
 
       array_push( $SYSNOTES ,"Change rpt_salary_id field in standby trx and salary bonus to ".$model_query->id." and insert new Details \n");
       $this->reInsertDetails($model_query);
@@ -747,16 +752,30 @@ class RptSalaryController extends Controller
         $v["employee_bpjs_jamsos"]    = $empx->bpjs_jamsos;
       }
 
+      $v['kerajinan'] = 0;
+      $salbon = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
+      ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)
+      ->where("type","Kerajinan")
+      ->where("employee_id",$v["employee_id"])
+      ->lockForUpdate()->get();
+
+      foreach ($salbon as $ksb => $vsb) {
+        $v["kerajinan"] += $vsb->nominal;
+
+        $vsb->salary_paid_id = $salary_paid[1]->id;
+        $vsb->save();
+      }
+
       if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
         if($empx->deleted==0)
-        $v['salary_bonus_nominal'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
+        $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
       }
 
       if(
         !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 
         $v["sb_gaji_2"]==0 && $v["sb_makan_2"]==0 && $v["sb_dinas_2"]==0 && 
         $v["uj_gaji"]==0 && $v["uj_makan"]==0 && $v["uj_dinas"]==0 && 
-        $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0) 
+        $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0 && $v["kerajinan"]==0) 
         ) RptSalaryDtl::insert($v);
     }
   }
@@ -790,6 +809,7 @@ class RptSalaryController extends Controller
       "ttl_bpjs_kesehatan"  => 0,
       "ttl_bpjs_jamsos"     => 0,
       "ttl_nominal_cut"     => 0,
+      "ttl_kerajinan"       => 0,
       "ttl_bonus"           => 0,
       "ttl_all"             => 0,
       "ttl_periode_2"       => 0,
@@ -809,12 +829,13 @@ class RptSalaryController extends Controller
       $ud = $data[$k]["uj_dinas"];
       $nc = $data[$k]["nominal_cut"];
       $sbn = $data[$k]["salary_bonus_nominal"];
+      $ker = $data[$k]["kerajinan"];
 
       $ebk = $data[$k]["employee_bpjs_kesehatan"];
       $ebj = $data[$k]["employee_bpjs_jamsos"];
 
-      $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn;
-      $ttl2 = $sg2 + $sm2 + $sd2 + $sbn;
+      $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn + $ker;
+      $ttl2 = $sg2 + $sm2 + $sd2 + $sbn + $ker;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
@@ -829,6 +850,7 @@ class RptSalaryController extends Controller
       $info["ttl_bonus"] += $sbn;
       $info["ttl_bpjs_kesehatan"] += $ebk;
       $info["ttl_bpjs_jamsos"] += $ebj;
+      $info["ttl_kerajinan"] += $ker;
       $info["ttl_all"] += $ttl;
       $info["ttl_periode_2"] += $ttl2;
 

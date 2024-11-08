@@ -2,7 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\MySql\TrxAbsen;
+use App\Models\MySql\TrxTrp;
 use Illuminate\Console\Command;
+use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Encoders\AutoEncoder;
+use Illuminate\Support\Facades\File;
 
 class RunData extends Command
 {
@@ -69,10 +74,57 @@ class RunData extends Command
         //     $q->where('val',1);            
         // })->update(['be_paid'=>1]);
 
-        $trx_trps = \App\Models\MySql\TrxTrp::whereNotNull("pv_id")->update(['pv_complete'=>1]);
-        $extra_moneys = \App\Models\MySql\ExtraMoneyTrx::whereNotNull("pv_id")->update(['pv_complete'=>1]);
+        // $trx_trps = \App\Models\MySql\TrxTrp::whereNotNull("pv_id")->update(['pv_complete'=>1]);
+        // $extra_moneys = \App\Models\MySql\ExtraMoneyTrx::whereNotNull("pv_id")->update(['pv_complete'=>1]);
 
 
+        // $trx_absens = TrxAbsen::exclude(['gambar'])->get();
+        // foreach ($trx_absens as $key => $value) {
+        //     $gmbr = TrxAbsen::select('gambar','gambar_loc','created_at')->where("id",$value->id)->first();
+        //     // $this->info(json_encode($gmbr->gambar)."\n ");
+
+        //     if($gmbr->gambar){
+        //         $img = "data:image/png;base64,";
+        //         if(mb_detect_encoding($gmbr->gambar)===false){
+        //             $img.=base64_encode($gmbr->gambar);
+        //         }else{
+        //             $img.=$gmbr->gambar;        
+        //         }
+                
+        //         $date = new \DateTime();
+        //         $timestamp = $date->format("Y-m-d H:i:s.v");
+        //         $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . 'png';
+
+        //         // $location = "/files/trx_absen";
+        //         // File::ensureDirectoryExists($location);
+        //         // $location = $location."/{$ca_path[0]}";
+        //         // File::ensureDirectoryExists($location);
+        //         // $location = $location."/{$ca_path[1]}";
+        //         // File::ensureDirectoryExists($location);
+        //         $ca_path = explode("-",$gmbr->created_at);
+        //         $location = "/files/trx_absen/{$ca_path[0]}/{$ca_path[1]}";
+
+        //         $full_lf = $location."/{$file_name}";
+
+        //         File::ensureDirectoryExists(files_path($location));
+
+        //         Image::read($img)->save(files_path($full_lf));
+
+        //         $gmbr->gambar_loc = $location;
+        //         // $gmbr->gambar = null;
+        //         $gmbr->save();
+        //     }
+        // }
+
+
+        foreach (\App\Models\MySql\SalaryPaidDtl::get() as $key => $value) {
+            if($value->salary_bonus_nominal > 0){
+                $value->kerajinan = $value->salary_bonus_nominal;
+                $value->salary_bonus_nominal = 0;
+                $value->save();
+            }
+        }
+        
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");
     }
