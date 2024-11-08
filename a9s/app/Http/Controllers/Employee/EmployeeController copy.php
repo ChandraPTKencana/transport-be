@@ -75,7 +75,55 @@ class EmployeeController extends Controller
     if($request->first_row){
       $first_row 	= json_decode($request->first_row, true);
     }
+    //======================================================================================================
+    // Model Sorting | Example $request->sort = "username:desc,role:desc";
+    //======================================================================================================
 
+    if ($request->sort) {
+      $sort_lists = [];
+
+      $sorts = explode(",", $request->sort);
+      foreach ($sorts as $key => $sort) {
+        $side = explode(":", $sort);
+        $side[1] = isset($side[1]) ? $side[1] : 'ASC';
+        $sort_symbol = $side[1] == "desc" ? "<=" : ">=";
+        $sort_lists[$side[0]] = $side[1];
+      }
+
+      if (isset($sort_lists["name"])) {
+        $model_query = $model_query->orderBy("name", $sort_lists["name"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("name",$sort_symbol,$first_row["name"]);
+        }
+      }
+
+      if (isset($sort_lists["role"])) {
+        $model_query = $model_query->orderBy("role", $sort_lists["role"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("role",$sort_symbol,$first_row["role"]);
+        }
+      }
+
+      
+
+      // if (isset($sort_lists["role"])) {
+      //   $model_query = $model_query->orderBy(function($q){
+      //     $q->from("internal.roles")
+      //     ->select("name")
+      //     ->whereColumn("id","auths.role_id");
+      //   },$sort_lists["role"]);
+      // }
+
+      // if (isset($sort_lists["auth"])) {
+      //   $model_query = $model_query->orderBy(function($q){
+      //     $q->from("users as u")
+      //     ->select("u.username")
+      //     ->whereColumn("u.id","users.id");
+      //   },$sort_lists["auth"]);
+      // }
+    } else {
+      $model_query = $model_query->orderBy('id', 'ASC');
+    }
     //======================================================================================================
     // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
     //======================================================================================================
@@ -90,123 +138,53 @@ class EmployeeController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      $list_to_like = ["id","name","role","ktp_no","sim_no","phone_number","rek_no"];
-
-      // $list_to_like_user = [
-      //   ["val_name","val_user"],
-      //   ["val1_name","val1_user"],
-      //   ["val2_name","val2_user"],
-      //   ["req_deleted_name","req_deleted_user"],
-      //   ["deleted_name","deleted_user"],
-      // ];
-
-      
-
       if(count($like_lists) > 0){
-        $model_query = $model_query->where(function ($q)use($like_lists,$list_to_like){
-          foreach ($list_to_like as $key => $v) {
-            if (isset($like_lists[$v])) {
-              $q->orWhere($v, "like", $like_lists[$v]);
-            }
+        $model_query = $model_query->where(function ($q)use($like_lists){
+            
+          if (isset($like_lists["name"])) {
+            $q->orWhere("name", "like", $like_lists["name"]);
+          }
+    
+          if (isset($like_lists["role"])) {
+            $q->orWhere("role", "like", $like_lists["role"]);
           }
 
-          // foreach ($list_to_like_user as $key => $v) {
-          //   if (isset($like_lists[$v[0]])) {
-          //     $q->orWhereIn($v[1], function($q2)use($like_lists,$v) {
-          //       $q2->from('is_users')
-          //       ->select('id')->where("username",'like',$like_lists[$v[0]]);          
-          //     });
-          //   }
-          // }
+          if (isset($like_lists["ktp_no"])) {
+            $q->orWhere("ktp_no", "like", $like_lists["ktp_no"]);
+          }
+    
+          if (isset($like_lists["sim_no"])) {
+            $q->orWhere("sim_no", "like", $like_lists["sim_no"]);
+          }
+
+          if (isset($like_lists["phone_number"])) {
+            $q->orWhere("phone_number", "like", $like_lists["phone_number"]);
+          }
+    
+          if (isset($like_lists["rek_no"])) {
+            $q->orWhere("rek_no", "like", $like_lists["rek_no"]);
+          }
 
         });        
-      }     
+      }
     }
 
     // ==============
     // Model Filter
     // ==============
 
-    $fm_sorts=[];
-    if($request->filter_model){
-      $filter_model = json_decode($request->filter_model,true);
-  
-      foreach ($filter_model as $key => $value) {
-        if($value["sort_priority"] && $value["sort_type"]){
-          array_push($fm_sorts,[
-            "key"    =>$key,
-            "priority"=>$value["sort_priority"],
-          ]);
-        }
-      }
-
-      if(count($fm_sorts)>0){
-        usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
-        foreach ($fm_sorts as $key => $value) {
-          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
-          if (count($first_row) > 0) {
-            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
-            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
-          }
-        }
-      }
-
-      $model_query = $model_query->where(function ($q)use($filter_model,$request){
-
-        foreach ($filter_model as $key => $value) {
-          if(!isset($value['type'])) continue;
-
-          if(array_search($key,['status'])!==false){
-          }else{
-            MyLib::queryCheck($value,$key,$q);
-          }
-        }
-        
-         
-       
-        // if (isset($like_lists["requested_name"])) {
-        //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
-        //     $q2->from('is_users')
-        //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
-        //   });
-        // }
-  
-        // if (isset($like_lists["confirmed_name"])) {
-        //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
-        //     $q2->from('is_users')
-        //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
-        //   });
-        // }
-      });  
-    }
-    
-    if(!$request->filter_model || count($fm_sorts)==0){
-      $model_query = $model_query->orderBy('name', 'asc')->orderBy('id','DESC');
-    }
-    
-    $filter_status = $request->filter_status;
-    
-    if($filter_status=="available"){
-      $model_query = $model_query->where("deleted",0)->where("val",1);
+    if (isset($request->name)) {
+      $model_query = $model_query->where("name", 'like', '%' . $request->name . '%');
     }
 
-    if($filter_status=="unapprove"){
-      $model_query = $model_query->where("deleted",0)->where(function($q){
-       $q->where("val",0); 
-      });
+    if (isset($request->role)) {
+      $model_query = $model_query->where("role", 'like', '%' . $request->role . '%');
     }
 
-    if($filter_status=="deleted"){
-      $model_query = $model_query->where("deleted",1);
-    }
-
-    // if($filter_status=="req_deleted"){
-    //   $model_query = $model_query->where("deleted",0);
-    // }
 
     $model_query = $model_query->exclude(["attachment_1"]);
 
-    $model_query = $model_query->with(['val_by','bank','deleted_by'])->get();
+    $model_query = $model_query->where("deleted",0)->with('bank')->get();
 
     return response()->json([
       // "data"=>EmployeeResource::collection($employees->keyBy->id),
@@ -218,7 +196,7 @@ class EmployeeController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'employee.view');
     
-    $model_query = Employee::with(['val_by','bank','deleted_by'])->find($request->id);
+    $model_query = Employee::with(['val_by','bank'])->find($request->id);
     return response()->json([
       "data" => new EmployeeResource($model_query),
     ], 200);

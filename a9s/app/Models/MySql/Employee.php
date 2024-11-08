@@ -102,6 +102,11 @@ class Employee extends Authenticatable
     {
         return $this->hasOne(IsUser::class, 'id', "val_user");
     }
+
+    public function deleted_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "deleted_user");
+    }
     // public function scopeOfRole(Builder $query, string $role): void
     // {
     //     $query->where('role', $role);
