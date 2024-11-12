@@ -108,11 +108,16 @@ class ExtraMoneyTrxResource extends JsonResource
 
             'received_payment'  => $this->received_payment,
 
+            // 'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+            // 'attachment_1_loc'     => $this->attachment_1_loc,
             'attachment_1'          => null,
             'attachment_1_preview'  => $this->attachment_1_loc && File::exists(files_path($this->attachment_1_loc)) ? "data:".$this->attachment_1_type.";base64,".base64_encode(File::get(files_path($this->attachment_1_loc))) :"",
-            // 'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
             'attachment_1_type'     => $this->attachment_1_type,
-            // 'attachment_1_loc'     => $this->attachment_1_loc,
+
+            'attachment_2'          => null,
+            'attachment_2_preview'  => $this->attachment_2_loc && File::exists(files_path($this->attachment_2_loc)) ? "data:".$this->attachment_2_type.";base64,".base64_encode(File::get(files_path($this->attachment_2_loc))) :"",
+            'attachment_2_type'     => $this->attachment_2_type,
+
             'prev_trx_trp_id'       => $this->prev_trx_trp_id,
         ];
     }

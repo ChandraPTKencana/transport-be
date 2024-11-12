@@ -26,6 +26,7 @@ class StandbyMstResource extends JsonResource
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
             'is_transition'     => $this->is_transition ? 1 : 0,
+            'is_trip'           => $this->is_trip ? 1 : 0,
             'driver_asst_opt'   => $this->driver_asst_opt,
 
             'val'               => $this->val,

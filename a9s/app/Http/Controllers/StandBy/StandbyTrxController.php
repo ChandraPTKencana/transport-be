@@ -29,6 +29,7 @@ use App\Http\Requests\MySql\StandbyTrxRequest;
 
 use App\Http\Resources\MySql\StandbyTrxResource;
 use App\Http\Resources\MySql\IsUserResource;
+use App\Models\MySql\TrxTrp;
 
 class StandbyTrxController extends Controller
 {
@@ -390,6 +391,17 @@ class StandbyTrxController extends Controller
       if($standby_mst->is_transition && ($request->transition_target=='' || $request->transition_type=='')) 
         throw new \Exception("Info Peralihan Harap Diisi",1);
 
+      if($standby_mst->is_trip && !$standby_mst->is_transition){
+        if(!$request->trx_trp_id)
+        throw new \Exception("Harap Trx Trp ID Diisi",1);
+
+        $trx_trp = TrxTrp::where("id",$request->trx_trp_id)->first();
+        if(!$trx_trp) 
+        throw new \Exception("Trx Trp Tidak Ditemukan",1);
+
+        $model_query->trx_trp_id = $trx_trp->id;
+      }
+
       $model_query->standby_mst_id      = $standby_mst->id;
       if($standby_mst->is_transition){
         $model_query->transition_target   = $request->transition_target;
@@ -419,7 +431,7 @@ class StandbyTrxController extends Controller
 
       $model_query->xto                 = $request->xto;
       $model_query->note_for_remarks    = $request->note_for_remarks;
-      $model_query->ref                 = $request->ref;
+      // $model_query->ref                 = $request->ref;
       
       // if($online_status=="true"){
       //   if($request->cost_center_code){
@@ -605,6 +617,17 @@ class StandbyTrxController extends Controller
         
         if($standby_mst->is_transition && ($request->transition_target=='' || $request->transition_type=='')) 
         throw new \Exception("Info Peralihan Harap Diisi",1);
+
+        if($standby_mst->is_trip && !$standby_mst->is_transition){
+          if(!$request->trx_trp_id)
+          throw new \Exception("Harap Trx Trp ID Diisi",1);
+  
+          $trx_trp = TrxTrp::where("id",$request->trx_trp_id)->first();
+          if(!$trx_trp) 
+          throw new \Exception("Trx Trp Tidak Ditemukan",1);
+  
+          $model_query->trx_trp_id = $trx_trp->id;
+        }
         
         $model_query->standby_mst_id      = $standby_mst->id;
 
@@ -647,7 +670,7 @@ class StandbyTrxController extends Controller
   
         $model_query->xto                 = $request->xto;
         $model_query->note_for_remarks    = $request->note_for_remarks;
-        $model_query->ref                 = $request->ref;
+        // $model_query->ref              = $request->ref;
       }
 
       // if($request->cost_center_code!=$model_query->cost_center_code){

@@ -292,7 +292,7 @@ class ExtraMoneyTrxController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee','payment_method'])->exclude(['attachment_1_loc'])->get();
+    $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','extra_money','employee','payment_method'])->exclude(['attachment_1_loc','attachment_2_loc'])->get();
 
     return response()->json([
       "data" => ExtraMoneyTrxResource::collection($model_query),
@@ -394,6 +394,34 @@ class ExtraMoneyTrxController extends Controller
         $model_query->attachment_1_type = $fileType;
       }
 
+      if($request->hasFile('attachment_2')){
+        $file = $request->file('attachment_2');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $ext = $file->extension();
+        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+        throw new MyException([ "attachment_2" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+
+        $image = Image::read($path)->scale(height: $this->height);
+        $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+
+        $date = new \DateTime();
+        $timestamp = $date->format("Y-m-d H:i:s.v");
+        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '-2.' . $ext;
+        $location = "/files/extra_money_trx/{$file_name}";
+        try {
+          ini_set('memory_limit', '256M');
+          Image::read($compressedImageBinary)->save(files_path($location));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan Foto Gagal");
+        }
+
+        // $blob_img_leave = base64_encode($compressedImageBinary); 
+        // $blobFile = base64_encode(file_get_contents($path));
+        $model_query->attachment_2_loc = $location;
+        $model_query->attachment_2_type = $fileType;
+      }
+
       $model_query->save();
 
       $rollback_id = $model_query->id - 1;
@@ -442,6 +470,7 @@ class ExtraMoneyTrxController extends Controller
     $t_stamp        = date("Y-m-d H:i:s");
     $location             = null;
     $attachment_1_preview = $request->attachment_1_preview;
+    $attachment_2_preview = $request->attachment_2_preview;
     $fileType             = null;
 
     DB::beginTransaction();
@@ -451,39 +480,101 @@ class ExtraMoneyTrxController extends Controller
       $SYSOLD      = clone($model_query);
       // array_push( $SYSNOTES ,"Details: \n");
 
-      if($model_query->val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
+      if($model_query->val6==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
-      if($model_query->trx_trp_id) 
-      throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
+      if($model_query->val1==0){
 
-      $employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where("id",$request->employee_id)
-      ->where("deleted",0)
-      ->lockForUpdate()
-      ->first();
+        if($model_query->trx_trp_id) 
+        throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
+  
+        $employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->where("id",$request->employee_id)
+        ->where("deleted",0)
+        ->lockForUpdate()
+        ->first();
+  
+        if(!$employee)
+        throw new \Exception("Pekerja tidak terdaftar",1);
+  
+        if($request->payment_method_id == 2){
+          if(!$employee->rek_no && $employee->id != 1)
+          throw new \Exception("Tidak ada no rekening pekerja",1);
+        }
+  
+        $extra_money = \App\Models\MySql\ExtraMoney::where("id",$request->extra_money_id)
+        ->where("deleted",0)
+        ->lockForUpdate()
+        ->first();
+  
+        if(!$extra_money) 
+        throw new \Exception("Silahkan Isi Data Uang Tambahan Dengan Benar",1);
+  
+        $trx_trp = TrxTrp::where("id",$request->prev_trx_trp_id)->where("supir_id",$employee->id)->first();
+        if(!$trx_trp) 
+        throw new \Exception("Trx Trp Pekerja Tidak Sesuai",1);
+  
+        if($request->hasFile('attachment_1')){
+          $file = $request->file('attachment_1');
+          $path = $file->getRealPath();
+          $fileType = $file->getClientMimeType();
+          // $blobFile = base64_encode(file_get_contents($path));
+          // $change++;
+  
+  
+          $ext = $file->extension();
+          if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+          throw new MyException([ "attachment_1" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+  
+          $image = Image::read($path)->scale(height: $this->height);
+          $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+  
+          $date = new \DateTime();
+          $timestamp = $date->format("Y-m-d H:i:s.v");
+          $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+          $location = "/files/extra_money_trx/{$file_name}";
+          try {
+            ini_set('memory_limit', '256M');
+            Image::read($compressedImageBinary)->save(files_path($location));
+          } catch (\Exception $e) {
+            throw new \Exception("Simpan Foto Gagal");
+          }
+  
+          if (File::exists(files_path($model_query->attachment_1_loc)) && $model_query->attachment_1_loc != null) {
+            if (!unlink(files_path($model_query->attachment_1_loc)))
+              throw new \Exception("Gagal Hapus Gambar", 1);
+          }
+          
+          $model_query->attachment_1_type   = $fileType;
+          $model_query->attachment_1_loc    = $location;
+  
+        }
+  
+        if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
+          if (File::exists(files_path($model_query->attachment_1_loc)) && $model_query->attachment_1_loc != null) {
+            if (!unlink(files_path($model_query->attachment_1_loc)))
+              throw new \Exception("Gagal Hapus Gambar", 1);
+          }
+          $location = null;
+          $fileType = null;
+          $model_query->attachment_1_type   = $fileType;
+          $model_query->attachment_1_loc    = $location;
+        }
+  
 
-      if(!$employee)
-      throw new \Exception("Pekerja tidak terdaftar",1);
-
-      if($request->payment_method_id == 2){
-        if(!$employee->rek_no && $employee->id != 1)
-        throw new \Exception("Tidak ada no rekening pekerja",1);
+        $model_query->extra_money_id      = $request->extra_money_id;
+        $model_query->tanggal             = $request->tanggal;
+        $model_query->employee_id         = $employee->id;
+        $model_query->employee_rek_no     = $employee->rek_no;
+        $model_query->employee_rek_name   = $employee->rek_name;
+        $model_query->no_pol              = $request->no_pol;
+        $model_query->note_for_remarks    = $request->note_for_remarks;
+  
+        $model_query->prev_trx_trp_id     = $request->prev_trx_trp_id;
+        $model_query->payment_method_id   = $request->payment_method_id;
       }
 
-      $extra_money = \App\Models\MySql\ExtraMoney::where("id",$request->extra_money_id)
-      ->where("deleted",0)
-      ->lockForUpdate()
-      ->first();
-
-      if(!$extra_money) 
-      throw new \Exception("Silahkan Isi Data Uang Tambahan Dengan Benar",1);
-
-      $trx_trp = TrxTrp::where("id",$request->prev_trx_trp_id)->where("supir_id",$employee->id)->first();
-      if(!$trx_trp) 
-      throw new \Exception("Trx Trp Pekerja Tidak Sesuai",1);
-
-      if($request->hasFile('attachment_1')){
-        $file = $request->file('attachment_1');
+      if($request->hasFile('attachment_2')){
+        $file = $request->file('attachment_2');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
         // $blobFile = base64_encode(file_get_contents($path));
@@ -492,7 +583,7 @@ class ExtraMoneyTrxController extends Controller
 
         $ext = $file->extension();
         if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-        throw new MyException([ "attachment_1" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+        throw new MyException([ "attachment_2" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
         $image = Image::read($path)->scale(height: $this->height);
         $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
@@ -508,38 +599,26 @@ class ExtraMoneyTrxController extends Controller
           throw new \Exception("Simpan Foto Gagal");
         }
 
-        if (File::exists(files_path($model_query->attachment_1_loc)) && $model_query->attachment_1_loc != null) {
-          if (!unlink(files_path($model_query->attachment_1_loc)))
+        if (File::exists(files_path($model_query->attachment_2_loc)) && $model_query->attachment_2_loc != null) {
+          if (!unlink(files_path($model_query->attachment_2_loc)))
             throw new \Exception("Gagal Hapus Gambar", 1);
         }
         
-        $model_query->attachment_1_type   = $fileType;
-        $model_query->attachment_1_loc    = $location;
+        $model_query->attachment_2_type   = $fileType;
+        $model_query->attachment_2_loc    = $location;
 
       }
 
-      if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
-        if (File::exists(files_path($model_query->attachment_1_loc)) && $model_query->attachment_1_loc != null) {
-          if (!unlink(files_path($model_query->attachment_1_loc)))
+      if (!$request->hasFile('attachment_2') && $attachment_2_preview == null) {
+        if (File::exists(files_path($model_query->attachment_2_loc)) && $model_query->attachment_2_loc != null) {
+          if (!unlink(files_path($model_query->attachment_2_loc)))
             throw new \Exception("Gagal Hapus Gambar", 1);
         }
         $location = null;
         $fileType = null;
-        $model_query->attachment_1_type   = $fileType;
-        $model_query->attachment_1_loc    = $location;
+        $model_query->attachment_2_type   = $fileType;
+        $model_query->attachment_2_loc    = $location;
       }
-
-      
-      $model_query->extra_money_id      = $request->extra_money_id;
-      $model_query->tanggal             = $request->tanggal;
-      $model_query->employee_id         = $employee->id;
-      $model_query->employee_rek_no     = $employee->rek_no;
-      $model_query->employee_rek_name   = $employee->rek_name;
-      $model_query->no_pol              = $request->no_pol;
-      $model_query->note_for_remarks    = $request->note_for_remarks;
-
-      $model_query->prev_trx_trp_id     = $request->prev_trx_trp_id;
-      $model_query->payment_method_id   = $request->payment_method_id;
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
