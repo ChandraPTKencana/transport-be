@@ -42,6 +42,7 @@ class StandbyTrxResource extends JsonResource
             'xto'               => $this->xto ?? "",
             'note_for_remarks'  => $this->note_for_remarks ?? '',
             'ref'               => $this->ref ?? '',
+            'trx_trp_id'        => $this->trx_trp_id ?? '',
 
             'cost_center_code'  => $this->cost_center_code ?? "",
             'cost_center_desc'  => $this->cost_center_desc ?? "",

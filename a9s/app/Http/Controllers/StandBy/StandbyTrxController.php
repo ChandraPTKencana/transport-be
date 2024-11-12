@@ -519,6 +519,7 @@ class StandbyTrxController extends Controller
         $detail->attachment_1_type  = $fileTypes[$key];
 
         $detail->tanggal            = $value['tanggal'];
+        $detail->waktu              = $value['waktu']=='' ? null : $value['waktu'];
         $detail->note               = $value['note'];
 
         if(MyAdmin::checkScope($this->permissions, 'standby_trx.detail.decide_paid',true)){
@@ -850,6 +851,8 @@ class StandbyTrxController extends Controller
               $mq->ordinal            = $v["ordinal"];
               // !!! IZIN EDIT TANGGAL TIDAK LAGI DIPERBOLEHKAN
               $mq->tanggal            = $v["tanggal"]; 
+              $mq->waktu              = $v['waktu']=='' ? null : $v['waktu'];
+
               $mq->note               = $v["note"];
 
               if(MyAdmin::checkScope($this->permissions, 'standby_trx.detail.decide_paid',true)){
@@ -902,6 +905,7 @@ class StandbyTrxController extends Controller
               'standby_trx_id'    => $model_query->id,
               'ordinal'           => $v["ordinal"],
               "tanggal"           => $v["tanggal"],
+              "waktu"             => $v["waktu"]=='' ? null : $v['waktu'],
               "note"              => $v["note"],
               "attachment_1"      => $blobFiles[$v["ordinal"]-1],
               "attachment_1_type" => $fileTypes[$v["ordinal"]-1],

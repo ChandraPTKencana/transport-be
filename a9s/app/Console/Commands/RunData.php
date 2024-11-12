@@ -117,11 +117,13 @@ class RunData extends Command
         // }
 
 
-        foreach (\App\Models\MySql\SalaryPaidDtl::get() as $key => $value) {
-            if($value->salary_bonus_nominal > 0){
-                $value->kerajinan = $value->salary_bonus_nominal;
-                $value->salary_bonus_nominal = 0;
+        foreach (\App\Models\MySql\StandbyTrx::whereNotNull("ref")->get() as $key => $value) {
+            $trx_trp =\App\Models\MySql\TrxTrp::where("id",$value->ref)->first();
+            if($trx_trp){
+                $value->trx_trp_id = $value->ref;
                 $value->save();
+            }else{
+                $this->info("ID ".$value->id.",ref not found in trx trp \n ");
             }
         }
         

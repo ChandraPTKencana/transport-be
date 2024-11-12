@@ -19,6 +19,7 @@ class StandbyTrxDtlResource extends JsonResource
         return [
             'ordinal'               => $this->ordinal,
             'tanggal'               => $this->tanggal,
+            'waktu'                 => $this->waktu ?? "",
             'note'                  => $this->note ?? "",
             'be_paid'               => $this->be_paid,
             'attachment_1'          => null,
