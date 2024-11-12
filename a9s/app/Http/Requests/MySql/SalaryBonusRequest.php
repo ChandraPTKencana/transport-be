@@ -32,7 +32,7 @@ class SalaryBonusRequest extends FormRequest
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['tanggal']       = 'required|date_format:Y-m-d';
-            $rules['type']          = 'required|in:Kerajinan';
+            $rules['type']          = 'required|in:Kerajinan,Lainnya';
             $rules['employee_id']   = 'required|exists:App\Models\MySql\Employee,id';
             $rules['nominal']       = 'required|numeric';
             // $rules['attachment_1']  = 'nullable|mimes:jpeg,jpg,png,pdf|max:2048';
