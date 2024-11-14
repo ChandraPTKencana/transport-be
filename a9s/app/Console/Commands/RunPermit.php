@@ -124,7 +124,7 @@ class RunPermit extends Command
         $re_lists = [
             // ["permit"=>'trp_trx.absen.clear_valval1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
             // ["permit"=>'standby_trx.detail.decide_paid',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            ["permit"=>'salary_bonus.val3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'user.remove',"to"=>['SUPERADMIN']],
             // ["permit"=>'extra_money_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
         ];
 

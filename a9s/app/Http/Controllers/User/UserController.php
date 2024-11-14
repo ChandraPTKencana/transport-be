@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Exceptions\MyException;
 
 use App\Helpers\MyAdmin;
-
+use App\Helpers\MyLib;
 use App\Models\MySql\PermissionUserDetail;
 use App\Models\MySql\IsUser;
 
@@ -74,53 +74,6 @@ class UserController extends Controller
       $first_row 	= json_decode($request->first_row, true);
     }
     //======================================================================================================
-    // Model Sorting | Example $request->sort = "username:desc,role:desc";
-    //======================================================================================================
-
-    if ($request->sort) {
-      $sort_lists = [];
-
-      $sorts = explode(",", $request->sort);
-      foreach ($sorts as $key => $sort) {
-        $side = explode(":", $sort);
-        $side[1] = isset($side[1]) ? $side[1] : 'ASC';
-        $sort_symbol = $side[1] == "desc" ? "<=" : ">=";
-        $sort_lists[$side[0]] = $side[1];
-      }
-
-      if (isset($sort_lists["username"])) {
-        $model_query = $model_query->orderBy("username", $sort_lists["username"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("username",$sort_symbol,$first_row["username"]);
-        }
-      }
-
-      if (isset($sort_lists["is_active"])) {
-        $model_query = $model_query->orderBy("is_active", $sort_lists["is_active"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("is_active",$sort_symbol,$first_row["is_active"]);
-        }
-      }
-
-      // if (isset($sort_lists["role"])) {
-      //   $model_query = $model_query->orderBy(function($q){
-      //     $q->from("internal.roles")
-      //     ->select("name")
-      //     ->whereColumn("id","auths.role_id");
-      //   },$sort_lists["role"]);
-      // }
-
-      // if (isset($sort_lists["auth"])) {
-      //   $model_query = $model_query->orderBy(function($q){
-      //     $q->from("users as u")
-      //     ->select("u.username")
-      //     ->whereColumn("u.id","users.id");
-      //   },$sort_lists["auth"]);
-      // }
-    } else {
-      $model_query = $model_query->orderBy('username', 'ASC');
-    }
-    //======================================================================================================
     // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
     //======================================================================================================
 
@@ -134,40 +87,109 @@ class UserController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
+      $list_to_like = ["id","username"];
+
+      // $list_to_like_user = [
+      //   ["val_name","val_user"],
+      //   ["val1_name","val1_user"],
+      //   ["val2_name","val2_user"],
+      //   ["req_deleted_name","req_deleted_user"],
+      //   ["deleted_name","deleted_user"],
+      // ];
+
+      
 
       if(count($like_lists) > 0){
-        $model_query = $model_query->where(function ($q)use($like_lists){            
-          if (isset($like_lists["username"])) {
-            $q->orWhere("username", "like", $like_lists["username"]);
-          }
-    
-          if (isset($like_lists["hak_akses"])) {
-            $q->orWhere("hak_akses", "like", $like_lists["hak_akses"]);
+        $model_query = $model_query->where(function ($q)use($like_lists,$list_to_like){
+          foreach ($list_to_like as $key => $v) {
+            if (isset($like_lists[$v])) {
+              $q->orWhere($v, "like", $like_lists[$v]);
+            }
           }
 
-          if (isset($like_lists["is_active"])) {
-            $q->orWhere("is_active", "like", $like_lists["is_active"]);
-          }
+          // foreach ($list_to_like_user as $key => $v) {
+          //   if (isset($like_lists[$v[0]])) {
+          //     $q->orWhereIn($v[1], function($q2)use($like_lists,$v) {
+          //       $q2->from('is_users')
+          //       ->select('id')->where("username",'like',$like_lists[$v[0]]);          
+          //     });
+          //   }
+          // }
+
         });        
-      }
-
-      // if (isset($like_lists["role"])) {
-      //   $model_query = $model_query->orWhere("role","like",$like_lists["role"]);
-      // }
+      }     
     }
 
     // ==============
     // Model Filter
     // ==============
 
-    if (isset($request->username)) {
-      $model_query = $model_query->where("username", 'like', '%' . $request->username . '%');
+    $fm_sorts=[];
+    if($request->filter_model){
+      $filter_model = json_decode($request->filter_model,true);
+  
+      foreach ($filter_model as $key => $value) {
+        if($value["sort_priority"] && $value["sort_type"]){
+          array_push($fm_sorts,[
+            "key"    =>$key,
+            "priority"=>$value["sort_priority"],
+          ]);
+        }
+      }
+
+      if(count($fm_sorts)>0){
+        usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
+        foreach ($fm_sorts as $key => $value) {
+          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+          if (count($first_row) > 0) {
+            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+          }
+        }
+      }
+
+      $model_query = $model_query->where(function ($q)use($filter_model,$request){
+
+        foreach ($filter_model as $key => $value) {
+          if(!isset($value['type'])) continue;
+
+          if(array_search($key,['status'])!==false){
+          }else{
+            MyLib::queryCheck($value,$key,$q);
+          }
+        }
+        
+         
+       
+        // if (isset($like_lists["requested_name"])) {
+        //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+        //   });
+        // }
+  
+        // if (isset($like_lists["confirmed_name"])) {
+        //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+        //   });
+        // }
+      });  
+    }
+    
+    if(!$request->filter_model || count($fm_sorts)==0){
+      $model_query = $model_query->orderBy('username', 'asc')->orderBy('id','DESC');
+    }
+    
+    $filter_status = $request->filter_status;
+    
+    if($filter_status=="active"){
+      $model_query = $model_query->where("is_active",1);
     }
 
-    if (isset($request->hak_akses)) {
-      $model_query = $model_query->where("hak_akses", 'like', '%' . $request->hak_akses . '%');
+    if($filter_status=="nonactive"){
+      $model_query = $model_query->where("is_active",0);
     }
-
 
     $model_query=$model_query->with(['permission_group_users'=>function ($q){
       $q->with('permission_group');      
