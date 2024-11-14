@@ -147,68 +147,139 @@ class SalaryBonusController extends Controller
     //   $model_query = $model_query->orderBy('period_start', 'DESC');
     // }
     
-    $model_query = $model_query->orderBy('id', 'DESC');
+    // $model_query = $model_query->orderBy('id', 'DESC');
 
     //======================================================================================================
     // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
     //======================================================================================================
 
-    // if ($request->like) {
-    //   $like_lists = [];
+    if ($request->like) {
+      $like_lists = [];
 
-    //   $likes = explode(",", $request->like);
-    //   foreach ($likes as $key => $like) {
-    //     $side = explode(":", $like);
-    //     $side[1] = isset($side[1]) ? $side[1] : '';
-    //     $like_lists[$side[0]] = $side[1];
-    //   }
+      $likes = explode(",", $request->like);
+      foreach ($likes as $key => $like) {
+        $side = explode(":", $like);
+        $side[1] = isset($side[1]) ? $side[1] : '';
+        $like_lists[$side[0]] = $side[1];
+      }
 
-    //   if(count($like_lists) > 0){
-    //     $model_query = $model_query->where(function ($q)use($like_lists){
-            
-    //       if (isset($like_lists["id"])) {
-    //         $q->orWhere("id", "like", $like_lists["id"]);
-    //       }
-    
-    //       if (isset($like_lists["xto"])) {
-    //         $q->orWhere("xto", "like", $like_lists["xto"]);
-    //       }
-    
-    //       if (isset($like_lists["tipe"])) {
-    //         $q->orWhere("tipe", "like", $like_lists["tipe"]);
-    //       }
+      $list_to_like = ["id"];
 
-    //       if (isset($like_lists["jenis"])) {
-    //         $q->orWhere("jenis", "like", $like_lists["jenis"]);
-    //       }
-    //       if (isset($like_lists["harga"])) {
-    //         $q->orWhere("harga", "like", $like_lists["harga"]);
-    //       }
-    
-    //       // if (isset($like_lists["requested_name"])) {
-    //       //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
-    //       //     $q2->from('is_users')
-    //       //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
-    //       //   });
-    //       // }
-    
-    //       // if (isset($like_lists["confirmed_name"])) {
-    //       //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
-    //       //     $q2->from('is_users')
-    //       //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
-    //       //   });
-    //       // }
-    //     });        
-    //   }
+      $list_to_like_employee = [
+        ["employee_name","employee_id"],
+      ];
 
       
-    // }
+
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists,$list_to_like,$list_to_like_employee){
+          foreach ($list_to_like as $key => $v) {
+            if (isset($like_lists[$v])) {
+              $q->orWhere($v, "like", $like_lists[$v]);
+            }
+          }
+
+          foreach ($list_to_like_employee as $key => $v) {
+            if (isset($like_lists[$v[0]])) {
+              $q->orWhereIn($v[1], function($q2)use($like_lists,$v) {
+                $q2->from('employee_mst')
+                ->select('id')->where("name",'like',$like_lists[$v[0]]);          
+              });
+            }
+          }
+
+        });        
+      }     
+    }
+
+    // ==============
+    // Model Filter
+    // ==============
+
+    $fm_sorts=[];
+    if($request->filter_model){
+      $filter_model = json_decode($request->filter_model,true);
+  
+      foreach ($filter_model as $key => $value) {
+        if($value["sort_priority"] && $value["sort_type"]){
+          array_push($fm_sorts,[
+            "key"    =>$key,
+            "priority"=>$value["sort_priority"],
+          ]);
+        }
+      }
+
+      if(count($fm_sorts)>0){
+        usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
+        foreach ($fm_sorts as $key => $value) {
+          if(array_search($value['key'],['employee_name','employee_ktp_no','employee_sim_no'])!==false){
+            $model_query = MyLib::queryOrderP1($model_query,"employee","employee_id",$value['key'],$filter_model[$value['key']]["sort_type"],"employee_mst");
+          }else{
+            $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+            if (count($first_row) > 0) {
+              $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+              $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+            }
+          }
+        }
+      }
+
+      $model_query = $model_query->where(function ($q)use($filter_model,$request){
+
+        foreach ($filter_model as $key => $value) {
+          if(!isset($value['type'])) continue;
+
+          if(array_search($key,['status'])!==false){
+          }else if(array_search($key,['employee_name','employee_ktp_no','employee_sim_no'])!==false){
+            MyLib::queryCheckP1("employee",$value,$key,$q,'employee_mst');
+          }else{
+            MyLib::queryCheck($value,$key,$q);
+          }
+        }
+        
+         
+       
+        // if (isset($like_lists["requested_name"])) {
+        //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+        //   });
+        // }
+  
+        // if (isset($like_lists["confirmed_name"])) {
+        //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+        //   });
+        // }
+      });  
+    }
+    
+    if(!$request->filter_model || count($fm_sorts)==0){
+      $model_query = $model_query->orderBy('id', 'desc');
+    }
+    
+    $filter_status = $request->filter_status;
+    
+    if($filter_status=="done"){
+      $model_query = $model_query->where("deleted",0)->where("val1",1)->where("val2",1)->where("val3",1)->whereNotNull("salary_paid_id");
+    }
+
+    if($filter_status=="undone"){
+      $model_query = $model_query->where("deleted",0)->where(function($q){
+       $q->where("val1",0)->orWhere("val2",0)->orWhere("val3",0)->orWhereNull("salary_paid_id"); 
+      });
+    }
+
+    if($filter_status=="deleted"){
+      $model_query = $model_query->where("deleted",1);
+    }
 
     // ==============
     // Model Filter
     // ==============
     $model_query = $model_query->exclude(['attachment_1']);
-    $model_query = $model_query->where('deleted',0)->with('employee')->get();
+    $model_query = $model_query->with('employee')->get();
     return response()->json([
       "data" => SalaryBonusResource::collection($model_query),
     ], 200);
@@ -451,7 +522,13 @@ class SalaryBonusController extends Controller
 
       DB::commit();
       return response()->json([
-        "message" => "Proses Hapus data berhasil",
+        "message"       => "Proses Hapus data berhasil",
+        "deleted"       => $model_query->deleted,
+        "deleted_user"  => $model_query->deleted_user,
+        "deleted_by"    => $model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
+        "deleted_at"    => $model_query->deleted_at,
+        "deleted_reason"=> $model_query->deleted_reason,
+
       ], 200);
     } catch (\Exception  $e) {
       DB::rollback();

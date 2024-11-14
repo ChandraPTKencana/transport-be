@@ -81,40 +81,6 @@ class StandbyMstController extends Controller
     }
 
     //======================================================================================================
-    // Model Sorting | Example $request->sort = "username:desc,role:desc";
-    //======================================================================================================
-    
-
-    if ($request->sort) {
-      $sort_lists = [];
-
-      $sorts = explode(",", $request->sort);
-      foreach ($sorts as $key => $sort) {
-        $side = explode(":", $sort);
-        $side[1] = isset($side[1]) ? $side[1] : 'ASC';
-        $sort_symbol = $side[1] == "desc" ? "<=" : ">=";
-        $sort_lists[$side[0]] = $side[1];
-      }
-
-      if (isset($sort_lists["id"])) {
-        $model_query = $model_query->orderBy("id", $sort_lists["id"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("id",$sort_symbol,$first_row["id"]);
-        }
-      }
-
-      if (isset($sort_lists["name"])) {
-        $model_query = $model_query->orderBy("name", $sort_lists["name"]);
-        if (count($first_row) > 0) {
-          $model_query = $model_query->where("name",$sort_symbol,$first_row["name"]);
-        }
-      }
-      
-
-    } else {
-      $model_query = $model_query->orderBy('updated_at', 'DESC');
-    }
-    //======================================================================================================
     // Model Filter | Example $request->like = "username:%username,role:%role%,name:role%,";
     //======================================================================================================
 
@@ -128,27 +94,121 @@ class StandbyMstController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      if(count($like_lists) > 0){
-        $model_query = $model_query->where(function ($q)use($like_lists){
-            
-          if (isset($like_lists["id"])) {
-            $q->orWhere("id", "like", $like_lists["id"]);
-          }
-    
-          if (isset($like_lists["name"])) {
-            $q->orWhere("name", "like", $like_lists["name"]);
-          }
-        });        
-      }
+      $list_to_like = ["id","name","amount"];
+
+      // $list_to_like_user = [
+      //   ["val_name","val_user"],
+      //   ["val1_name","val1_user"],
+      //   ["val2_name","val2_user"],
+      //   ["req_deleted_name","req_deleted_user"],
+      //   ["deleted_name","deleted_user"],
+      // ];
 
       
+
+      if(count($like_lists) > 0){
+        $model_query = $model_query->where(function ($q)use($like_lists,$list_to_like){
+          foreach ($list_to_like as $key => $v) {
+            if (isset($like_lists[$v])) {
+              $q->orWhere($v, "like", $like_lists[$v]);
+            }
+          }
+
+          // foreach ($list_to_like_user as $key => $v) {
+          //   if (isset($like_lists[$v[0]])) {
+          //     $q->orWhereIn($v[1], function($q2)use($like_lists,$v) {
+          //       $q2->from('is_users')
+          //       ->select('id')->where("username",'like',$like_lists[$v[0]]);          
+          //     });
+          //   }
+          // }
+
+        });        
+      }     
     }
 
     // ==============
     // Model Filter
     // ==============
 
-    $model_query = $model_query->where("deleted",0)->get();
+    $fm_sorts=[];
+    if($request->filter_model){
+      $filter_model = json_decode($request->filter_model,true);
+  
+      foreach ($filter_model as $key => $value) {
+        if($value["sort_priority"] && $value["sort_type"]){
+          array_push($fm_sorts,[
+            "key"    =>$key,
+            "priority"=>$value["sort_priority"],
+          ]);
+        }
+      }
+
+      if(count($fm_sorts)>0){
+        usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
+        foreach ($fm_sorts as $key => $value) {
+          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+          if (count($first_row) > 0) {
+            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+          }
+        }
+      }
+
+      $model_query = $model_query->where(function ($q)use($filter_model,$request){
+
+        foreach ($filter_model as $key => $value) {
+          if(!isset($value['type'])) continue;
+
+          if(array_search($key,['status'])!==false){
+          }else{
+            MyLib::queryCheck($value,$key,$q);
+          }
+        }
+        
+         
+       
+        // if (isset($like_lists["requested_name"])) {
+        //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['requested_name']);          
+        //   });
+        // }
+  
+        // if (isset($like_lists["confirmed_name"])) {
+        //   $q->orWhereIn("confirmed_by", function($q2)use($like_lists) {
+        //     $q2->from('is_users')
+        //     ->select('id_user')->where("username",'like',$like_lists['confirmed_name']);          
+        //   });
+        // }
+      });  
+    }
+    
+    if(!$request->filter_model || count($fm_sorts)==0){
+      $model_query = $model_query->orderBy('name', 'asc')->orderBy('id','DESC');
+    }
+    
+    $filter_status = $request->filter_status;
+    
+    if($filter_status=="available"){
+      $model_query = $model_query->where("deleted",0)->where("val",1)->where("val1",1);
+    }
+
+    if($filter_status=="unapprove"){
+      $model_query = $model_query->where("deleted",0)->where(function($q){
+       $q->where("val",0)->orWhere("val1",0); 
+      });
+    }
+
+    if($filter_status=="deleted"){
+      $model_query = $model_query->where("deleted",1);
+    }
+
+    // ==============
+    // Model Filter
+    // ==============
+
+    $model_query = $model_query->with('deleted_by')->get();
 
     return response()->json([
       "data" => StandbyMstResource::collection($model_query),
@@ -163,7 +223,7 @@ class StandbyMstController extends Controller
     'details'=>function($q){
       $q->orderBy("ordinal","asc");
     },
-    ])->with(['val_by','val1_by'])->where("deleted",0)->find($request->id);
+    ])->with(['val_by','val1_by','deleted_by'])->where("deleted",0)->find($request->id);
 
     return response()->json([
       "data" => new StandbyMstResource($model_query),
@@ -681,7 +741,12 @@ class StandbyMstController extends Controller
 
       DB::commit();
       return response()->json([
-        "message" => "Proses Hapus data berhasil",
+        "message"       => "Proses Hapus data berhasil",
+        "deleted"       => $model_query->deleted,
+        "deleted_user"  => $model_query->deleted_user,
+        "deleted_by"    => $model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
+        "deleted_at"    => $model_query->deleted_at,
+        "deleted_reason"=> $model_query->deleted_reason,
       ], 200);
     } catch (\Exception  $e) {
       DB::rollback();

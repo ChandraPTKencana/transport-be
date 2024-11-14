@@ -64,4 +64,9 @@ class Vehicle extends Authenticatable
     //     return $this->from("hrm_revisi_lokasi")->select('*')->whereIn("id",$locs)->get()->pluck("id")->toArray();
     //     // return $this->belongsTo(HrmRevisiLokasi::class, 'loc', 'id');
     // }
+
+    public function deleted_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "deleted_user");
+    }
 }

@@ -229,10 +229,17 @@ class ExtraMoneyTrxController extends Controller
       if(count($fm_sorts)>0){
         usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
         foreach ($fm_sorts as $key => $value) {
-          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
-          if (count($first_row) > 0) {
-            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
-            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+
+          if(array_search($value['key'],['employee_name'])!==false){
+            $model_query = MyLib::queryOrderP1($model_query,"employee","employee_id",$value['key'],$filter_model[$value['key']]["sort_type"],"employee_mst");
+          } else if(array_search($value['key'],['extra_money_xto','extra_money_jenis','extra_money_desc','extra_money_transition_target','extra_money_transition_type'])!==false){
+            $model_query = MyLib::queryOrderP1($model_query,"extra_money","extra_money_id",$value['key'],$filter_model[$value['key']]["sort_type"]);
+          } else{
+            $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+            if (count($first_row) > 0) {
+              $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+              $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+            }
           }
         }
       }

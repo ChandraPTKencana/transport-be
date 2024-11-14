@@ -439,7 +439,12 @@ class EmployeeController extends Controller
 
       DB::commit();
       return response()->json([
-        "message" => "Proses ubah data berhasil",
+        "message"       => "Proses hapus data berhasil",
+        "deleted"       => $model_query->deleted,
+        "deleted_user"  => $model_query->deleted_user,
+        "deleted_by"    => $model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
+        "deleted_at"    => $model_query->deleted_at,
+        "deleted_reason"=> $model_query->deleted_reason,
       ], 200);
     } catch (\Exception  $e) {
       DB::rollback();
