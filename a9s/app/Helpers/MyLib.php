@@ -688,4 +688,32 @@ class MyLib
       }
     }
   }
+
+  public static function queryOrderP1($mq,$alias,$pk_id,$keyval,$keysort,$table=""){
+    $nkey = str_replace($alias."_","",$keyval);
+    if($table=="") $table = $alias;
+
+    $mq = $mq->orderBy(function($q)use($table,$pk_id,$nkey){
+      $q->from($table." as u")
+      ->select("u.".$nkey)
+      ->whereColumn("u.id",$pk_id);
+    },$keysort);
+
+
+    return $mq;
+  }
+
+  // public static function queryOrderC1($mq,$alias,$pk_id,$keyval,$keysort,$table=""){
+  //   $nkey = str_replace($alias."_","",$keyval);
+  //   if($table=="") $table = $alias;
+
+  //   $mq = $mq->orderBy(function($q)use($table,$pk_id,$nkey){
+  //     $q->from($table." as u")
+  //     ->select("u.".$nkey)
+  //     ->whereColumn("u.".$pk_id,$pk_id);
+  //   },$keysort);
+
+
+  //   return $mq;
+  // }
 }
