@@ -985,7 +985,6 @@ class SalaryPaidController extends Controller
         if( $diff == 0){
           $sg = $sm = $sd=0;
           array_unshift($toDel,$k);
-          continue;
         }else{
           $sg = $diff;
           $sm = $sd = 0;
