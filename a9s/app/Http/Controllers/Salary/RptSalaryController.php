@@ -888,4 +888,124 @@ class RptSalaryController extends Controller
     ];
     return $result;
   }
+
+  public function excelDownload2(Request $request){
+    MyAdmin::checkScope($this->permissions, 'rpt_salary.preview_file');
+
+    set_time_limit(0);
+    $sp = RptSalary::where("id",$request->id)->first();
+
+    // $data = RptSalaryDtl::where('rpt_salary_id',$request->id)->with(["employee"=>function($q1){
+    //   $q1->with('bank');
+    // }])->orderBy(function($q){
+    //   $q->from("employee_mst")
+    //   ->select("name")
+    //   ->whereColumn("id","employee_id");
+    // },'asc')->get()->toArray();
+
+    $data = RptSalaryDtl::where('rpt_salary_id',$request->id)->orderBy("employee_name",'asc')->get()->toArray();
+
+    $info = [
+      "ttl_sb_gaji"         => 0,
+      "ttl_sb_makan"        => 0,
+      "ttl_sb_dinas"        => 0,
+      "ttl_sb_gaji_2"       => 0,
+      "ttl_sb_makan_2"      => 0,
+      "ttl_sb_dinas_2"      => 0,
+      "ttl_uj_gaji"         => 0,
+      "ttl_uj_makan"        => 0,
+      "ttl_uj_dinas"        => 0,
+      "ttl_bpjs_kesehatan"  => 0,
+      "ttl_bpjs_jamsos"     => 0,
+      "ttl_nominal_cut"     => 0,
+      "ttl_kerajinan"       => 0,
+      "ttl_all"             => 0,
+      "ttl_periode_2"       => 0,
+      "now"                 => date("d-m-Y H:i:s"),
+      "periode"             => date("m-Y",strtotime($sp->period_end))
+    ];
+
+    foreach ($data as $k => $v) {
+      $sg = $data[$k]["sb_gaji"];
+      $sm = $data[$k]["sb_makan"];
+      $sd = $data[$k]["sb_dinas"];
+
+      $sg2 = $data[$k]["sb_gaji_2"];
+      $sm2 = $data[$k]["sb_makan_2"];
+      $sd2 = $data[$k]["sb_dinas_2"];
+
+      $ug = $data[$k]["uj_gaji"];
+      $um = $data[$k]["uj_makan"];
+      $ud = $data[$k]["uj_dinas"];
+      $nc = $data[$k]["nominal_cut"];
+
+      $sbn = $data[$k]["salary_bonus_nominal"];
+      if($sbn<0){
+        $diff = $sg+$sm+$sd+$sg2+$sm2+$sd2+$sbn;
+        if( $diff == 0){
+          $sg = $sm = $sd = $sg2 = $sm2 = $sd2 = 0;
+        }else{
+          $sg2 = $diff;
+          $sg = $sm = $sd = $sm2 = $sd2 = 0;
+        }
+      }
+
+      $ker = $data[$k]["kerajinan"];
+
+      $ebk = $data[$k]["employee_bpjs_kesehatan"];
+      $ebj = $data[$k]["employee_bpjs_jamsos"];
+
+      $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $ker;
+      $ttl2 = $sg2 + $sm2 + $sd2 + $ker;
+
+      $info["ttl_sb_gaji"] += $sg;
+      $info["ttl_sb_makan"] += $sm;
+      $info["ttl_sb_dinas"] += $sd;
+      $info["ttl_sb_gaji_2"] += $sg2;
+      $info["ttl_sb_makan_2"] += $sm2;
+      $info["ttl_sb_dinas_2"] += $sd2;
+      $info["ttl_uj_gaji"] += $ug;
+      $info["ttl_uj_makan"] += $um;
+      $info["ttl_uj_dinas"] += $ud;
+      $info["ttl_nominal_cut"] += $nc;
+      $info["ttl_bpjs_kesehatan"] += $ebk;
+      $info["ttl_bpjs_jamsos"] += $ebj;
+      $info["ttl_kerajinan"] += $ker;
+      $info["ttl_all"] += $ttl;
+      $info["ttl_periode_2"] += $ttl2;
+
+      $data[$k]["total"] = $ttl;
+      $data[$k]["total_2"] = $ttl2;
+    }
+    
+
+    $date = new \DateTime();
+    $filename=env("app_name").'-rpt_salary-'.$info["periode"]."-".$date->format("YmdHis");
+
+    $mime=MyLib::mime("xlsx");
+
+    $blade= 'excel.rpt_salary2';
+
+    $columnFormats = [
+      'H' => '0',
+      // 'G' => '###############',
+      // 'G' => '₹#,##0.00',
+      // 'J' => '0',
+            // 'G' => '0',
+      // 'J' => '0',
+      // 'G' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+      // 'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+    ];
+
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+      // "ex"=>\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT
+    ];
+    return $result;
+  }
 }

@@ -949,4 +949,82 @@ class SalaryPaidController extends Controller
     ];
     return $result;
   }
+
+  public function excelDownload2(Request $request){
+    MyAdmin::checkScope($this->permissions, 'salary_paid.preview_file');
+
+    set_time_limit(0);
+    $sp = SalaryPaid::where("id",$request->id)->first();
+
+    $data = SalaryPaidDtl::where('salary_paid_id',$request->id)->with(["employee"=>function($q1){
+      $q1->with('bank');
+    }])->orderBy(function($q){
+      $q->from("employee_mst")
+      ->select("name")
+      ->whereColumn("id","employee_id");
+    },'asc')->get()->toArray();
+
+    $info = [
+      "ttl_sb_gaji"=>0,
+      "ttl_sb_makan"=>0,
+      "ttl_sb_dinas"=>0,
+      "ttl_bonus"=>0,
+      "ttl_all"=>0,
+      "now"=>date("d-m-Y H:i:s"),
+      "periode"=>date("m-Y",strtotime($sp->period_end))."[".$sp->period_part."]"
+    ];
+
+    foreach ($data as $k => $v) {
+      $sg = $data[$k]["sb_gaji"];
+      $sm = $data[$k]["sb_makan"];
+      $sd = $data[$k]["sb_dinas"];
+      $sbn = $data[$k]["salary_bonus_nominal"];
+      if($sbn<0){
+        $diff = $sg+$sm+$sd+$sbn;
+        if( $diff == 0){
+          $sg = $sm = $sd=0;
+        }else{
+          $sg = $diff;
+          $sm = $sd = 0;
+        }
+      }
+
+      $ttl = $sg + $sm + $sd;
+
+      $info["ttl_sb_gaji"] += $sg;
+      $info["ttl_sb_makan"] += $sm;
+      $info["ttl_sb_dinas"] += $sd;
+      $info["ttl_all"] += $ttl;
+
+      $data[$k]["total"] =$ttl;
+    }
+    
+
+    $date = new \DateTime();
+    $filename=env("app_name").'-salary_paid-'.$info["periode"]."-".$date->format("YmdHis");
+
+    $mime=MyLib::mime("xlsx");
+
+    $blade= 'excel.salary_paid2';
+
+    $columnFormats = [
+        // 'D' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+        // 'E' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+        // 'D' => '@',
+        // 'E' => '@',
+        'D' => '0',
+        'E' => '0',
+        // Add more columns as needed
+    ];
+
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
 }

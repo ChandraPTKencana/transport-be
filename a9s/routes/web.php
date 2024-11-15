@@ -212,6 +212,7 @@ Route::put('/salary_paid', [\App\Http\Controllers\Salary\SalaryPaidController::c
 Route::put('/salary_paid_validasi', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'validasi']);
 Route::get('/salary_paid/pdf_preview', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'pdfPreview']);
 Route::get('/salary_paid/excel_download', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'excelDownload']);
+Route::get('/salary_paid/excel_download2', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'excelDownload2']);
 
 Route::get('/rpt_salarys', [\App\Http\Controllers\Salary\RptSalaryController::class, 'index']);
 Route::get('/rpt_salary', [\App\Http\Controllers\Salary\RptSalaryController::class, 'show']);
@@ -221,6 +222,7 @@ Route::put('/rpt_salary', [\App\Http\Controllers\Salary\RptSalaryController::cla
 Route::put('/rpt_salary_validasi', [\App\Http\Controllers\Salary\RptSalaryController::class, 'validasi']);
 Route::get('/rpt_salary/pdf_preview', [\App\Http\Controllers\Salary\RptSalaryController::class, 'pdfPreview']);
 Route::get('/rpt_salary/excel_download', [\App\Http\Controllers\Salary\RptSalaryController::class, 'excelDownload']);
+Route::get('/rpt_salary/excel_download2', [\App\Http\Controllers\Salary\RptSalaryController::class, 'excelDownload2']);
 
 Route::get('/salary_bonuses', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'index']);
 Route::get('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'show']);
