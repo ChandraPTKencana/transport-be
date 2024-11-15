@@ -950,6 +950,14 @@ class RptSalaryController extends Controller
         }
       }
 
+      $data[$k]["sb_gaji"]    = $sg;
+      $data[$k]["sb_makan"]   = $sm;
+      $data[$k]["sb_dinas"]   = $sd;
+
+      $data[$k]["sb_gaji_2"]  = $sg2;
+      $data[$k]["sb_makan_2"] = $sm2;
+      $data[$k]["sb_dinas_2"] = $sd2;
+
       $ker = $data[$k]["kerajinan"];
 
       $ebk = $data[$k]["employee_bpjs_kesehatan"];

@@ -989,6 +989,10 @@ class SalaryPaidController extends Controller
         }
       }
 
+      $data[$k]["sb_gaji"]  = $sg;
+      $data[$k]["sb_makan"] = $sm;
+      $data[$k]["sb_dinas"] = $sd;
+
       $ttl = $sg + $sm + $sd;
 
       $info["ttl_sb_gaji"] += $sg;
