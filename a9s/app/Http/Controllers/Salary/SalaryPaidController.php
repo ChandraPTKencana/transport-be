@@ -974,6 +974,7 @@ class SalaryPaidController extends Controller
       "periode"=>date("m-Y",strtotime($sp->period_end))."[".$sp->period_part."]"
     ];
 
+    $toDel = [];
     foreach ($data as $k => $v) {
       $sg = $data[$k]["sb_gaji"];
       $sm = $data[$k]["sb_makan"];
@@ -983,6 +984,8 @@ class SalaryPaidController extends Controller
         $diff = $sg+$sm+$sd+$sbn;
         if( $diff == 0){
           $sg = $sm = $sd=0;
+          array_unshift($toDel,$k);
+          continue;
         }else{
           $sg = $diff;
           $sm = $sd = 0;
@@ -1001,6 +1004,10 @@ class SalaryPaidController extends Controller
       $info["ttl_all"] += $ttl;
 
       $data[$k]["total"] =$ttl;
+    }
+
+    foreach ($toDel as $key => $value) {
+      array_splice($data, $key, 1);
     }
     
 
