@@ -47,6 +47,11 @@
           <td> {{date('d-m-Y',strtotime($tanggal))}} </td>
         </tr>
         <tr>
+          <td > Info </td>
+          <td> : </td>
+          <td> {{$info}} </td>
+        </tr>
+        <tr>
           <td > Tipe </td>
           <td> : </td>
           <td> {{$tipe}} </td>

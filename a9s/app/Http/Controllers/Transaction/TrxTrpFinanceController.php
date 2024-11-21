@@ -113,7 +113,18 @@ class TrxTrpFinanceController extends Controller
               $q->orWhere($v, "like", $like_lists[$v]);
             }
           }
-    
+
+          $list_to_like_uj = [
+            ["uj_asst_opt","asst_opt"],
+          ];
+          foreach ($list_to_like_uj as $key => $v) {
+            if (isset($like_lists[$v[0]])) {
+              $q->orWhereIn('id_uj', function($q2)use($like_lists,$v) {
+                $q2->from('is_uj')
+                ->select('id')->where($v[1],'like',$like_lists[$v[0]]);          
+              });
+            }
+          }
           // if (isset($like_lists["requested_name"])) {
           //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
           //     $q2->from('is_users')
@@ -153,10 +164,14 @@ class TrxTrpFinanceController extends Controller
       if(count($fm_sorts)>0){
         usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
         foreach ($fm_sorts as $key => $value) {
-          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
-          if (count($first_row) > 0) {
-            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
-            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+          if(array_search($value['key'],['uj_asst_opt'])!==false){
+            $model_query = MyLib::queryOrderP1($model_query,"uj","id_uj",$value['key'],$filter_model[$value['key']]["sort_type"],"is_uj");
+          } else{
+            $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+            if (count($first_row) > 0) {
+              $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+              $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+            }
           }
         }
       }
@@ -281,6 +296,8 @@ class TrxTrpFinanceController extends Controller
                 }
               }
             }
+          }else if(array_search($key,['uj_asst_opt'])!==false){
+            MyLib::queryCheckP1Dif("uj",$value,$key,$q,'is_uj',"id_uj");
           }else{
             MyLib::queryCheck($value,$key,$q);
           }
@@ -326,7 +343,7 @@ class TrxTrpFinanceController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method'])->get();
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','uj','payment_method'])->get();
 
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),

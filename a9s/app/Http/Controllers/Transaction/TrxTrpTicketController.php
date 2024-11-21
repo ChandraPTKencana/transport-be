@@ -117,6 +117,18 @@ class TrxTrpTicketController extends Controller
               $q->orWhere($v, "like", $like_lists[$v]);
             }
           }
+
+          $list_to_like_uj = [
+            ["uj_asst_opt","asst_opt"],
+          ];
+          foreach ($list_to_like_uj as $key => $v) {
+            if (isset($like_lists[$v[0]])) {
+              $q->orWhereIn('id_uj', function($q2)use($like_lists,$v) {
+                $q2->from('is_uj')
+                ->select('id')->where($v[1],'like',$like_lists[$v[0]]);          
+              });
+            }
+          }
     
           // if (isset($like_lists["requested_name"])) {
           //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
@@ -157,10 +169,14 @@ class TrxTrpTicketController extends Controller
       if(count($fm_sorts)>0){
         usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
         foreach ($fm_sorts as $key => $value) {
-          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
-          if (count($first_row) > 0) {
-            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
-            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+          if(array_search($value['key'],['uj_asst_opt'])!==false){
+            $model_query = MyLib::queryOrderP1($model_query,"uj","id_uj",$value['key'],$filter_model[$value['key']]["sort_type"],"is_uj");
+          } else{
+            $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+            if (count($first_row) > 0) {
+              $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+              $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+            }
           }
         }
       }
@@ -285,6 +301,8 @@ class TrxTrpTicketController extends Controller
                 // }
               }
             }
+          }else if(array_search($key,['uj_asst_opt'])!==false){
+            MyLib::queryCheckP1Dif("uj",$value,$key,$q,'is_uj',"id_uj");
           }else{
             MyLib::queryCheck($value,$key,$q);
           }
@@ -371,7 +389,7 @@ class TrxTrpTicketController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -384,7 +402,7 @@ class TrxTrpTicketController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
-    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','trx_absens'=>function ($q){
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function ($q){
       $q->where("status","B");
     },'potongan'])->find($request->id);
     return response()->json([
@@ -392,84 +410,84 @@ class TrxTrpTicketController extends Controller
     ], 200);
   }
 
-  public function mandorGetVerifyTrx(TrxTrpRequest $request)
-  {
-    MyAdmin::checkScope($this->permissions, 'trp_trx.ritase.views');
+  // public function mandorGetVerifyTrx(TrxTrpRequest $request)
+  // {
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.ritase.views');
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
-    return response()->json([
-      "data" => new TrxTrpResource($model_query),
-    ], 200);
-  }
+  //   $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
+  //   return response()->json([
+  //     "data" => new TrxTrpResource($model_query),
+  //   ], 200);
+  // }
 
-  public function mandorGetVerifySet(Request $request){
-    MyAdmin::checkScope($this->permissions, 'trp_trx.val1');
+  // public function mandorGetVerifySet(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.val1');
 
-    $rules = [
-      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
-    ];
+  //   $rules = [
+  //     'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+  //   ];
 
-    $messages = [
-      'id.required' => 'ID tidak boleh kosong',
-      'id.exists' => 'ID tidak terdaftar',
-    ];
+  //   $messages = [
+  //     'id.required' => 'ID tidak boleh kosong',
+  //     'id.exists' => 'ID tidak terdaftar',
+  //   ];
 
-    $validator = Validator::make($request->all(), $rules, $messages);
+  //   $validator = Validator::make($request->all(), $rules, $messages);
 
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
 
-    $t_stamp = date("Y-m-d H:i:s");
-    DB::beginTransaction();
-    try {
-      $model_query = TrxTrp::find($request->id);
-      if($model_query->cost_center_code==""){
-        throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
-      }
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_query = TrxTrp::find($request->id);
+  //     if($model_query->cost_center_code==""){
+  //       throw new \Exception("Minta Kasir Untuk Memasukkan Cost Center Code Terlebih Dahulu",1);
+  //     }
 
-      if($model_query->val==0){
-        throw new \Exception("Data Perlu Divalidasi oleh kasir terlebih dahulu",1);
-      }
+  //     if($model_query->val==0){
+  //       throw new \Exception("Data Perlu Divalidasi oleh kasir terlebih dahulu",1);
+  //     }
 
-      if($model_query->val1){
-        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
-      }
+  //     if($model_query->val1){
+  //       throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+  //     }
   
-      $model_query->val1 = 1;
-      $model_query->val1_user = $this->admin_id;
-      $model_query->val1_at = $t_stamp;
+  //     $model_query->val1 = 1;
+  //     $model_query->val1_user = $this->admin_id;
+  //     $model_query->val1_at = $t_stamp;
 
-      $model_query->save();
+  //     $model_query->save();
 
-      MyLog::sys("trx_trp",$model_query->id,"approve");
+  //     MyLog::sys("trx_trp",$model_query->id,"approve");
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses validasi data berhasil",
-        "val1"=>$model_query->val1,
-        "val1_user"=>$model_query->val1_user,
-        "val1_at"=>$model_query->val1_at,
-        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
-      return response()->json([
-        "message" => "Proses ubah data gagal",
-      ], 400);
-    }
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses validasi data berhasil",
+  //       "val1"=>$model_query->val1,
+  //       "val1_user"=>$model_query->val1_user,
+  //       "val1_at"=>$model_query->val1_at,
+  //       "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     return response()->json([
+  //       "getCode" => $e->getCode(),
+  //       "line" => $e->getLine(),
+  //       "message" => $e->getMessage(),
+  //     ], 400);
+  //     return response()->json([
+  //       "message" => "Proses ubah data gagal",
+  //     ], 400);
+  //   }
 
-  }
+  // }
 
   // public function store(TrxTrpRequest $request)
   // {

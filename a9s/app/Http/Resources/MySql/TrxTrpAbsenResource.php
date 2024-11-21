@@ -76,6 +76,9 @@ class TrxTrpAbsenResource extends JsonResource
             'ritase_val2_user'  => $this->ritase_val2_user ?? "",
             'ritase_val2_by'    => new IsUserResource($this->whenLoaded('ritase_val2_by')),
             'ritase_val2_at'    => $this->ritase_val2_at ?? "",
+
+            'uj'                => new UjalanResource($this->whenLoaded('uj')),
+
         ];
     }
 }

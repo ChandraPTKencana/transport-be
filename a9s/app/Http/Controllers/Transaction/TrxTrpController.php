@@ -114,6 +114,18 @@ class TrxTrpController extends Controller
               $q->orWhere($v, "like", $like_lists[$v]);
             }
           }
+
+          $list_to_like_uj = [
+            ["uj_asst_opt","asst_opt"],
+          ];
+          foreach ($list_to_like_uj as $key => $v) {
+            if (isset($like_lists[$v[0]])) {
+              $q->orWhereIn('id_uj', function($q2)use($like_lists,$v) {
+                $q2->from('is_uj')
+                ->select('id')->where($v[1],'like',$like_lists[$v[0]]);          
+              });
+            }
+          }
     
           // if (isset($like_lists["requested_name"])) {
           //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
@@ -154,10 +166,14 @@ class TrxTrpController extends Controller
       if(count($fm_sorts)>0){
         usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
         foreach ($fm_sorts as $key => $value) {
-          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
-          if (count($first_row) > 0) {
-            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
-            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+          if(array_search($value['key'],['uj_asst_opt'])!==false){
+            $model_query = MyLib::queryOrderP1($model_query,"uj","id_uj",$value['key'],$filter_model[$value['key']]["sort_type"],"is_uj");
+          } else{
+            $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+            if (count($first_row) > 0) {
+              $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+              $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+            }
           }
         }
       }
@@ -282,6 +298,8 @@ class TrxTrpController extends Controller
                 }
               }
             }
+          }else if(array_search($key,['uj_asst_opt'])!==false){
+            MyLib::queryCheckP1Dif("uj",$value,$key,$q,'is_uj',"id_uj");
           }else{
             MyLib::queryCheck($value,$key,$q);
           }
@@ -367,7 +385,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','potongan','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','potongan','uj','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -430,7 +448,7 @@ class TrxTrpController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'trp_trx.ritase.views');
 
-    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj_details'])->find($request->id);
+    $model_query = TrxTrp::where("deleted",0)->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','trx_absens','uj','uj_details'])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
@@ -512,7 +530,6 @@ class TrxTrpController extends Controller
     MyAdmin::checkScope($this->permissions, 'trp_trx.create');
 
     $t_stamp = date("Y-m-d H:i:s");
-    $online_status=$request->online_status;
 
     DB::beginTransaction();
     try {
@@ -537,9 +554,6 @@ class TrxTrpController extends Controller
         throw new \Exception("Tidak ada no rekening kernet",1);
       }
 
-      // if(TrxTrp::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
-      // throw new \Exception("List sudah terdaftar");
-
       $model_query                  = new TrxTrp();      
       $model_query->tanggal         = $request->tanggal;
 
@@ -563,20 +577,6 @@ class TrxTrpController extends Controller
         $model_query->transition_target = $ujalan->transition_from;
         $model_query->transition_type   = "From";
       }
-      
-      // if($online_status=="true"){
-      //   if($request->cost_center_code){
-      //     $list_cost_center = DB::connection('sqlsrv')->table("AC_CostCenterNames")
-      //     ->select('CostCenter','Description')
-      //     ->where('CostCenter',$request->cost_center_code)
-      //     ->first();
-      //     if(!$list_cost_center)
-      //     throw new \Exception(json_encode(["cost_center_code"=>["Cost Center Code Tidak Ditemukan"]]), 422);
-        
-      //     $model_query->cost_center_code = $list_cost_center->CostCenter;
-      //     $model_query->cost_center_desc = $list_cost_center->Description;
-      //   }
-      // }
 
       $model_query->supir_id          = $supir_dt->id;
       $model_query->supir             = $supir_dt->name;
@@ -1258,7 +1258,7 @@ class TrxTrpController extends Controller
 
     set_time_limit(0);
 
-    $trx_trp = TrxTrp::find($request->id);
+    $trx_trp = TrxTrp::with('uj')->find($request->id);
 
     if($trx_trp->val==0)
     return response()->json([
@@ -1313,6 +1313,7 @@ class TrxTrpController extends Controller
       "xto"           => $trx_trp->xto,
       "jenis"         => $trx_trp->jenis,
       "tipe"          => $trx_trp->tipe,
+      "info"          => $trx_trp->uj->asst_opt,
       "details"       => $details,
       "total"         => $ujalan->harga,
       "is_transition" => $trx_trp->transition_type=='From',
