@@ -274,77 +274,16 @@ class TrxTrpAbsenController extends Controller
     }])->find($request->id);
 
 
-    // $data = new TrxTrpAbsenResource($model_query);
+    $data = new TrxTrpAbsenResource($model_query);
+    $data = collect($data);
 
-    $data = [
-      'id'                => $model_query->id,
-      'tanggal'           => $model_query->tanggal,
+    $data["img_leave_ts"]      = $model_query->ritase_leave_at;
+    $data["img_arrive_ts"]     = $model_query->ritase_arrive_at;
+    $data["img_return_ts"]     = $model_query->ritase_return_at;
+    $data["img_till_ts"]       = $model_query->ritase_till_at;
 
-      'id_uj'             => $model_query->id_uj,
-      'jenis'             => $model_query->jenis,
-      'xto'               => $model_query->xto,
-      'tipe'              => $model_query->tipe,
-
-      'supir_id'          => $model_query->supir_id ?? "",
-      'supir'             => $model_query->supir,
-      // 'supir_rek_no'      => $model_query->supir_rek_no ?? "",
-      // 'supir_rek_name'    => $model_query->supir_rek_name ?? "",
-      'kernet_id'         => $model_query->kernet_id ?? "",
-      'kernet'            => $model_query->kernet ?? "",
-      // 'kernet_rek_no'     => $model_query->kernet_rek_no ?? "",
-      // 'kernet_rek_name'   => $model_query->kernet_rek_name ?? "",
-      'no_pol'            => $model_query->no_pol,
-      
-      'created_user'      => $model_query->created_user,
-      'updated_user'      => $model_query->updated_user,
-      'created_at'        => $model_query->created_at,
-      'updated_at'        => $model_query->updated_at,
-
-      'deleted'           => $model_query->deleted,
-      'deleted_user'      => $model_query->deleted_user ?? "",
-      'deleted_at'        => $model_query->deleted_at ?? "",
-      'deleted_by'        => $model_query->deleted_by ? new IsUserResource($model_query->deleted_by) : "",
-      'deleted_reason'    => $model_query->deleted_reason ?? "",
-
-      'req_deleted'       => $model_query->req_deleted,
-      'req_deleted_user'  => $model_query->req_deleted_user ?? "",
-      'req_deleted_at'    => $model_query->req_deleted_at ?? "",
-      'req_deleted_by'    => $model_query->req_deleted_by ? new IsUserResource($model_query->req_deleted_by) : "",
-      'req_deleted_reason'=> $model_query->req_deleted_reason ?? "",
-
-      'transition_target' => $model_query->transition_target ?? "",
-      'transition_type'   => $model_query->transition_type ?? "",
-      // 'trx_absens'        => $model_query->trx_absens,
-
-      'ritase_leave_at'   => $model_query->ritase_leave_at ?? "",
-      'ritase_arrive_at'  => $model_query->ritase_arrive_at ?? "",
-      'ritase_return_at'  => $model_query->ritase_return_at ?? "",
-      'ritase_till_at'    => $model_query->ritase_till_at ?? "",
-      
-      'ritase_note'       => $model_query->ritase_note ?? "",
-      
-      'ritase_val'        => $model_query->ritase_val,
-      'ritase_val_user'   => $model_query->ritase_val_user ?? "",
-      'ritase_val_by'     => $model_query->ritase_val_by ? new IsUserResource($model_query->ritase_val_by) : "",
-      'ritase_val_at'     => $model_query->ritase_val_at ?? "",
-
-      'ritase_val1'       => $model_query->ritase_val1,
-      'ritase_val1_user'  => $model_query->ritase_val1_user ?? "",
-      'ritase_val1_by'    => $model_query->ritase_val1_by ? new IsUserResource($model_query->ritase_val1_by) : "",
-      'ritase_val1_at'    => $model_query->ritase_val1_at ?? "",
-
-      'ritase_val2'       => $model_query->ritase_val2,
-      'ritase_val2_user'  => $model_query->ritase_val2_user ?? "",
-      'ritase_val2_by'    => $model_query->ritase_val2_by ? new IsUserResource($model_query->ritase_val2_by) : "",
-      'ritase_val2_at'    => $model_query->ritase_val2_at ?? "",
-
-      "img_leave_ts"      => $model_query->ritase_leave_at,
-      "img_arrive_ts"     => $model_query->ritase_arrive_at,
-      "img_return_ts"     => $model_query->ritase_return_at,
-      "img_till_ts"       => $model_query->ritase_till_at,
-    ];
-
-    $data['img_leaves']=[];
+    $img_leaves = [];
+    $data['img_leave']="";
     foreach ($model_query->trx_absens as $k => $v) {
       // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
       $img = "data:image/png;base64,";
@@ -356,7 +295,7 @@ class TrxTrpAbsenController extends Controller
       
       if($v['status']=="B") {
         $data["img_leave"]   = $img;
-        array_push($data['img_leaves'],[
+        array_push($img_leaves,[
           "id"=>$v["id"],
           "gambar"=>$img,
         ]);
@@ -371,6 +310,7 @@ class TrxTrpAbsenController extends Controller
       if($v['status']=="S") 
       $data["img_till"]   = $img;
     }
+    $data['img_leaves']=$img_leaves;
 
     // $data['trx_absens']= array_filter($data['trx_absens']->toArray(),function($x){
     //   $x['status']=="B";
