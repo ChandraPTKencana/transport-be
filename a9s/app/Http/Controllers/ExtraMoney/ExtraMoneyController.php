@@ -412,11 +412,11 @@ class ExtraMoneyController extends Controller
       }
 
 
-      if($model_query->val2 || $model_query->req_deleted==1  || $model_query->deleted==1) 
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
-
-      if($model_query->pvr_id!="" || $model_query->pvr_id!=null)
-      throw new \Exception("Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
+      if($model_query->req_deleted==1  || $model_query->deleted==1) 
+      throw new \Exception("Data sudah tidak dapat di Hapus",1);
+      
+      // if($model_query->pvr_id!="" || $model_query->pvr_id!=null)
+      // throw new \Exception("Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
 
       $deleted_reason = $request->deleted_reason;
       if(!$deleted_reason)

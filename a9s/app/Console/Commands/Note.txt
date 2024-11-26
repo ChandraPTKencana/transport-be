@@ -32,3 +32,7 @@ apabila tetap tidak bisa maka pastikan ticket dengan tanggal yang sama
 di input secara manual terlebih dahulu.
 
 Selalu cross cek dengan ascend.
+
+httpd.conf
+active it for SEO
+-> LoadModule deflate_module modules/mod_deflate.so

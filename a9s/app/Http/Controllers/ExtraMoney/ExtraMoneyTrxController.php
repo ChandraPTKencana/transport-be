@@ -943,6 +943,43 @@ class ExtraMoneyTrxController extends Controller
     return $result;
   }
 
+  public function previewFileBT(Request $request){
+    MyAdmin::checkScope($this->permissions, 'extra_money_trx.preview_file');
+
+    set_time_limit(0);
+
+    $extra_money_trx = ExtraMoneyTrx::find($request->id);
+
+    if($extra_money_trx->val1==0)
+    return response()->json([
+      "message" => "Harap Di Validasi Terlebih Dahulu",
+    ], 400);
+    $extra_money = \App\Models\MySql\ExtraMoney::where("id",$extra_money_trx->extra_money_id)->first();
+
+    $employee_remarks  = "EM#".$extra_money_trx->id;
+
+    $employee_money = $extra_money->nominal * $extra_money->qty;
+  
+    $sendData = [
+      "id"              => $extra_money_trx->id,
+      "ext"             => $extra_money->id,
+      "logo"            => File::exists(files_path("/duitku.png")) ? "data:image/png;base64,".base64_encode(File::get(files_path("/duitku.png"))) :"",
+
+      "ref_no"          => $extra_money_trx->duitku_employee_disburseId,
+      "employee_name"   => $extra_money_trx->employee->name,
+      "employee_rek_no" => $extra_money_trx->employee_rek_no,
+      "nominal"         => $employee_money,
+      "tanggal"         => $extra_money_trx->rp_employee_at,
+      "remarks"         => $employee_remarks,
+    ];   
+    $html = view("html.extra_money_trx_bt",$sendData);  
+    $result = [
+      "html"=>$html->render()
+    ];
+    return $result;
+  }
+
+
   // public function previewFiles(Request $request){
 
   //   // set_time_limit(0);
@@ -1471,12 +1508,12 @@ class ExtraMoneyTrxController extends Controller
 
     $amount_paid = $extra_money->nominal * $extra_money->qty; // call from child
 
-    // if($extra_money_trx->payment_method->id==2){
-    //   $adm_cost = 2500;
-    //   $adm_qty = 1;
+    if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==2){
+      $adm_cost = 2500;
+      $adm_qty = 1;
 
-    //   $amount_paid += ($adm_cost * $adm_qty);
-    // }
+      $amount_paid += ($adm_cost * $adm_qty);
+    }
 
     $exclude_in_ARAP = 0;
     $login_name = $this->admin->the_user->username;
@@ -1581,50 +1618,50 @@ class ExtraMoneyTrxController extends Controller
       // }
     }
 
-    // if($extra_money_trx->payment_method->id==2){
-    //   $admin_cost_code=env("PVR_ADMIN_COST");
+    if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==2){
+      $admin_cost_code=env("PVR_ADMIN_COST");
   
-    //   $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
-    //   ->select('AccountID')
-    //   ->where("AccountCode",$admin_cost_code)
-    //   ->first();
-    //   if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
+      $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
+      ->select('AccountID')
+      ->where("AccountCode",$admin_cost_code)
+      ->first();
+      if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
 
-    //   $adm_cost_id = $admin_cost_db->AccountID;
-    //   $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
-    //   ->select('VoucherID')
-    //   ->where("VoucherID",$d_voucher_id)
-    //   ->where("AccountID",$adm_cost_id)
-    //   ->first();
+      $adm_cost_id = $admin_cost_db->AccountID;
+      $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+      ->select('VoucherID')
+      ->where("VoucherID",$d_voucher_id)
+      ->where("AccountID",$adm_cost_id)
+      ->first();
 
-    //   if(!$adm_fee_exists){
-    //     $d_description  = "Biaya Admin";
-    //     $d_account_id   = $adm_cost_id;
-    //     $d_dept         = '112';
-    //     $d_qty          = $adm_qty;
-    //     $d_unit_price   = $adm_cost;
-    //     $d_amount       = $d_qty * $d_unit_price;
+      if(!$adm_fee_exists){
+        $d_description  = "Biaya Admin";
+        $d_account_id   = $adm_cost_id;
+        $d_dept         = '112';
+        $d_qty          = $adm_qty;
+        $d_unit_price   = $adm_cost;
+        $d_amount       = $d_qty * $d_unit_price;
   
-    //     DB::connection('sqlsrv')->update("exec 
-    //     USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
-    //     @VoucherExtraItemID=:d_voucher_extra_item_id,
-    //     @Description=:d_description,@Amount=:d_amount,
-    //     @AccountID=:d_account_id,@TypeID=:d_type,
-    //     @Department=:d_dept,@LoginName=:login_name,
-    //     @Qty=:d_qty,@UnitPrice=:d_unit_price",[
-    //       ":d_voucher_id"=>$d_voucher_id,
-    //       ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
-    //       ":d_description"=>$d_description,
-    //       ":d_amount"=>$d_amount,
-    //       ":d_account_id"=>$d_account_id,
-    //       ":d_type"=>$d_type,
-    //       ":d_dept"=>$d_dept,
-    //       ":login_name"=>$login_name,
-    //       ":d_qty"=>$d_qty,
-    //       ":d_unit_price"=>$d_unit_price
-    //     ]);
-    //   }
-    // }
+        DB::connection('sqlsrv')->update("exec 
+        USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+        @VoucherExtraItemID=:d_voucher_extra_item_id,
+        @Description=:d_description,@Amount=:d_amount,
+        @AccountID=:d_account_id,@TypeID=:d_type,
+        @Department=:d_dept,@LoginName=:login_name,
+        @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+          ":d_voucher_id"=>$d_voucher_id,
+          ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+          ":d_description"=>$d_description,
+          ":d_amount"=>$d_amount,
+          ":d_account_id"=>$d_account_id,
+          ":d_type"=>$d_type,
+          ":d_dept"=>$d_dept,
+          ":login_name"=>$login_name,
+          ":d_qty"=>$d_qty,
+          ":d_unit_price"=>$d_unit_price
+        ]);
+      }
+    }
 
     $tocheck = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->first();
 

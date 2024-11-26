@@ -260,7 +260,7 @@ Route::post('/extra_money_trx_do_update_pv', [\App\Http\Controllers\ExtraMoney\E
 Route::get('/extra_money_trx/transfers', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'index']);
 Route::put('/extra_money_trx/transfer', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'validasiAndTransfer']);
 Route::get('/extra_money_trx/transfer/detail', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'show']);
-Route::get('/extra_money_trx_preview_file_bt', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'previewFileBT']);
+Route::get('/extra_money_trx_preview_file_bt', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFileBT']);
 
 // Route::get('/payment_methods', [\App\Http\Controllers\PaymentMethodController::class, 'index']);
 Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);

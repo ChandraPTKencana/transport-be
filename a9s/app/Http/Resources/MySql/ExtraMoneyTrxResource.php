@@ -119,6 +119,9 @@ class ExtraMoneyTrxResource extends JsonResource
             'attachment_2_type'     => $this->attachment_2_type,
 
             'prev_trx_trp_id'       => $this->prev_trx_trp_id,
+        
+            'duitku_employee_disburseId' => $this->duitku_employee_disburseId ?? "",
+        
         ];
     }
 }

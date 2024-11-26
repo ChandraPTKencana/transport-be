@@ -322,7 +322,7 @@ class ExtraMoneyTrxTransferController extends Controller
 
     $filter_status = $request->filter_status;
     
-    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val1',1)->where('val2',1)->where('val3',1)->where('received_payment',0);
+    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val1',1)->where('val2',1)->where('val3',1)->where('received_payment',0)->whereNull('trx_trp_id');
 
     $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method','extra_money','employee'])->get();
 
@@ -390,6 +390,12 @@ class ExtraMoneyTrxTransferController extends Controller
         throw new \Exception("Pembayaran sudah selesai",1);
       }
 
+      if($model_query->trx_trp_id){
+        throw new \Exception("Pembayaran harus melalui transfer uang jalan",1);
+      }
+
+      
+
       $employee_id   = $model_query->employee_id;
       $ttl_ps     = 0;
       $ttl_pk     = 0;
@@ -429,11 +435,23 @@ class ExtraMoneyTrxTransferController extends Controller
           }
           // MyLog::logging($result);
         }
+
+        if($model_query->duitku_employee_disburseId && $model_query->duitku_employee_trf_res_code=="00" && !$model_query->rp_employee_user){
+          $model_query->rp_employee_user = $this->admin_id;               
+          $model_query->rp_employee_at   = $t_stamp;               
+        }
       }
 
 
       if($model_query->duitku_employee_trf_res_code=="00"){
         $model_query->received_payment=1;
+
+
+        if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.val4',true)){
+          $model_query->val4 = 1;
+          $model_query->val4_user = $this->admin_id;
+          $model_query->val4_at = $t_stamp;
+        }
 
         if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.val5',true)){
           $model_query->val5 = 1;
@@ -492,6 +510,10 @@ class ExtraMoneyTrxTransferController extends Controller
         "val5_user"=>$model_query->val5_user,
         "val5_at"=>$model_query->val5_at,
         "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
+        "val6"=>$model_query->val6,
+        "val6_user"=>$model_query->val6_user,
+        "val6_at"=>$model_query->val6_at,
+        "val6_by"=>$model_query->val6_user ? new IsUserResource(IsUser::find($model_query->val6_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

@@ -580,6 +580,12 @@ class TrxTrpTransferController extends Controller
 
         foreach ($model_query->extra_money_trxs as $key => $emt) {
           $emt->received_payment=1;
+          if($emt->employee_id == $supir_id){
+            $emt->employee_rek_no = $supir->rek_no;
+          }
+          if(isset($kernet) && $emt->employee_id == $kernet_id){
+            $emt->employee_rek_no = $kernet->rek_no;
+          }
           
           if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$emt->val4){
             $emt->val4 = 1;
