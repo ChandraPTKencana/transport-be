@@ -359,7 +359,9 @@ class EmployeeController extends Controller
 
       $model_query->attachment_1_type = $fileType;
 
-      $model_query->name          = $request->name;
+      if(!$model_query->val_at){
+        $model_query->name          = $request->name;
+      }
       $model_query->role          = $request->role;
       $model_query->ktp_no        = $ktp_no;
       $model_query->sim_no        = $sim_no;
