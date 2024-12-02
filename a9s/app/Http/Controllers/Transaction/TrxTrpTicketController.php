@@ -337,18 +337,20 @@ class TrxTrpTicketController extends Controller
     }
 
     if($filter_status=="ticket_done"){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
-          $q->orWhere(function ($q1){
-            $q1->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
-          });
-          $q->orWhere(function ($q1){
-            $q1->where("jenis","TBSK")->whereNotNull("ticket_b_no");
-          });
-          $q->orWhere(function ($q1){
-            $q1->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
-          });
-          $q->orWhereNotNull("ticket_note");
-      })->where('val_ticket',1);
+      // $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
+      //     $q->orWhere(function ($q1){
+      //       $q1->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
+      //     });
+      //     $q->orWhere(function ($q1){
+      //       $q1->where("jenis","TBSK")->whereNotNull("ticket_b_no");
+      //     });
+      //     $q->orWhere(function ($q1){
+      //       $q1->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
+      //     });
+      //     $q->orWhereNotNull("ticket_note");
+      // })->where('val_ticket',1);
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)
+      ->where('val_ticket',1);
     }
 
     if($filter_status=="ticket_not_done"){
@@ -1239,11 +1241,13 @@ class TrxTrpTicketController extends Controller
     ->where("TicketID",$request->ticket_b_id)
     ->where("TicketNo",$request->ticket_b_no);
 
-    if($request->jenis!=="TBS" || $connection_name!=='sqlsrv'){
-      $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
-    }else {
-      $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
-    }
+    // if($request->jenis!=="TBS" || $connection_name!=='sqlsrv'){
+    //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+    // }else {
+    //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+    // }
+
+    $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
 
     $get_data_ticket=$get_data_ticket->first();
     

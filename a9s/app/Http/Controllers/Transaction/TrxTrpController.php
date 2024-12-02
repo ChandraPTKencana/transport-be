@@ -267,35 +267,35 @@ class TrxTrpController extends Controller
                   };
                 }
 
-                if($r_val=='Done'){
-                  $q->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no")->Where(function ($q1){
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBSK")->whereNotNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
-                      });
-                  });
-                }else{
-                  $q->where("deleted",0)->where("req_deleted",0)->whereNull("pv_no")->Where(function ($q1){
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBS")->where(function($q2){
-                          $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
-                        });
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
-                      });
-                      $q1->orWhere(function ($q2){
-                        $q2->whereIn("jenis",["CPO","PK"])->where(function($q2){
-                          $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
-                        });
-                      });
-                  });
-                }
+                // if($r_val=='Done'){
+                //   $q->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no")->Where(function ($q1){
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBSK")->whereNotNull("ticket_b_no");
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
+                //       });
+                //   });
+                // }else{
+                //   $q->where("deleted",0)->where("req_deleted",0)->whereNull("pv_no")->Where(function ($q1){
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBS")->where(function($q2){
+                //           $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
+                //         });
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->where("jenis","TBSK")->whereNull("ticket_b_no");
+                //       });
+                //       $q1->orWhere(function ($q2){
+                //         $q2->whereIn("jenis",["CPO","PK"])->where(function($q2){
+                //           $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
+                //         });
+                //       });
+                //   });
+                // }
               }
             }
           }else if(array_search($key,['uj_asst_opt'])!==false){
@@ -333,36 +333,44 @@ class TrxTrpController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereNotNull("pv_no");
     }
 
+    // if($filter_status=="ticket_done"){
+    //   $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
+    //       $q->orWhere(function ($q1){
+    //         $q1->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
+    //       });
+    //       $q->orWhere(function ($q1){
+    //         $q1->where("jenis","TBSK")->whereNotNull("ticket_b_no");
+    //       });
+    //       $q->orWhere(function ($q1){
+    //         $q1->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
+    //       });
+    //   });
+    // }
+
+    // if($filter_status=="ticket_not_done"){
+    //   $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
+    //       $q->orWhere(function ($q1){
+    //         $q1->where("jenis","TBS")->where(function($q2){
+    //           $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
+    //         });
+    //       });
+    //       $q->orWhere(function ($q1){
+    //         $q1->where("jenis","TBSK")->whereNull("ticket_b_no");
+    //       });
+    //       $q->orWhere(function ($q1){
+    //         $q1->whereIn("jenis",["CPO","PK"])->where(function($q2){
+    //           $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
+    //         });
+    //       });
+    //   });
+    // }
+
     if($filter_status=="ticket_done"){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
-          $q->orWhere(function ($q1){
-            $q1->where("jenis","TBS")->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_no");
-          });
-          $q->orWhere(function ($q1){
-            $q1->where("jenis","TBSK")->whereNotNull("ticket_b_no");
-          });
-          $q->orWhere(function ($q1){
-            $q1->whereIn("jenis",["CPO","PK"])->whereNotNull("ticket_a_no")->whereNotNull("ticket_b_in_at")->whereNotNull("ticket_b_out_at")->where("ticket_b_bruto",">",1)->where("ticket_b_tara",">",1)->where("ticket_b_netto",">",1);
-          });
-      });
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('val_ticket',1);
     }
 
     if($filter_status=="ticket_not_done"){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where(function ($q){
-          $q->orWhere(function ($q1){
-            $q1->where("jenis","TBS")->where(function($q2){
-              $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_no");
-            });
-          });
-          $q->orWhere(function ($q1){
-            $q1->where("jenis","TBSK")->whereNull("ticket_b_no");
-          });
-          $q->orWhere(function ($q1){
-            $q1->whereIn("jenis",["CPO","PK"])->where(function($q2){
-              $q2->whereNull("ticket_a_no")->orWhereNull("ticket_b_in_at")->orWhereNull("ticket_b_out_at")->orWhereNull("ticket_b_bruto")->orWhereNull("ticket_b_tara")->orWhereNull("ticket_b_netto");
-            });
-          });
-      });
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('val_ticket',0);
     }
 
     if($filter_status=="pv_not_done"){
@@ -557,9 +565,8 @@ class TrxTrpController extends Controller
       $model_query                  = new TrxTrp();      
       $model_query->tanggal         = $request->tanggal;
 
-      $rejenis = ($request->jenis=="TBSK" ? "TBS" : $request->jenis );
       $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
-      ->where("jenis",$rejenis)
+      ->where("jenis",$request->jenis)
       ->where("deleted",0)
       ->lockForUpdate()
       ->first();
@@ -692,9 +699,8 @@ class TrxTrpController extends Controller
         
         $model_query->tanggal         = $request->tanggal;
   
-        $rejenis = ($request->jenis=="TBSK" ? "TBS" : $request->jenis );
         $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
-        ->where("jenis",$rejenis)
+        ->where("jenis",$request->jenis)
         ->where("deleted",0)
         ->lockForUpdate()
         ->first();
@@ -1242,11 +1248,13 @@ class TrxTrpController extends Controller
     ->where("TicketID",$request->ticket_b_id)
     ->where("TicketNo",$request->ticket_b_no);
 
-    if($request->jenis!=="TBS" || $connection_name!=='sqlsrv'){
-      $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
-    }else {
-      $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
-    }
+    // if($request->jenis!=="TBS" || $connection_name!=='sqlsrv'){
+    //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+    // }else {
+    //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+    // }
+    $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+
 
     $get_data_ticket=$get_data_ticket->first();
     

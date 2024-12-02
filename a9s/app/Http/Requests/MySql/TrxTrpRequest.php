@@ -35,7 +35,7 @@ class TrxTrpRequest extends FormRequest
             // $rules['xto']               = 'required|max:50';
             $rules['id_uj']             = 'required|exists:App\Models\MySql\Ujalan,id';
             // $rules['tipe'] = 'required|max:50';
-            $rules['jenis']             = 'required|in:CPO,TBS,PK,TBSK';
+            $rules['jenis']             = 'required|in:CPO,TBS,PK,TBSK,LAIN';
             $rules['supir_id']          = 'required|exists:App\Models\MySql\Employee,id';
             $rules['kernet_id']         = 'nullable|exists:App\Models\MySql\Employee,id';
             $rules['no_pol']            = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';

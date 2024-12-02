@@ -2,7 +2,7 @@
       <thead class="text-center" style="background-color: #B0A4A4;">
         
       <tr>
-        <th colspan="22" style="text-align: center; font-weight:bold;">
+        <th colspan="23" style="text-align: center; font-weight:bold;">
           Laporan Uang Gaji Dan Makan Standby,Uang Gaji Dan Makan Trip, Potongan, Serta Bonus Periode {{$info['periode']}}
         </th>
       </tr>
@@ -24,6 +24,7 @@
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Lain</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Lain 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS JAMSOS</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">U.Kerajinan</th>
@@ -73,6 +74,7 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["kerajinan"] }}</td>
@@ -94,6 +96,7 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_dinas']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_nominal_cut']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bonus']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bonus_2']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_kesehatan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_jamsos']}} </td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_kerajinan']}}</td>

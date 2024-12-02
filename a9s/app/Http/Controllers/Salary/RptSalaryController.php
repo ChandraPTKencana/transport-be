@@ -513,18 +513,19 @@ class RptSalaryController extends Controller
             "uj_makan"              => 0,
             "uj_dinas"              => 0,
             "nominal_cut"           => 0,
-            "salary_bonus_nominal"  => $spd->salary_bonus_nominal
+            "salary_bonus_nominal"  => $sp->period_part==1 ? $spd->salary_bonus_nominal :0,
+            "salary_bonus_nominal_2"  => $sp->period_part==2 ? $spd->salary_bonus_nominal : 0,
           ]);
         }else{
           $data[$search]["sb_gaji"] += $sp->period_part==1 ? $spd->sb_gaji:0;
           $data[$search]["sb_makan"] += $sp->period_part==1 ? $spd->sb_makan:0;
           $data[$search]["sb_dinas"] += $sp->period_part==1 ?$spd->sb_dinas:0;
+          $data[$search]["salary_bonus_nominal"] += $sp->period_part==1 ? $spd->salary_bonus_nominal :0;
 
           $data[$search]["sb_gaji_2"] += $sp->period_part==2 ? $spd->sb_gaji :0;
           $data[$search]["sb_makan_2"] += $sp->period_part==2 ? $spd->sb_makan :0;
           $data[$search]["sb_dinas_2"] += $sp->period_part==2 ? $spd->sb_dinas :0;
-
-          $data[$search]["salary_bonus_nominal"] += $spd->salary_bonus_nominal;
+          $data[$search]["salary_bonus_nominal_2"] += $sp->period_part==2 ? $spd->salary_bonus_nominal :0;
         }
 
       }
@@ -627,7 +628,8 @@ class RptSalaryController extends Controller
             "uj_makan"              => $uj_makan_s,
             "uj_dinas"              => $uj_dinas_s,
             "nominal_cut"           => 0,
-            "salary_bonus_nominal"  => 0
+            "salary_bonus_nominal"  => 0,
+            "salary_bonus_nominal_2"  => 0
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_s;
@@ -671,7 +673,8 @@ class RptSalaryController extends Controller
             "uj_makan"              => $uj_makan_k,
             "uj_dinas"              => $uj_dinas_k,
             "nominal_cut"           => 0,
-            "salary_bonus_nominal"  => 0
+            "salary_bonus_nominal"  => 0,
+            "salary_bonus_nominal_2"  => 0
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
@@ -725,7 +728,8 @@ class RptSalaryController extends Controller
           "uj_makan"              => 0,
           "uj_dinas"              => 0,
           "nominal_cut"           => $v->nominal_cut,
-          "salary_bonus_nominal"  => 0
+          "salary_bonus_nominal"  => 0,
+          "salary_bonus_nominal_2"  => 0
         ]);
       }else{
         $data[$search]['nominal_cut']+=$v->nominal_cut;
@@ -775,7 +779,7 @@ class RptSalaryController extends Controller
         !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 
         $v["sb_gaji_2"]==0 && $v["sb_makan_2"]==0 && $v["sb_dinas_2"]==0 && 
         $v["uj_gaji"]==0 && $v["uj_makan"]==0 && $v["uj_dinas"]==0 && 
-        $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0 && $v["kerajinan"]==0) 
+        $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0 && $v["salary_bonus_nominal_2"]==0 && $v["kerajinan"]==0) 
         ) RptSalaryDtl::insert($v);
     }
   }
@@ -811,6 +815,7 @@ class RptSalaryController extends Controller
       "ttl_nominal_cut"     => 0,
       "ttl_kerajinan"       => 0,
       "ttl_bonus"           => 0,
+      "ttl_bonus_2"         => 0,
       "ttl_all"             => 0,
       "ttl_periode_2"       => 0,
       "now"                 => date("d-m-Y H:i:s"),
@@ -829,13 +834,14 @@ class RptSalaryController extends Controller
       $ud = $data[$k]["uj_dinas"];
       $nc = $data[$k]["nominal_cut"];
       $sbn = $data[$k]["salary_bonus_nominal"];
+      $sbn2 = $data[$k]["salary_bonus_nominal_2"];
       $ker = $data[$k]["kerajinan"];
 
       $ebk = $data[$k]["employee_bpjs_kesehatan"];
       $ebj = $data[$k]["employee_bpjs_jamsos"];
 
-      $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn + $ker;
-      $ttl2 = $sg2 + $sm2 + $sd2 + $sbn + $ker;
+      $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn + $sbn2 + $ker;
+      $ttl2 = $sg2 + $sm2 + $sd2 + $sbn2 + $ker;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
@@ -848,6 +854,7 @@ class RptSalaryController extends Controller
       $info["ttl_uj_dinas"] += $ud;
       $info["ttl_nominal_cut"] += $nc;
       $info["ttl_bonus"] += $sbn;
+      $info["ttl_bonus_2"] += $sbn2;
       $info["ttl_bpjs_kesehatan"] += $ebk;
       $info["ttl_bpjs_jamsos"] += $ebj;
       $info["ttl_kerajinan"] += $ker;
@@ -941,12 +948,23 @@ class RptSalaryController extends Controller
 
       $sbn = $data[$k]["salary_bonus_nominal"];
       if($sbn<0){
-        $diff = $sg+$sm+$sd+$sg2+$sm2+$sd2+$sbn;
+        $diff = $sg+$sm+$sd+$sbn;
         if( $diff == 0){
-          $sg = $sm = $sd = $sg2 = $sm2 = $sd2 = 0;
+          $sg = $sm = $sd =0;
         }else{
-          $sg2 = $diff;
-          $sg = $sm = $sd = $sm2 = $sd2 = 0;
+          $sg = $diff;
+          $sm = $sd = 0;
+        }
+      }
+
+      $sbn2 = $data[$k]["salary_bonus_nominal_2"];
+      if($sbn2<0){
+        $diff_2 = $sg2+$sm2+$sd2+$sbn2;
+        if( $diff_2 == 0){
+          $sg2 = $sm2 = $sd2 =0;
+        }else{
+          $sg2 = $diff_2;
+          $sm2 = $sd2 = 0;
         }
       }
 
