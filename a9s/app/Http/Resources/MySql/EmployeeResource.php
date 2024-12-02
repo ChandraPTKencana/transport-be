@@ -48,6 +48,9 @@ class EmployeeResource extends JsonResource
             'deleted_at'            => $this->deleted_at ?? "",
             'deleted_by'            => new IsUserResource($this->whenLoaded('deleted_by')),
             'deleted_reason'        => $this->deleted_reason ?? "",
+            
+            'bpjs_kesehatan'        => $this->bpjs_kesehatan ?? "",
+            'bpjs_jamsos'           => $this->bpjs_jamsos ?? "",
         ];
     }
 }
