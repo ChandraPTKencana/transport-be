@@ -72,7 +72,6 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
-          <!-- <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td> -->
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["kerajinan"] }}</td>
@@ -93,7 +92,6 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_makan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_dinas']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_nominal_cut']}}</td>
-          <!-- <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bonus']}}</td> -->
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_kesehatan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_jamsos']}} </td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_kerajinan']}}</td>
