@@ -2150,7 +2150,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.val_ticket',true) && !$model_query->val_ticket){
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$model_query->val_ticket){
         $model_query->val_ticket = 1;
         $model_query->val_ticket_user = $this->admin_id;
         $model_query->val_ticket_at = $t_stamp;
