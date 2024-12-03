@@ -2125,7 +2125,7 @@ class TrxTrpController extends Controller
   }
 
   public function valTicket(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val_ticket']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -2154,8 +2154,9 @@ class TrxTrpController extends Controller
         $model_query->val_ticket = 1;
         $model_query->val_ticket_user = $this->admin_id;
         $model_query->val_ticket_at = $t_stamp;
+        $model_query->updated_user = $this->admin_id;
+        $model_query->updated_at = $t_stamp;
       }
-
       $model_query->save();
 
       MyLog::sys("trx_trp",$request->id,"approve ticket");
@@ -2167,6 +2168,7 @@ class TrxTrpController extends Controller
         "val_ticket_user"=>$model_query->val_ticket_user,
         "val_ticket_at"=>$model_query->val_ticket_at,
         "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
+        "updated_at"=>$model_query->updated_at,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
