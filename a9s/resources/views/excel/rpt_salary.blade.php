@@ -18,6 +18,7 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Alamat</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Status</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">No Rek</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Rek</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Bank</th>
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 1</th>
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 2</th>
@@ -62,6 +63,7 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_address"]}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_status"]}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_rek_no"]}}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_rek_name"]}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bank_name"]}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan"] }}</td>
@@ -84,7 +86,7 @@
         </tr>
         @endforeach
         <tr>
-          <td colspan="12" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
+          <td colspan="13" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_gaji']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_makan']}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_dinas']}}</td>

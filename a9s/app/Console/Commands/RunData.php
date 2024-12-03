@@ -117,14 +117,24 @@ class RunData extends Command
         // }
 
 
-        foreach (\App\Models\MySql\StandbyTrx::whereNotNull("ref")->get() as $key => $value) {
-            $trx_trp =\App\Models\MySql\TrxTrp::where("id",$value->ref)->first();
-            if($trx_trp){
-                $value->trx_trp_id = $value->ref;
-                $value->save();
-            }else{
-                $this->info("ID ".$value->id.",ref not found in trx trp \n ");
-            }
+        // foreach (\App\Models\MySql\StandbyTrx::whereNotNull("ref")->get() as $key => $value) {
+        //     $trx_trp =\App\Models\MySql\TrxTrp::where("id",$value->ref)->first();
+        //     if($trx_trp){
+        //         $value->trx_trp_id = $value->ref;
+        //         $value->save();
+        //     }else{
+        //         $this->info("ID ".$value->id.",ref not found in trx trp \n ");
+        //     }
+        // }
+
+        $rpts = \App\Models\MySql\RptSalaryDtl::get();
+
+        foreach ($rpts as $k => $v) {
+            $emp = \App\Models\MySql\Employee::selectRaw("id,name,rek_name")->where("id",$v->employee_id)->first();
+            \App\Models\MySql\RptSalaryDtl::where("employee_id",$v->employee_id)->update([
+                "employee_rek_name"=>$emp->rek_name
+            ]);
+            $this->info($v->id."-".$emp->id."-".$emp->rek_name."-".$v->employee_id."-".$v->employee_name."\n ");
         }
         
         $this->info("Finish\n ");
