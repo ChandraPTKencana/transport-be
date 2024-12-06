@@ -805,20 +805,23 @@ class RptSalaryController extends Controller
       "ttl_sb_gaji"         => 0,
       "ttl_sb_makan"        => 0,
       "ttl_sb_dinas"        => 0,
+      "ttl_bonus"           => 0,
+      "ttl_periode_1"       => 0,
       "ttl_sb_gaji_2"       => 0,
       "ttl_sb_makan_2"      => 0,
       "ttl_sb_dinas_2"      => 0,
+      "ttl_bonus_2"         => 0,
+      "ttl_kerajinan"       => 0,
+      "ttl_periode_2"       => 0,
+      "ttl_periode"         => 0,
       "ttl_uj_gaji"         => 0,
       "ttl_uj_makan"        => 0,
       "ttl_uj_dinas"        => 0,
+      "ttl_nominal_cut"     => 0,
+      "ttl_all"             => 0,
       "ttl_bpjs_kesehatan"  => 0,
       "ttl_bpjs_jamsos"     => 0,
-      "ttl_nominal_cut"     => 0,
-      "ttl_kerajinan"       => 0,
-      "ttl_bonus"           => 0,
-      "ttl_bonus_2"         => 0,
-      "ttl_all"             => 0,
-      "ttl_periode_2"       => 0,
+      "ttl_grand"           => 0,
       "now"                 => date("d-m-Y H:i:s"),
       "periode"             => date("m-Y",strtotime($sp->period_end))
     ];
@@ -843,27 +846,34 @@ class RptSalaryController extends Controller
 
       $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $sbn + $sbn2 + $ker;
       $ttl2 = $sg2 + $sm2 + $sd2 + $sbn2 + $ker;
+      $ttl1 = $sg + $sm + $sd + $sbn;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
       $info["ttl_sb_dinas"] += $sd;
+      $info["ttl_bonus"] += $sbn;
+      $info["ttl_periode_1"] += $ttl1;
       $info["ttl_sb_gaji_2"] += $sg2;
       $info["ttl_sb_makan_2"] += $sm2;
       $info["ttl_sb_dinas_2"] += $sd2;
+      $info["ttl_bonus_2"] += $sbn2;
+      $info["ttl_kerajinan"] += $ker;
+      $info["ttl_periode_2"] += $ttl2;
+      $info["ttl_periode"] += ($ttl1 + $ttl2);
       $info["ttl_uj_gaji"] += $ug;
       $info["ttl_uj_makan"] += $um;
       $info["ttl_uj_dinas"] += $ud;
       $info["ttl_nominal_cut"] += $nc;
-      $info["ttl_bonus"] += $sbn;
-      $info["ttl_bonus_2"] += $sbn2;
+      $info["ttl_all"] += $ttl;
       $info["ttl_bpjs_kesehatan"] += $ebk;
       $info["ttl_bpjs_jamsos"] += $ebj;
-      $info["ttl_kerajinan"] += $ker;
-      $info["ttl_all"] += $ttl;
-      $info["ttl_periode_2"] += $ttl2;
+      $info["ttl_grand"] += ($ttl + $ebk + $ebj);
 
-      $data[$k]["total"] = $ttl;
+      $data[$k]["total_1"] = $ttl1;
       $data[$k]["total_2"] = $ttl2;
+      $data[$k]["total_p"] = ($ttl1 + $ttl2);
+      $data[$k]["total"] = $ttl;
+      $data[$k]["total_grand"] = ($ttl+ $ebk + $ebj);
     }
     
 
@@ -917,18 +927,21 @@ class RptSalaryController extends Controller
       "ttl_sb_gaji"         => 0,
       "ttl_sb_makan"        => 0,
       "ttl_sb_dinas"        => 0,
+      "ttl_periode_1"       => 0,
       "ttl_sb_gaji_2"       => 0,
       "ttl_sb_makan_2"      => 0,
       "ttl_sb_dinas_2"      => 0,
+      "ttl_kerajinan"       => 0,
+      "ttl_periode_2"       => 0,
+      "ttl_periode"         => 0,
       "ttl_uj_gaji"         => 0,
       "ttl_uj_makan"        => 0,
       "ttl_uj_dinas"        => 0,
+      "ttl_nominal_cut"     => 0,
+      "ttl_all"             => 0,
       "ttl_bpjs_kesehatan"  => 0,
       "ttl_bpjs_jamsos"     => 0,
-      "ttl_nominal_cut"     => 0,
-      "ttl_kerajinan"       => 0,
-      "ttl_all"             => 0,
-      "ttl_periode_2"       => 0,
+      "ttl_grand"           => 0,
       "now"                 => date("d-m-Y H:i:s"),
       "periode"             => date("m-Y",strtotime($sp->period_end))
     ];
@@ -983,26 +996,33 @@ class RptSalaryController extends Controller
       $ebj = $data[$k]["employee_bpjs_jamsos"];
 
       $ttl = $sg + $sm + $sd +$sg2 + $sm2 + $sd2 + $ug + $um + $ud - $nc + $ker;
+      $ttl1 = $sg + $sm + $sd;
       $ttl2 = $sg2 + $sm2 + $sd2 + $ker;
 
       $info["ttl_sb_gaji"] += $sg;
       $info["ttl_sb_makan"] += $sm;
       $info["ttl_sb_dinas"] += $sd;
+      $info["ttl_periode_1"] += $ttl1;
       $info["ttl_sb_gaji_2"] += $sg2;
       $info["ttl_sb_makan_2"] += $sm2;
       $info["ttl_sb_dinas_2"] += $sd2;
+      $info["ttl_kerajinan"] += $ker;
+      $info["ttl_periode_2"] += $ttl2;
+      $info["ttl_periode"] += ($ttl1 + $ttl2);
       $info["ttl_uj_gaji"] += $ug;
       $info["ttl_uj_makan"] += $um;
       $info["ttl_uj_dinas"] += $ud;
       $info["ttl_nominal_cut"] += $nc;
+      $info["ttl_all"] += $ttl;
       $info["ttl_bpjs_kesehatan"] += $ebk;
       $info["ttl_bpjs_jamsos"] += $ebj;
-      $info["ttl_kerajinan"] += $ker;
-      $info["ttl_all"] += $ttl;
-      $info["ttl_periode_2"] += $ttl2;
-
-      $data[$k]["total"] = $ttl;
+      $info["ttl_grand"] += ($ttl + $ebk + $ebj);
+      
+      $data[$k]["total_1"] = $ttl1;
       $data[$k]["total_2"] = $ttl2;
+      $data[$k]["total_p"] = $ttl1 + $ttl2;
+      $data[$k]["total"] = $ttl;
+      $data[$k]["total_grand"] = ($ttl + $ebk + $ebj);
     }
     
 

@@ -1152,7 +1152,8 @@ class TrxTrpController extends Controller
       if($model_query->pvr_id=="" || $model_query->pvr_id==null)
       throw new \Exception("Harap Lakukan Penghapusan",1);
 
-      $deleted_reason = $model_query->req_deleted_reason;
+      $reason_adder = $request->reason_adder;
+      $deleted_reason = $model_query->req_deleted_reason.($reason_adder?" | ".$reason_adder:"");
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
