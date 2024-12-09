@@ -161,6 +161,8 @@ class TrxTrpResource extends JsonResource
 
             'received_payment'  => $this->received_payment,
             'extra_money_trxs'  => ExtraMoneyTrxResource::collection($this->whenLoaded('extra_money_trxs')),
+
+            'note_for_remarks'  => $this->note_for_remarks,
         ];
     }
 }

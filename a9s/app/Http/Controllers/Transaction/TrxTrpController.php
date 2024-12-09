@@ -598,6 +598,7 @@ class TrxTrpController extends Controller
       }
 
       $model_query->payment_method_id = $request->payment_method_id;
+      $model_query->note_for_remarks  = $request->note_for_remarks;
       $model_query->no_pol            = $request->no_pol;      
       $model_query->created_at        = $t_stamp;
       $model_query->created_user      = $this->admin_id;
@@ -751,6 +752,7 @@ class TrxTrpController extends Controller
           }
         }
         $model_query->payment_method_id = $request->payment_method_id;
+        $model_query->note_for_remarks  = $request->note_for_remarks;
         $model_query->no_pol            = $request->no_pol;
       }
       
@@ -2462,6 +2464,11 @@ class TrxTrpController extends Controller
 
     if($ujalan->note_for_remarks!=null){
       $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $ujalan->note_for_remarks);
+      $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
+    }
+
+    if($trx_trp->note_for_remarks!=null){
+      $note_for_remarks_arr = preg_split('/\r\n|\r|\n/', $trx_trp->note_for_remarks);
       $arrRemarks = array_merge($arrRemarks,$note_for_remarks_arr);
     }
     

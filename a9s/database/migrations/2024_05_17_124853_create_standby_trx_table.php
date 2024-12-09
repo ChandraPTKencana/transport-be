@@ -24,7 +24,7 @@ return new class extends Migration
 
             $table->string('supir',255)->nullable();
             $table->string('kernet',255)->nullable();
-            $table->string('no_pol',12);
+            $table->string('no_pol',12)->nullable();
             $table->string('xto',50)->nullable();
             $table->text('note_for_remarks')->nullable();
             $table->string('ref',50)->nullable();

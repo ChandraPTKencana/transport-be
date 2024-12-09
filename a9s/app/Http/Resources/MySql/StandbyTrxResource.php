@@ -37,7 +37,7 @@ class StandbyTrxResource extends JsonResource
             'kernet'            => $this->kernet ?? "",
             'kernet_rek_no'     => $this->kernet_rek_no ?? "",
             'kernet_rek_name'   => $this->kernet_rek_name ?? "",
-            'no_pol'            => $this->no_pol,
+            'no_pol'            => $this->no_pol ?? "",
             
             'xto'               => $this->xto ?? "",
             'note_for_remarks'  => $this->note_for_remarks ?? '',

@@ -402,6 +402,17 @@ class StandbyTrxController extends Controller
         $model_query->trx_trp_id = $trx_trp->id;
       }
 
+      if($standby_mst->is_trip==1 && !$request->no_pol)
+      throw new \Exception("Harap No Pol Diisi",1);
+      
+      $model_query->no_pol              = MyLib::emptyStrToNull($request->no_pol);
+
+
+      if($standby_mst->is_trip==1 && !$request->xto)
+      throw new \Exception("Harap Tujuan Diisi",1);
+
+      $model_query->xto                 = MyLib::emptyStrToNull($request->xto);
+
       $model_query->standby_mst_id      = $standby_mst->id;
       if($standby_mst->is_transition){
         $model_query->transition_target   = $request->transition_target;
@@ -427,9 +438,7 @@ class StandbyTrxController extends Controller
         $model_query->kernet_rek_no   = $kernet_dt->rek_no;
         $model_query->kernet_rek_name = $kernet_dt->rek_name;  
       }
-      $model_query->no_pol              = $request->no_pol;
 
-      $model_query->xto                 = $request->xto;
       $model_query->note_for_remarks    = $request->note_for_remarks;
       // $model_query->ref                 = $request->ref;
       
@@ -628,8 +637,22 @@ class StandbyTrxController extends Controller
           throw new \Exception("Trx Trp Tidak Ditemukan",1);
   
           $model_query->trx_trp_id = $trx_trp->id;
+        }else{
+          $model_query->trx_trp_id = null;
         }
+
         
+        if($standby_mst->is_trip==1 && !$request->no_pol)
+        throw new \Exception("Harap No Pol Diisi",1);
+
+        $model_query->no_pol              = MyLib::emptyStrToNull($request->no_pol);
+  
+        if($standby_mst->is_trip==1 && !$request->xto)
+        throw new \Exception("Harap Tujuan Diisi",1);
+  
+        $model_query->xto                 = MyLib::emptyStrToNull($request->xto);
+
+
         $model_query->standby_mst_id      = $standby_mst->id;
 
         if($standby_mst->is_transition){
@@ -667,9 +690,7 @@ class StandbyTrxController extends Controller
           $model_query->kernet_rek_no   = null;
           $model_query->kernet_rek_name = null;  
         }
-        $model_query->no_pol              = $request->no_pol;
   
-        $model_query->xto                 = $request->xto;
         $model_query->note_for_remarks    = $request->note_for_remarks;
         // $model_query->ref              = $request->ref;
       }

@@ -42,7 +42,8 @@ class StandbyTrxRequest extends FormRequest
             $rules['supir_id']      = 'required_without:kernet_id';
             $rules['kernet_id']     = 'required_without:supir_id';
 
-            $rules['no_pol'] = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';
+            // $rules['no_pol'] = 'required|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';
+            $rules['no_pol'] = 'nullable|max:12|regex:/(\D)+\s{1}(\d)+\s{1}(\D)+/|exists:App\Models\MySql\Vehicle,no_pol';
             $rules['xto'] = 'nullable|max:50|exists:App\Models\MySql\Ujalan,xto';
 
             // $rules['online_status'] = 'required';
