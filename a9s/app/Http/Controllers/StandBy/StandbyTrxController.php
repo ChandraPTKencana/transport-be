@@ -470,8 +470,8 @@ class StandbyTrxController extends Controller
         $checks = StandbyTrxDtl::where('tanggal',$value['tanggal'])
         ->whereHas('standby_trx',function ($q) use ($supir_id,$kernet_id) {
           $q->where('deleted',0)->where('req_deleted',0)->where(function ($q1) use ($supir_id,$kernet_id) {            
-            if($supir_id>0) $q1->where('supir_id',$supir_id);
-            if($kernet_id>0) $q1->orwhere('kernet_id',$kernet_id);
+            if($supir_id>0) $q1->where('supir_id',$supir_id)->orwhere('kernet_id',$supir_id);
+            if($kernet_id>0) $q1->orwhere('supir_id',$kernet_id)->orwhere('kernet_id',$kernet_id);
           });
         })->get();
 
@@ -848,8 +848,8 @@ class StandbyTrxController extends Controller
               $checks = StandbyTrxDtl::where('tanggal',$v['tanggal'])
               ->whereHas('standby_trx',function ($q)use($supir_id,$kernet_id) {
                 $q->where('deleted',0)->where('req_deleted',0)->where(function ($q1) use ($supir_id,$kernet_id) {            
-                  if($supir_id>0) $q1->where('supir_id',$supir_id);
-                  if($kernet_id>0) $q1->orwhere('kernet_id',$kernet_id);
+                  if($supir_id>0) $q1->where('supir_id',$supir_id)->orwhere('kernet_id',$supir_id);
+                  if($kernet_id>0) $q1->orwhere('supir_id',$kernet_id)->orwhere('kernet_id',$kernet_id);
                 });
               })->where("standby_trx_id","!=",$model_query->id)->get();
       
@@ -913,8 +913,8 @@ class StandbyTrxController extends Controller
             $checks = StandbyTrxDtl::where('tanggal',$v['tanggal'])
             ->whereHas('standby_trx',function ($q)use($supir_id,$kernet_id) {
               $q->where('deleted',0)->where('req_deleted',0)->where(function ($q1) use ($supir_id,$kernet_id) {            
-                if($supir_id>0) $q1->where('supir_id',$supir_id);
-                if($kernet_id>0) $q1->orwhere('kernet_id',$kernet_id);
+                if($supir_id>0) $q1->where('supir_id',$supir_id)->orwhere('kernet_id',$supir_id);
+                if($kernet_id>0) $q1->orwhere('supir_id',$kernet_id)->orwhere('kernet_id',$kernet_id);
               });
             })->get();
     
