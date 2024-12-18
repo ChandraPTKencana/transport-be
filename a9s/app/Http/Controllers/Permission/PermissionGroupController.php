@@ -275,7 +275,7 @@ class PermissionGroupController extends Controller
       $ordinal=0;
       foreach ($users_in as $key => $value) {
         $ordinal = $key + 1;
-        PermissionGroupDetail::insert([
+        PermissionGroupUser::insert([
           'ordinal' => $ordinal,
           'permission_group_id' => $model_query->id,
           'user_id' => $value['id'],

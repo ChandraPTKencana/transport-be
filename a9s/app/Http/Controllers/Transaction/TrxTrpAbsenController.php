@@ -591,12 +591,19 @@ class TrxTrpAbsenController extends Controller
         $model_query->ritase_val_at = $t_stamp;
       }
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val1',true) && !$model_query->ritase_val1){
+
+        if($model_query->ritase_val==0) 
+        throw new \Exception("App1 Belum Memvalidasi",1);
+
         $model_query->ritase_val1 = 1;
         $model_query->ritase_val1_user = $this->admin_id;
         $model_query->ritase_val1_at = $t_stamp;
       }
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val2',true) && !$model_query->ritase_val2){
+        if($model_query->ritase_val1==0) 
+        throw new \Exception("App2 Belum Memvalidasi",1);
+      
         $model_query->ritase_val2 = 1;
         $model_query->ritase_val2_user = $this->admin_id;
         $model_query->ritase_val2_at = $t_stamp;
