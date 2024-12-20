@@ -595,19 +595,19 @@ class TrxTrpTransferController extends Controller
             $emt->employee_rek_no = $kernet->rek_no;
           }
           
-          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$emt->val4){
+          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true)){
             $emt->val4 = 1;
             $emt->val4_user = $this->admin_id;
             $emt->val4_at = $t_stamp;
           }
   
-          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && !$emt->val5){
+          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true)){
             $emt->val5 = 1;
             $emt->val5_user = $this->admin_id;
             $emt->val5_at = $t_stamp;
           }
   
-          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true) && !$emt->val6){
+          if(MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true)){
             $emt->val6 = 1;
             $emt->val6_user = $this->admin_id;
             $emt->val6_at = $t_stamp;
