@@ -340,7 +340,7 @@ class TrxTrpTransferController extends Controller
 
     $filter_status = $request->filter_status;
     
-    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val',1)->where('val1',1)->where('val2',1)->where('val4',1)->where('val5',1)->where('received_payment',0);
+    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val',1)->where('val1',1)->where('val2',1)->where('val5',1)->where('val6',1)->where('received_payment',0);
 
     $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
