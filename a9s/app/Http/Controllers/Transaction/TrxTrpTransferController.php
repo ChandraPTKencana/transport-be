@@ -421,6 +421,10 @@ class TrxTrpTransferController extends Controller
       if(!MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && $model_query->val5==0){
         throw new \Exception("Data Perlu Divalidasi oleh SPV Logistik terlebih dahulu",1);
       }
+
+      if(!MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true) && $model_query->val6==0){
+        throw new \Exception("Data Perlu Divalidasi oleh SPV Logistik terlebih dahulu",1);
+      }
       
       // if(($model_query->jenis=='CPO' || $model_query->jenis=='PK') && $model_query->val3==0){
       //   throw new \Exception("Data Perlu Divalidasi oleh marketing terlebih dahulu",1);
