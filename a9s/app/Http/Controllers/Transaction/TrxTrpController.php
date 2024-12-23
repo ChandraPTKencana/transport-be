@@ -574,6 +574,9 @@ class TrxTrpController extends Controller
       if(!$ujalan) 
       throw new \Exception("Silahkan Isi Data Ujalan Dengan Benar",1);
 
+      if($ujalan->asst_opt=="DENGAN KERNET" && !isset($kernet_dt))
+      throw new \Exception("KERNET HARUS DIPILIH",1);
+
       $model_query->id_uj               = $ujalan->id;
       $model_query->jenis               = $request->jenis;
       $model_query->xto                 = $ujalan->xto;
