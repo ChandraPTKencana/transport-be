@@ -401,26 +401,63 @@ class ExtraMoneyTrxController extends Controller
         $model_query->attachment_1_type = $fileType;
       }
 
+      // if($request->hasFile('attachment_2')){
+      //   $file = $request->file('attachment_2');
+      //   $path = $file->getRealPath();
+      //   $fileType = $file->getClientMimeType();
+      //   $ext = $file->extension();
+      //   if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+      //   throw new MyException([ "attachment_2" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+
+      //   $image = Image::read($path)->scale(height: $this->height);
+      //   $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+
+      //   $date = new \DateTime();
+      //   $timestamp = $date->format("Y-m-d H:i:s.v");
+      //   $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '-2.' . $ext;
+      //   $location = "/files/extra_money_trx/{$file_name}";
+      //   try {
+      //     ini_set('memory_limit', '256M');
+      //     Image::read($compressedImageBinary)->save(files_path($location));
+      //   } catch (\Exception $e) {
+      //     throw new \Exception("Simpan Foto Gagal");
+      //   }
+
+      //   // $blob_img_leave = base64_encode($compressedImageBinary); 
+      //   // $blobFile = base64_encode(file_get_contents($path));
+      //   $model_query->attachment_2_loc = $location;
+      //   $model_query->attachment_2_type = $fileType;
+      // }
+
       if($request->hasFile('attachment_2')){
         $file = $request->file('attachment_2');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
         $ext = $file->extension();
-        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-        throw new MyException([ "attachment_2" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-
-        $image = Image::read($path)->scale(height: $this->height);
-        $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
 
         $date = new \DateTime();
         $timestamp = $date->format("Y-m-d H:i:s.v");
         $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '-2.' . $ext;
         $location = "/files/extra_money_trx/{$file_name}";
-        try {
-          ini_set('memory_limit', '256M');
-          Image::read($compressedImageBinary)->save(files_path($location));
-        } catch (\Exception $e) {
-          throw new \Exception("Simpan Foto Gagal");
+
+        if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
+          $image = Image::read($path)->scale(height: $this->height);
+          $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+          try {
+            ini_set('memory_limit', '256M');
+            Image::read($compressedImageBinary)->save(files_path($location));
+          } catch (\Exception $e) {
+            throw new \Exception("Simpan Gambar Gagal");
+          }  
+        }else{
+          try {
+              // Set memory limit (optional)
+              ini_set('memory_limit', '256M');      
+              // Save the PDF file
+              file_put_contents(files_path($location), file_get_contents($path));
+          } catch (\Exception $e) {
+              throw new \Exception("Simpan PDF Gagal");
+          }
         }
 
         // $blob_img_leave = base64_encode($compressedImageBinary); 
@@ -580,6 +617,42 @@ class ExtraMoneyTrxController extends Controller
         $model_query->payment_method_id   = $request->payment_method_id;
       }
 
+      // if($request->hasFile('attachment_2')){
+      //   $file = $request->file('attachment_2');
+      //   $path = $file->getRealPath();
+      //   $fileType = $file->getClientMimeType();
+      //   // $blobFile = base64_encode(file_get_contents($path));
+      //   // $change++;
+
+
+      //   $ext = $file->extension();
+      //   if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+      //   throw new MyException([ "attachment_2" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+
+      //   $image = Image::read($path)->scale(height: $this->height);
+      //   $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+
+      //   $date = new \DateTime();
+      //   $timestamp = $date->format("Y-m-d H:i:s.v");
+      //   $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+      //   $location = "/files/extra_money_trx/{$file_name}";
+      //   try {
+      //     ini_set('memory_limit', '256M');
+      //     Image::read($compressedImageBinary)->save(files_path($location));
+      //   } catch (\Exception $e) {
+      //     throw new \Exception("Simpan Foto Gagal");
+      //   }
+
+      //   if (File::exists(files_path($model_query->attachment_2_loc)) && $model_query->attachment_2_loc != null) {
+      //     if (!unlink(files_path($model_query->attachment_2_loc)))
+      //       throw new \Exception("Gagal Hapus Gambar", 1);
+      //   }
+        
+      //   $model_query->attachment_2_type   = $fileType;
+      //   $model_query->attachment_2_loc    = $location;
+
+      // }
+
       if($request->hasFile('attachment_2')){
         $file = $request->file('attachment_2');
         $path = $file->getRealPath();
@@ -587,23 +660,31 @@ class ExtraMoneyTrxController extends Controller
         // $blobFile = base64_encode(file_get_contents($path));
         // $change++;
 
-
         $ext = $file->extension();
-        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-        throw new MyException([ "attachment_2" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-
-        $image = Image::read($path)->scale(height: $this->height);
-        $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
 
         $date = new \DateTime();
         $timestamp = $date->format("Y-m-d H:i:s.v");
         $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
         $location = "/files/extra_money_trx/{$file_name}";
-        try {
-          ini_set('memory_limit', '256M');
-          Image::read($compressedImageBinary)->save(files_path($location));
-        } catch (\Exception $e) {
-          throw new \Exception("Simpan Foto Gagal");
+
+        if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
+          $image = Image::read($path)->scale(height: $this->height);
+          $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+          try {
+            ini_set('memory_limit', '256M');
+            Image::read($compressedImageBinary)->save(files_path($location));
+          } catch (\Exception $e) {
+            throw new \Exception("Simpan Foto Gagal");
+          }
+        }else{
+          try {
+            // Set memory limit (optional)
+            ini_set('memory_limit', '256M');      
+            // Save the PDF file
+            file_put_contents(files_path($location), file_get_contents($path));
+          } catch (\Exception $e) {
+            throw new \Exception("Simpan PDF Gagal");
+          }
         }
 
         if (File::exists(files_path($model_query->attachment_2_loc)) && $model_query->attachment_2_loc != null) {
