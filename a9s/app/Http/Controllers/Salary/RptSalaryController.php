@@ -744,7 +744,7 @@ class RptSalaryController extends Controller
     foreach($em_else as $k=>$v){
       array_push($data,[
         "rpt_salary_id"         => $model_query->id,
-        "employee_id"           => $v,
+        "employee_id"           => $v->id,
         "sb_gaji"               => 0,
         "sb_makan"              => 0,
         "sb_dinas"              => 0,
@@ -801,7 +801,7 @@ class RptSalaryController extends Controller
       //   $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
       // }
 
-      if($empx && $empx->deleted==0)
+      if($empx->deleted==0)
       $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
 
       if(
