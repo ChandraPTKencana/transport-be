@@ -741,8 +741,6 @@ class RptSalaryController extends Controller
     },$data);
 
     $em_else = Employee::exclude(['attachement_1','attachement_2'])->whereNotIn("id",$em_has_trx)->where("val",1)->where("deleted",0)->get();
-    MyLog::logging($em_has_trx,"elseid");
-    MyLog::logging($em_else,"elseid");
     foreach($em_else as $k=>$v){
       array_push($data,[
         "rpt_salary_id"         => $model_query->id,
@@ -798,10 +796,13 @@ class RptSalaryController extends Controller
         $vsb->save();
       }
 
-      if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
-        if($empx->deleted==0)
-        $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
-      }
+      // if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
+      //   if($empx->deleted==0)
+      //   $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
+      // }
+
+      if($empx->deleted==0)
+      $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
 
       if(
         !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 
