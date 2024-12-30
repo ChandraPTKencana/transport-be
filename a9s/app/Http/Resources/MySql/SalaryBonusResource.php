@@ -53,6 +53,9 @@ class SalaryBonusResource extends JsonResource
             'deleted_at'        => $this->deleted_at ?? "",
             'deleted_by'        => new IsUserResource($this->whenLoaded('deleted_by')),
             'deleted_reason'    => $this->deleted_reason ?? "",
+
+            'salary_paid_id'     => $this->salary_paid_id,
+
         ];
     }
 }
