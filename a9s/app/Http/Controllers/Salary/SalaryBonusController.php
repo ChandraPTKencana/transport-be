@@ -296,7 +296,7 @@ class SalaryBonusController extends Controller
     $model_query = SalaryBonus::with([
     'employee'
     //end for details2
-    ])->with(['val1_by','val2_by'])->find($request->id);
+    ])->with(['val1_by','val2_by','deleted_by'])->find($request->id);
 
     // if($model_query->requested_by != $this->admin_id){
     //   return response()->json([

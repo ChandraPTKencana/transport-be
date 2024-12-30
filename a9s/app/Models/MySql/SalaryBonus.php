@@ -29,4 +29,9 @@ class SalaryBonus extends Model
     {
         return $this->belongsTo(Employee::class, "employee_id", 'id')->exclude(['attachment_1','attachment_2']);
     }
+
+    public function deleted_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "deleted_user");
+    }
 }
