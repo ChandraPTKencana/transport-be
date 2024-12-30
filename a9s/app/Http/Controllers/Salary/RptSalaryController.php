@@ -372,11 +372,11 @@ class RptSalaryController extends Controller
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
 
       if ($e->getCode() == 1) {
         return response()->json([
@@ -740,7 +740,7 @@ class RptSalaryController extends Controller
       return $v['employee_id'];
     },$data);
 
-    $em_else = Employee::exclude(['attachement_1','attachement_2'])->whereNotIn("id",$em_has_trx)->where("val",1)->where("deleted",0)->get();
+    $em_else = Employee::exclude(['attachment_1','attachment_2'])->whereNotIn("id",$em_has_trx)->where("val",1)->where("deleted",0)->get();
     foreach($em_else as $k=>$v){
       array_push($data,[
         "rpt_salary_id"         => $model_query->id,
@@ -765,7 +765,7 @@ class RptSalaryController extends Controller
       $kerajinan_s=400000;
       $kerajinan_k=200000;
 
-      $empx = Employee::where("id",$v['employee_id'])->exclude(['attachement_1','attachement_2'])->first();
+      $empx = Employee::where("id",$v['employee_id'])->exclude(['attachment_1','attachment_2'])->first();
       if($empx){
         $v["employee_name"]           = $empx->name;
         $v["employee_role"]           = $empx->role;
