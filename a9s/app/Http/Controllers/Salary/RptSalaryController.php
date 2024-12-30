@@ -801,7 +801,7 @@ class RptSalaryController extends Controller
       //   $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
       // }
 
-      if($empx->deleted==0)
+      if($empx && $empx->deleted==0)
       $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
 
       if(
