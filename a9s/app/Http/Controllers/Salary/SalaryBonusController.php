@@ -279,7 +279,7 @@ class SalaryBonusController extends Controller
     // Model Filter
     // ==============
     $model_query = $model_query->exclude(['attachment_1']);
-    $model_query = $model_query->with('employee')->get();
+    $model_query = $model_query->with(['employee','deleted_by'])->get();
     return response()->json([
       "data" => SalaryBonusResource::collection($model_query),
     ], 200);
