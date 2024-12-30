@@ -736,6 +736,31 @@ class RptSalaryController extends Controller
       }
     }
 
+    $em_has_trx = array_map(function ($v){
+      return $v['employee_id'];
+    },$data);
+
+    $em_else = Employee::exclude(['attachement_1','attachement_2'])->whereNotIn("id",$em_has_trx)->where("val",1)->where("deleted",0)->get();
+    foreach($em_else as $k=>$v){
+      array_push($data,[
+        "rpt_salary_id"         => $model_query->id,
+        "employee_id"           => $v,
+        "sb_gaji"               => 0,
+        "sb_makan"              => 0,
+        "sb_dinas"              => 0,
+        "sb_gaji_2"             => 0,
+        "sb_makan_2"            => 0,
+        "sb_dinas_2"            => 0,
+        "uj_gaji"               => 0,
+        "uj_makan"              => 0,
+        "uj_dinas"              => 0,
+        "nominal_cut"           => 0,
+        "salary_bonus_nominal"  => 0,
+        "salary_bonus_nominal_2"  => 0
+      ]);
+    }
+    
+
     foreach ($data as $k => $v) {
       $kerajinan_s=400000;
       $kerajinan_k=200000;
