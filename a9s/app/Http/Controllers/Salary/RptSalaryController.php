@@ -741,6 +741,8 @@ class RptSalaryController extends Controller
     },$data);
 
     $em_else = Employee::exclude(['attachement_1','attachement_2'])->whereNotIn("id",$em_has_trx)->where("val",1)->where("deleted",0)->get();
+    MyLog::logging($em_has_trx,"elseid");
+    MyLog::logging($em_else,"elseid");
     foreach($em_else as $k=>$v){
       array_push($data,[
         "rpt_salary_id"         => $model_query->id,
