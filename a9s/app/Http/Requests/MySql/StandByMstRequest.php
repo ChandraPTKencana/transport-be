@@ -31,7 +31,7 @@ class StandbyMstRequest extends FormRequest
             $rules['id'] = 'required|exists:App\Models\MySql\StandbyMst,id';
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
-            $rules['name'] = 'required|max:30';
+            $rules['name'] = 'required|max:60';
             $rules['tipe'] = 'required|max:50';
         }
         return $rules;

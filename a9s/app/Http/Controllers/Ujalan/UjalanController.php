@@ -25,6 +25,7 @@ use App\Http\Requests\MySql\UjalanRequest;
 
 use App\Http\Resources\IsUserResource;
 use App\Http\Resources\MySql\UjalanResource;
+use App\Models\MySql\TrxTrp;
 
 class UjalanController extends Controller
 {
@@ -1337,6 +1338,74 @@ class UjalanController extends Controller
       $model_query->save();
 
       MyLog::sys("ujalan_mst",$request->id,"approve");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val"=>$model_query->val,
+        "val_user"=>$model_query->val_user,
+        "val_at"=>$model_query->val_at,
+        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function unvalidasi(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['ujalan.unval']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\Ujalan,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = Ujalan::find($request->id);
+      if(TrxTrp::where("id_uj",$model_query->id)->first()){
+        throw new \Exception("Data Sudah Digunakan",1);
+      }
+      $model_query->val = 0;
+      // $model_query->val_user = $this->admin_id;
+      // $model_query->val_at = $t_stamp;
+      
+      $model_query->val1 = 0;
+      // $model_query->val1_user = $this->admin_id;
+      // $model_query->val1_at = $t_stamp;
+      
+      $model_query->save();
+
+      MyLog::sys("ujalan_mst",$request->id,"unapprove");
 
       DB::commit();
       return response()->json([

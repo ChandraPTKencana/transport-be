@@ -546,4 +546,68 @@ class EmployeeController extends Controller
     }
 
   }
+
+  public function unvalidasi(Request $request){
+    MyAdmin::checkScope($this->permissions, 'employee.unval');
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\Employee,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = Employee::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
+      if($model_query->val){
+        throw new \Exception("Data Sudah Tervalidasi",1);
+      }
+      
+      $model_query->val = 0;
+      // if(!$model_query->val){
+      //   $model_query->val = 1;
+      //   $model_query->val_user = $this->admin_id;
+      //   $model_query->val_at = $t_stamp;
+      // }
+
+      $model_query->save();
+
+      MyLog::sys($this->syslog_db,$request->id,"unapprove");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val"=>$model_query->val,
+        "val_user"=>$model_query->val_user,
+        "val_at"=>$model_query->val_at,
+        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
 }

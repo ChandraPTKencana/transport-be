@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('standby_mst', function (Blueprint $table) {
             $table->id();
-            $table->string("name",30);
+            $table->string("name",60);
             $table->string('tipe',50);
             $table->decimal('amount',18);
 
