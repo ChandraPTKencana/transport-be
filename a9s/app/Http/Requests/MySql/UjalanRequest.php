@@ -31,7 +31,7 @@ class UjalanRequest extends FormRequest
             $rules['id'] = 'required|exists:App\Models\MySql\Ujalan,id';
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
-            $rules['xto'] = 'required|max:50';
+            $rules['xto'] = 'required|max:100';
             $rules['tipe'] = 'required|max:50';
             $rules['jenis'] = 'required|in:CPO,TBS,PK,TBSK,LAIN';
         }

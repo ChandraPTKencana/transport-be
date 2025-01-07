@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('is_uj', function (Blueprint $table) {
             $table->id();
             $table->string('xto',50);
-            $table->string('tipe',50);
+            $table->string('tipe',100);
             $table->string('jenis',50);
 
             $table->foreignId('created_user')->references('id')->on('is_users')->onDelete('restrict')->onUpdate('cascade');
