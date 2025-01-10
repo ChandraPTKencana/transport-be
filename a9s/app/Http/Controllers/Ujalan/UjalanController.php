@@ -1315,7 +1315,7 @@ class UjalanController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = Ujalan::find($request->id);
+      $model_query = Ujalan::lockForUpdate()->find($request->id);
       if(MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && $model_query->val){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
@@ -1371,7 +1371,7 @@ class UjalanController extends Controller
   }
 
   public function unvalidasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['ujalan.unval']);
+    MyAdmin::checkMultiScope($this->permissions, ['ujalan.unval','ujalan.unval1']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Ujalan,id",
@@ -1391,17 +1391,22 @@ class UjalanController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = Ujalan::find($request->id);
+      $model_query = Ujalan::lockForUpdate()->find($request->id);
       if(TrxTrp::where("id_uj",$model_query->id)->first()){
         throw new \Exception("Data Sudah Digunakan",1);
       }
-      $model_query->val = 0;
-      // $model_query->val_user = $this->admin_id;
-      // $model_query->val_at = $t_stamp;
       
-      $model_query->val1 = 0;
-      // $model_query->val1_user = $this->admin_id;
-      // $model_query->val1_at = $t_stamp;
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.unval',true) && $model_query->val){
+        $model_query->val = 0;
+        // $model_query->val_user = $this->admin_id;
+        // $model_query->val_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.unval1',true) && $model_query->val1){
+        $model_query->val1 = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
+      }
       
       $model_query->save();
 

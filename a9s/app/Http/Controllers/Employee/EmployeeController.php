@@ -569,11 +569,17 @@ class EmployeeController extends Controller
     DB::beginTransaction();
     try {
       $model_query = Employee::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
-      if($model_query->val){
-        throw new \Exception("Data Sudah Tervalidasi",1);
+      // if($model_query->val){
+      //   throw new \Exception("Data Sudah Tervalidasi",1);
+      // }
+
+      if(MyAdmin::checkScope($this->permissions, 'employee.unval',true) && $model_query->val){
+        $model_query->val = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
       }
       
-      $model_query->val = 0;
+      // $model_query->val = 0;
       // if(!$model_query->val){
       //   $model_query->val = 1;
       //   $model_query->val_user = $this->admin_id;
@@ -586,7 +592,7 @@ class EmployeeController extends Controller
 
       DB::commit();
       return response()->json([
-        "message" => "Proses validasi data berhasil",
+        "message" => "Proses unvalidasi data berhasil",
         "val"=>$model_query->val,
         "val_user"=>$model_query->val_user,
         "val_at"=>$model_query->val_at,
@@ -605,7 +611,7 @@ class EmployeeController extends Controller
       //   "message" => $e->getMessage(),
       // ], 400);
       return response()->json([
-        "message" => "Proses ubah data gagal",
+        "message" => "Proses unvalidasi data gagal",
       ], 400);
     }
 

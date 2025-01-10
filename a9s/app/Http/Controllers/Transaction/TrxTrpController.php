@@ -117,6 +117,7 @@ class TrxTrpController extends Controller
 
           $list_to_like_uj = [
             ["uj_asst_opt","asst_opt"],
+            ["uj_xto","xto"],
           ];
           foreach ($list_to_like_uj as $key => $v) {
             if (isset($like_lists[$v[0]])) {
@@ -166,7 +167,7 @@ class TrxTrpController extends Controller
       if(count($fm_sorts)>0){
         usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
         foreach ($fm_sorts as $key => $value) {
-          if(array_search($value['key'],['uj_asst_opt'])!==false){
+          if(array_search($value['key'],['uj_asst_opt','uj_xto'])!==false){
             $model_query = MyLib::queryOrderP1($model_query,"uj","id_uj",$value['key'],$filter_model[$value['key']]["sort_type"],"is_uj");
           } else{
             $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
@@ -298,7 +299,7 @@ class TrxTrpController extends Controller
                 // }
               }
             }
-          }else if(array_search($key,['uj_asst_opt'])!==false){
+          }else if(array_search($key,['uj_asst_opt','uj_xto'])!==false){
             MyLib::queryCheckP1Dif("uj",$value,$key,$q,'is_uj',"id_uj");
           }else{
             MyLib::queryCheck($value,$key,$q);
@@ -2031,7 +2032,7 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = TrxTrp::find($request->id);
+      $model_query = TrxTrp::lockForUpdate()->find($request->id);
       if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5 && $model_query->val6){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
@@ -2151,7 +2152,7 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = TrxTrp::find($request->id);
+      $model_query = TrxTrp::lockForUpdate()->find($request->id);
       if($model_query->val_ticket){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
@@ -2195,6 +2196,71 @@ class TrxTrpController extends Controller
 
   }
 
+  public function unvalTicket(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = TrxTrp::lockForUpdate()->find($request->id);
+      // if($model_query->val_ticket){
+      //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      // }
+
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $model_query->val_ticket){
+        $model_query->val_ticket = 0;
+        // $model_query->val_ticket_user = $this->admin_id;
+        // $model_query->val_ticket_at = $t_stamp;
+        $model_query->updated_user = $this->admin_id;
+        $model_query->updated_at = $t_stamp;
+      }
+      $model_query->save();
+
+      MyLog::sys("trx_trp",$request->id,"unvalidasi ticket");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val_ticket"=>$model_query->val_ticket,
+        "val_ticket_user"=>$model_query->val_ticket_user,
+        "val_ticket_at"=>$model_query->val_ticket_at,
+        "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
+        "updated_at"=>$model_query->updated_at,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
   public function valTickets(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
@@ -2202,7 +2268,7 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_querys = TrxTrp::whereIn("id",$ids)->get();
+      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
       $valList = [];
 
       foreach ($model_querys as $key => $v) {
@@ -2254,6 +2320,65 @@ class TrxTrpController extends Controller
 
   }
 
+  public function unvalTickets(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
+
+    $ids = json_decode($request->ids, true);
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
+      $valList = [];
+
+      foreach ($model_querys as $key => $v) {
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $v->val_ticket){
+          $v->val_ticket = 0;
+          // $v->val_ticket_user = $this->admin_id;
+          // $v->val_ticket_at = $t_stamp;
+          $v->updated_user = $this->admin_id;
+          $v->updated_at = $t_stamp;
+          $v->save();
+          array_push($valList,[
+            "id"=>$v->id,
+            "val_ticket"=>$v->val_ticket,
+            "val_ticket_user"=>$v->val_ticket_user,
+            "val_ticket_at"=>$v->val_ticket_at,
+            "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
+            "updated_at"=>$v->updated_at,
+          ]);
+        }
+      }
+
+      $nids = array_map(function($x) {
+        return $x['id'];        
+      },$valList);
+
+      MyLog::sys("trx_trp",null,"unval_tickets",implode(",",$nids));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses unvalidasi data berhasil",
+        "val_lists"=>$valList
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses unvalidasi data gagal",
+      ], 400);
+    }
+
+  }
+
   public function clearTickets(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
@@ -2261,7 +2386,7 @@ class TrxTrpController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_querys = TrxTrp::whereIn("id",$ids)->where('val_ticket',0)->get();
+      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->where('val_ticket',0)->get();
       $clearList = [];
 
       foreach ($model_querys as $key => $v) {

@@ -22,8 +22,7 @@ use App\Http\Requests\MySql\StandbyMstRequest;
 
 use App\Http\Resources\MySql\StandbyMstResource;
 use App\Http\Resources\IsUserResource;
-
-
+use App\Models\MySql\StandbyTrx;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -847,5 +846,76 @@ class StandbyMstController extends Controller
 
   }
 
+  public function unvalidasi(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['standby_mst.unval','standby_mst.unval1']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\StandbyMst,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
+      if(StandbyTrx::where("standby_mst_id",$model_query->id)->first()){
+        throw new \Exception("Data Sudah Digunakan",1);
+      }
+      
+      if(MyAdmin::checkScope($this->permissions, 'standby_mst.unval',true) && $model_query->val){
+        $model_query->val = 0;
+        // $model_query->val_user = $this->admin_id;
+        // $model_query->val_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_mst.unval1',true) && $model_query->val1){
+        $model_query->val1 = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
+      }
+      $model_query->save();
+
+      MyLog::sys("standby_mst",$request->id,"unapprove");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses unvalidasi data berhasil",
+        "val"=>$model_query->val,
+        "val_user"=>$model_query->val_user,
+        "val_at"=>$model_query->val_at,
+        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses unvalidasi data gagal",
+      ], 400);
+    }
+
+  }
   
 }

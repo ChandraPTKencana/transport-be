@@ -126,10 +126,17 @@ class RunPermit extends Command
             // ["permit"=>'standby_trx.detail.decide_paid',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
             // ["permit"=>'user.remove',"to"=>['SUPERADMIN']],
             ["permit"=>'ujalan.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'ujalan.unval1',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'standby_mst.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'standby_mst.unval1',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'standby_trx.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'standby_trx.unval1',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'standby_trx.unval2',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             ["permit"=>'employee.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             ["permit"=>'trp_trx.unval2',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             ["permit"=>'trp_trx.unval3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             ["permit"=>'trp_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.ticket.unval_ticket',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             // ["permit"=>'extra_money_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
         ];
 

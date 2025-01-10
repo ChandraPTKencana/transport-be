@@ -433,4 +433,47 @@ class TrxTrpFinanceController extends Controller
     ];
     return $result;
   }
+
+  public function reportFullExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      // $value['amount']=$value["amount"];
+      // $value['pv_total']=$value["pv_total"];
+      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+      $value['created_at']=$value["created_at"] ? date("d-m-Y H:i:s",strtotime($value["created_at"])) : "";
+      $value['updated_at']=$value["updated_at"] ? date("d-m-Y H:i:s",strtotime($value["updated_at"])) : "";
+      array_push($newDetails,$value);
+    }
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+    $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-trx_trp'."[".$date_from."_".$date_to."]";
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.trx_trp_full'), $mime["exportType"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
 }

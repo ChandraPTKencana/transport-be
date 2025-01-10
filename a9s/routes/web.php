@@ -69,6 +69,7 @@ Route::get('/trx_trp_susuts/report_Excel', [\App\Http\Controllers\Transaction\Tr
 Route::get('/trx_trps/dataFin', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'index']);
 Route::get('/trx_trps/reportFinPDF', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'reportFinPDF']);
 Route::get('/trx_trps/reportFinExcel', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'reportFinExcel']);
+Route::get('/trx_trps/reportFullExcel', [\App\Http\Controllers\Transaction\TrxTrpFinanceController::class, 'reportFullExcel']);
 
 Route::get('/trx_trp/transfers', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'index']);
 Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransfer']);
@@ -93,7 +94,9 @@ Route::post('/trx_trp_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpCont
 Route::post('/trx_trp_do_gen_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPV']);
 Route::post('/trx_trp_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
 Route::put('/trx_trp_val_ticket', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'valTicket']);
+Route::put('/trx_trp_unval_ticket', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'unvalTicket']);
 Route::put('/trx_trp_val_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'valTickets']);
+Route::put('/trx_trp_unval_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'unvalTickets']);
 Route::put('/trx_trp_clear_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'clearTickets']);
 
 Route::get('/trx_load_cost_center', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'cost_center']);
@@ -126,6 +129,7 @@ Route::post('/employee', [\App\Http\Controllers\Employee\EmployeeController::cla
 Route::put('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'update']);
 Route::delete('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'delete']);
 Route::put('/employee_validasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'validasi']);
+Route::put('/employee_unvalidasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'unvalidasi']);
 
 
 Route::get('/standby_msts', [\App\Http\Controllers\Standby\StandbyMstController::class, 'index']);
@@ -134,6 +138,7 @@ Route::post('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController:
 Route::put('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController::class, 'update']);
 Route::delete('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController::class, 'delete']);
 Route::put('/standby_mst_validasi', [\App\Http\Controllers\Standby\StandbyMstController::class, 'validasi']);
+Route::put('/standby_mst_unvalidasi', [\App\Http\Controllers\Standby\StandbyMstController::class, 'unvalidasi']);
 
 Route::get('/ac_accounts', [\App\Http\Controllers\AcAccountController::class, 'index']);
 
@@ -157,6 +162,7 @@ Route::delete('/standby_trx_approve_req_delete', [\App\Http\Controllers\Standby\
 // Route::get('/standby_trxs_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
 Route::get('/standby_trx_preview_file', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'previewFile']);
 Route::put('/standby_trx_validasi', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'validasi']);
+Route::put('/standby_trx_unvalidasi', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'unvalidasi']);
 Route::post('/standby_trx_do_gen_pvr', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doGenPVR']);
 Route::post('/standby_trx_do_update_pv', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doUpdatePV']);
 

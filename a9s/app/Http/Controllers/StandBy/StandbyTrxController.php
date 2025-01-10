@@ -1534,7 +1534,7 @@ class StandbyTrxController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = StandbyTrx::find($request->id);
+      $model_query = StandbyTrx::lockForUpdate()->find($request->id);
       if($model_query->salary_paid_id){
         throw new \Exception("Standby Sudah Generate Salary Paid Tidak Dapat Divalidasi lagi",1);
       }
@@ -1616,6 +1616,95 @@ class StandbyTrxController extends Controller
       // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function unvalidasi(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.unval','standby_trx.unval1','standby_trx.unval2']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = StandbyTrx::lockForUpdate()->find($request->id);
+      if($model_query->salary_paid_id){
+        throw new \Exception("Standby Sudah Generate Salary Paid Tidak Dapat Diunvalidasi lagi",1);
+      }
+      // if($model_query->cost_center_code=="")
+      // throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
+
+      if(!$model_query->val && !$model_query->val1 && !$model_query->val2){
+        throw new \Exception("Data Sudah Terunvalidasi Sepenuhnya",1);
+      }
+
+    if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval',true) && $model_query->val){
+      $model_query->val = 0;
+      // $model_query->val_user = $this->admin_id;
+      // $model_query->val_at = $t_stamp;
+    }
+  
+    if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval1',true) && $model_query->val1){
+        $model_query->val1 = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval2',true) && $model_query->val2){
+        $model_query->val2 = 0;
+        // $model_query->val2_user = $this->admin_id;
+        // $model_query->val2_at = $t_stamp;
+      }
+
+      $model_query->save();
+
+      MyLog::sys("standby_trx",$request->id,"unapprove");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses unvalidasi data berhasil",
+        "val"=>$model_query->val,
+        "val_user"=>$model_query->val_user,
+        "val_at"=>$model_query->val_at,
+        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses unvalidasi data gagal",
       ], 400);
     }
 
