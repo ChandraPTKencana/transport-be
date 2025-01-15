@@ -3142,7 +3142,7 @@ class TrxTrpTicketController extends Controller
                 //   break;
                 // }
 
-                if($af['transition_type']!='To'){
+                // if($af['transition_type']!='To'){
                   
                   if($af['ticket_b_no'] && $af['ticket_b_no'] !== $gdt['TicketNo']){
                     break;
@@ -3199,7 +3199,7 @@ class TrxTrpTicketController extends Controller
   
                   }
 
-                }
+                // }
 
                 if(count($get_data_tickets) == 0)
                 break;
@@ -3218,8 +3218,7 @@ class TrxTrpTicketController extends Controller
                 if($tn[0]==env("app_name"))
                 break;
 
-                if($af['transition_type']!='To'){
-
+                // if($af['transition_type']!='To'){
                   if($af['ticket_a_no'] && $af['ticket_a_no'] !== $gdt['TicketNo']){
                     continue;
                     // break;
@@ -3273,11 +3272,11 @@ class TrxTrpTicketController extends Controller
                       break;
                     }
                   }
-                }
+                // }
 
               }else{
 
-                if($af['transition_type']!='From'){
+                // if($af['transition_type']!='From'){
                   if($af['ticket_a_no'] && $af['ticket_a_no'] !== $gdt['TicketNo']){
                     break;
                   }elseif($af['ticket_a_no'] && $af['ticket_a_no'] == $gdt['TicketNo']){
@@ -3330,7 +3329,7 @@ class TrxTrpTicketController extends Controller
                       break;
                     }
                   }
-                }
+                // }
 
                 if(count($get_data_tickets) == 0)
                 break;
@@ -3348,7 +3347,7 @@ class TrxTrpTicketController extends Controller
                 if($tn[0]!=env("app_name"))
                 break;
 
-                if($af['transition_type']!='To'){
+                // if($af['transition_type']!='To'){
                   if($af['ticket_b_no'] && $af['ticket_b_no'] !== $gdt['TicketNo']){
                     break;
                   }elseif($af['ticket_b_no'] && $af['ticket_b_no'] == $gdt['TicketNo']){
@@ -3401,7 +3400,7 @@ class TrxTrpTicketController extends Controller
                       break;
                     }
                   }
-                }
+                // }
 
               }
 
