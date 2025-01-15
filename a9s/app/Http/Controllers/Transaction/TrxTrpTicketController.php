@@ -3129,7 +3129,7 @@ class TrxTrpTicketController extends Controller
 
                   if($vgp["DateTimeIn"] < $vg["DateTimeIn"]){
                     $insert=1;
-                    array_splice($get_data_tickets,$kg,0,$vgp);
+                    array_splice($get_data_tickets,$kg,0,[$vgp]);
                     break;                    
                   }
                 }
@@ -3140,7 +3140,6 @@ class TrxTrpTicketController extends Controller
               }
             }
           }
-          MyLog::logging($get_data_tickets);
 
           foreach ($all_afters as $key => $af) {
             if(!$af->ticket_a_no && !$af->ticket_b_no && $af->ticket_note && $af->val_ticket == 1)
