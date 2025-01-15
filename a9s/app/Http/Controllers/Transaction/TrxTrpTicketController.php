@@ -3140,6 +3140,7 @@ class TrxTrpTicketController extends Controller
               }
             }
           }
+          MyLog::logging($get_data_tickets);
 
           foreach ($all_afters as $key => $af) {
             if(!$af->ticket_a_no && !$af->ticket_b_no && $af->ticket_note && $af->val_ticket == 1)
