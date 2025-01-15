@@ -3025,6 +3025,7 @@ class TrxTrpTicketController extends Controller
 
     $dkey = "vehiclesAllowedUpdateTicket";
     $lists = json_decode($request->vehicles, true);
+    $pabriks = json_decode($request->pabriks, true);
     
     $vehicles = Vehicle::whereIn("id",$lists)->where("deleted",0)->get();
 
@@ -3106,6 +3107,37 @@ class TrxTrpTicketController extends Controller
           $get_data_tickets = $get_data_tickets->orderBy("DateTimeIn","asc")->get();
 
           $get_data_tickets = MyLib::objsToArray($get_data_tickets);
+
+          foreach ($pabriks as $kp => $vp) {
+            if(array_search($vp,MyLib::$list_pabrik)!==false){
+              $get_data_ticketsp = DB::connection($vp)->table('palm_tickets')
+              ->select('VehicleNo','DateTimeIn','TicketNo','Void',"TicketID","Bruto","Tara","OriginalBruto","OriginalTara","NamaSupir","DateTimeOut")
+              ->whereRaw("REPLACE(VehicleNo, ' ', '')='".$no_pol."'")->where('DateTimeIn',">",$created_at);
+    
+              if(in_array($empty_one['jenis'],['PK','CPO'])){
+                $get_data_ticketsp = $get_data_ticketsp->where('TicketNo','not like','%-%');
+              }else{
+                $get_data_ticketsp = $get_data_ticketsp->where('Void',0);
+              }
+              $get_data_ticketsp = $get_data_ticketsp->orderBy("DateTimeIn","asc")->get();
+
+              $get_data_ticketsp = MyLib::objsToArray($get_data_ticketsp);
+
+              foreach ($get_data_ticketsp as $kgp => $vgp) {
+                $insert=0;
+                foreach ($get_data_tickets as $kg => $vg) {
+                  if($vgp["DateTimeIn"] < $vg["DateTimeIn"]){
+                    $insert=1;
+                    array_splice($get_data_tickets,$kg,0,$vgp);                    
+                  }
+
+                  if($insert==0){
+                    array_push($get_data_tickets,$vgp);
+                  }
+                }
+              }
+            }
+          }
 
           foreach ($all_afters as $key => $af) {
             if(!$af->ticket_a_no && !$af->ticket_b_no && $af->ticket_note && $af->val_ticket == 1)
