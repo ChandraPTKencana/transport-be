@@ -3125,23 +3125,17 @@ class TrxTrpTicketController extends Controller
 
               foreach ($get_data_ticketsp as $kgp => $vgp) {
                 $insert=0;
-                MyLog::logging($vgp["DateTimeIn"]);
                 foreach ($get_data_tickets as $kg => $vg) {
-                MyLog::logging($vg["DateTimeIn"]);
 
                   if($vgp["DateTimeIn"] < $vg["DateTimeIn"]){
-                    MyLog::logging("PAsss");
                     $insert=1;
-                    array_splice($get_data_tickets,$kg,0,$vgp);                    
+                    array_splice($get_data_tickets,$kg,0,$vgp);
+                    break;                    
                   }
-
-                  if($insert==0){
-                    MyLog::logging("PAsss1");
-
-                    array_push($get_data_tickets,$vgp);
-                  }
-                  MyLog::logging("PAsss2");
-
+                }
+                
+                if($insert==0){
+                  array_push($get_data_tickets,$vgp);
                 }
               }
             }
