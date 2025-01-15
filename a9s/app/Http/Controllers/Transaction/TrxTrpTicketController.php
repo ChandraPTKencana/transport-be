@@ -3107,6 +3107,8 @@ class TrxTrpTicketController extends Controller
           $get_data_tickets = $get_data_tickets->orderBy("DateTimeIn","asc")->get();
 
           $get_data_tickets = MyLib::objsToArray($get_data_tickets);
+          MyLog::logging($get_data_tickets);
+
 
           foreach ($pabriks as $kp => $vp) {
             if(array_search($vp,MyLib::$list_pabrik)!==false){
@@ -3122,6 +3124,7 @@ class TrxTrpTicketController extends Controller
               $get_data_ticketsp = $get_data_ticketsp->orderBy("DateTimeIn","asc")->get();
 
               $get_data_ticketsp = MyLib::objsToArray($get_data_ticketsp);
+              MyLog::logging($get_data_ticketsp);
 
               foreach ($get_data_ticketsp as $kgp => $vgp) {
                 $insert=0;
