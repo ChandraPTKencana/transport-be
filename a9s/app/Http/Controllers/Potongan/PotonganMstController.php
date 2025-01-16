@@ -443,7 +443,7 @@ class PotonganMstController extends Controller
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
       }
-
+      $SYSOLD                     = clone($model_query);
       // if($model_query->id==1){
       //   throw new \Exception("Izin Hapus Ditolak",1);
       // }
@@ -453,8 +453,9 @@ class PotonganMstController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
-
-      MyLog::sys($this->syslog_db,$request->id,"delete");
+      
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -515,6 +516,8 @@ class PotonganMstController extends Controller
       if($model_query->val && $model_query->val1){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
+
+      $SYSOLD                     = clone($model_query);
       
       if(MyAdmin::checkScope($this->permissions, 'potongan_mst.val',true) && !$model_query->val){
         $model_query->val = 1;
@@ -530,7 +533,8 @@ class PotonganMstController extends Controller
 
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([

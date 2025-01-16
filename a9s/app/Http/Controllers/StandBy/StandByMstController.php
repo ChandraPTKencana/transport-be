@@ -725,6 +725,7 @@ class StandbyMstController extends Controller
       throw new \Exception("Sertakan Alasan Penghapusan",1);
     
       $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD                     = clone($model_query);
 
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
@@ -736,7 +737,8 @@ class StandbyMstController extends Controller
       $model_query->deleted_reason  = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys("standby_mst",$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("standby_mst",$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -789,6 +791,7 @@ class StandbyMstController extends Controller
     DB::beginTransaction();
     try {
       $model_query = StandbyMst::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD                     = clone($model_query);
       
       
       if(MyAdmin::checkScope($this->permissions, 'standby_mst.val',true) &&  $model_query->val){
@@ -813,7 +816,8 @@ class StandbyMstController extends Controller
       }
       $model_query->save();
 
-      MyLog::sys("standby_mst",$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("standby_mst",$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -871,6 +875,7 @@ class StandbyMstController extends Controller
       if(StandbyTrx::where("standby_mst_id",$model_query->id)->first()){
         throw new \Exception("Data Sudah Digunakan",1);
       }
+      $SYSOLD                     = clone($model_query);
       
       if(MyAdmin::checkScope($this->permissions, 'standby_mst.unval',true) && $model_query->val){
         $model_query->val = 0;
@@ -885,7 +890,8 @@ class StandbyMstController extends Controller
       }
       $model_query->save();
 
-      MyLog::sys("standby_mst",$request->id,"unapprove");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("standby_mst",$request->id,"unapprove",$SYSNOTE);
 
       DB::commit();
       return response()->json([

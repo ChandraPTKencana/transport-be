@@ -1232,6 +1232,8 @@ class UjalanController extends Controller
       throw new \Exception("Sertakan Alasan Penghapusan",1);
     
       $model_query = Ujalan::where("id",$request->id)->lockForUpdate()->first();
+    
+      $SYSOLD                     = clone($model_query);
       // if($model_query->requested_by != $this->admin_id){
       //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
       // }
@@ -1260,7 +1262,9 @@ class UjalanController extends Controller
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
-      MyLog::sys("ujalan_mst",$request->id,"delete");
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("ujalan_mst",$request->id,"delete",$SYSNOTE);
 
       // UjalanDetail::where("id_uj",$model_query->id)->delete();
       // $model_query->delete();
@@ -1324,6 +1328,8 @@ class UjalanController extends Controller
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
       
+      $SYSOLD                     = clone($model_query);
+      
       if(MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
@@ -1337,7 +1343,8 @@ class UjalanController extends Controller
       }
       $model_query->save();
 
-      MyLog::sys("ujalan_mst",$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("ujalan_mst",$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1395,6 +1402,7 @@ class UjalanController extends Controller
       if(TrxTrp::where("id_uj",$model_query->id)->first()){
         throw new \Exception("Data Sudah Digunakan",1);
       }
+      $SYSOLD                     = clone($model_query);
       
       if(MyAdmin::checkScope($this->permissions, 'ujalan.unval',true) && $model_query->val){
         $model_query->val = 0;
@@ -1409,8 +1417,9 @@ class UjalanController extends Controller
       }
       
       $model_query->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
 
-      MyLog::sys("ujalan_mst",$request->id,"unapprove");
+      MyLog::sys("ujalan_mst",$request->id,"unapprove",$SYSNOTE);
 
       DB::commit();
       return response()->json([

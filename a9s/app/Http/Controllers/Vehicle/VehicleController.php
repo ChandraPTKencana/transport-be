@@ -314,13 +314,16 @@ class VehicleController extends Controller
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
       }
+      $SYSOLD                     = clone($model_query);
   
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
-      MyLog::sys("vehicle_mst",$request->id,"delete");
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("vehicle_mst",$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([

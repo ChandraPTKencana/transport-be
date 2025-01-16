@@ -451,6 +451,8 @@ class TrxTrpTransferController extends Controller
         throw new \Exception("Pembayaran sudah selesai",1);
       }
 
+      $SYSOLD                     = clone($model_query);
+
       $supir_id   = $model_query->supir_id;
       $kernet_id  = $model_query->kernet_id;
       $ttl_ps     = 0;
@@ -604,6 +606,7 @@ class TrxTrpTransferController extends Controller
         }
 
         foreach ($model_query->extra_money_trxs as $key => $emt) {
+          $SYSOLD2                     = clone($emt);
           $emt->received_payment=1;
           if($emt->employee_id == $supir_id){
             $emt->employee_rek_no = $supir->rek_no;
@@ -631,7 +634,8 @@ class TrxTrpTransferController extends Controller
           }
           
           $emt->save();
-          MyLog::sys("extra_money_trx",$emt->id,"transfer");
+          $SYSNOTE2 = MyLib::compareChange($SYSOLD2,$emt);
+          MyLog::sys("extra_money_trx",$emt->id,"transfer",$SYSNOTE2);
         }
 
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$model_query->val4){
@@ -655,7 +659,8 @@ class TrxTrpTransferController extends Controller
 
       $model_query->save();
 
-      MyLog::sys("trx_trp",$model_query->id,"transfer");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$model_query->id,"transfer",$SYSNOTE);
 
       DB::commit();
 

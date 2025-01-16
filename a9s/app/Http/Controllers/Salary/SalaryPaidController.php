@@ -483,6 +483,7 @@ class SalaryPaidController extends Controller
     DB::beginTransaction();
     try {
       $model_query = SalaryPaid::find($request->id);
+      $SYSOLD                     = clone($model_query);
       $run_val = 0;
       if(MyAdmin::checkScope($this->permissions, 'salary_paid.val1',true) && !$model_query->val1){
         $run_val++;
@@ -508,7 +509,8 @@ class SalaryPaidController extends Controller
       
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -667,6 +669,7 @@ class SalaryPaidController extends Controller
     // $employees = Employee::exclude(['attachment_1','attachment_2'])->verified()->available()->where('name',"!=","BLANK")->get();
     $dt_dtl = [];
 
+    $SYSNOTES = [];
     // foreach ($employees as $v) {
     //   array_push($dt_dtl,[
     //     "salary_paid_id" => $model_query->id,
@@ -685,6 +688,8 @@ class SalaryPaidController extends Controller
     }])->lockForUpdate()->get();
 
     foreach ($sts as $k => $v) {
+      $SYSOLD                     = clone($v);
+      
       $smd = $v->standby_mst->details;
 
       $nominal_s = 0;
@@ -771,6 +776,9 @@ class SalaryPaidController extends Controller
 
       $v->salary_paid_id = $model_query->id;
       $v->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$v);
+      array_push($SYSNOTES,$SYSNOTE);
+
     }
     $sbs = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
     ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)
@@ -778,6 +786,7 @@ class SalaryPaidController extends Controller
     ->lockForUpdate()->get();
       
     foreach($sbs as $v){
+      $SYSOLD                     = clone($v);
 
       $map_e = array_map(function($x){
         return $x['employee_id'];
@@ -803,12 +812,15 @@ class SalaryPaidController extends Controller
       }
       $v->salary_paid_id = $model_query->id;
       $v->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$v);
+      array_push($SYSNOTES,$SYSNOTE);
     }
 
     foreach ($dt_dtl as $k => $v) {
       SalaryPaidDtl::insert($v);
     }
 
+    MyLog::sys($this->syslog_db,null,"insert",implode(",",$SYSNOTES));
   }
 
   public function pdfPreview(Request $request){

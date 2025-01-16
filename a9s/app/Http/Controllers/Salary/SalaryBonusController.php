@@ -509,13 +509,15 @@ class SalaryBonusController extends Controller
       //   throw new \Exception("Hapus data ditolak. Data sudah dikonfirmasi",1);
       // }
       
+      $SYSOLD                     = clone($model_query);
   
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
-      MyLog::sys($this->syslog_db,$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"delete",$SYSNOTE);
 
       // SalaryBonusDtl::where("id_uj",$model_query->id)->delete();
       // $model_query->delete();
@@ -572,6 +574,7 @@ class SalaryBonusController extends Controller
     DB::beginTransaction();
     try {
       $model_query = SalaryBonus::exclude(['attachment_1'])->lockForUpdate()->find($request->id);
+      $SYSOLD                     = clone($model_query);
       $run_val = 0;
       if(MyAdmin::checkScope($this->permissions, 'salary_bonus.val1',true) && !$model_query->val1){
         $run_val++;
@@ -596,7 +599,8 @@ class SalaryBonusController extends Controller
 
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([

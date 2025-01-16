@@ -338,6 +338,7 @@ class PotonganTrxController extends Controller
       if ($model_query->id_uj) {
         throw new \Exception("Izin Hapus Ditolak", 1);
       }
+      $SYSOLD                     = clone($model_query);
   
       $model_query->deleted         = 1;
       $model_query->deleted_user    = $this->admin_id;
@@ -345,7 +346,8 @@ class PotonganTrxController extends Controller
       $model_query->deleted_reason  = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -395,6 +397,8 @@ class PotonganTrxController extends Controller
       
 
       $model_query = PotonganMst::exclude(['attachment_1','attachment_2'])->where("id",$id)->lockForUpdate()->first();
+      $SYSOLD                     = clone($model_query);
+      
       $model_query1 = PotonganTrx::selectRaw('sum(nominal_cut) as paid')->where("potongan_mst_id",$id)->where("deleted",0)->lockForUpdate()->first();
       $paid = 0; 
       if($model_query1){
@@ -408,7 +412,8 @@ class PotonganTrxController extends Controller
       $model_query->save();
 
       // MyLog::sys($this->syslog_db,$request->id,"recalculate");
-      MyLog::sys("potongan_mst",$request->id,"recalculate");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("potongan_mst",$request->id,"recalculate",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -471,6 +476,7 @@ class PotonganTrxController extends Controller
       if($model_query->val && $model_query->val1){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
+      $SYSOLD                     = clone($model_query);
       
       if(MyAdmin::checkScope($this->permissions, 'potongan_trx.val',true) && !$model_query->val){
         $model_query->val = 1;
@@ -486,7 +492,8 @@ class PotonganTrxController extends Controller
 
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([

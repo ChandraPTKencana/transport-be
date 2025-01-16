@@ -412,6 +412,7 @@ class RptSalaryController extends Controller
     DB::beginTransaction();
     try {
       $model_query = RptSalary::find($request->id);
+      $SYSOLD                     = clone($model_query);
       $run_val = 0;
       if(MyAdmin::checkScope($this->permissions, 'rpt_salary.val1',true) && !$model_query->val1){
         $run_val++;
@@ -437,7 +438,8 @@ class RptSalaryController extends Controller
       
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -760,7 +762,7 @@ class RptSalaryController extends Controller
       ]);
     }
     
-
+    $SYSNOTES = [];
     foreach ($data as $k => $v) {
       $kerajinan_s=400000;
       $kerajinan_k=200000;
@@ -789,11 +791,15 @@ class RptSalaryController extends Controller
       ->where("employee_id",$v["employee_id"])
       ->lockForUpdate()->get();
 
+      
       foreach ($salbon as $ksb => $vsb) {
+        $SYSOLD                     = clone($vsb);
         $v["kerajinan"] += $vsb->nominal;
 
         $vsb->salary_paid_id = $salary_paid[1]->id;
         $vsb->save();
+        $SYSNOTE = MyLib::compareChange($SYSOLD,$vsb); 
+        array_push($SYSNOTES,$SYSNOTE);
       }
 
       // if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
@@ -811,6 +817,8 @@ class RptSalaryController extends Controller
         $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0 && $v["salary_bonus_nominal_2"]==0 && $v["kerajinan"]==0) 
         ) RptSalaryDtl::insert($v);
     }
+
+    MyLog::sys($this->syslog_db,null,"insert",implode(",",$SYSNOTES));
   }
 
   public function excelDownload(Request $request){

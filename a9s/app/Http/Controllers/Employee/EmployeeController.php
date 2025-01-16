@@ -428,7 +428,7 @@ class EmployeeController extends Controller
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
       $model_query = Employee::exclude(['attachment_1','attachment_2'])->where("id",$request->id)->lockForUpdate()->first();
-
+      $SYSOLD                     = clone($model_query);
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
       }
@@ -443,7 +443,8 @@ class EmployeeController extends Controller
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -506,6 +507,7 @@ class EmployeeController extends Controller
     DB::beginTransaction();
     try {
       $model_query = Employee::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
+      $SYSOLD                     = clone($model_query);
       if($model_query->val){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
@@ -517,8 +519,9 @@ class EmployeeController extends Controller
       }
 
       $model_query->save();
-
-      MyLog::sys($this->syslog_db,$request->id,"approve");
+      
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -569,6 +572,7 @@ class EmployeeController extends Controller
     DB::beginTransaction();
     try {
       $model_query = Employee::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
+      $SYSOLD                     = clone($model_query);
       // if($model_query->val){
       //   throw new \Exception("Data Sudah Tervalidasi",1);
       // }
@@ -588,7 +592,8 @@ class EmployeeController extends Controller
 
       $model_query->save();
 
-      MyLog::sys($this->syslog_db,$request->id,"unapprove");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"unapprove",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -612,6 +617,78 @@ class EmployeeController extends Controller
       // ], 400);
       return response()->json([
         "message" => "Proses unvalidasi data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function undelete(Request $request){
+    MyAdmin::checkScope($this->permissions, 'employee.unremove');
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\Employee,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = Employee::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
+      $SYSOLD                     = clone($model_query);
+      if($model_query->deleted==0){
+        throw new \Exception("Data Sudah Di Aktifkan",1);
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'employee.unremove',true) && $model_query->deleted){
+        $model_query->deleted = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
+      }
+      
+      // $model_query->val = 0;
+      // if(!$model_query->val){
+      //   $model_query->val = 1;
+      //   $model_query->val_user = $this->admin_id;
+      //   $model_query->val_at = $t_stamp;
+      // }
+
+      $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"unremove",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses unremove data berhasil",
+        "deleted"=>$model_query->deleted,
+        "deleted_user"=>$model_query->deleted_user,
+        "deleted_at"=>$model_query->deleted_at,
+        "deleted_by"=>$model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses unremove data gagal",
       ], 400);
     }
 

@@ -128,6 +128,7 @@ Route::get('/employee', [\App\Http\Controllers\Employee\EmployeeController::clas
 Route::post('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'store']);
 Route::put('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'update']);
 Route::delete('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'delete']);
+Route::put('/employee_unremove', [\App\Http\Controllers\Employee\EmployeeController::class, 'undelete']);
 Route::put('/employee_validasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'validasi']);
 Route::put('/employee_unvalidasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'unvalidasi']);
 

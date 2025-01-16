@@ -755,6 +755,7 @@ class ExtraMoneyTrxController extends Controller
 
     try {
       $model_query = ExtraMoneyTrx::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD                     = clone($model_query);
       // if($model_query->requested_by != $this->admin_id){
       //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
       // }
@@ -781,7 +782,8 @@ class ExtraMoneyTrxController extends Controller
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys("extra_money_trx",$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("extra_money_trx",$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -847,13 +849,15 @@ class ExtraMoneyTrxController extends Controller
       if(!$req_deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
       $model_query->req_deleted = 1;
       $model_query->req_deleted_user = $this->admin_id;
       $model_query->req_deleted_at = date("Y-m-d H:i:s");
       $model_query->req_deleted_reason = $req_deleted_reason;
       $model_query->save();
 
-      MyLog::sys("extra_money_trx",$request->id,"delete","Request Delete (Void)");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("extra_money_trx",$request->id,"req_delete",$SYSNOTE);
 
 
       DB::commit();
@@ -920,7 +924,8 @@ class ExtraMoneyTrxController extends Controller
       $deleted_reason = $model_query->req_deleted_reason;
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
-
+      
+      $SYSOLD                     = clone($model_query);
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
       $model_query->deleted_at = date("Y-m-d H:i:s");
@@ -948,7 +953,8 @@ class ExtraMoneyTrxController extends Controller
       
       $model_query->save();
 
-      MyLog::sys("extra_money_trx",$request->id,"delete","Approve Request Delete (Void)");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("extra_money_trx",$request->id,"req_app_delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1333,6 +1339,7 @@ class ExtraMoneyTrxController extends Controller
       
       if(!$model_query->attachment_1_loc)
       throw new \Exception("Harap Mengisi Attachment Terlebih dahulu",1);
+      $SYSOLD                     = clone($model_query);
 
       $run_val = 0; 
   
@@ -1380,8 +1387,9 @@ class ExtraMoneyTrxController extends Controller
 
 
       $model_query->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
 
-      MyLog::sys("extra_money_trx",$request->id,"approve");
+      MyLog::sys("extra_money_trx",$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([

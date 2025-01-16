@@ -531,6 +531,8 @@ class PermissionGroupController extends Controller
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
       }
+
+      $SYSOLD                     = clone($model_query);
   
       $model_query->deleted         = 1;
       $model_query->deleted_user    = $this->admin_id;
@@ -538,7 +540,8 @@ class PermissionGroupController extends Controller
       $model_query->deleted_reason  = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys("permission_group",$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("permission_group",$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([

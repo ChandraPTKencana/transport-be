@@ -39,6 +39,7 @@ class TrxTrpAbsenController extends Controller
   private $admin;
   private $admin_id;
   private $permissions;
+  private $syslog_db = 'trx_trp';
 
   public function __construct(Request $request)
   {
@@ -585,6 +586,8 @@ class TrxTrpAbsenController extends Controller
       if(!$model_query->ritase_note && (!$model_query->ritase_leave_at || !$model_query->ritase_arrive_at || !$model_query->ritase_return_at || !$model_query->ritase_till_at) )
       throw new \Exception("Gambar Belum Lengkap dan tidak disertai Catatan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val',true) && !$model_query->ritase_val){
         $model_query->ritase_val = 1;
         $model_query->ritase_val_user = $this->admin_id;
@@ -611,7 +614,8 @@ class TrxTrpAbsenController extends Controller
       
       $model_query->save();
 
-      MyLog::sys("trx_trp",$request->id,"approve_absen");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"approve_absen",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -655,10 +659,13 @@ class TrxTrpAbsenController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
+      $SYSNOTES = [];
       $model_query = TrxTrp::whereIn("id",$ids)->lockForUpdate()->get();
       $valList = [];
       
       foreach ($model_query as $key => $v) {
+        $SYSOLD                     = clone($v);
+
           $change=0;
           if($v->ritase_val != 0){
             $v->ritase_val        = 0;
@@ -686,13 +693,17 @@ class TrxTrpAbsenController extends Controller
               "updated_at"  => $v->updated_at,
             ]);
           }
+
+        $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);         
+        array_push($SYSNOTES,$SYSNOTE);
       }
+      MyLog::sys($this->syslog_db,null,"clearValVal1",implode(",",$SYSNOTES));
 
       $nids = array_map(function($x) {
         return $x['id'];        
       },$valList);
       
-      MyLog::sys("trx_trp",null,"unval_absen",implode(",",$nids));
+      // MyLog::sys("trx_trp",null,"unval_absen",implode(",",$nids));
 
       DB::commit();
       if(count($nids) == 0 ){

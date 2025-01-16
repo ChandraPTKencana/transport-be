@@ -40,6 +40,8 @@ class TrxTrpTicketController extends Controller
   private $admin;
   private $admin_id;
   private $permissions;
+  private $syslog_db = 'trx_trp';
+
 
   public function __construct(Request $request)
   {
@@ -1149,6 +1151,8 @@ class TrxTrpTicketController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       $t_stamp                      = date("Y-m-d H:i:s");
       $model_query->deleted         = 1;
       $model_query->deleted_user    = $this->admin_id;
@@ -1182,7 +1186,10 @@ class TrxTrpTicketController extends Controller
       // }
       
       $model_query->save();
-      MyLog::sys("trx_trp",$request->id,"delete","Approve Request Delete (Void)");
+      
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+
+      MyLog::sys("trx_trp",$request->id,"req_app_delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1813,9 +1820,11 @@ class TrxTrpTicketController extends Controller
     try {
       $model_querys = TrxTrp::whereIn("id",$ids)->get();
       $valList = [];
+      $SYSNOTES = [];
 
       foreach ($model_querys as $key => $v) {
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+          $SYSOLD                     = clone($v);
           $v->val_ticket = 1;
           $v->val_ticket_user = $this->admin_id;
           $v->val_ticket_at = $t_stamp;
@@ -1827,14 +1836,18 @@ class TrxTrpTicketController extends Controller
             "val_ticket_at"=>$v->val_ticket_at,
             "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
           ]);
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+          array_push($SYSNOTES,$SYSNOTE);
         }
       }
+
+      MyLog::sys($this->syslog_db,null,"val_tickets",implode(",",$SYSNOTES));
 
       $nids = array_map(function($x) {
         return $x['id'];        
       },$valList);
 
-      MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
+      // MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
 
       DB::commit();
       return response()->json([

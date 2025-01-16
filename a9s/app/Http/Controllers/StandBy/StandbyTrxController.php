@@ -1008,13 +1008,16 @@ class StandbyTrxController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
       $model_query->deleted_at = date("Y-m-d H:i:s");
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys("standby_trx",$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("standby_trx",$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1083,13 +1086,16 @@ class StandbyTrxController extends Controller
       if(!$req_deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       $model_query->req_deleted = 1;
       $model_query->req_deleted_user = $this->admin_id;
       $model_query->req_deleted_at = date("Y-m-d H:i:s");
       $model_query->req_deleted_reason = $req_deleted_reason;
       $model_query->save();
 
-      MyLog::sys("standby_trx",$request->id,"delete","Request Delete (Void)");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("standby_trx",$request->id,"req_delete",$SYSNOTE);
 
 
       DB::commit();
@@ -1160,6 +1166,8 @@ class StandbyTrxController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
       $model_query->deleted_at = date("Y-m-d H:i:s");
@@ -1187,7 +1195,8 @@ class StandbyTrxController extends Controller
       
       $model_query->save();
 
-      MyLog::sys("standby_trx",$request->id,"delete","Approve Request Delete (Void)");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("standby_trx",$request->id,"req_app_delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1545,13 +1554,15 @@ class StandbyTrxController extends Controller
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
-    if(MyAdmin::checkScope($this->permissions, 'standby_trx.val',true) && !$model_query->val){
-      $model_query->val = 1;
-      $model_query->val_user = $this->admin_id;
-      $model_query->val_at = $t_stamp;
-    }
-  
-    if(MyAdmin::checkScope($this->permissions, 'standby_trx.val1',true) && !$model_query->val1){
+      $SYSOLD                     = clone($model_query);
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val',true) && !$model_query->val){
+        $model_query->val = 1;
+        $model_query->val_user = $this->admin_id;
+        $model_query->val_at = $t_stamp;
+      }
+    
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val1',true) && !$model_query->val1){
         if($model_query->val==0){
           throw new \Exception("Kasir Harus Memvalidasi Terlebih Dahulu",1);
         }
@@ -1574,17 +1585,19 @@ class StandbyTrxController extends Controller
             ->update([
               "be_paid"=>$value['be_paid']
             ]);
+            MyLog::sys("standby_trx_dtl",$model_query->id,"change","update be_paid =>".$value['be_paid']." | standby trx id ".$model_query->id);
           }
         }
 
         $model_query->val2 = 1;
         $model_query->val2_user = $this->admin_id;
         $model_query->val2_at = $t_stamp;
+        
       }
 
       $model_query->save();
-
-      MyLog::sys("standby_trx",$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("standby_trx",$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1652,14 +1665,15 @@ class StandbyTrxController extends Controller
       if(!$model_query->val && !$model_query->val1 && !$model_query->val2){
         throw new \Exception("Data Sudah Terunvalidasi Sepenuhnya",1);
       }
+      $SYSOLD                     = clone($model_query);
 
-    if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval',true) && $model_query->val){
-      $model_query->val = 0;
-      // $model_query->val_user = $this->admin_id;
-      // $model_query->val_at = $t_stamp;
-    }
-  
-    if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval1',true) && $model_query->val1){
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval',true) && $model_query->val){
+        $model_query->val = 0;
+        // $model_query->val_user = $this->admin_id;
+        // $model_query->val_at = $t_stamp;
+      }
+    
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval1',true) && $model_query->val1){
         $model_query->val1 = 0;
         // $model_query->val1_user = $this->admin_id;
         // $model_query->val1_at = $t_stamp;
@@ -1672,8 +1686,9 @@ class StandbyTrxController extends Controller
       }
 
       $model_query->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
 
-      MyLog::sys("standby_trx",$request->id,"unapprove");
+      MyLog::sys("standby_trx",$request->id,"unapprove",$SYSNOTE);
 
       DB::commit();
       return response()->json([

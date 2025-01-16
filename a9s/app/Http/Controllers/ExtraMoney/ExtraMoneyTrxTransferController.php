@@ -394,6 +394,7 @@ class ExtraMoneyTrxTransferController extends Controller
         throw new \Exception("Pembayaran harus melalui transfer uang jalan",1);
       }
 
+      $SYSOLD                     = clone($model_query);
       
 
       $employee_id   = $model_query->employee_id;
@@ -471,7 +472,8 @@ class ExtraMoneyTrxTransferController extends Controller
 
       $model_query->save();
 
-      MyLog::sys("extra_money_trx",$model_query->id,"transfer");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("extra_money_trx",$model_query->id,"transfer",$SYSNOTE);
 
       DB::commit();
 

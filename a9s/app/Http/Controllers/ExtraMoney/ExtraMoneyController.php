@@ -406,6 +406,7 @@ class ExtraMoneyController extends Controller
 
     try {
       $model_query = ExtraMoney::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD                     = clone($model_query);
 
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
@@ -428,7 +429,8 @@ class ExtraMoneyController extends Controller
       $model_query->deleted_reason = $deleted_reason;
       $model_query->save();
 
-      MyLog::sys("extra_money",$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("extra_money",$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -920,6 +922,7 @@ class ExtraMoneyController extends Controller
     DB::beginTransaction();
     try {
       $model_query = ExtraMoney::find($request->id);
+      $SYSOLD                     = clone($model_query);
 
       if($model_query->val && $model_query->val1 && $model_query->val2){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
@@ -945,7 +948,8 @@ class ExtraMoneyController extends Controller
 
       $model_query->save();
 
-      MyLog::sys("extra_money",$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("extra_money",$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([

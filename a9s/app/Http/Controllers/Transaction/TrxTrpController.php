@@ -37,6 +37,7 @@ class TrxTrpController extends Controller
   private $admin;
   private $admin_id;
   private $permissions;
+  private $syslog_db = 'trx_trp';
 
   public function __construct(Request $request)
   {
@@ -499,13 +500,15 @@ class TrxTrpController extends Controller
   
       $this->permit_continue_trx($model_query);
 
+      $SYSOLD                     = clone($model_query);
       $model_query->val1 = 1;
       $model_query->val1_user = $this->admin_id;
       $model_query->val1_at = $t_stamp;
 
       $model_query->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
 
-      MyLog::sys("trx_trp",$model_query->id,"approve");
+      MyLog::sys("trx_trp",$model_query->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1013,6 +1016,8 @@ class TrxTrpController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       $t_stamp                      = date("Y-m-d H:i:s");
       $model_query->deleted         = 1;
       $model_query->deleted_user    = $this->admin_id;
@@ -1026,7 +1031,8 @@ class TrxTrpController extends Controller
         "deleted_reason"  => $deleted_reason,
       ]);
 
-      MyLog::sys("trx_trp",$request->id,"delete");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1089,13 +1095,16 @@ class TrxTrpController extends Controller
       if(!$req_deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       $model_query->req_deleted = 1;
       $model_query->req_deleted_user = $this->admin_id;
       $model_query->req_deleted_at = date("Y-m-d H:i:s");
       $model_query->req_deleted_reason = $req_deleted_reason;
       $model_query->save();
 
-      MyLog::sys("trx_trp",$request->id,"delete","Request Delete (Void)");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"req_delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -1163,6 +1172,8 @@ class TrxTrpController extends Controller
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      $SYSOLD                     = clone($model_query);
+
       $t_stamp                      = date("Y-m-d H:i:s");
       $model_query->deleted         = 1;
       $model_query->deleted_user    = $this->admin_id;
@@ -1196,7 +1207,9 @@ class TrxTrpController extends Controller
       // }
       
       $model_query->save();
-      MyLog::sys("trx_trp",$request->id,"delete","Approve Request Delete (Void)");
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"req_app_delete",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -2036,6 +2049,7 @@ class TrxTrpController extends Controller
       if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5 && $model_query->val6){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
+      $SYSOLD                     = clone($model_query);
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.val',true) && !$model_query->val){
         $model_query->val = 1;
@@ -2078,7 +2092,8 @@ class TrxTrpController extends Controller
 
       $model_query->save();
 
-      MyLog::sys("trx_trp",$request->id,"approve");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"approve",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -2156,6 +2171,7 @@ class TrxTrpController extends Controller
       if($model_query->val_ticket){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
+      $SYSOLD                     = clone($model_query);
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$model_query->val_ticket){
         $model_query->val_ticket = 1;
@@ -2165,8 +2181,8 @@ class TrxTrpController extends Controller
         $model_query->updated_at = $t_stamp;
       }
       $model_query->save();
-
-      MyLog::sys("trx_trp",$request->id,"approve ticket");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"approve ticket",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -2221,6 +2237,7 @@ class TrxTrpController extends Controller
       // if($model_query->val_ticket){
       //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       // }
+      $SYSOLD                     = clone($model_query);
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $model_query->val_ticket){
         $model_query->val_ticket = 0;
@@ -2231,7 +2248,8 @@ class TrxTrpController extends Controller
       }
       $model_query->save();
 
-      MyLog::sys("trx_trp",$request->id,"unvalidasi ticket");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"unvalidasi ticket",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -2270,9 +2288,10 @@ class TrxTrpController extends Controller
     try {
       $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
       $valList = [];
-
+      $SYSNOTES = [];
       foreach ($model_querys as $key => $v) {
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+          $SYSOLD                     = clone($v);
           $v->val_ticket = 1;
           $v->val_ticket_user = $this->admin_id;
           $v->val_ticket_at = $t_stamp;
@@ -2287,14 +2306,18 @@ class TrxTrpController extends Controller
             "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
             "updated_at"=>$v->updated_at,
           ]);
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+          array_push($SYSNOTES,$SYSNOTE);
         }
       }
+
+      MyLog::sys($this->syslog_db,null,"val_tickets",implode(",",$SYSNOTES));
 
       $nids = array_map(function($x) {
         return $x['id'];        
       },$valList);
 
-      MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
+      // MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
 
       DB::commit();
       return response()->json([
@@ -2329,9 +2352,10 @@ class TrxTrpController extends Controller
     try {
       $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
       $valList = [];
-
+      $SYSNOTES =[];
       foreach ($model_querys as $key => $v) {
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $v->val_ticket){
+          $SYSOLD                     = clone($v);
           $v->val_ticket = 0;
           // $v->val_ticket_user = $this->admin_id;
           // $v->val_ticket_at = $t_stamp;
@@ -2346,14 +2370,18 @@ class TrxTrpController extends Controller
             "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
             "updated_at"=>$v->updated_at,
           ]);
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+          array_push($SYSNOTES,$SYSNOTE);
         }
       }
+
+      MyLog::sys($this->syslog_db,null,"unval_tickets",implode(",",$SYSNOTES));
 
       $nids = array_map(function($x) {
         return $x['id'];        
       },$valList);
 
-      MyLog::sys("trx_trp",null,"unval_tickets",implode(",",$nids));
+      // MyLog::sys("trx_trp",null,"unval_tickets",implode(",",$nids));
 
       DB::commit();
       return response()->json([
@@ -2388,9 +2416,11 @@ class TrxTrpController extends Controller
     try {
       $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->where('val_ticket',0)->get();
       $clearList = [];
+      $SYSNOTES =[];
 
       foreach ($model_querys as $key => $v) {
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+          $SYSOLD                     = clone($v);
           $v->ticket_a_id = null;
           $v->ticket_a_no = null;
           $v->ticket_b_id = null;
@@ -2407,14 +2437,18 @@ class TrxTrpController extends Controller
             "ticket_b_no"=>$v->ticket_b_no,
             "updated_at"=>$v->updated_at,
           ]);
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+          array_push($SYSNOTES,$SYSNOTE);
         }
       }
+
+      MyLog::sys($this->syslog_db,null,"clear_tickets",implode(",",$SYSNOTES));
 
       $nids = array_map(function($x) {
         return $x['id'];        
       },$clearList);
 
-      MyLog::sys("trx_trp",null,"clear_tickets",implode(",",$nids));
+      // MyLog::sys("trx_trp",null,"clear_tickets",implode(",",$nids));
 
       DB::commit();
       return response()->json([
