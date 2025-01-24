@@ -163,6 +163,19 @@ class TrxTrpResource extends JsonResource
             'extra_money_trxs'  => ExtraMoneyTrxResource::collection($this->whenLoaded('extra_money_trxs')),
 
             'note_for_remarks'  => $this->note_for_remarks,
+            'received_payment'  => $this->received_payment,
+
+            'duitku_supir_disburseId'       => $this->duitku_supir_disburseId,
+            'duitku_supir_inv_res_code'     => $this->duitku_supir_inv_res_code,
+            'duitku_supir_inv_res_desc'     => $this->duitku_supir_inv_res_desc,
+            'duitku_supir_trf_res_code'     => $this->duitku_supir_trf_res_code,
+            'duitku_supir_trf_res_desc'     => $this->duitku_supir_trf_res_desc,
+
+            'duitku_kernet_disburseId'      => $this->duitku_kernet_disburseId,
+            'duitku_kernet_inv_res_code'    => $this->duitku_kernet_inv_res_code,
+            'duitku_kernet_inv_res_desc'    => $this->duitku_kernet_inv_res_desc,
+            'duitku_kernet_trf_res_code'    => $this->duitku_kernet_trf_res_code,
+            'duitku_kernet_trf_res_desc'    => $this->duitku_kernet_trf_res_desc,
         ];
     }
 }
