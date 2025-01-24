@@ -90,6 +90,7 @@ Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxT
 // Route::get('/trx_trps_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
 Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFile']);
 Route::put('/trx_trp_validasi', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'validasi']);
+Route::put('/trx_trp_unvalidasi', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'unvalidasi']);
 Route::post('/trx_trp_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);
 Route::post('/trx_trp_do_gen_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPV']);
 Route::post('/trx_trp_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);

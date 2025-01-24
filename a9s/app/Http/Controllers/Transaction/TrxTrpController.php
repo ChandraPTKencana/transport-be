@@ -2146,6 +2146,129 @@ class TrxTrpController extends Controller
 
   }
 
+  public function unvalidasi(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.unval1','trp_trx.unval2','trp_trx.unval3','trp_trx.unval4','trp_trx.unval5','trp_trx.unval6']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = TrxTrp::lockForUpdate()->find($request->id);
+      if(!$model_query->val1 && !$model_query->val2 && !$model_query->val3 && !$model_query->val4 && !$model_query->val5 && !$model_query->val6){
+        throw new \Exception("Data Sudah Terunvalidasi Sepenuhnya",1);
+      }
+
+      // if($model_query->duitku_supir_disburseId!==null && $request->confirm==0){
+      //   throw new \Exception("need_confirm",1);
+      // }
+
+      $SYSOLD                     = clone($model_query);
+
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.unval4',true) && $model_query->val4){
+        $model_query->val4 = 0;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.unval6',true) && $model_query->val6){
+        if($model_query->val4==1)
+        throw new \Exception("Minta Staff Logistik untuk unvalidasi terlebih dahulu",1);
+
+        $model_query->val6 = 0;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.unval5',true) && $model_query->val5){
+        if($model_query->val6==1)
+        throw new \Exception("Minta Manager Logistik untuk unvalidasi terlebih dahulu",1);
+
+        $model_query->val5 = 0;
+      }      
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.unval3',true) && $model_query->val3){
+        if($model_query->val5==1)
+        throw new \Exception("Minta Supervisor Logistik untuk unvalidasi terlebih dahulu",1);
+        $model_query->val3 = 0;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.unval2',true) && $model_query->val2){
+        if($model_query->val3==1)
+        throw new \Exception("Minta Marketing untuk unvalidasi terlebih dahulu",1);
+        $model_query->val2 = 0;
+      }
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.unval1',true) && $model_query->val1){
+        if($model_query->val2==1)
+        throw new \Exception("Minta KTU/W untuk unvalidasi terlebih dahulu",1);
+        $model_query->val1 = 0;
+      }
+      
+      $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"unapprove",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses unvalidasi data berhasil",
+        "val"=>$model_query->val,
+        "val_user"=>$model_query->val_user,
+        "val_at"=>$model_query->val_at,
+        "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null,
+        "val4"=>$model_query->val4,
+        "val4_user"=>$model_query->val4_user,
+        "val4_at"=>$model_query->val4_at,
+        "val4_by"=>$model_query->val4_user ? new IsUserResource(IsUser::find($model_query->val4_user)) : null,
+        "val5"=>$model_query->val5,
+        "val5_user"=>$model_query->val5_user,
+        "val5_at"=>$model_query->val5_at,
+        "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
+        "val6"=>$model_query->val6,
+        "val6_user"=>$model_query->val6_user,
+        "val6_at"=>$model_query->val6_at,
+        "val6_by"=>$model_query->val6_user ? new IsUserResource(IsUser::find($model_query->val6_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        $status_code = 400;
+        if($e->getMessage()=="need_confirm"){
+          $status_code = 200;
+        }
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], $status_code);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses unvalidasi data gagal",
+      ], 400);
+    }
+
+  }
+
   public function valTicket(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
