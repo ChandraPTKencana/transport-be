@@ -2079,12 +2079,16 @@ class TrxTrpController extends Controller
         $model_query->val4_at = $t_stamp;
       }
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && !$model_query->val5){
+        if($model_query->val4==0)
+        throw new \Exception("Data Perlu Divalidasi oleh Staff Logistik terlebih dahulu",1);
         $model_query->val5 = 1;
         $model_query->val5_user = $this->admin_id;
         $model_query->val5_at = $t_stamp;
       }
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true) && !$model_query->val6){
+        if($model_query->val5==0)
+        throw new \Exception("Data Perlu Divalidasi oleh SPV Logistik terlebih dahulu",1);
         $model_query->val6 = 1;
         $model_query->val6_user = $this->admin_id;
         $model_query->val6_at = $t_stamp;
