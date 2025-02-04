@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string("module",50);
             $table->bigInteger("module_id")->nullable();
             $table->string("action",20);
-            $table->text('note');
+            $table->longText('note');
         });
     }
 

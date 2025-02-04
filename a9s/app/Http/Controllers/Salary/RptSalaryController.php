@@ -1091,4 +1091,152 @@ class RptSalaryController extends Controller
     ];
     return $result;
   }
+
+
+  public function checkNilaiAscend(Request $request){
+
+    // MyAdmin::checkMultiScope($this->permissions, ['rpt_salary.val1','rpt_salary.val2','rpt_salary.val3']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\RptSalary,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = RptSalary::lockForUpdate()->find($request->id);
+
+      $period_start = substr($model_query->period_end,0,8)."01";
+      $period_end = $model_query->period_end;
+      // Check Total Tidak Sesuai
+      $total_tidak_sesuai = [];
+
+      $pv_diff = DB::connection('sqlsrv')->select("select *,header-detail as selisih from (
+      select voucherno,AMOUNTPAID as header, (SELECT SUM(AMOUNT) FROM FI_ARAPExtraItems WHERE VOUCHERID = FI_ARAP.VOUCHERID ) AS detail
+      from fi_arap where VOUCHERTYPE = 'TRP' and voucherdate >= '".$period_start."' and voucherdate <= '".$period_end."' and isAR = 0 
+      ) PV where header-detail > 0 OR header-detail < 0");
+
+      foreach ($pv_diff as $key => $value) {
+        array_push($total_tidak_sesuai,[
+          "no"=>$value->voucherno,
+          "header"=>$value->header,
+          "detail"=>$value->detail,
+          "selisih"=>$value->selisih,
+        ]);
+      }
+
+      // Check Total Tidak Sesuai
+      $acc_account_ids=[
+        "GAJI" => "01.510.001",
+        "MAKAN" => "01.510.005",
+        "DINAS" => "01.575.002",
+      ];
+
+      $pembanding = [
+        "GAJI" => [
+          "AL"=>[],
+          "LA"=>[]
+        ],
+        "MAKAN" => [
+          "AL"=>[],
+          "LA"=>[]
+        ],
+        "DINAS" => [
+          "AL"=>[],
+          "LA"=>[]
+        ],
+      ];
+     
+
+      foreach ($acc_account_ids as $key => $value) {
+        $acc = DB::connection('sqlsrv')->table("AC_Accounts")
+        ->select('AccountID','AccountCode','AccountName')
+        ->where('AccountCode',$value)
+        ->first();
+
+        if(!$acc)
+        throw new \Exception(json_encode(["ac_account_id"=>["ID Tidak Ditemukan"]]), 422);
+   
+        $list_ascends = [];
+
+        $source_ascend = DB::connection('sqlsrv')->select("exec USP_AC_Accounts_QueryActivities @AccountID=:account_id,@DateStart =:start_date,
+        @DateEnd=:end_date",[
+          ":account_id"=>$acc->AccountID,
+          ":start_date"=>$period_start,
+          ":end_date"=>$period_end,
+        ]);
+
+        foreach ($source_ascend as $ksa => $vsa) {  
+          array_push($list_ascends,[
+            "voucherno"=>$vsa->VoucherNo,
+            "amount"=>(int)$vsa->DebitAmount,
+          ]);
+        }
+
+        $list_locals = [];
+        $source_local = DB::connection('mysql')->select("select a.id,b.id,a.pv_no,a.pv_total,b.amount from 
+        (SELECT * FROM trx_trp WHERE pv_id is NOT NULL AND req_deleted = '0' AND deleted ='0' AND val='1' AND val1='1' 
+        AND val2='1' 
+        and ( (payment_method_id = '1' AND received_payment = '0' AND tanggal >='".$period_start."' AND tanggal <= '".$period_end."') 
+        OR (payment_method_id='2' AND ((rp_supir_at>= '".$period_start." 00:00:00' AND rp_supir_at<='".$period_end." 23:59:59') OR 
+        (rp_kernet_at>='".$period_start." 00:00:00' AND rp_kernet_at<='".$period_end." 23:59:59')) )  ))  a
+        join
+        is_ujdetails2 b on a.id_uj = b.id_uj where (b.xfor ='Kernet' or b.xfor='Supir') and b.ac_account_code ='".$value."'");
+        
+        foreach ($source_local as $ksl => $vsl) {  
+          array_push($list_locals,[
+            "voucherno"=>$vsl->pv_no,
+            "amount"=>(int)$vsl->amount,
+          ]);
+        }
+
+        $fs_no = array_map(function($x) { return $x["voucherno"].((int)$x["amount"]); }, $list_ascends);
+        $sc_no = array_map(function($x) { return $x["voucherno"].((int)$x["amount"]); }, $list_locals);
+
+        $al = array_filter($list_ascends, function($x) use ($sc_no) {
+          return !in_array($x["voucherno"].((int)$x["amount"]), $sc_no);
+        });
+
+        $la = array_filter($list_locals, function($x) use ($fs_no) {
+          return !in_array($x["voucherno"].((int)$x["amount"]), $fs_no);
+        });
+
+        $pembanding[$key]["AL"] = $al;
+        $pembanding[$key]["LA"] = $la;
+      }      
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses Data Berhasil",
+        "pembanding"=>$pembanding,
+        "total_tidak_sesuai"=>$total_tidak_sesuai
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses Data gagal",
+      ], 400);
+    }
+  }
 }

@@ -28,6 +28,14 @@ Route::get('/', function () {
 //     // ],200);
 // });
 
+// Route::get('test-pgl', function () {
+//         return response()->json([
+//         "1"=>"test1",
+//         "2"=>"data",
+//         "token"=>"token",
+//     ],200);
+// });
+
 Route::post('/login', [\App\Http\Controllers\User\UserAccount::class, 'login']);
 Route::post('/logout', [\App\Http\Controllers\User\UserAccount::class, 'logout']);
 Route::put('/change_password', [\App\Http\Controllers\User\UserAccount::class, 'change_password']);
@@ -232,6 +240,7 @@ Route::put('/rpt_salary_validasi', [\App\Http\Controllers\Salary\RptSalaryContro
 Route::get('/rpt_salary/pdf_preview', [\App\Http\Controllers\Salary\RptSalaryController::class, 'pdfPreview']);
 Route::get('/rpt_salary/excel_download', [\App\Http\Controllers\Salary\RptSalaryController::class, 'excelDownload']);
 Route::get('/rpt_salary/excel_download2', [\App\Http\Controllers\Salary\RptSalaryController::class, 'excelDownload2']);
+Route::get('/rpt_salary/check_nilai_ascend', [\App\Http\Controllers\Salary\RptSalaryController::class, 'checkNilaiAscend']);
 
 Route::get('/salary_bonuses', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'index']);
 Route::get('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'show']);
