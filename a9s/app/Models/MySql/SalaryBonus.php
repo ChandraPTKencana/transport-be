@@ -25,6 +25,11 @@ class SalaryBonus extends Model
         return $this->hasOne(IsUser::class, 'id', "val2_user");
     }
 
+    public function val3_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val3_user");
+    }
+
     public function employee()
     {
         return $this->belongsTo(Employee::class, "employee_id", 'id')->exclude(['attachment_1','attachment_2']);
