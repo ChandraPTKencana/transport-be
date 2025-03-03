@@ -1177,7 +1177,7 @@ class UjalanController extends Controller
         throw new \Exception("Total Tidak Cocok harap Periksa Kembali",1);
       }
 
-      if(MyAdmin::checkScope($this->permissions,'ujalan.modify',true)){
+      if(MyAdmin::checkMultiScope($this->permissions,['ujalan.modify','ujalan.detail2.modify'],true)){
         $model_query->asst_opt = $asst_opt;
         $model_query->save();
       }

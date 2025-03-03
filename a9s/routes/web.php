@@ -28,12 +28,12 @@ Route::get('/', function () {
 //     // ],200);
 // });
 
-// Route::get('test-pgl', function () {
-//         return response()->json([
-//         "1"=>"test1",
-//         "2"=>"data",
-//         "token"=>"token",
-//     ],200);
+// Route::post('/employee_login', function () {
+//     //     return response()->json([
+//     //     "1"=>"test1",
+//     //     "2"=>"data",
+//     //     "token"=>"token",
+//     // ],200);
 // });
 
 Route::post('/login', [\App\Http\Controllers\User\UserAccount::class, 'login']);
@@ -140,7 +140,13 @@ Route::delete('/employee', [\App\Http\Controllers\Employee\EmployeeController::c
 Route::put('/employee_unremove', [\App\Http\Controllers\Employee\EmployeeController::class, 'undelete']);
 Route::put('/employee_validasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'validasi']);
 Route::put('/employee_unvalidasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'unvalidasi']);
+Route::put('/employee_generate_code', [\App\Http\Controllers\Employee\EmployeeController::class, 'generateCode']);
 
+Route::post('/m_employee/login', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'login']);
+Route::post('/m_employee/face_rec', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'faceRec']);
+Route::post('/m_employee/change_password', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'change_password']);
+Route::post('/m_employee/get_trip', [\App\Http\Controllers\Employee\EmployeeTrip::class, 'get_trip']);
+Route::post('/m_employee/send_absen', [\App\Http\Controllers\Employee\EmployeeTrip::class, 'send_absen']);
 
 Route::get('/standby_msts', [\App\Http\Controllers\Standby\StandbyMstController::class, 'index']);
 Route::get('/standby_mst', [\App\Http\Controllers\Standby\StandbyMstController::class, 'show']);

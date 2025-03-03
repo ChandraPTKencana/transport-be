@@ -107,6 +107,18 @@ class Employee extends Authenticatable
     {
         return $this->hasOne(IsUser::class, 'id', "deleted_user");
     }
+
+    public function generateToken()
+    {
+        $token                  = Str::random(100).$this->id."/#".round(microtime(true) * 1000);
+        $session                = new \App\Models\MySql\EmployeeSession();
+        $session->employee_id   = $this->id;
+        $session->token         = $token;
+        $session->m_enkey       = $this->m_enkey;
+        $session->created_at    = date("Y-m-d h:i:s");
+        $session->save();
+        return $token;
+    }
     // public function scopeOfRole(Builder $query, string $role): void
     // {
     //     $query->where('role', $role);

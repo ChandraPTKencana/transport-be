@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('syslog_employee', function (Blueprint $table) {
+            $table->id();
+            $table->timestamp('created_at')->useCurrent();
+            $table->string("ip_address",25);
+            $table->foreignId('created_employee')->nullable()->references('id')->on('employee_mst')->onDelete('restrict')->onUpdate('cascade');
+            $table->string("module",50);
+            $table->bigInteger("module_id")->nullable();
+            $table->string("action",20);
+            $table->longText('note');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('syslog_employee');
+    }
+};

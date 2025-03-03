@@ -37,7 +37,9 @@ class EmployeeRequest extends FormRequest
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['name'] = 'required|max:50';
             $rules['role'] = 'required|in:Supir,Kernet';
+            $rules['religion'] = 'required|in:ISLAM,KRISTEN PROTESTAN,KRISTEN KATOLIK,HINDU,BUDDHA,KONGHUCU';
             $rules['bank_id'] = 'nullable|exists:App\Models\MySql\Bank,id';
+            $rules['username'] = 'nullable|min:3';
             // $rules['birth_date']  = 'required|date_format:Y-m-d';
             // $rules['birth_place']  = 'required|max:100';
             
@@ -60,9 +62,14 @@ class EmployeeRequest extends FormRequest
             'role.required' => 'Jabatan Tidak boleh kosong',
             'role.in' => 'Jabatan harus dipilih',
 
+            'religion.required' => 'Agama Tidak boleh kosong',
+            'religion.in' => 'Agama harus dipilih',
+
             'bank_id.exists' => 'Bank harap di pilih',
             // 'id_no.required_with' => 'No ID perlu diisi',
             // 'id_type.required_with' => 'Tipe ID perlu dipilih',
+            'username.min' => 'Username minimal 3 karakter',
+            // 'username.unique' => 'Username tidak boleh sama',
 
         ];
     }

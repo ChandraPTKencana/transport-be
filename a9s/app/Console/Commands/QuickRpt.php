@@ -70,19 +70,43 @@ class QuickRpt extends Command
 // is_ujdetails2 b on a.id_uj = b.id_uj where (b.xfor ='Kernet' or b.xfor='Supir') and b.ac_account_code ='01.510.001'");
 
 
-$source_local = DB::connection('mysql')->select("select a.id,b.id,a.pv_no,b.amount from (SELECT * FROM trx_trp WHERE pv_id is NOT NULL AND req_deleted = '0' AND deleted ='0' AND val='1' AND val1='1' 
-AND val2='1' 
-and ( (payment_method_id = '1' AND received_payment = '0' AND tanggal >='2025-01-01' AND tanggal <= '2025-01-31') 
-OR (payment_method_id='2' AND ((rp_supir_at>='2025-01-01 00:00:00' AND rp_supir_at<='2025-01-31 23:59:59') OR 
-(rp_kernet_at>='2025-01-01 00:00:00' AND rp_kernet_at<='2025-01-31 23:59:59')) )  ))  a
-join
-is_ujdetails2 b on a.id_uj = b.id_uj where (b.xfor ='Kernet' or b.xfor='Supir') and b.ac_account_code ='01.510.001'");
+// $source_local = DB::connection('mysql')->select("select a.id,b.id,a.pv_no,b.amount from (SELECT * FROM trx_trp WHERE pv_id is NOT NULL AND req_deleted = '0' AND deleted ='0' AND val='1' AND val1='1' 
+// AND val2='1' 
+// and ( (payment_method_id = '1' AND received_payment = '0' AND tanggal >='2025-01-01' AND tanggal <= '2025-01-31') 
+// OR (payment_method_id='2' AND ((rp_supir_at>='2025-01-01 00:00:00' AND rp_supir_at<='2025-01-31 23:59:59') OR 
+// (rp_kernet_at>='2025-01-01 00:00:00' AND rp_kernet_at<='2025-01-31 23:59:59')) )  ))  a
+// join
+// is_ujdetails2 b on a.id_uj = b.id_uj where (b.xfor ='Kernet' or b.xfor='Supir') and b.ac_account_code ='01.510.001'");
 
 
-$this->info(json_encode($source_local)."\n ");
+// $this->info(json_encode($source_local)."\n ");
 
-foreach ($source_local as $key => $value) {
-            $this->info(json_encode($value)."\n ");
-        }
-    }
+// foreach ($source_local as $key => $value) {
+//             $this->info(json_encode($value)."\n ");
+//         }
+//     }
+$client = new \GuzzleHttp\Client([
+    'headers' => [ 'Content-Type' => 'application/json' ]
+]);
+
+$endpoint = "http://127.0.0.1:5000/compare_face";
+$id = 5;
+$value = "ABC";
+try {
+    
+    $response = $client->request('GET', $endpoint, ['body' => json_encode([
+      'emp_data' => [
+        'id' => $id,
+        'name' => $value,
+      ], 
+      'key2' => $value,
+  ])]);
+  $data = json_decode($response->getBody(), true);
+} catch (\Exception $e) {
+    echo $e->getMessage();
+
+  }
+  echo $response->getBody();
+
+}
 }

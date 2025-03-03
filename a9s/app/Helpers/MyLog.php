@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Models\MySql\Syslog;
+use App\Models\MySql\SyslogEmployee;
 use Illuminate\Support\Facades\DB;
 use File;
 use Request;
@@ -60,8 +61,36 @@ class MyLog {
       // $content="[".$timestamp."] ".getRealIpAddress()." ".json_encode($msg,JSON_PRETTY_PRINT).PHP_EOL;
       
       // File::append(storage_path($filename),$content);
+    }
 
+    public static function sys_emp($module,$module_id,$action,$note="")
+    {
+      $date=new \DateTime();
+      $created_at=$date->format("Y-m-d H:i:s.v");
+
+      $token = Request::bearerToken();
+      if($token){
+        $employee = MyAdmin::employee();
+        $employee_id = $employee->the_employee->id;
+      }
+      else{
+        $employee_id = null;
+      }
+
+      SyslogEmployee::insert([
+        "created_at"=>$created_at,
+        "ip_address"=>getRealIpAddress(),
+        "created_employee"=>$employee_id,
+        "module"=>$module,
+        "module_id"=>$module_id,
+        "action"=>$action,
+        "note"=>$note,
+      ]);
+      // $today=date("Y-m-d");
+      // $filename="/logs/data_history".$today.".log";
+
+      // $content="[".$timestamp."] ".getRealIpAddress()." ".json_encode($msg,JSON_PRETTY_PRINT).PHP_EOL;
       
-
+      // File::append(storage_path($filename),$content);
     }
 }

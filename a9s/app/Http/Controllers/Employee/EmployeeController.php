@@ -10,10 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
 use App\Helpers\MyLib;
+
+use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Encoders\AutoEncoder;
 
 use App\Models\MySql\Employee;
 use App\Models\MySql\IsUser;
@@ -32,6 +36,14 @@ class EmployeeController extends Controller
 
   public function __construct(Request $request)
   {
+    // if (request()->route()->getActionMethod() !== 'specificMethod') {
+    //     // Your constructor logic here
+    //     $this->middleware('auth'); // Example middleware
+    // }else{
+    //   $this->admin = MyAdmin::user();
+    //   $this->admin_id = $this->admin->the_user->id;
+    //   $this->permissions = $this->admin->the_user->listPermissions();
+    // }
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->permissions = $this->admin->the_user->listPermissions();
@@ -224,11 +236,14 @@ class EmployeeController extends Controller
     ], 200);
   }
 
+  private $height = 500;
+  private $quality = 100;
+
   public function store(EmployeeRequest $request)
   {
     MyAdmin::checkScope($this->permissions, 'employee.create');
     // set_time_limit(0);
-
+    $location = null;
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
@@ -246,6 +261,12 @@ class EmployeeController extends Controller
         throw new \Exception("No SIM Telah Terdaftar",1);
       }
 
+      if($request->password != $request->confirm_password)
+      throw new \Exception("Password dan Confirm Password tidak cocok",1);
+      
+      if($request->username && Employee::where("username",$request->username)->first())
+      throw new \Exception("Username sudah digunakan",1);
+
       $model_query                = new Employee();
 
       if($request->hasFile('attachment_1')){
@@ -255,6 +276,37 @@ class EmployeeController extends Controller
         $blobFile = base64_encode(file_get_contents($path));
         $model_query->attachment_1 = $blobFile;
         $model_query->attachment_1_type = $fileType;
+      }
+
+      if($request->hasFile('face_loc_target')){
+        $file = $request->file('face_loc_target');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $ext = $file->extension();
+        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+        throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+
+        // $image = Image::read($path)->scale(height: $this->height);
+        // $image = Image::read($path);
+        // $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+
+        $date = new \DateTime();
+        $timestamp = $date->format("Y-m-d H:i:s.v");
+        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+        $location = "/files/employees";
+        File::ensureDirectoryExists(files_path($location));
+        $location .= "/{$file_name}";
+        try {
+          ini_set('memory_limit', '256M');
+          Image::read($path)->save(files_path($location));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan Foto Gagal");
+        }
+
+        // $blob_img_leave = base64_encode($compressedImageBinary); 
+        // $blobFile = base64_encode(file_get_contents($path));
+        $model_query->face_loc_target = $location;
+        $model_query->face_loc_type = $fileType;
       }
 
       $model_query->name          = $request->name;
@@ -279,6 +331,16 @@ class EmployeeController extends Controller
       $model_query->bpjs_kesehatan   = $request->bpjs_kesehatan;
       $model_query->bpjs_jamsos      = $request->bpjs_jamsos;
 
+
+      $model_query->religion      = $request->religion;
+      
+      $model_query->username      = $request->username;
+      
+      if($request->password)
+      $model_query->password      = bcrypt($request->password);
+      
+      $model_query->m_face_login  = in_array($request->m_face_login,[1,'true']) ? 1 : 0;
+
       $model_query->save();
 
       MyLog::sys($this->syslog_db,$model_query->id,"insert");
@@ -291,6 +353,10 @@ class EmployeeController extends Controller
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
+
+
+      if ($location && File::exists(files_path($location)))
+      unlink(files_path($location));
 
       if ($e->getCode() == 1) {
         return response()->json([
@@ -314,6 +380,10 @@ class EmployeeController extends Controller
     // set_time_limit(0);
     $t_stamp = date("Y-m-d H:i:s");
     $attachment_1_preview = $request->attachment_1_preview;
+
+    $location             = null;
+    $face_loc_preview     = $request->face_loc_preview;
+
     $fileType = null;
     $blobFile = null;
     $change = 0;
@@ -332,9 +402,15 @@ class EmployeeController extends Controller
         if($emp)
         throw new \Exception("No SIM Telah Terdaftar",1);
       }
+      
+      if($request->password != $request->confirm_password)
+      throw new \Exception("Password dan Confirm Password tidak cocok",1);
 
       $model_query                = Employee::where("id",$request->id)->lockForUpdate()->first();
       
+      if($request->username && Employee::where("username",$request->username)->where("id","!=",$model_query->id)->first())
+      throw new \Exception("Username sudah digunakan",1);
+
       if($model_query->id==1){
         throw new \Exception("Izin Ubah Ditolak",1);
       }
@@ -362,6 +438,80 @@ class EmployeeController extends Controller
 
       $model_query->attachment_1_type = $fileType;
 
+      if($request->hasFile('face_loc')){
+        $file = $request->file('face_loc');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        // $blobFile = base64_encode(file_get_contents($path));
+        // $change++;
+
+        $ext = $file->extension();
+
+        $date = new \DateTime();
+        $timestamp = $date->format("Y-m-d H:i:s.v");
+        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+        $location = "/files/employees/{$file_name}";
+
+        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+        throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+
+        // if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
+        //   // $image = Image::read($path)->scale(height: $this->height);
+        //   // $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+        //   try {
+        //     ini_set('memory_limit', '256M');
+        //     Image::read($path)->save(files_path($location));
+        //   } catch (\Exception $e) {
+        //     throw new \Exception("Simpan Foto Gagal");
+        //   }
+        // }else{
+        //   try {
+        //     // Set memory limit (optional)
+        //     ini_set('memory_limit', '256M');     
+        //     // Save the PDF file
+        //     file_put_contents(files_path($location), file_get_contents($path));
+        //   } catch (\Exception $e) {
+        //     throw new \Exception("Simpan PDF Gagal");
+        //   }
+        // }
+
+        $date = new \DateTime();
+        $timestamp = $date->format("Y-m-d H:i:s.v");
+        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+        $location = "/files/employees";
+        File::ensureDirectoryExists(files_path($location));
+        $location .= "/{$file_name}";
+
+        try {
+          ini_set('memory_limit', '256M');
+          Image::read($path)->save(files_path($location));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan Foto Gagal".$e->getMessage());
+
+          // throw new \Exception("Simpan Foto Gagal");
+        }
+
+        if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
+          if (!unlink(files_path($model_query->face_loc_target)))
+            throw new \Exception("Gagal Hapus Gambar", 1);
+        }
+        
+        $model_query->face_loc_type   = $fileType;
+        $model_query->face_loc_target    = $location;
+
+      }
+
+      if (!$request->hasFile('face_loc') && $face_loc_preview == null) {
+        if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
+          if (!unlink(files_path($model_query->face_loc_target)))
+            throw new \Exception("Gagal Hapus Gambar", 1);
+        }
+        $location = null;
+        $fileType = null;
+        $model_query->face_loc_type   = $fileType;
+        $model_query->face_loc_target    = $location;
+      }
+
       if(!$model_query->val_at){
         $model_query->name          = $request->name;
       }
@@ -383,6 +533,15 @@ class EmployeeController extends Controller
 
       $model_query->bpjs_kesehatan   = $request->bpjs_kesehatan;
       $model_query->bpjs_jamsos      = $request->bpjs_jamsos;
+
+      $model_query->religion      = $request->religion;
+      
+      $model_query->username      = $request->username;
+      
+      if($request->password)
+      $model_query->password      = bcrypt($request->password);
+      
+      $model_query->m_face_login  = in_array($request->m_face_login,[1,'true']) ? 1 : 0;
 
       $model_query->save();
       
@@ -415,7 +574,6 @@ class EmployeeController extends Controller
       ], 400);
     }
   }
-
 
   public function delete(EmployeeRequest $request)
   {
@@ -483,7 +641,6 @@ class EmployeeController extends Controller
     //     "message"=>"Proses ubah data gagal",
     // ],400);
   }
-
 
   public function validasi(Request $request){
     MyAdmin::checkScope($this->permissions, 'employee.val');
@@ -691,6 +848,136 @@ class EmployeeController extends Controller
         "message" => "Proses unremove data gagal",
       ], 400);
     }
+  }
+
+  public function generateCode(Request $request){
+    // MyAdmin::checkScope($this->permissions, 'employee.unval');
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\Employee,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = Employee::exclude(['attachment_1','attachment_2'])->lockForUpdate()->find($request->id);
+      $SYSOLD                     = clone($model_query);
+      // if($model_query->val){
+      //   throw new \Exception("Data Sudah Tervalidasi",1);
+      // }
+
+      $model_query->m_dekey       = env('MIPP').'|'.$model_query->id.'|'.MyLib::generateRandomString(5);
+      $model_query->m_enkey       = MyLib::encryptText($model_query->m_dekey);
+
+      $model_query->updated_at    = $t_stamp;
+      $model_query->updated_user  = $this->admin_id;
+
+      $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"unapprove",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message"       => "Proses Generate Code berhasil",
+        "m_enkey"       => $model_query->m_enkey,
+        "updated_user"  => $model_query->updated_user,
+        "updated_at"    => $model_query->updated_at,
+        "updated_by"    => $model_query->updated_user ? new IsUserResource(IsUser::find($model_query->updated_user)) : null,
+
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses Generate Code gagal",
+      ], 400);
+    }
 
   }
+  
+  // public function comTfDataSend(Request $request){
+  //   MyAdmin::checkScope($this->permissions, 'employee.transfer_data');
+  //   $model_query = Employee::where("id",$request->id)->lockForUpdate()->first();
+
+  //   try {
+  //     $domain_status = "";
+
+  //     $domain = substr (request()->getHttpHost(), 7); // $domain is now 'www.example.com'
+  //     if(array_search($domain, MyLib::$pub_ip_pabrik)!== false)
+  //     $domain_status = "pub_ip";
+
+  //     if(array_search($domain, MyLib::$loc_ip_pabrik)!== false)
+  //     $domain_status = "loc_ip";
+
+  //     if($domain_status=="")
+  //     throw new \Exception("Parameter yang lengkap. 001",1);
+
+  //     $index_item = array_search($request->company_target, MyLib::$list_pabrik);    
+  //     if ($index_item === false)
+  //     throw new \Exception("Parameter yang lengkap. 002",1);
+
+  //     $target_ip = "";
+  //     if($domain_status=="pub_ip")
+  //       $target_ip = MyLib::$pub_ip_pabrik[$index_item];
+  //     elseif($domain_status=="loc_ip")
+  //       $target_ip = MyLib::$loc_ip_pabrik[$index_item];
+
+  //     $endpoint = "http://".$target_ip."/transport-be/a9p/employee_transfer_set";
+
+  //     $client = new \GuzzleHttp\Client();
+  //     $id = 5;
+  //     $value = "ABC";
+  
+  //     $response = $client->request('GET', $endpoint, ['query' => [
+  //         'emp_data' => [
+  //           'id' => $model_query->id,
+  //           'name' => $model_query->name,
+  //           'role' => $model_query->role,
+
+  //         ], 
+  //         'key2' => $value,
+  //     ]]);
+  
+  //     // url will be: http://my.domain.com/test.php?key1=5&key2=ABC;
+  
+  //     $statusCode = $response->getStatusCode();
+  //     $content = $response->getBody();
+
+  //     return response()->json([
+  //       "message"       => "Proses Transfer data berhasil",
+  //     ], 200);
+  //   } catch (\Exception  $e) {
+      
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+
+  //     return response()->json([
+  //       "message" => "Proses Transfer data gagal",
+  //     ], 400);
+  //   }
+  // }
 }

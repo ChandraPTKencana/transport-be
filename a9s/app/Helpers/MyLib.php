@@ -8,13 +8,20 @@ use Illuminate\Support\Facades\Request;
 use App\Exceptions\MyException;
 use App\Model\User;
 
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 class MyLib
 {
   public static $exist_item_no = "000.00.000"; // use in itemcontrollers
+  public static $en_de_skey = "yUX3-t.r}F2LpAF=tuX|84w9MjSx{qnl"; // use in itemcontrollers
+  public static $en_de_iv = "P2R[-Q<pH5J^IT>A"; // use in itemcontrollers
   // public static $total_question = 10;
   // public static $correct_value = 1;
   // public static $incorrect_value = 0;
-  public static $list_pabrik = ["KPN","KAS","KUS","ARP","KAP","SMP"];
+  // public static $list_pabrik    = ["KPN","KAS","KUS","ARP","KAP","SMP"];
+  // public static $pub_ip_pabrik  = ["103.228.242.60:8888","119.11.204.166:8888","103.228.242.61:8888","103.228.240.89:8888","116.254.98.142:8888","119.11.204.168:8888"];
+  // public static $loc_ip_pabrik  = ["10.10.26.197","10.10.88.197","10.10.29.196","10.10.30.196","10.10.7.197","10.10.77.196"];
   public static $min_transfer = 10000;
 
   public static function checkScope($user, $allowed_scopes = [], $msg = "Forbidden", $return = false)
@@ -853,4 +860,105 @@ class MyLib
 
   //   return $mq;
   // }
+
+
+  
+  // public static function generateKey($password, $salt) {
+  //   return substr(hash('sha256', $password . $salt, true), 0, 32);
+  //   // return substr(base64_encode(hash('sha256', $password . $salt, true)), 0, 32);
+  // }
+
+  public static function generateRandomString(int $length = 5): string {
+    // Pastikan panjang minimal 1
+    // if ($length < 1) {
+    //     throw new InvalidArgumentException("Length must be at least 1");
+    // }
+
+    // Hitung jumlah byte yang dibutuhkan
+    $bytes = ceil($length / 2); // Setiap byte menghasilkan 2 karakter hex
+
+    // Generate random bytes dan konversi ke hex
+    $randomHex = bin2hex(random_bytes($bytes));
+
+    // Potong string agar sesuai dengan panjang yang diinginkan
+    return substr($randomHex, 0, $length);
+  }
+
+  public static function generateSecureComplexString(int $length = 5): string {
+    // Karakter yang diinginkan: huruf besar, huruf kecil, angka, simbol
+    $charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?';
+
+    // // Pastikan panjang minimal 1
+    // if ($length < 1) {
+    //     throw new InvalidArgumentException("Length must be at least 1");
+    // }
+
+    // Hitung jumlah byte yang dibutuhkan
+    $bytes = random_bytes($length); // Menghasilkan byte acak
+
+    // Pemetaan byte ke karakter dalam $charset
+    $result = '';
+    $maxIndex = strlen($charset) - 1;
+
+    foreach (str_split($bytes) as $byte) {
+        $result .= $charset[ord($byte) % $maxIndex]; // Menggunakan modulus untuk memilih karakter acak dari charset
+    }
+
+    return substr($result, 0, $length);
+  }
+
+  public static function encryptText($plainText) {  
+    return openssl_encrypt($plainText, 'aes-256-cbc', self::$en_de_skey, 0, self::$en_de_iv);
+  }
+
+  public static function decryptText($encryptedText) {
+    return openssl_decrypt($encryptedText, 'aes-256-cbc', self::$en_de_skey, 0, self::$en_de_iv);
+  }
+
+  public static function testCrypt($id=0){
+    $plainText = env('MIPP').'|'.$id.'|'.self::generateRandomString(5);
+    
+    $result = self::encryptText($plainText);
+    echo "Encrypted: {$result}\n";
+
+    $decrypted = self::decryptText($result);
+    echo "Decrypted: $decrypted\n";
+  }
+
+
+  public static function compare_face($images){
+
+    try {
+      $client = new \GuzzleHttp\Client();
+      $endpoint = "http://127.0.0.1:5000/compare_face";
+      $response = $client->post($endpoint, [
+        'multipart' => $images,
+        'headers' => [
+            'Authorization' => 'Bearer your_token_here', // If authentication is needed
+            'Accept'        => 'application/json',
+        ]
+      ]);
+      
+      // return ["status_code"=>200,json_decode($response->getBody(), true)];
+    
+      return response()->json(json_decode($response->getBody(),true),200); // Mengembalikan JSON sebagai array
+    
+    } catch (\GuzzleHttp\Exception\RequestException  $e) {
+      if ($e->hasResponse()) {
+        $responseBody = $e->getResponse()->getBody()->getContents();
+        // return ["status_code"=>400,json_decode($responseBody)]; // Mengembalikan JSON sebagai array
+        return response()->json(json_decode($responseBody,true),400); // Mengembalikan JSON sebagai array
+    }
+
+    return response()->json([
+      'error' => $e->getMessage()
+    ],400); // Mengembalikan JSON sebagai array
+
+    // Jika tidak ada response, kembalikan pesan error umum
+    // return ["status_code"=>400,'error' => $e->getMessage()];
+
+    }
+
+  }
+
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Resources\MySql;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\File;
 
 class EmployeeResource extends JsonResource
 {
@@ -51,6 +52,20 @@ class EmployeeResource extends JsonResource
             
             'bpjs_kesehatan'        => $this->bpjs_kesehatan ?? "",
             'bpjs_jamsos'           => $this->bpjs_jamsos ?? "",
+            'religion'              => $this->religion ?? "",
+            // 'm_dekey'               => $this->m_dekey ?? "",
+            'm_enkey'               => $this->m_enkey ?? "",
+            'username'              => $this->username ?? "",
+            'password'              => "",
+            'm_face_login'          => $this->m_face_login ? 1 : 0,
+            // 'face_loc_target'       => $this->face_loc_target ?? "",
+            // 'face_loc_type'         => $this->face_loc_type ?? "",
+
+            'face_loc'          => null,
+            'face_loc_preview'  => $this->face_loc_target && File::exists(files_path($this->face_loc_target)) ? "data:".$this->face_loc_type.";base64,".base64_encode(File::get(files_path($this->face_loc_target))) :"",
+            'face_loc_type'     => $this->face_loc_type,
+
+
         ];
     }
 }

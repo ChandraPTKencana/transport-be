@@ -2,7 +2,7 @@
       <thead class="text-center" style="background-color: #B0A4A4;">
         
       <tr>
-        <th colspan="31" style="text-align: center; font-weight:bold;">
+        <th colspan="33" style="text-align: center; font-weight:bold;">
           Laporan Uang Gaji Dan Makan Standby,Uang Gaji Dan Makan Trip, Potongan, Serta Bonus Periode {{$info['periode']}}
         </th>
       </tr>
@@ -21,19 +21,23 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Rek</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Bank</th>
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 1</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan 1</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 1</th>
+
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 2</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">U.Kerajinan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 1+2</th>
+
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Total</th>
-          <!-- <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Lain</th> -->
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS JAMSOS</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Grand Total</th>
         </tr>
+
         <tr>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Makan</th>
@@ -49,8 +53,7 @@
       <tbody>
         @foreach($data as $k=>$v)
         @php
-        $ktp_no=mb_strtoupper("'".$v["employee_ktp_no"],'UTF-8');
-        $row_jump = 3;
+          $ktp_no=mb_strtoupper("'".$v["employee_ktp_no"],'UTF-8');
         @endphp
         <tr>
           <td style="border: 1px solid black;">{{$loop->iteration}}</td>
@@ -69,43 +72,47 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" >=N{{$loop->iteration+$row_jump}}+O{{$loop->iteration+$row_jump}}+P{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">{{ $v["total_1"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas_2"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["kerajinan"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =R{{$loop->iteration+$row_jump}}+S{{$loop->iteration+$row_jump}}+T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =Q{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">{{ $v["total_2"] }}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">{{ $v["total_p"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=W{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}+Z{{$loop->iteration+$row_jump}}-AA{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">{{ $v["total"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AB{{$loop->iteration+$row_jump}}-AC{{$loop->iteration+$row_jump}}-AD{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">{{ $v["total_grand"] }}</td>
         </tr>
         @endforeach
         <tr>
           <td colspan="13" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(N4:N{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(O4:O{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(P4:P{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Q4:Q{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(R4:R{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(S4:S{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(T4:T{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(U4:U{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(V4:V{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(W4:W{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(X4:X{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Y4:Y{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Z4:Z{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AA4:AA{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AB4:AB{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AC4:AC{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AD4:AD{{ count($data) + $row_jump }}) </td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AE4:AE{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_gaji']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_makan']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_dinas']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bonus']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_periode_1']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_gaji_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_makan_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_sb_dinas_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bonus_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_kerajinan']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_periode_2']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_periode']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_gaji']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_makan']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_uj_dinas']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_nominal_cut']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_all']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_kesehatan']}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_bpjs_jamsos']}} </td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > {{$info['ttl_grand']}}</td>
         </tr>
       </tbody>
     </table>

@@ -27,6 +27,23 @@ class MyAdmin
     return $model_query;
   }
 
+  public static function employee()
+  {
+    $token = Request::bearerToken();
+    if ($token == "") {
+      throw new MyException(["message" => "Get user info cannot complete, please restart the apps"], 400);
+    }
+    $model_query = \App\Models\MySql\EmployeeSession::where("token", $token)->first();
+    if (!$model_query) {
+      throw new MyException(["message" => "Unauthenticate"], 401);
+    }
+    // if ($model_query->the_user->is_active == 0) {
+    //   throw new MyException(["message" => "Izin Masuk Tidak Diberikan"], 403);
+    // }
+
+    return $model_query;
+  }
+
   public static function checkRole($role, $allowed_roles = [], $msg = null, $return = false)
   {
     $msg = is_null($msg) ? 'Forbidden' : $msg;

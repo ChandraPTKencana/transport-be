@@ -137,14 +137,17 @@ class RunPermit extends Command
             // ["permit"=>'employee.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             // ["permit"=>'trp_trx.ticket.unval_ticket',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             
-            ["permit"=>'trp_trx.unval1',"to"=>['SUPERADMIN','TRANSPORT_MANDOR']],
-            ["permit"=>'trp_trx.unval2',"to"=>['SUPERADMIN','KTU','WAKIL_KTU']],
-            ["permit"=>'trp_trx.unval3',"to"=>['SUPERADMIN','MARKETING']],
-            ["permit"=>'trp_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_STAFF']],
-            ["permit"=>'trp_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_SPV']],
-            ["permit"=>'trp_trx.unval6',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'employee.unremove',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'trp_trx.unval1',"to"=>['SUPERADMIN','TRANSPORT_MANDOR']],
+            // ["permit"=>'trp_trx.unval2',"to"=>['SUPERADMIN','KTU','WAKIL_KTU']],
+            // ["permit"=>'trp_trx.unval3',"to"=>['SUPERADMIN','MARKETING']],
+            // ["permit"=>'trp_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_STAFF']],
+            // ["permit"=>'trp_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_SPV']],
+            // ["permit"=>'trp_trx.unval6',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'employee.unremove',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             
+
+            // tidak jadi ["permit"=>'employee.transfer_data',"to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+
         ];
 
         foreach ($re_lists as $k => $v) {
