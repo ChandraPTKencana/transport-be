@@ -3083,6 +3083,7 @@ class TrxTrpController extends Controller
 
     if($trx_trp->pv_complete==1) throw new \Exception("Karna PV sudah selesai dibuat",1);
     if($trx_trp->pvr_id==null) throw new \Exception("Karna PVR Masih Kosong",1);
+    if($trx_trp->pvr_had_detail==0) throw new \Exception("Karna PVR Masih Belum Selesai",1);
 
     $pvr_dt = DB::connection('sqlsrv')->table('FI_APRequest')
     ->select('BankAccountID','AmountPaid','VoucherID','AssociateName','Remarks','VoucherType','IncomeOrExpense','CurrencyID','PaymentMethod','CheckNo','CheckDueDate','BankName','AccountNo','ExcludeInARAP','ExpenseOrRevenueTypeID','Confidential')
@@ -3246,7 +3247,7 @@ class TrxTrpController extends Controller
     $miniError="";
     try {
       $t_stamp = date("Y-m-d H:i:s");
-      $trx_trps = TrxTrp::whereNotNull("pvr_id")->whereNull("pv_id")->where("deleted",0)->where("req_deleted",0)->get();
+      $trx_trps = TrxTrp::whereNotNull("pvr_id")->where('pvr_had_detail',1)->whereNull("pv_id")->where("deleted",0)->where("req_deleted",0)->get();
       if(count($trx_trps)==0){
         throw new \Exception("Semua PVR yang ada ,PV ny sudah terisi",1);
       }

@@ -1880,6 +1880,7 @@ class ExtraMoneyTrxController extends Controller
 
     if($extra_money_trx->pv_complete==1) throw new \Exception("Karna PV sudah selesai dibuat",1);
     if($extra_money_trx->pvr_id==null) throw new \Exception("Karna PVR Masih Kosong",1);
+    if($extra_money_trx->pvr_complete==0) throw new \Exception("Karna PVR Masih Belum Selesai",1);
 
     $pvr_dt = DB::connection('sqlsrv')->table('FI_APRequest')
     ->select('BankAccountID','AmountPaid','VoucherID','AssociateName','Remarks','VoucherType','IncomeOrExpense','CurrencyID','PaymentMethod','CheckNo','CheckDueDate','BankName','AccountNo','ExcludeInARAP','ExpenseOrRevenueTypeID','Confidential','AssociateName')
@@ -2043,7 +2044,7 @@ class ExtraMoneyTrxController extends Controller
     $miniError="";
     try {
       $t_stamp = date("Y-m-d H:i:s");
-      $extra_money_trxs = ExtraMoneyTrx::whereNotNull("pvr_id")->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->get();
+      $extra_money_trxs = ExtraMoneyTrx::whereNotNull("pvr_id")->where("pvr_complete",1)->whereNull("pv_id")->where("req_deleted",0)->where("deleted",0)->get();
       if(count($extra_money_trxs)==0){
         throw new \Exception("Semua PVR yang ada ,PV ny sudah terisi",1);
       }
