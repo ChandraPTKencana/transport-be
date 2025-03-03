@@ -19,7 +19,7 @@ class MyLib
   // public static $total_question = 10;
   // public static $correct_value = 1;
   // public static $incorrect_value = 0;
-  // public static $list_pabrik    = ["KPN","KAS","KUS","ARP","KAP","SMP"];
+  public static $list_pabrik    = ["KPN","KAS","KUS","ARP","KAP","SMP"];
   // public static $pub_ip_pabrik  = ["103.228.242.60:8888","119.11.204.166:8888","103.228.242.61:8888","103.228.240.89:8888","116.254.98.142:8888","119.11.204.168:8888"];
   // public static $loc_ip_pabrik  = ["10.10.26.197","10.10.88.197","10.10.29.196","10.10.30.196","10.10.7.197","10.10.77.196"];
   public static $min_transfer = 10000;
