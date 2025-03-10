@@ -17,6 +17,8 @@ use App\Helpers\MyLog;
 
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Typography\FontFactory;
 
 use App\Models\MySql\TrxTrp;
 
@@ -176,24 +178,60 @@ class EmployeeTrip extends Controller
       $status = substr($request->status,0,1);
       if($request->hasFile('image')){
 
-        $url = "https://www.google.com/maps/@{$request->lat},{$request->lng},17z";
-        // $url = "https://www.google.com/maps/@3.704385,98.660519,17z";
+        // $url = "https://www.google.com/maps/@{$request->lat},{$request->lng},17z";
+        // // $url = "https://www.google.com/maps/@3.704385,98.660519,17z";
         
-        $svg_file=File::get(files_path("/location_on.png"));
+        // $svg_file=File::get(files_path("/location_on.png"));
 
-        $position = Image::read(Browsershot::url($url)
-        ->setChromePath($chromePath) // Set Chrome path manually for Windows
-        ->windowSize(800, 800) // Set viewport size
-        ->waitUntilNetworkIdle() // Wait for page to fully load
-        // ->save(storage_path('app/public/map_screenshot.png'));
-        // ->fullPage()
-        ->screenshot())->crop(320 ,320 ,240,240)
-        ->place(Image::read($svg_file)->scale(40,40),'center',0,-10);
+        // $position = Image::read(Browsershot::url($url)
+        // ->setChromePath($chromePath) // Set Chrome path manually for Windows
+        // ->windowSize(800, 800) // Set viewport size
+        // ->waitUntilNetworkIdle() // Wait for page to fully load
+        // // ->save(storage_path('app/public/map_screenshot.png'));
+        // // ->fullPage()
+        // ->screenshot())->crop(320 ,320 ,240,240)
+        // ->place(Image::read($svg_file)->scale(40,40),'center',0,-10);
+
+        // $file = $request->file('image');
+        // $path = $file->getRealPath();
+        // $fileType = $file->getClientMimeType();
+        // $image = Image::read($path)->scale(height: $this->height)->place(Image::read($position)->scale(150),'top-left',10,10);
+        // $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+        // $blob_img = base64_encode($compressedImageBinary); 
+
+
+        // $imgtext = Image::text('Hello World!', 50, 50, function($font) {
+        //   // $font->file(public_path('fonts/arial.ttf')); // Font custom
+        //   $font->size(50); // Ukuran font
+        //   $font->color('#ffffff'); // Warna font (putih)
+        //   $font->align('center');
+        //   $font->valign('top');
+        //   $font->angle(0); // Sudut teks
+        // });
+        $data['tanggalwaktu'] = date("d-m-Y H:i:s",strtotime($t_stamp));
 
         $file = $request->file('image');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        $image = Image::read($path)->scale(height: $this->height)->place(Image::read($position)->scale(150),'top-left',10,10);
+        $image = ImageManager::gd()->read($path)->scale(height: $this->height)
+        ->text("LAT:{$request->lat},LONG:{$request->lng}", 5, 5, function($font) {
+          // $font->file(public_path('fonts/arial.ttf')); // Font custom
+          $font->size(200);
+          $font->color('#ffffff'); // Warna font (putih)
+          $font->stroke('ff5500', 1); // Ukuran font
+          $font->align('left');
+          $font->valign('top');
+          $font->angle(0); // Sudut teks
+        })
+        ->text($data['tanggalwaktu'], 5, 15, function($font) {
+          // $font->file(public_path('fonts/arial.ttf')); // Font custom
+          $font->size(200);
+          $font->color('#ffffff'); // Warna font (putih)
+          $font->stroke('ff5500', 1); // Ukuran font
+          $font->align('left');
+          $font->valign('top');
+          $font->angle(0); // Sudut teks
+        });
         $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
         $blob_img = base64_encode($compressedImageBinary); 
 
@@ -218,7 +256,7 @@ class EmployeeTrip extends Controller
           $model_query->ritase_till_at = $t_stamp;
         }
 
-        $data['tanggalwaktu'] = date("d-m-Y H:i:s",strtotime($t_stamp));
+        
         $data['gambar'] = "data:image/png;base64,".$blob_img;
         $model_query->save();
       }
@@ -236,6 +274,11 @@ class EmployeeTrip extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
+      // MyLog::logging(response()->json([
+      //     "getCode" => $e->getCode(),
+      //     "line" => $e->getLine(),
+      //     "message" => $e->getMessage(),
+      //   ], 400));
       // return response()->json([
       //   "getCode" => $e->getCode(),
       //   "line" => $e->getLine(),

@@ -299,17 +299,25 @@ class TrxTrpAbsenController extends Controller
         array_push($img_leaves,[
           "id"=>$v["id"],
           "gambar"=>$img,
+          "is_manual"=>$v["is_manual"],
         ]);
       }
 
-      if($v['status']=="T") 
-      $data["img_arrive"]   = $img;
+      if($v['status']=="T") {
+        $data["img_arrive"]   = $img;
+        $data["img_arrive_is_manual"]   = $v["is_manual"];
+      }
 
-      if($v['status']=="K") 
-      $data["img_return"]   = $img;
+      if($v['status']=="K") {
+        $data["img_return"]   = $img;
+        $data["img_return_is_manual"]   = $v["is_manual"];
+      }
 
-      if($v['status']=="S") 
-      $data["img_till"]   = $img;
+      if($v['status']=="S") {
+        $data["img_till"]   = $img;
+        $data["img_till_is_manual"]   = $v["is_manual"];
+      }
+
     }
     $data['img_leaves']=$img_leaves;
 
