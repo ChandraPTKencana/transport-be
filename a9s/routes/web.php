@@ -17,6 +17,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Route::get('/testmap', function () {
+//     return view('map');
+// });
+
 // Route::get("testdb",function(){
 
 //     $data = DB::select("select * from cc");
@@ -35,6 +39,7 @@ Route::get('/', function () {
 //     //     "token"=>"token",
 //     // ],200);
 // });
+// Route::get('/testmap', [\App\Http\Controllers\MapController::class, 'get']);
 
 Route::post('/login', [\App\Http\Controllers\User\UserAccount::class, 'login']);
 Route::post('/logout', [\App\Http\Controllers\User\UserAccount::class, 'logout']);

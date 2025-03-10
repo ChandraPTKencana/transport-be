@@ -9,28 +9,20 @@ use App\Exceptions\MyException;
 use Illuminate\Validation\ValidationException;
 
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-use App\Helpers\MyLib;
 
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
 
-use App\Models\MySql\Employee;
-use App\Models\MySql\IsUser;
-
-use App\Http\Requests\MySql\EmployeeRequest;
-
-use App\Http\Resources\MySql\EmployeeResource;
-use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\TrxTrp;
 
 use App\Http\Resources\MySql\TrxTrpAbsenResource;
 use App\Models\MySql\TrxAbsen;
+use Spatie\Browsershot\Browsershot;
 
 class EmployeeTrip extends Controller
 {
@@ -54,7 +46,7 @@ class EmployeeTrip extends Controller
         $q->orwhereNull("ritase_arrive_at");
         $q->orwhereNull("ritase_return_at");
         $q->orwhereNull("ritase_till_at");
-      })
+      })->where("ritase_val2",0)
       ->orderBy("id","asc")
       ->first();
 
@@ -66,6 +58,12 @@ class EmployeeTrip extends Controller
 
       $data = new TrxTrpAbsenResource($model_query);
       $data = collect($data);
+
+      $data['tanggal'] = date("d-m-Y",strtotime($data['tanggal']));
+      $data['ritase_leave_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_leave_at']));
+      $data['ritase_arrive_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_arrive_at']));
+      $data['ritase_return_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_return_at']));
+      $data['ritase_till_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_till_at']));
 
       $data['supir_name'] = $model_query->employee_s->name;
       $data['kernet_name'] = $model_query->employee_k ? $model_query->employee_k->name : "";
@@ -160,6 +158,14 @@ class EmployeeTrip extends Controller
       throw new ValidationException($validator);
     }
 
+    if(!isset($request->lat) || !isset($request->lng)){
+      return response()->json([
+        "message" => "Koordinat harus disertakan",
+      ], 400);
+    }
+    
+    $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe';
+
     $t_stamp = date("Y-m-d H:i:s");
     $data=[];
     DB::beginTransaction();
@@ -170,10 +176,24 @@ class EmployeeTrip extends Controller
       $status = substr($request->status,0,1);
       if($request->hasFile('image')){
 
+        $url = "https://www.google.com/maps/@{$request->lat},{$request->lng},17z";
+        // $url = "https://www.google.com/maps/@3.704385,98.660519,17z";
+        
+        $svg_file=File::get(files_path("/location_on.png"));
+
+        $position = Image::read(Browsershot::url($url)
+        ->setChromePath($chromePath) // Set Chrome path manually for Windows
+        ->windowSize(800, 800) // Set viewport size
+        ->waitUntilNetworkIdle() // Wait for page to fully load
+        // ->save(storage_path('app/public/map_screenshot.png'));
+        // ->fullPage()
+        ->screenshot())->crop(320 ,320 ,240,240)
+        ->place(Image::read($svg_file)->scale(40,40),'center',0,-10);
+
         $file = $request->file('image');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        $image = Image::read($path)->place(Image::read($path),'top-left',50,50)->scale(height: $this->height);
+        $image = Image::read($path)->scale(height: $this->height)->place(Image::read($position)->scale(150),'top-left',10,10);
         $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
         $blob_img = base64_encode($compressedImageBinary); 
 
