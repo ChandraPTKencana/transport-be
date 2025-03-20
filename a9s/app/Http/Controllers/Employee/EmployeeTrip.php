@@ -48,7 +48,10 @@ class EmployeeTrip extends Controller
         $q->orwhereNull("ritase_arrive_at");
         $q->orwhereNull("ritase_return_at");
         $q->orwhereNull("ritase_till_at");
-      })->where("ritase_val2",0)
+      })
+      ->where("ritase_val2",0)
+      ->where("deleted",0)
+      ->where("req_delete",0)
       ->orderBy("id","asc")
       ->first();
 
