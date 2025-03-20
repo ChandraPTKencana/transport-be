@@ -51,7 +51,7 @@ class EmployeeTrip extends Controller
       })
       ->where("ritase_val2",0)
       ->where("deleted",0)
-      ->where("req_delete",0)
+      ->where("req_deleted",0)
       ->orderBy("id","asc")
       ->first();
 
