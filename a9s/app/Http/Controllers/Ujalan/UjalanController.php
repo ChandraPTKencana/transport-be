@@ -93,7 +93,7 @@ class UjalanController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      $list_to_like = ["id","xto","tipe","jenis","harga"];
+      $list_to_like = ["id","xto","tipe","jenis","harga","km_range"];
 
       // $list_to_like_user = [
       //   ["val_name","val_user"],
@@ -444,6 +444,7 @@ class UjalanController extends Controller
 
       $model_query                  = new Ujalan();      
       $model_query->xto             = $request->xto;
+      $model_query->km_range        = $request->km_range ?? 0;
       $model_query->tipe            = $request->tipe;
       $model_query->jenis           = $request->jenis;
       // $model_query->status          = $request->status;
@@ -658,6 +659,7 @@ class UjalanController extends Controller
 
       if(MyAdmin::checkScope($this->permissions,'ujalan.modify',true)){
         $model_query->xto             = $request->xto;
+        $model_query->km_range        = $request->km_range ?? 0;
         $model_query->tipe            = $request->tipe;
         $model_query->jenis           = $request->jenis;
         $model_query->harga           = 0;
@@ -1327,7 +1329,13 @@ class UjalanController extends Controller
       if(MyAdmin::checkScope($this->permissions, 'ujalan.val1',true) &&  $model_query->val1){
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
+
+      $uj2 = UjalanDetail2::where("id_uj",$request->id)->selectRaw("sum(amount * qty) as total")->groupBy("id_uj")->first();
+      if($uj2->total != $model_query->harga)
+      throw new \Exception("Total Tidak Cocok",1);
       
+      
+
       $SYSOLD                     = clone($model_query);
       
       if(MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && !$model_query->val){

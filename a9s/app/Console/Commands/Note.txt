@@ -36,3 +36,7 @@ Selalu cross cek dengan ascend.
 httpd.conf
 active it for SEO
 -> LoadModule deflate_module modules/mod_deflate.so
+
+
+composer require spatie/browsershot
+npm install --global puppeteer

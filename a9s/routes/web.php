@@ -191,6 +191,10 @@ Route::get('/report/ramp/get_locations', [\App\Http\Controllers\Report\RampContr
 Route::get('/report/ramp/pdf_preview', [\App\Http\Controllers\Report\RampController::class, 'pdfPreview']);
 Route::get('/report/ramp/excel_download', [\App\Http\Controllers\Report\RampController::class, 'excelDownload']);
 
+Route::get('/report/distance/pdf_preview', [\App\Http\Controllers\Report\DistanceController::class, 'pdfPreview']);
+Route::get('/report/distance/excel_download', [\App\Http\Controllers\Report\DistanceController::class, 'excelDownload']);
+
+
 Route::get('/report/ast_n_driver/load_data', [\App\Http\Controllers\Report\AstNDriverController::class, 'loadData']);
 Route::get('/report/ast_n_driver/index', [\App\Http\Controllers\Report\AstNDriverController::class, 'index']);
 Route::get('/report/ast_n_driver/pdf_preview', [\App\Http\Controllers\Report\AstNDriverController::class, 'pdfPreview']);

@@ -12,10 +12,10 @@ class UjalanDetail2 extends Model
     protected $table = 'is_ujdetails2';  
     // public $timestamps = false;
 
-    // public function warehouse()
-    // {
-    //     return $this->belongsTo(\App\Models\HrmRevisiLokasi::class, "hrm_revisi_lokasi_id", 'id');
-    // }
+    public function uj()
+    {
+        return $this->belongsTo(\App\Models\MySql\Ujalan::class, "id_uj", 'id');
+    }
 
     // public function warehouse_source()
     // {

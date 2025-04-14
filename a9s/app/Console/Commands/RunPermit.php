@@ -144,7 +144,8 @@ class RunPermit extends Command
             // ["permit"=>'trp_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_SPV']],
             // ["permit"=>'trp_trx.unval6',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             // ["permit"=>'employee.unremove',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            
+            ["permit"=>'report.distance.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF']],            
+            ["permit"=>'report.distance.views',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF']],            
 
             // tidak jadi ["permit"=>'employee.transfer_data',"to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
 
