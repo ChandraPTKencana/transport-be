@@ -1331,7 +1331,7 @@ class UjalanController extends Controller
       }
 
       $uj2 = UjalanDetail2::where("id_uj",$request->id)->selectRaw("sum(amount * qty) as total")->groupBy("id_uj")->first();
-      if($uj2->total != $model_query->harga)
+      if($uj2 && $uj2->total != $model_query->harga)
       throw new \Exception("Total Tidak Cocok",1);
       
       
