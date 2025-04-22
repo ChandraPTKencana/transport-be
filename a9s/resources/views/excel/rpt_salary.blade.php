@@ -1,6 +1,5 @@
 <table class="line borderless text-center mt-2" style="font-size: x-small;">
       <thead class="text-center" style="background-color: #B0A4A4;">
-        
       <tr>
         <th colspan="33" style="text-align: center; font-weight:bold;">
           Laporan Uang Gaji Dan Makan Standby,Uang Gaji Dan Makan Trip, Potongan, Serta Bonus Periode {{$info['periode']}}
@@ -11,6 +10,7 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">ID</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Nama Pekerja</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Jabatan</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Agama</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Tmpt Lahir</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Tgl Lahir</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">TMK</th>
@@ -61,6 +61,7 @@
           <td style="border: 1px solid black;">{{ $v["employee_id"] }}</td>
           <td style="border: 1px solid black;">{{ $v["employee_name"] }}</td>
           <td style="border: 1px solid black;">{{ $v["employee_role"] }}</td>
+          <td style="border: 1px solid black;">{{ $v["employee_religion"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_birth_place"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_birth_date"] ? date("d-m-Y",strtotime($v["employee_birth_date"])) : '' }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_tmk"] ? date("d-m-Y",strtotime($v["employee_tmk"])) : '' }}</td>
@@ -74,46 +75,46 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=N{{$loop->iteration+$row_jump}}+O{{$loop->iteration+$row_jump}}+P{{$loop->iteration+$row_jump}}+Q{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=O{{$loop->iteration+$row_jump}}+P{{$loop->iteration+$row_jump}}+Q{{$loop->iteration+$row_jump}}+R{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["kerajinan"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=S{{$loop->iteration+$row_jump}}+T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}+W{{$loop->iteration+$row_jump}}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=R{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}+W{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=S{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=Y{{$loop->iteration+$row_jump}}+Z{{$loop->iteration+$row_jump}}+AA{{$loop->iteration+$row_jump}}+AB{{$loop->iteration+$row_jump}}-AC{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=Z{{$loop->iteration+$row_jump}}+AA{{$loop->iteration+$row_jump}}+AB{{$loop->iteration+$row_jump}}+AC{{$loop->iteration+$row_jump}}-AD{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AD{{$loop->iteration+$row_jump}}-AE{{$loop->iteration+$row_jump}}-AF{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AE{{$loop->iteration+$row_jump}}-AF{{$loop->iteration+$row_jump}}-AG{{$loop->iteration+$row_jump}}</td>
         </tr>
         @endforeach
         <tr>
-          <td colspan="13" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(N4:N{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(O4:O{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(P4:P{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Q4:Q{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(R4:R{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(S4:S{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(T4:T{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(U4:U{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(V4:V{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(W4:W{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(X4:X{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Y4:Y{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Z4:Z{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AA4:AA{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AB4:AB{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AC4:AC{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AD4:AD{{ count($data) + $row_jump }}) </td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AE4:AE{{ count($data) + $row_jump }})</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AF4:AF{{ count($data) + $row_jump }}) </td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AG4:AG{{ count($data) + $row_jump }})</td>
+          <td colspan="14" style="text-align: right; border: 1px solid black; font-weight:bold;"> Grand Total</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(O{{ $row_jump + 1 }}:O{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(P{{ $row_jump + 1 }}:P{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Q{{ $row_jump + 1 }}:Q{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(R{{ $row_jump + 1 }}:R{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(S{{ $row_jump + 1 }}:S{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(T{{ $row_jump + 1 }}:T{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(U{{ $row_jump + 1 }}:U{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(V{{ $row_jump + 1 }}:V{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(W{{ $row_jump + 1 }}:W{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(X{{ $row_jump + 1 }}:X{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Y{{ $row_jump + 1 }}:Y{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(Z{{ $row_jump + 1 }}:Z{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AA{{ $row_jump + 1 }}:AA{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AB{{ $row_jump + 1 }}:AB{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AC{{ $row_jump + 1 }}:AC{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AD{{ $row_jump + 1 }}:AD{{ count($data) + $row_jump }}) </td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AE{{ $row_jump + 1 }}:AE{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AF{{ $row_jump + 1 }}:AF{{ count($data) + $row_jump }}) </td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AG{{ $row_jump + 1 }}:AG{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AH{{ $row_jump + 1 }}:AH{{ count($data) + $row_jump }})</td>
         </tr>
       </tbody>
     </table>

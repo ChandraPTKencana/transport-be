@@ -21,6 +21,7 @@ class RptSalaryDtlResource extends JsonResource
             'employee_id'               => $this->employee_id,
             'employee_name'             => $this->employee_name,
             'employee_role'             => $this->employee_role,
+            'employee_religion'         => $this->employee_religion,
             'employee_birth_place'      => $this->employee_birth_place,
             'employee_birth_date'       => $this->employee_birth_date,
             'employee_tmk'              => $this->employee_tmk,
