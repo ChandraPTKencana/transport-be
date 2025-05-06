@@ -1173,9 +1173,9 @@ class RptSalaryController extends Controller
               "TBSK"=>0,
               "LAIN"=>0,
             ];
-          }else{
-            $data[$v->supir_id][$v->jenis] += 1;
           }
+          $data[$v->supir_id][$v->jenis] += 1;
+          
         }
 
         if($v->kernet_id){
@@ -1187,9 +1187,8 @@ class RptSalaryController extends Controller
               "TBSK"=>0,
               "LAIN"=>0,
             ];
-          }else{
-            $data[$v->kernet_id][$v->jenis] += 1;
           }
+          $data[$v->kernet_id][$v->jenis] += 1;
         }
       }
 
