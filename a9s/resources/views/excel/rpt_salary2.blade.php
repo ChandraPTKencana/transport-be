@@ -86,7 +86,7 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AC{{$loop->iteration+$row_jump}}-AD{{$loop->iteration+$row_jump}}-AE{{$loop->iteration+$row_jump}}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">={{ $v["total_trip"] }}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">={{ $v["trip_cpo"]+$v["trip_pk"]+$v["trip_tbs"]+$v["trip_tbsk"]+$v["trip_lain"] }}</td>
         </tr>
         @endforeach
         <tr>

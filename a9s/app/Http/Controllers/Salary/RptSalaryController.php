@@ -1165,19 +1165,30 @@ class RptSalaryController extends Controller
       foreach ($tt as $k => $v) {
        
         if($v->supir_id){
-
           if(!isset($data[$v->supir_id])){
-            $data[$v->supir_id] = 1;
+            $data[$v->supir_id] = [
+              "CPO"=>0,
+              "PK"=>0,
+              "TBS"=>0,
+              "TBSK"=>0,
+              "LAIN"=>0,
+            ];
           }else{
-            $data[$v->supir_id] += 1;
+            $data[$v->supir_id][$v->jenis] += 1;
           }
         }
 
         if($v->kernet_id){
           if(!isset($data[$v->kernet_id])){
-            $data[$v->kernet_id] = 1;
+            $data[$v->kernet_id] =[
+              "CPO"=>0,
+              "PK"=>0,
+              "TBS"=>0,
+              "TBSK"=>0,
+              "LAIN"=>0,
+            ];
           }else{
-            $data[$v->kernet_id] += 1;
+            $data[$v->kernet_id][$v->jenis] += 1;
           }
         }
       }
@@ -1185,7 +1196,13 @@ class RptSalaryController extends Controller
       // MyLog::logging(json_encode($data),"jsonencode");
 
       foreach ($data as $key => $value) {
-        RptSalaryDtl::where("rpt_salary_id",$model_query->id)->where("employee_id",$key)->update(['total_trip'=>$value]);
+        RptSalaryDtl::where("rpt_salary_id",$model_query->id)->where("employee_id",$key)->update([
+          'trip_cpo'=>$value['CPO'],
+          'trip_pk'=>$value['PK'],
+          'trip_tbs'=>$value['TBS'],
+          'trip_tbsk'=>$value['TBSK'],
+          'trip_lain'=>$value['LAIN'],
+        ]);
       }
       // $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
       // array_unshift( $SYSNOTES , $SYSNOTE );            
