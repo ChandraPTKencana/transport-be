@@ -692,6 +692,7 @@ class RptSalaryController extends Controller
     ->where('created_at',">=",$smp_bulan."-01 00:00:00")
     ->where('val',1)
     ->where('deleted',0)
+    ->whereNotNull("trx_trp_id")
     ->get();
     
     foreach($pt as $v){
