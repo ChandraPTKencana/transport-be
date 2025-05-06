@@ -1181,7 +1181,7 @@ class RptSalaryController extends Controller
         }
       }
 
-      MyLog::logging(json_encode($data),"jsonencode");
+      // MyLog::logging(json_encode($data),"jsonencode");
 
       foreach ($data as $key => $value) {
         RptSalaryDtl::where("rpt_salary_id",$model_query->id)->where("employee_id",$key)->update(['total_trip'=>$value]);
