@@ -33,6 +33,7 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS JAMSOS</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Grand Total</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Trip Total</th>
         </tr>
         <tr>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
@@ -85,6 +86,7 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AC{{$loop->iteration+$row_jump}}-AD{{$loop->iteration+$row_jump}}-AE{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">={{ $v["total_trip"] }}</td>
         </tr>
         @endforeach
         <tr>
@@ -107,6 +109,7 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AD{{ $row_jump + 1 }}:AD{{ count($data) + $row_jump }}) </td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AE{{ $row_jump + 1 }}:AE{{ count($data) + $row_jump }})</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AF{{ $row_jump + 1 }}:AF{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AG{{ $row_jump + 1 }}:AG{{ count($data) + $row_jump }})</td>
         </tr>
       </tbody>
     </table>

@@ -256,6 +256,7 @@ Route::get('/rpt_salary/pdf_preview', [\App\Http\Controllers\Salary\RptSalaryCon
 Route::get('/rpt_salary/excel_download', [\App\Http\Controllers\Salary\RptSalaryController::class, 'excelDownload']);
 Route::get('/rpt_salary/excel_download2', [\App\Http\Controllers\Salary\RptSalaryController::class, 'excelDownload2']);
 Route::get('/rpt_salary/check_nilai_ascend', [\App\Http\Controllers\Salary\RptSalaryController::class, 'checkNilaiAscend']);
+Route::post('/rpt_salary/recal_trip', [\App\Http\Controllers\Salary\RptSalaryController::class, 'recalTrip']);
 
 Route::get('/salary_bonuses', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'index']);
 Route::get('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'show']);

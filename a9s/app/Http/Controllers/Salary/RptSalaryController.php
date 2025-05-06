@@ -26,7 +26,7 @@ use App\Models\MySql\RptSalaryDtl;
 use App\Models\MySql\IsUser;
 
 use App\Http\Requests\MySql\RptSalaryRequest;
-
+use App\Http\Requests\MySql\RptSalaryTripRequest;
 use App\Http\Resources\IsUserResource;
 use App\Http\Resources\MySql\RptSalaryDtlResource;
 use App\Http\Resources\MySql\RptSalaryResource;
@@ -1117,5 +1117,96 @@ class RptSalaryController extends Controller
         "message" => "Proses Data gagal",
       ], 400);
     }
+  }
+
+  public function recalTrip(RptSalaryTripRequest $request){
+    MyAdmin::checkScope($this->permissions, 'rpt_salary.modify');
+    $t_stamp = date("Y-m-d H:i:s");
+
+    DB::beginTransaction();
+    try {
+      $model_query = RptSalary::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD      = clone($model_query);
+
+      $smp_bulan = substr($model_query->period_end,0,7);
+      $data=[];
+      $tt = TrxTrp::whereNotNull("pv_id")
+      ->where("req_deleted",0)
+      ->where("deleted",0)
+      ->where('val',1)
+      ->where('val1',1)
+      ->where('val2',1)
+      ->where(function ($q) use($model_query,$smp_bulan) {
+        $q->where(function ($q1)use($model_query,$smp_bulan){
+          $q1->where("payment_method_id",1);       
+          $q1->where("received_payment",0);                  
+          $q1->where("tanggal",">=",$smp_bulan."-01");                  
+          $q1->where("tanggal","<=",$model_query->period_end);                  
+        });
+
+        $q->orWhere(function ($q1)use($model_query,$smp_bulan){
+          $q1->where("payment_method_id",2);
+          $q1->where(function ($q2)use($model_query,$smp_bulan){
+            // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
+            $q2->where(function ($q3) use($model_query,$smp_bulan) {            
+              $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
+              $q3->where("rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
+            });
+            $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
+              $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
+              $q3->where("rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
+            });
+          });                         
+        });
+      })->get();
+
+
+      foreach ($tt as $k => $v) {
+       
+        if($v->supir_id){
+
+          if(!isset($data[$v->supir_id])){
+            $data[$v->supir_id] = 1;
+          }else{
+            $data[$v->supir_id] += 1;
+          }
+        }
+
+        if($v->kernet_id){
+          if(!isset($data[$v->kernet_id])){
+            $data[$v->kernet_id] = 1;
+          }else{
+            $data[$v->kernet_id] += 1;
+          }
+        }
+      }
+
+      MyLog::logging(json_encode($data),"jsonencode");
+
+      foreach ($data as $key => $value) {
+        RptSalaryDtl::where("rpt_salary_id",$model_query->id)->where("employee_id",$key)->update(['total_trip'=>$value]);
+      }
+      // $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      // array_unshift( $SYSNOTES , $SYSNOTE );            
+      // MyLog::sys($this->syslog_db,$request->id,"update",implode("\n",$SYSNOTES));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses Recal Trip berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+
+
+      return response()->json([
+        "message" => "Proses Recal Trip gagal",
+      ], 400);
+    }
+
   }
 }
