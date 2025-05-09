@@ -32,7 +32,7 @@ class ExtraMoneyRequest extends FormRequest
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['xto']                   = 'required|min:1|max:50';
-            $rules['jenis']                 = 'required|in:CPO,TBS,PK,TBSK,LAIN';
+            $rules['jenis']                 = 'required|in:CPO,TBS,PK,TBSK,LAIN,TUNGGU';
             $rules['transition_target']     = 'nullable|max:10|in:KPN,KAS,KUS,ARP,KAP,SMP';
             if($this->filled('transition_target')){
                 $rules['transition_type']   = 'required|max:4|in:From,To';

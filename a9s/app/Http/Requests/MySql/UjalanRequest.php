@@ -33,7 +33,7 @@ class UjalanRequest extends FormRequest
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['xto'] = 'required|max:100';
             $rules['tipe'] = 'required|max:50';
-            $rules['jenis'] = 'required|in:CPO,TBS,PK,TBSK,LAIN';
+            $rules['jenis'] = 'required|in:CPO,TBS,PK,TBSK,LAIN,TUNGGU';
         }
         return $rules;
     }
