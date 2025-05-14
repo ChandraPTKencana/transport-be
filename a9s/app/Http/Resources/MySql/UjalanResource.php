@@ -24,6 +24,8 @@ class UjalanResource extends JsonResource
             'asst_opt'          => $this->asst_opt,
             'jenis'             => $this->jenis,
             'harga'             => $this->harga,
+            'bonus_trip_supir'  => $this->bonus_trip_supir,
+            'bonus_trip_kernet' => $this->bonus_trip_kernet,
             'note_for_remarks'  => $this->note_for_remarks ?? '' ,
             'transition_from'   => $this->transition_from ?? '' ,
             'created_at'        => $this->created_at,

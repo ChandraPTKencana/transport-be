@@ -93,7 +93,7 @@ class UjalanController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      $list_to_like = ["id","xto","tipe","jenis","harga","km_range"];
+      $list_to_like = ["id","xto","tipe","jenis","harga","km_range","bonus_trip_supir","bonus_trip_kernet"];
 
       // $list_to_like_user = [
       //   ["val_name","val_user"],
@@ -442,21 +442,23 @@ class UjalanController extends Controller
       // if(Ujalan::where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
       // throw new \Exception("List sudah terdaftar",1);
 
-      $model_query                  = new Ujalan();      
-      $model_query->xto             = $request->xto;
-      $model_query->km_range        = $request->km_range ?? 0;
-      $model_query->tipe            = $request->tipe;
-      $model_query->jenis           = $request->jenis;
+      $model_query                    = new Ujalan();      
+      $model_query->xto               = $request->xto;
+      $model_query->km_range          = $request->km_range ?? 0;
+      $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
+      $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+      $model_query->tipe              = $request->tipe;
+      $model_query->jenis             = $request->jenis;
       // $model_query->status          = $request->status;
-      $model_query->harga            = 0;
-      $model_query->note_for_remarks = MyLib::emptyStrToNull($request->note_for_remarks);
-      $model_query->transition_from  = $transition_from;
+      $model_query->harga             = 0;
+      $model_query->note_for_remarks  = MyLib::emptyStrToNull($request->note_for_remarks);
+      $model_query->transition_from   = $transition_from;
       
-      $model_query->created_at      = $t_stamp;
-      $model_query->created_user    = $this->admin_id;
+      $model_query->created_at        = $t_stamp;
+      $model_query->created_user      = $this->admin_id;
 
-      $model_query->updated_at      = $t_stamp;
-      $model_query->updated_user    = $this->admin_id;
+      $model_query->updated_at        = $t_stamp;
+      $model_query->updated_user      = $this->admin_id;
 
       $model_query->save();
       $rollback_id = $model_query->id - 1;
@@ -658,13 +660,15 @@ class UjalanController extends Controller
       // }
 
       if(MyAdmin::checkScope($this->permissions,'ujalan.modify',true)){
-        $model_query->xto             = $request->xto;
-        $model_query->km_range        = $request->km_range ?? 0;
-        $model_query->tipe            = $request->tipe;
-        $model_query->jenis           = $request->jenis;
-        $model_query->harga           = 0;
-        $model_query->note_for_remarks= MyLib::emptyStrToNull($request->note_for_remarks);
-        $model_query->transition_from = $transition_from;
+        $model_query->xto               = $request->xto;
+        $model_query->km_range          = $request->km_range ?? 0;
+        $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
+        $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+        $model_query->tipe              = $request->tipe;
+        $model_query->jenis             = $request->jenis;
+        $model_query->harga             = 0;
+        $model_query->note_for_remarks  = MyLib::emptyStrToNull($request->note_for_remarks);
+        $model_query->transition_from   = $transition_from;
 
         // $model_query->status          = $request->status;
     
