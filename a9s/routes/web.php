@@ -88,6 +88,7 @@ Route::get('/trx_trp/transfers', [\App\Http\Controllers\Transaction\TrxTrpTransf
 Route::put('/trx_trp/transfer', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransfer']);
 Route::get('/trx_trp/transfer/detail', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'show']);
 Route::get('/trx_trp_preview_file_bt', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFileBT']);
+Route::get('/trx_trp/manual_tf', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'generateForManual']);
 
 Route::get('/trx_trp/transfers_mandiri', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'indexMandiri']);
 Route::put('/trx_trp/transfer_mandiri', [\App\Http\Controllers\Transaction\TrxTrpTransferController::class, 'validasiAndTransferMandiri']);

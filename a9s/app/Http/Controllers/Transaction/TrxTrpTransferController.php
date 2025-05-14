@@ -748,6 +748,214 @@ class TrxTrpTransferController extends Controller
   }
 
 
+  public function generateForManual(Request $request){
+    $this->checkGATimeout();
+
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.transfer.do_transfer']);
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_querys = TrxTrp::where("deleted",0)->where("req_deleted",0)
+      ->where('payment_method_id',2)->where('received_payment',0)
+      ->where('val',1)->where('val1',1)->where('val2',1)
+      ->where('val4',1)->where('val5',1)->where('val6',1)
+      ->where(function ($q) {
+        $q->whereNotIn('jenis', ['CPO', 'PK']) // Jika bukan CPO atau PK, abaikan kondisi val3
+          ->orWhere(function ($q) {
+              $q->whereIn('jenis', ['CPO', 'PK'])
+              ->where('val3', 1); // Jika CPO atau PK, val3 harus 1
+          });
+      })
+      ->lockForUpdate()->get();
+
+      $data=[];
+      foreach ($model_querys as $key => $model_query) {
+        $dt_supir=[
+          "amount"=>0,
+          "bank_code"=>"",
+          "bank_name"=>"",
+          "bank_account_name"=>"",
+          "bank_account_number"=>"",
+          "description"=>"",
+          "email"=>"",
+          "method"=>"BI FAST",
+        ];
+        $dt_kernet=[
+          "amount"=>0,
+          "bank_code"=>"",
+          "bank_name"=>"",
+          "bank_account_name"=>"",
+          "bank_account_number"=>"",
+          "description"=>"",
+          "email"=>"",
+          "method"=>"BI FAST",
+        ];
+        
+        $supir_id   = $model_query->supir_id;
+        $kernet_id  = $model_query->kernet_id;
+        $ttl_ps     = 0;
+        $ttl_pk     = 0;
+        $supir_remarks  = "UJ#".$model_query->id;
+        $kernet_remarks = "UJ#".$model_query->id;
+
+        $supir_money = 0;
+        $kernet_money = 0;
+        foreach ($model_query->uj_details2 as $key => $val) {
+          if($val->xfor=='Kernet'){
+            $kernet_money+=$val->amount*$val->qty;
+          }else{
+            $supir_money+=$val->amount*$val->qty;
+          }
+        }
+  
+        $ptg_ps_ids = "";
+        $ptg_pk_ids = "";
+        foreach ($model_query->potongan as $k => $v) {
+          if($v->potongan_mst->employee_id == $supir_id){
+            $ttl_ps+=$v->nominal_cut;
+            $ptg_ps_ids.="#".$v->potongan_mst->id." ";
+          }
+    
+          if($v->potongan_mst->employee_id == $kernet_id){
+            $ttl_pk+=$v->nominal_cut;
+            $ptg_pk_ids.="#".$v->potongan_mst->id." ";
+          }
+        }
+        
+        $supir_money -= $ttl_ps;
+        $kernet_money -= $ttl_pk;
+  
+        $sem_remarks="";
+        $kem_remarks="";
+        foreach ($model_query->extra_money_trxs as $k => $emt) {
+          if($emt->employee_id == $supir_id){
+            $supir_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+            if($sem_remarks=="")
+              $sem_remarks="EM#".$emt->id;
+            else
+              $sem_remarks.=",".$emt->id;
+          }
+    
+          if($emt->employee_id == $kernet_id){
+            $kernet_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+            if($kem_remarks=="")
+              $kem_remarks="EM#".$emt->id;
+            else
+              $kem_remarks.=",".$emt->id;
+          }
+        }
+  
+        if($sem_remarks!="") $supir_remarks.=",".$sem_remarks;
+        if($kem_remarks!="") $kernet_remarks.=",".$kem_remarks;
+  
+        if($model_query->supir_id){
+          $supir = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($model_query->supir_id);
+          if(!$supir->bank || !$supir->bank->code_duitku)
+          throw new \Exception("Bank Belum Memiliki code duitku",1);
+  
+          if(!$supir->rek_no)
+          throw new \Exception("Supir Belum Memiliki rekening",1);
+  
+          if($supir_money==0)
+          throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi supir atau semua berisikan kernet",1);
+  
+          if($supir_money < 0)
+          throw new \Exception("Potongan Supir tidak Diterima Karna Nilai Potongan Lebih Besar Dari Uang Yang Akan Ditransfer kan",1);
+  
+        }
+  
+        if($model_query->kernet_id){
+          $kernet = Employee::exclude(['attachment_1','attachment_2'])->with('bank')->find($model_query->kernet_id);
+          if(!$kernet->bank || !$kernet->bank->code_duitku)
+          throw new \Exception("Bank Belum Memiliki code duitku",1);
+  
+          if(!$kernet->rek_no)
+          throw new \Exception("Supir Belum Memiliki rekening",1);
+  
+          if($kernet_money==0)
+          throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi kernet atau semua berisikan kernet",1);
+  
+          if($kernet_money < 0)
+          throw new \Exception("Potongan Kernet tidak Diterima Karna Nilai Potongan Lebih Besar Dari Uang Yang Akan Ditransfer kan",1);
+  
+        }
+
+
+        if(isset($supir) && $supir_money > 0){
+          $dt_supir["amount"] = $supir_money;
+          $dt_supir["bank_code"] = $supir->bank->code_duitku;
+          $dt_supir["bank_name"] = $supir->bank->code;
+          $dt_supir["bank_account_name"] = $supir->rek_name;
+          $dt_supir["bank_account_number"] = $supir->rek_no;
+          $dt_supir["description"] = $supir_remarks;
+          array_push($data,$dt_supir);
+        }
+        if(isset($kernet) && $kernet_money > 0){
+          $dt_kernet["amount"] = $kernet_money;
+          $dt_kernet["bank_code"] = $kernet->bank->code_duitku;
+          $dt_kernet["bank_name"] = $kernet->bank->code;
+          $dt_kernet["bank_account_name"] = $kernet->rek_name;
+          $dt_kernet["bank_account_number"] = $kernet->rek_no;
+          $dt_kernet["description"] = $kernet_remarks;
+          array_push($data,$dt_kernet);
+        }
+      }
+
+      $info = [
+        "now"                 => date("d-m-Y H:i:s"),
+      ];  
+  
+      DB::commit();
+
+      $date = new \DateTime();
+      $filename=env("app_name").'-manual_tf-'.$date->format("YmdHis");
+  
+      $mime=MyLib::mime("xlsx");
+  
+      $blade= 'excel.manual_tf';
+  
+      $columnFormats = [
+        // 'H' => '0',
+        // 'G' => '###############',
+        // 'G' => '₹#,##0.00',
+        // 'J' => '0',
+              // 'G' => '0',
+        // 'J' => '0',
+        // 'G' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+        // 'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
+      ];
+  
+      $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
+  
+      $result = [
+        "contentType" => $mime["contentType"],
+        "data" => $bs64,
+        "dataBase64" => $mime["dataBase64"] . $bs64,
+        "filename" => $filename . "." . $mime["ext"],
+        // "ex"=>\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT
+      ];
+      return $result;
+
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses download data gagal",
+      ], 400);
+    }
+
+  }
+
   // public function indexMandiri(Request $request, $download = false)
   // {
   //   if(!$download)
