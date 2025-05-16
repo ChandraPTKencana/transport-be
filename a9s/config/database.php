@@ -60,12 +60,12 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                PDO::ATTR_TIMEOUT => 300, // 5 menit
+                PDO::ATTR_TIMEOUT => 1000, // 5 menit
                 PDO::ATTR_PERSISTENT => true, // Koneksi persisten
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=1000, net_read_timeout=1000, net_write_timeout=1000",
             ]) : [],
-            'retries' => 3, // Jumlah percobaan ulang
-            'retry_delay' => 5, // Delay antar percobaan dalam detik
+            'retries' => 1000, // Jumlah percobaan ulang
+            'retry_delay' => 10, // Delay antar percobaan dalam detik
         ],
 
         'pgsql' => [
