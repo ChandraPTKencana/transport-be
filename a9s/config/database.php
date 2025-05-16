@@ -64,6 +64,8 @@ return [
                 PDO::ATTR_PERSISTENT => true, // Koneksi persisten
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
             ]) : [],
+            'retries' => 3, // Jumlah percobaan ulang
+            'retry_delay' => 5, // Delay antar percobaan dalam detik
         ],
 
         'pgsql' => [
