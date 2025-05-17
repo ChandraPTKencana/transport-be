@@ -42,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
                     $maxAttempts = 100;
                     $attempt = 0;
                     $delayMs = 200;
+                    MyLog::logging("In DB Query ".$query, "retry_report");
+
     
                     while ($attempt < $maxAttempts) {
                         try {
