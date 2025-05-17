@@ -6,7 +6,7 @@ use App\Helpers\MyLog;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\MySqlConnection;
-use Illuminate\Database\Connectors\ConnectionFactory;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -26,19 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        MyLog::logging("In1 bootx","retry_report");
         DB::resolverFor('mysql', function ($connection, $database, $prefix, $config) {
-            MyLog::logging("bIn getPdo","retry_report");
-            // $pdo = DB::connection($connection)->getPdo();
-            // $pdo = app('db.factory')->make($config)->getPdo();
-            // $pdo = app(ConnectionFactory::class)->make($config)->getPdo();
-            $pdo = new \PDO(
-                "mysql:host={$config['host']};dbname={$database};port={$config['port']}",
-                $config['username'],
-                $config['password'],
-                $config['options'] ?? []
-            );
-            MyLog::logging("aIn getPdo","retry_report");
+            $pdo = DB::connection($connection)->getPdo();
 
             return new class($pdo, $database, $prefix, $config) extends MySqlConnection {
                 public function run($query, $bindings, \Closure $callback)
