@@ -16,14 +16,11 @@ class MyAdmin
     if ($token == "") {
       throw new MyException(["message" => "Get user info cannot complete, please restart the apps"], 400);
     }
-    try{
-      $model_query = \App\Models\MySql\Session::where("token", $token)->first();
-      MyLog::logging($model_query,"myadmin");
-      if (!$model_query) {
-        throw new MyException(["message" => "Unauthenticate"], 401);
-      }
-    }catch(\Exception $e){
-      MyLog::logging($e->getMessage(),"myadmin");
+
+    $model_query = \App\Models\MySql\Session::where("token", $token)->first();
+    MyLog::logging($model_query,"myadmin");
+    if (!$model_query) {
+      throw new MyException(["message" => "Unauthenticate"], 401);
     }
     if ($model_query->the_user->is_active == 0) {
       throw new MyException(["message" => "Izin Masuk Tidak Diberikan"], 403);
