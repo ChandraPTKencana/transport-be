@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
             return new class($pdo, $database, $prefix, $config) extends MySqlConnection {
                 public function run($query, $bindings, \Closure $callback)
                 {
+                    MyLog::logging("In DB Query","retry_report");
                     $maxAttempts = 3;
                     $attempt = 0;
                     $delayMs = 200;
