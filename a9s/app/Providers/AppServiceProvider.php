@@ -26,45 +26,50 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        MyLog::logging("In2 boot", "retry_report");
-    
-        DB::extend('mysql', function ($config, $name) {
-            MyLog::logging("Custom mysql connection resolver called", "retry_report");
-    
-            $factory = app(\Illuminate\Database\Connectors\ConnectionFactory::class);
-            $connection = $factory->make($config, $name);
-    
-            $pdo = $connection->getPdo();
-    
-            return new class($pdo, $config['database'], $config['prefix'] ?? '', $config) extends MySqlConnection {
+        MyLog::logging("In1 bootx","retry_report");
+        DB::resolverFor('mysql', function ($connection, $database, $prefix, $config) {
+            MyLog::logging("bIn getPdo","retry_report");
+            // $pdo = DB::connection($connection)->getPdo();
+            // $pdo = app('db.factory')->make($config)->getPdo();
+            // $pdo = app(ConnectionFactory::class)->make($config)->getPdo();
+            $pdo = new \PDO(
+                "mysql:host={$config['host']};dbname={$database};port={$config['port']}",
+                $config['username'],
+                $config['password'],
+                $config['options'] ?? []
+            );
+            MyLog::logging("aIn getPdo","retry_report");
+
+            return new class($pdo, $database, $prefix, $config) extends MySqlConnection {
                 public function run($query, $bindings, \Closure $callback)
-                {    
-                    $maxAttempts = 100;
+                {
+                    MyLog::logging("In DB Query","retry_report");
+                    $maxAttempts = 3;
                     $attempt = 0;
                     $delayMs = 200;
-    
+
                     while ($attempt < $maxAttempts) {
                         try {
                             return parent::run($query, $bindings, $callback);
                         } catch (\Exception $e) {
+                            // Bisa disesuaikan hanya untuk error tertentu
+                            $isRetryable = $this->shouldRetry($e);
                             $attempt++;
 
-                            MyLog::logging("Retry DB Query [$attempt]: " . $e->getMessage(), "retry_report");
-    
-                            if (!$this->shouldRetry($e) || $attempt >= $maxAttempts) {
+                            if (!$isRetryable || $attempt >= $maxAttempts) {
                                 throw $e;
                             }
-    
-    
-                            usleep($delayMs * 1000);
+                            MyLog::logging("Retry DB Query [$attempt]: " . $e->getMessage(),"retry_report");
+                            usleep($delayMs * 1000); // delay dalam mikrodetik
                         }
                     }
                 }
-    
+
                 private function shouldRetry(\Exception $e): bool
                 {
+                    // Bisa dibuat lebih canggih, misalnya hanya jika koneksi terputus
                     $message = $e->getMessage();
-    
+
                     return str_contains($message, 'server has gone away')
                         || str_contains($message, 'Connection refused')
                         || str_contains($message, 'Connection timed out')
