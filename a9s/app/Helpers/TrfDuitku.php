@@ -20,6 +20,15 @@ class TrfDuitku {
         $email      = env("DK_E");
         $timestamp  = round(microtime(true) * 1000);
 
+        $all = [
+            "userId"=>$userId,
+            "secretKey"=>$secretKey,
+            "email"=>$email,
+            "timestamp"=>$timestamp,
+        ];
+
+        MyLog::logging(json_encode($all),"linkduitku");
+
         // $bankCode          = '014'; 
         // $bankAccount       = '8760673466';
         // $amountTransfer    =  12000; 
