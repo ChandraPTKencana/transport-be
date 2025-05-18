@@ -26,11 +26,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->bind('session.store', function ($app) {
-            return $app->make('cache')->driver()->store(
-                $app['config']['session.cookie']
-            );
-        });
+        // $this->app->bind('session.store', function ($app) {
+        //     return $app->make('cache')->driver()->store(
+        //         $app['config']['session.cookie']
+        //     );
+        // });
 
         MyLog::logging("In2 boot", "retry_report");
     
