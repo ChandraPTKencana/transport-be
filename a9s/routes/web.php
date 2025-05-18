@@ -17,6 +17,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+Route::get('/clear_cookies', [\App\Http\Controllers\CookieController::class, 'clear']);
 // Route::get('/testmap', function () {
 //     return view('map');
 // });
