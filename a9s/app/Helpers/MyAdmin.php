@@ -20,7 +20,7 @@ class MyAdmin
     $model_query = \App\Models\MySql\Session::where("token", $token)->first();
     MyLog::logging($model_query,"myadmin");
     if (!$model_query) {
-      throw new MyException(["message" => "Unauthenticate"], 401);
+      throw new MyException(["message" => "Unauthenticate ad"], 401);
     }
     if ($model_query->the_user->is_active == 0) {
       throw new MyException(["message" => "Izin Masuk Tidak Diberikan"], 403);
