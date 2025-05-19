@@ -32,10 +32,10 @@ class AppServiceProvider extends ServiceProvider
         //     );
         // });
 
-        MyLog::logging("In2 boot", "retry_report");
+        MyLog::logging(env("APP_NAME")."In2 boot", "retry_report");
     
         DB::extend('mysql', function ($config, $name) {
-            MyLog::logging("Custom mysql connection resolver called", "retry_report");
+            MyLog::logging(env("APP_NAME")."Custom mysql connection resolver called", "retry_report");
     
             $factory = app(\Illuminate\Database\Connectors\ConnectionFactory::class);
             $connection = $factory->make($config, $name);
@@ -48,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
                     $maxAttempts = 100;
                     $attempt = 0;
                     $delayMs = 200;
-                    MyLog::logging("In DB Query ".$query, "retry_report");
+                    MyLog::logging(env("APP_NAME")."In DB Query ".$query, "retry_report");
 
     
                     while ($attempt < $maxAttempts) {
@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
                         } catch (\Exception $e) {
                             $attempt++;
 
-                            MyLog::logging("Retry DB Query [$attempt]: " . $e->getMessage(), "retry_report");
+                            MyLog::logging(env("APP_NAME")."Retry DB Query [$attempt]: " . $e->getMessage(), "retry_report");
     
                             if (!$this->shouldRetry($e) || $attempt >= $maxAttempts) {
                                 throw $e;
