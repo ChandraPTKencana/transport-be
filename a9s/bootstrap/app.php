@@ -52,4 +52,7 @@ $app->singleton(
 |
 */
 
+$app->useEnvironmentPath(__DIR__.'/../');
+$app->loadEnvironmentFrom('.env');
+
 return $app;
