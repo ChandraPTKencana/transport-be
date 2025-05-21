@@ -148,8 +148,12 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', true),
+            'options' => [
+                'TrustServerCertificate' => true,
+                // Optional: 'Encrypt' => true,
+            ],
         ],
         'KAS' => [
             'driver' => 'sqlsrv',
@@ -162,8 +166,12 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', true),
+            'options' => [
+                'TrustServerCertificate' => true,
+                // Optional: 'Encrypt' => true,
+            ],
         ],
         'KUS' => [
             'driver' => 'sqlsrv',
@@ -176,8 +184,12 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', true),
+            'options' => [
+                'TrustServerCertificate' => true,
+                // Optional: 'Encrypt' => true,
+            ],
         ],
         'ARP' => [
             'driver' => 'sqlsrv',
@@ -190,9 +202,12 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
-        ],
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', true),
+            'options' => [
+                'TrustServerCertificate' => true,
+                // Optional: 'Encrypt' => true,
+            ],        ],
         'KAP' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL_SVR'),
@@ -204,8 +219,12 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', true),
+            'options' => [
+                'TrustServerCertificate' => true,
+                // Optional: 'Encrypt' => true,
+            ],
         ],
         'SMP' => [
             'driver' => 'sqlsrv',
@@ -218,8 +237,12 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+            'encrypt' => env('DB_ENCRYPT', 'yes'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', true),
+            'options' => [
+                'TrustServerCertificate' => true,
+                // Optional: 'Encrypt' => true,
+            ],
         ],
 
     ],
