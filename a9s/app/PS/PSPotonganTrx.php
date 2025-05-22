@@ -59,11 +59,11 @@ class PSPotonganTrx
         ->lockForUpdate()
         ->first();
 
-        if($trx_trp->supir_id == $employee->id && $supir_money_to_tf - $potongan_mst->nominal_cut < MyLib::$min_transfer)
-        throw new \Exception("Dana Untuk Transfer Kesupir Minimal 10.000",1);
+        // if($trx_trp->supir_id == $employee->id && $supir_money_to_tf - $potongan_mst->nominal_cut < MyLib::$min_transfer)
+        // throw new \Exception("Dana Untuk Transfer Kesupir Minimal 10.000",1);
 
-        if($trx_trp->kernet_id == $employee->id && $kernet_money_to_tf - $potongan_mst->nominal_cut < MyLib::$min_transfer)
-        throw new \Exception("Dana Untuk Transfer Kekernet Minimal 10.000",1);
+        // if($trx_trp->kernet_id == $employee->id && $kernet_money_to_tf - $potongan_mst->nominal_cut < MyLib::$min_transfer)
+        // throw new \Exception("Dana Untuk Transfer Kekernet Minimal 10.000",1);
 
       }
 
