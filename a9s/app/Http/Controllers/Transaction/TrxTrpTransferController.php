@@ -344,9 +344,11 @@ class TrxTrpTransferController extends Controller
       $q->where('val5',1)->orWhere('val6',1);
     })->where('received_payment',0);
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
-    }])->get();
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj',
+    // 'trx_absens'=>function($q) {
+    //   $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
+    // }
+    ])->get();
 
 
     foreach ($model_query as $key => $mq) {
@@ -372,9 +374,11 @@ class TrxTrpTransferController extends Controller
     'val_ticket_by','deleted_by','req_deleted_by','payment_method',
     'uj_details','potongan','uj','extra_money_trxs'=>function ($q){
       $q->with(['employee','extra_money']);
-    },'trx_absens'=>function($q) {
-      $q->select('*')->where("status","B");
-    }])->find($request->id);
+    }
+    // ,'trx_absens'=>function($q) {
+    //   $q->select('*')->where("status","B");
+    // }
+    ])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),
     ], 200);
