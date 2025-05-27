@@ -1580,7 +1580,7 @@ class StandbyTrxController extends Controller
           // $this->validateItems($details_in);
 
           foreach ($details_in as $key => $value) {
-            StandbyTrxDtl::where("standby_trx_id",$model_query->id)
+            StandbyTrxDtl::exclude(["attachment_1"])->where("standby_trx_id",$model_query->id)
             ->where("ordinal",$value['ordinal'])
             ->update([
               "be_paid"=>$value['be_paid']
