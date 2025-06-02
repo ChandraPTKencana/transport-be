@@ -1,7 +1,7 @@
 <table class="line borderless text-center mt-2" style="font-size: x-small;">
       <thead class="text-center" style="background-color: #B0A4A4;">   
       <tr>
-        <th colspan="31" style="text-align: center; font-weight:bold;">
+        <th colspan="41" style="text-align: center; font-weight:bold;">
           Laporan Uang Gaji Dan Makan Standby,Uang Gaji Dan Makan Trip, Potongan, Serta Bonus Periode {{$info['periode']}}
         </th>
       </tr>
@@ -27,13 +27,15 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 1+2</th>
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip</th>
+          <th colspan="4" style="border: 1px solid black; font-weight:bold;">Trip Lain</th>
+          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip Tunggu</th>
+          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Bonus Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Total</th>
           <!-- <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Lain</th> -->
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS JAMSOS</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Grand Total</th>
-          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Trip Total</th>
         </tr>
         <tr>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
@@ -45,13 +47,27 @@
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Makan</th>
           <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
         </tr>
       </thead>
       <tbody>
         @foreach($data as $k=>$v)
         @php
-        $ktp_no=mb_strtoupper("'".$v["employee_ktp_no"],'UTF-8');
-        $row_jump = 3;
+          $ktp_no=mb_strtoupper("'".$v["employee_ktp_no"],'UTF-8');
+          $row_jump = 3;
+
+          $bonus_jumlah = $v["trip_cpo"]+$v["trip_pk"]+$v["trip_tbs"]+$v["trip_tbsk"];
+          $bonus_gaji = $v["trip_cpo_bonus_gaji"]+$v["trip_pk_bonus_gaji"]+$v["trip_tbs_bonus_gaji"]+$v["trip_tbsk_bonus_gaji"];
+          $bonus_dinas = $v["trip_cpo_bonus_dinas"]+$v["trip_pk_bonus_dinas"]+$v["trip_tbs_bonus_dinas"]+$v["trip_tbsk_bonus_dinas"];
         @endphp
         <tr>
           <td style="border: 1px solid black;">{{$loop->iteration}}</td>
@@ -81,12 +97,23 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=X{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}+Z{{$loop->iteration+$row_jump}}+AA{{$loop->iteration+$row_jump}}-AB{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_lain"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_lain_gaji"] }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_lain_makan"] }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_lain_dinas"] }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu_gaji"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu_dinas"] }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_jumlah }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_gaji }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_dinas }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td> 
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=X{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}+Z{{$loop->iteration+$row_jump}}+AA{{$loop->iteration+$row_jump}}+AC{{$loop->iteration+$row_jump}}+AD{{$loop->iteration+$row_jump}}+AE{{$loop->iteration+$row_jump}}
+          +AG{{$loop->iteration+$row_jump}}+AH{{$loop->iteration+$row_jump}}+AJ{{$loop->iteration+$row_jump}}+AK{{$loop->iteration+$row_jump}}-AL{{$loop->iteration+$row_jump}}
+          </td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AC{{$loop->iteration+$row_jump}}-AD{{$loop->iteration+$row_jump}}-AE{{$loop->iteration+$row_jump}}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">={{ $v["trip_cpo"]+$v["trip_pk"]+$v["trip_tbs"]+$v["trip_tbsk"]+$v["trip_lain"] }}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AM{{$loop->iteration+$row_jump}}-AN{{$loop->iteration+$row_jump}}-AO{{$loop->iteration+$row_jump}}</td>
         </tr>
         @endforeach
         <tr>
@@ -110,6 +137,15 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AE{{ $row_jump + 1 }}:AE{{ count($data) + $row_jump }})</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AF{{ $row_jump + 1 }}:AF{{ count($data) + $row_jump }})</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AG{{ $row_jump + 1 }}:AG{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AH{{ $row_jump + 1 }}:AH{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AI{{ $row_jump + 1 }}:AI{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AJ{{ $row_jump + 1 }}:AJ{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AK{{ $row_jump + 1 }}:AK{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AL{{ $row_jump + 1 }}:AL{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AM{{ $row_jump + 1 }}:AM{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AN{{ $row_jump + 1 }}:AN{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AO{{ $row_jump + 1 }}:AO{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AP{{ $row_jump + 1 }}:AP{{ count($data) + $row_jump }})</td>
         </tr>
       </tbody>
     </table>

@@ -48,8 +48,27 @@ class RptSalaryDtlResource extends JsonResource
 
             'nominal_cut'               => $this->nominal_cut,
             'salary_bonus_nominal'      => $this->salary_bonus_nominal,
-            'salary_bonus_nominal_2'      => $this->salary_bonus_nominal_2,
+            'salary_bonus_nominal_2'    => $this->salary_bonus_nominal_2,
             'kerajinan'                 => $this->kerajinan,
+            'trip_cpo'                  => $this->trip_cpo,
+            'trip_cpo_bonus_gaji'       => $this->trip_cpo_bonus_gaji,
+            'trip_cpo_bonus_dinas'      => $this->trip_cpo_bonus_dinas,
+            'trip_pk'                   => $this->trip_pk,
+            'trip_pk_bonus_gaji'        => $this->trip_pk_bonus_gaji,
+            'trip_pk_bonus_dinas'       => $this->trip_pk_bonus_dinas,
+            'trip_tbs'                  => $this->trip_tbs,
+            'trip_tbs_bonus_gaji'       => $this->trip_tbs_bonus_gaji,
+            'trip_tbs_bonus_dinas'      => $this->trip_tbs_bonus_dinas,
+            'trip_tbsk'                 => $this->trip_tbsk,
+            'trip_tbsk_bonus_gaji'      => $this->trip_tbsk_bonus_gaji,
+            'trip_tbsk_bonus_dinas'     => $this->trip_tbsk_bonus_dinas,
+            'trip_lain'                 => $this->trip_lain,
+            'trip_lain_gaji'            => $this->trip_lain_gaji,
+            'trip_lain_makan'           => $this->trip_lain_makan,
+            'trip_lain_dinas'           => $this->trip_lain_dinas,
+            'trip_tunggu'               => $this->trip_tunggu,
+            'trip_tunggu_gaji'          => $this->trip_tunggu_gaji,
+            'trip_tunggu_dinas'         => $this->trip_tunggu_dinas,
         ];
     }
 }
