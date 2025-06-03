@@ -27,13 +27,14 @@
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">U.Kerajinan</th>
+          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Bonus Trip</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Penyesuaian Bonus Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 1+2</th>
 
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip</th>
           <th colspan="4" style="border: 1px solid black; font-weight:bold;">Trip Lain</th>
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Trip Tunggu</th>
-          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Bonus Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Total</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">BPJS Kesehatan</th>
@@ -42,6 +43,9 @@
         </tr>
 
         <tr>
+          <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Makan</th>
           <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
@@ -54,9 +58,6 @@
           <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Makan</th>
-          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
-          <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
-          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
           <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
@@ -98,8 +99,12 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["salary_bonus_nominal_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["kerajinan"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}+W{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=S{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_jumlah }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_gaji }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_dinas }}</td> 
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $salary_bonus_bonus_trip }}</td> 
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}+W{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}+Z{{$loop->iteration+$row_jump}}+AA{{$loop->iteration+$row_jump}}-AB{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=S{{$loop->iteration+$row_jump}}+AC{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
@@ -110,15 +115,11 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu"] }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu_gaji"] }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu_dinas"] }}</td> 
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_jumlah }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_gaji }}</td> 
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_dinas }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td> 
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=Z{{$loop->iteration+$row_jump}}+AA{{$loop->iteration+$row_jump}}+AB{{$loop->iteration+$row_jump}}+AC{{$loop->iteration+$row_jump}}
-          +AE{{$loop->iteration+$row_jump}}+AF{{$loop->iteration+$row_jump}}+AG{{$loop->iteration+$row_jump}}+AI{{$loop->iteration+$row_jump}}+AJ{{$loop->iteration+$row_jump}}+AL{{$loop->iteration+$row_jump}}+AM{{$loop->iteration+$row_jump}}-AN{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AE{{$loop->iteration+$row_jump}}+AF{{$loop->iteration+$row_jump}}+AG{{$loop->iteration+$row_jump}}+AI{{$loop->iteration+$row_jump}}+AJ{{$loop->iteration+$row_jump}}+AK{{$loop->iteration+$row_jump}}+AM{{$loop->iteration+$row_jump}}+AN{{$loop->iteration+$row_jump}}-AO{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AO{{$loop->iteration+$row_jump}}-AP{{$loop->iteration+$row_jump}}-AQ{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AP{{$loop->iteration+$row_jump}}-AQ{{$loop->iteration+$row_jump}}-AR{{$loop->iteration+$row_jump}}</td>
         </tr>
         @endforeach
         <tr>
@@ -153,6 +154,7 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AP{{ $row_jump + 1 }}:AP{{ count($data) + $row_jump }})</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AQ{{ $row_jump + 1 }}:AQ{{ count($data) + $row_jump }})</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AR{{ $row_jump + 1 }}:AR{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AS{{ $row_jump + 1 }}:AS{{ count($data) + $row_jump }})</td>
         </tr>
       </tbody>
     </table>

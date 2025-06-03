@@ -959,17 +959,22 @@ class RptSalaryController extends Controller
       }
 
       $v['kerajinan'] = 0;
+      $v['salary_bonus_bonus_trip'] = 0;
       $salbon = SalaryBonus::exclude(['attachment_1'])->where('tanggal',"<=",$model_query->period_end)
       ->where('val2',1)->whereNull('salary_paid_id')->where('deleted',0)
-      ->where("type","Kerajinan")
+      ->whereIn("type",["Kerajinan","BonusTrip"])
       ->where("employee_id",$v["employee_id"])
       ->lockForUpdate()->get();
 
       
       foreach ($salbon as $ksb => $vsb) {
         $SYSOLD                     = clone($vsb);
-        $v["kerajinan"] += $vsb->nominal;
-
+        
+        if($vsb->type=="Kerajinan"){
+          $v["kerajinan"] += $vsb->nominal;
+        }elseif ($vsb->type=="BonusTrip") {
+          $v["salary_bonus_bonus_trip"] += $vsb->nominal;
+        }
         $vsb->salary_paid_id = $salary_paid[1]->id;
         $vsb->save();
         $SYSNOTE = MyLib::compareChange($SYSOLD,$vsb); 
@@ -988,7 +993,14 @@ class RptSalaryController extends Controller
         !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 
         $v["sb_gaji_2"]==0 && $v["sb_makan_2"]==0 && $v["sb_dinas_2"]==0 && 
         $v["uj_gaji"]==0 && $v["uj_makan"]==0 && $v["uj_dinas"]==0 && 
-        $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0 && $v["salary_bonus_nominal_2"]==0 && $v["kerajinan"]==0) 
+        $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0 && $v["salary_bonus_nominal_2"]==0 &&
+        $v["trip_cpo"]==0 && $v["trip_cpo_bonus_gaji"]==0 && $v["trip_cpo_bonus_dinas"]==0 &&
+        $v["trip_pk"]==0 && $v["trip_pk_bonus_gaji"]==0 && $v["trip_pk_bonus_dinas"]==0 &&
+        $v["trip_tbs"]==0 && $v["trip_tbs_bonus_gaji"]==0 && $v["trip_tbs_bonus_dinas"]==0 &&
+        $v["trip_tbsk"]==0 && $v["trip_tbsk_bonus_gaji"]==0 && $v["trip_tbsk_bonus_dinas"]==0 &&
+        $v["trip_lain"]==0 && $v["trip_lain_gaji"]==0 && $v["trip_lain_makan"]==0 && $v["trip_lain_dinas"]==0 &&
+        $v["trip_tunggu"]==0 && $v["trip_tunggu_gaji"]==0 && $v["trip_tunggu_dinas"]==0 &&
+        $v["kerajinan"]==0 && $v["salary_bonus_bonus_trip"]==0) 
         ) RptSalaryDtl::insert($v);
     }
 
@@ -1111,6 +1123,17 @@ class RptSalaryController extends Controller
       $data[$k]["sb_makan_2"] = $sm2;
       $data[$k]["sb_dinas_2"] = $sd2;
 
+      $data[$k]["bonus_gaji"]    = $data[$k]["trip_cpo_bonus_gaji"]+$data[$k]["trip_pk_bonus_gaji"]+$data[$k]["trip_tbs_bonus_gaji"]+$data[$k]["trip_tbsk_bonus_gaji"];
+      $data[$k]["bonus_dinas"]    = $data[$k]["trip_cpo_bonus_dinas"]+$data[$k]["trip_pk_bonus_dinas"]+$data[$k]["trip_tbs_bonus_dinas"]+$data[$k]["trip_tbsk_bonus_dinas"];
+
+      $sbbt = $data[$k]["salary_bonus_bonus_trip"];
+
+      $data[$k]["bonus_gaji"]+=$sbbt;
+      if($data[$k]["bonus_gaji"]<0){
+        $sbbt=$data[$k]["bonus_gaji"];
+        $data[$k]["bonus_gaji"]=0;
+        $data[$k]["bonus_dinas"]+=$sbbt;
+      }
     }
     
 
