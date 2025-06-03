@@ -93,7 +93,7 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $bonus_jumlah }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["bonus_gaji"] }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["bonus_dinas"] }}</td> 
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =S{{$loop->iteration+$row_jump}}+T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}+W{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =S{{$loop->iteration+$row_jump}}+T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =R{{$loop->iteration+$row_jump}}+Z{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
