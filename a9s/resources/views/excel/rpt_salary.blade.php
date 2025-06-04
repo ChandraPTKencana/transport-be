@@ -43,14 +43,14 @@
         </tr>
 
         <tr>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
+          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
+          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
           <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
-          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
-          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
-          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
-          <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
-          <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
-          <th style="border: 1px solid black; font-weight:bold;">Makan</th>
           <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Makan</th>
