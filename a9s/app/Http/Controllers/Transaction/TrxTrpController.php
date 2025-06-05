@@ -2406,6 +2406,143 @@ class TrxTrpController extends Controller
 
   }
 
+  public function validasis(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5','trp_trx.val6']);
+
+    $ids = json_decode($request->ids, true);
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
+      $valList = [];
+      $SYSNOTES = [];
+      foreach ($model_querys as $key => $v) {
+        $SYSOLD                     = clone($v);
+        $hadChange = 0;
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val',true) && !$v->val){
+          $v->val = 1;
+          $v->val_user = $this->admin_id;
+          $v->val_at = $t_stamp;
+          $hadChange++;
+        }
+  
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$v->val1){
+          $this->permit_continue_trx($v);
+          $v->val1 = 1;
+          $v->val1_user = $this->admin_id;
+          $v->val1_at = $t_stamp;
+          $hadChange++;
+        }
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val2',true) && !$v->val2){
+          $v->val2 = 1;
+          $v->val2_user = $this->admin_id;
+          $v->val2_at = $t_stamp;
+          $hadChange++;
+        }
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val3',true) && !$v->val3){
+          $v->val3 = 1;
+          $v->val3_user = $this->admin_id;
+          $v->val3_at = $t_stamp;
+          $hadChange++;
+        }
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val4',true) && !$v->val4){
+          $v->val4 = 1;
+          $v->val4_user = $this->admin_id;
+          $v->val4_at = $t_stamp;
+          $hadChange++;
+        }
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val5',true) && !$v->val5){
+          if($v->val4==0)
+          throw new \Exception("Data Perlu Divalidasi oleh Staff Logistik terlebih dahulu",1);
+          $v->val5 = 1;
+          $v->val5_user = $this->admin_id;
+          $v->val5_at = $t_stamp;
+          $hadChange++;
+        }
+  
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.val6',true) && !$v->val6){
+          if($v->val5==0)
+          throw new \Exception("Data Perlu Divalidasi oleh SPV Logistik terlebih dahulu",1);
+          $v->val6 = 1;
+          $v->val6_user = $this->admin_id;
+          $v->val6_at = $t_stamp;
+          $hadChange++;
+        }
+
+        if($hadChange>0){
+          $v->updated_user = $this->admin_id;
+          $v->updated_at = $t_stamp;
+
+          $v->save();
+          array_push($valList,[
+            "id"=>$v->id,
+            "val"=>$v->val,
+            "val_user"=>$v->val_user,
+            "val_at"=>$v->val_at,
+            "val_by"=>$v->val_user ? new IsUserResource(IsUser::find($v->val_user)) : null,
+            "val1"=>$v->val1,
+            "val1_user"=>$v->val1_user,
+            "val1_at"=>$v->val1_at,
+            "val1_by"=>$v->val1_user ? new IsUserResource(IsUser::find($v->val1_user)) : null,
+            "val2"=>$v->val2,
+            "val2_user"=>$v->val2_user,
+            "val2_at"=>$v->val2_at,
+            "val2_by"=>$v->val2_user ? new IsUserResource(IsUser::find($v->val2_user)) : null,
+            "val3"=>$v->val3,
+            "val3_user"=>$v->val3_user,
+            "val3_at"=>$v->val3_at,
+            "val3_by"=>$v->val3_user ? new IsUserResource(IsUser::find($v->val3_user)) : null,
+            "val4"=>$v->val4,
+            "val4_user"=>$v->val4_user,
+            "val4_at"=>$v->val4_at,
+            "val4_by"=>$v->val4_user ? new IsUserResource(IsUser::find($v->val4_user)) : null,
+            "val5"=>$v->val5,
+            "val5_user"=>$v->val5_user,
+            "val5_at"=>$v->val5_at,
+            "val5_by"=>$v->val5_user ? new IsUserResource(IsUser::find($v->val5_user)) : null,
+            "val6"=>$v->val6,
+            "val6_user"=>$v->val6_user,
+            "val6_at"=>$v->val6_at,
+            "val6_by"=>$v->val6_user ? new IsUserResource(IsUser::find($v->val6_user)) : null,
+            "updated_at"=>$v->updated_at,
+          ]);
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+          array_push($SYSNOTES,$SYSNOTE);
+        }
+      }
+
+      MyLog::sys($this->syslog_db,null,"validasis",implode(",",$SYSNOTES));
+
+      $nids = array_map(function($x) {
+        return $x['id'];        
+      },$valList);
+
+      // MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val_lists"=>$valList
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses validasi data gagal",
+      ], 400);
+    }
+
+  }
+
   public function valTickets(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 

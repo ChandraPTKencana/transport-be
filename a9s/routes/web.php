@@ -103,6 +103,7 @@ Route::put('/trx_trp_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketCon
 Route::get('/trx_trps/ticket_over', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'ticketOver']);
 Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'doUpdateTicket']);
 
+Route::put('/trx_trp_validasis', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'validasis']);
 
 // Route::get('/trx_trps_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
 Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFile']);
