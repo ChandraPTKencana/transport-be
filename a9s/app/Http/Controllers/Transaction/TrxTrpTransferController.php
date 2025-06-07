@@ -783,8 +783,8 @@ class TrxTrpTransferController extends Controller
           "bank_account_number"=>"",
           "description"=>"",
           "email"=>"",
-          "method"=>"REALTIME",
-          // "method"=>"BI FAST",
+          // "method"=>"REALTIME",
+          "method"=>"BI FAST",
         ];
         $dt_kernet=[
           "amount"=>0,
@@ -794,8 +794,8 @@ class TrxTrpTransferController extends Controller
           "bank_account_number"=>"",
           "description"=>"",
           "email"=>"",
-          "method"=>"REALTIME",
-          // "method"=>"BI FAST",
+          // "method"=>"REALTIME",
+          "method"=>"BI FAST",
         ];
         
         $supir_id   = $model_query->supir_id;
