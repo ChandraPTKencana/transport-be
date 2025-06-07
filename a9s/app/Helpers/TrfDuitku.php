@@ -12,7 +12,8 @@ class TrfDuitku {
     // private static $secretKey = '26c52e376ebe13a216175e8c2998de582b984d2c765a0f5f7700765ce6208653';
     // private static $email = 'miausion@gmail.com';
     // private static $type = 'BIFAST';
-    private static $type = 'RTGS';
+    // private static $type = 'RTGS';
+    private static $type = 'H2H';
 
 
     public static function generate_invoice($bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){
