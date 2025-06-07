@@ -24,7 +24,7 @@
           <td style="border: 1px solid black;">{{ $bank_account_number }}</td>
           <td style="border: 1px solid black;">{{ $v["description"] }}</td>
           <td style="border: 1px solid black;"></td>
-          <td style="border: 1px solid black;">BI FAST</td>
+          <td style="border: 1px solid black;">REALTIME</td>
         </tr>
         @endforeach
       </tbody>
