@@ -13,7 +13,7 @@ class TrfDuitku {
     // private static $email = 'miausion@gmail.com';
     // private static $type = 'BIFAST';
     // private static $type = 'RTGS';
-    private static $type = 'H2H';
+    private static $type = 'REALTIME';
 
 
     public static function generate_invoice($bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){

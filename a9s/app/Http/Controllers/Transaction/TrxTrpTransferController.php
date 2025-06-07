@@ -783,7 +783,7 @@ class TrxTrpTransferController extends Controller
           "bank_account_number"=>"",
           "description"=>"",
           "email"=>"",
-          "method"=>"H2H",
+          "method"=>"REALTIME",
           // "method"=>"BI FAST",
         ];
         $dt_kernet=[
@@ -794,7 +794,7 @@ class TrxTrpTransferController extends Controller
           "bank_account_number"=>"",
           "description"=>"",
           "email"=>"",
-          "method"=>"H2H",
+          "method"=>"REALTIME",
           // "method"=>"BI FAST",
         ];
         
