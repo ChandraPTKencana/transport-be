@@ -784,8 +784,7 @@ class TrxTrpTransferController extends Controller
           "description"=>"",
           "email"=>"",
           // "method"=>"REALTIME",
-          // "method"=>"BI FAST",
-          "method"=>"Transfer Online",
+          "method"=>"BI FAST",
         ];
         $dt_kernet=[
           "amount"=>0,
@@ -796,8 +795,7 @@ class TrxTrpTransferController extends Controller
           "description"=>"",
           "email"=>"",
           // "method"=>"REALTIME",
-          // "method"=>"BI FAST",
-          "method"=>"Transfer Online",
+          "method"=>"BI FAST",
         ];
         
         $supir_id   = $model_query->supir_id;

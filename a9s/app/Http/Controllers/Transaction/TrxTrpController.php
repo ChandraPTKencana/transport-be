@@ -2935,8 +2935,8 @@ class TrxTrpController extends Controller
 
     // Admin Cost & Variable
     if($trx_trp->payment_method->id==2){
-      // $adm_cost = 2500;
-      $adm_cost = 5000;
+      $adm_cost = 2500;
+      // $adm_cost = 5000;
       $adm_qty = ($supir && $kernet) ? 2 : 1;
 
       $amount_paid += ($adm_cost * $adm_qty);
