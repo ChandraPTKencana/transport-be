@@ -83,6 +83,65 @@ class TrfDuitku {
 
     // }
 
+    // public static function generate_transfer($disburseId,$bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){
+    //     $userId     = env("DK_I");
+    //     $secretKey  = env("DK_S");
+    //     $email      = env("DK_E");
+    //     $accountName    = '';
+    //     $timestamp      = round(microtime(true) * 1000);
+    //     $paramSignature = $email . $timestamp . $bankCode . self::$type . $bankAccount . $accountName . $custRefNumber . $amountTransfer . $purpose . $disburseId . $secretKey; 
+
+    //     $signature = hash('sha256', $paramSignature);
+
+    //     $params = array(
+    //         'disburseId' => $disburseId,
+    //         'userId'         => $userId,
+    //         'email'          => $email,
+    //         'bankCode'       => $bankCode,
+    //         'bankAccount'    => $bankAccount,
+    //         'amountTransfer' => $amountTransfer,
+    //         'accountName'    => $accountName,
+    //         'custRefNumber'  => $custRefNumber,
+    //         'type'           => self::$type,
+    //         'purpose'        => $purpose,
+    //         'timestamp'      => $timestamp,
+    //         'signature'      => $signature
+    //     );
+
+    //     $params_string = json_encode($params);
+    //     $url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
+    //     // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/transferclearingsandbox';
+    
+    //     $ch = curl_init();
+
+    //     curl_setopt($ch, CURLOPT_URL, $url); 
+    //     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
+    //     curl_setopt($ch, CURLOPT_POSTFIELDS, $params_string);                                                                  
+    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);                                                                      
+    //     curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+    //         'Content-Type: application/json',                                                                                
+    //         'Content-Length: ' . strlen($params_string))                                                                       
+    //     );   
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+    //     //execute post
+    //     $request = curl_exec($ch);
+    //     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    //     $result = [];
+
+    //     if($httpCode == 200)
+    //     {
+    //         $result = json_decode($request, true);
+                     
+    //         if($result['responseCode']=="-142" || trim($result['responseDesc'])=="In Progress"){
+    //             $result['responseCode']=="00";
+    //         }
+    //     }
+
+    //     return $result;
+
+    // }
+
     public static function generate_invoice($bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){
         $userId     = env("DK_I");
         $secretKey  = env("DK_S");
@@ -154,7 +213,7 @@ class TrfDuitku {
         $signature = hash('sha256', $paramSignature);
 
         $params = array(
-            'disburseId' => $disburseId,
+            'disburseId'     => $disburseId,
             'userId'         => $userId,
             'email'          => $email,
             'bankCode'       => $bankCode,
@@ -169,7 +228,8 @@ class TrfDuitku {
         );
 
         $params_string = json_encode($params);
-        $url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
+        $url = 'http://192.168.99.246/duitku/duitkuTransfer.php';
+        // $url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
         // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/transferclearingsandbox';
     
         $ch = curl_init();
@@ -185,20 +245,23 @@ class TrfDuitku {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 
         //execute post
-        $request = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $result = [];
+        $response = curl_exec($ch);
+        // $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $apiResponse = json_decode($response, true);
+        return $apiResponse;
 
-        if($httpCode == 200)
-        {
-            $result = json_decode($request, true);
+        // $result = [];
+
+        // if($httpCode == 200)
+        // {
+        //     $result = json_decode($request, true);
                      
-            if($result['responseCode']=="-142" || trim($result['responseDesc'])=="In Progress"){
-                $result['responseCode']=="00";
-            }
-        }
+        //     if($result['responseCode']=="-142" || trim($result['responseDesc'])=="In Progress"){
+        //         $result['responseCode']=="00";
+        //     }
+        // }
 
-        return $result;
+        // return $result;
 
     }
 
