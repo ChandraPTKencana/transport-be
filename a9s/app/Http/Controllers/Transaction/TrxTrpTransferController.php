@@ -581,7 +581,7 @@ class TrxTrpTransferController extends Controller
         }
       }
 
-      if(isset($kernet) && $kernet_money > 0){
+      if(isset($kernet) && $kernet_money > 0 && $model_query->duitku_supir_trf_res_code=="00"){
         if(!$model_query->duitku_kernet_disburseId){
           $result = TrfDuitku::generate_invoice($kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,$kernet_remarks);
           if($result){
