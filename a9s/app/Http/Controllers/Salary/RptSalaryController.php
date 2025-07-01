@@ -653,9 +653,6 @@ class RptSalaryController extends Controller
 
         $search = array_search($v->supir_id,$map_s);
 
-        if($v->supir_id==1084)
-        MyLog::logging(["supir id"=>$v->supir_id,"gaji"=>$uj_gaji_s],"gajian06");
-
         if(count($data)==0 || $search===false){
 
           $emp = $v->employee_s;
