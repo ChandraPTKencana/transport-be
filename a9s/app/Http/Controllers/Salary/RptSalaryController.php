@@ -644,14 +644,6 @@ class RptSalaryController extends Controller
         }
       }
 
-      if($v->kernet_id==1120){
-        MyLog::logging([
-          "kernet_id"=>1120,
-          "kernet_ug"=>$uj_gaji_k,
-          "trip"=>$v->id,
-        ],"reportcheck");
-      }
-
 
       if($v->supir_id){
 
@@ -786,6 +778,15 @@ class RptSalaryController extends Controller
 
         $search = array_search($v->kernet_id,$map_k);
 
+        if($v->kernet_id==1120){
+          MyLog::logging([
+            "data"=>"Raw",
+            "kernet_id"=>1120,
+            "kernet_ug"=>$uj_gaji_k,
+            "trip"=>$v->id,
+          ],"reportcheck");
+        }
+
         if(count($data)==0 || $search===false){
           $emp = $v->employee_k;
           $newData = $temp;
@@ -846,6 +847,16 @@ class RptSalaryController extends Controller
           }
 
           array_push($data,$newData);
+
+          if($v->kernet_id==1120){
+            MyLog::logging([
+              "data"=>"new",
+              "kernet_id"=>1120,
+              "kernet_ug"=>$uj_gaji_k,
+              "trip"=>$v->id,
+              "export"=>$newData
+            ],"reportcheck");
+          }
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
           $data[$search]['uj_gaji']+=$uj_gaji_k;
@@ -899,6 +910,16 @@ class RptSalaryController extends Controller
             $data[$search]["trip_lain"]+=1;
           }elseif ($smd->jenis=='TUNGGU') {
             $data[$search]["trip_tunggu"]+=1;
+          }
+
+          if($v->kernet_id==1120){
+            MyLog::logging([
+              "data"=>"add",
+              "kernet_id"=>1120,
+              "kernet_ug"=>$uj_gaji_k,
+              "trip"=>$v->id,
+              "export"=>$data[$search]
+            ],"reportcheck");
           }
         }
       }
