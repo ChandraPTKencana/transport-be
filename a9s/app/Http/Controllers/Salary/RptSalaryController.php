@@ -644,6 +644,14 @@ class RptSalaryController extends Controller
         }
       }
 
+      if($v->kernet_id==1120){
+        MyLog::logging([
+          "kernet_id"=>1120,
+          "kernet_ug"=>$uj_gaji_k,
+          "trip"=>$v->id,
+        ],"reportcheck");
+      }
+
 
       if($v->supir_id){
 
