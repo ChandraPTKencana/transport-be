@@ -284,6 +284,7 @@ Route::get('/extra_money_load_local', [\App\Http\Controllers\ExtraMoney\ExtraMon
 Route::get('/extra_money_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyController::class, 'loadSqlSrv']);
 
 Route::get('/extra_money_trxs', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'index']);
+Route::get('/extra_money_trxs/reportExcel', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'reportExcel']);
 Route::get('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'show']);
 Route::post('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'store']);
 Route::put('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'update']);

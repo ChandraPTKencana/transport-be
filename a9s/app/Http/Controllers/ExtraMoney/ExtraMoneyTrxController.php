@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\File;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
 
+use Maatwebsite\Excel\Facades\Excel;
+
 use App\Exceptions\MyException;
 use Exception;
 
@@ -32,6 +34,9 @@ use App\Http\Resources\MySql\ExtraMoneyTrxResource;
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\ExtraMoney;
 use App\Models\MySql\TrxTrp;
+
+use App\Exports\MyReport;
+
 
 class ExtraMoneyTrxController extends Controller
 {
@@ -1066,6 +1071,57 @@ class ExtraMoneyTrxController extends Controller
     return $result;
   }
 
+  public function reportExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'extra_money_trx.views');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      // $value['amount']=$value["amount"];
+      // $value['pv_total']=$value["pv_total"];
+      $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
+      $value['created_at']=$value["created_at"] ? date("d-m-Y H:i:s",strtotime($value["created_at"])) : "";
+      $value['updated_at']=$value["updated_at"] ? date("d-m-Y H:i:s",strtotime($value["updated_at"])) : "";
+      
+      $value["xto"] = $value["extra_money"]["xto"];
+      $value["jenis"] = $value["extra_money"]["jenis"];
+      $value["transition_target"] = $value["extra_money"]["transition_target"];
+      $value["transition_type"] = $value["extra_money"]["transition_type"];
+      $value["nominal"] = $value["extra_money"]["nominal"];
+      $value["qty"] = $value["extra_money"]["qty"];
+      $value["description"] = $value["extra_money"]["description"];
+      $value["amount"] = $value["nominal"] * $value["qty"];
+      array_push($newDetails,$value);
+    }
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+    $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-extra_money_trx'."[".$date_from."_".$date_to."]";
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.extra_money_trxs'), $mime["exportType"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
 
   // public function previewFiles(Request $request){
 
