@@ -168,7 +168,8 @@ class TrfDuitku {
         );
 
         $params_string = json_encode($params);
-        $url = 'http://192.168.99.246/duitku/duitkuInvoice.php';
+        $url = 'http://192.168.120.247/duitku/duitkuInvoice.php';
+        // $url = 'http://192.168.99.246/duitku/duitkuInvoice.php';
         // $url = 'https://passport.duitku.com/webapi/api/disbursement/inquiryclearing';
         // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/inquiryclearingsandbox';
         $ch = curl_init();
@@ -228,7 +229,8 @@ class TrfDuitku {
         );
 
         $params_string = json_encode($params);
-        $url = 'http://192.168.99.246/duitku/duitkuTransfer.php';
+        $url = 'http://192.168.120.247/duitku/duitkuTransfer.php';
+        // $url = 'http://192.168.99.246/duitku/duitkuTransfer.php';
         // $url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
         // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/transferclearingsandbox';
     
