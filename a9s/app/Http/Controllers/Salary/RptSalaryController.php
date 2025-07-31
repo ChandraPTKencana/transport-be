@@ -464,6 +464,11 @@ class RptSalaryController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
+      MyLog::logging([
+          "getCode" => $e->getCode(),
+          "line" => $e->getLine(),
+          "message" => $e->getMessage(),
+      ],"check_err");
       // return response()->json([
       //   "getCode" => $e->getCode(),
       //   "line" => $e->getLine(),
