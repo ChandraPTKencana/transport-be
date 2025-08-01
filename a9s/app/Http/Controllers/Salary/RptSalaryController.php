@@ -349,7 +349,7 @@ class RptSalaryController extends Controller
         $q->select("id");
         $q->from('salary_paid');
         $q->where('period_end',$model_query->period_end);
-      })->where("type","Kerajinan")->lockForUpdate()->update(['salary_paid_id'=>null]);
+      })->whereIn("type",["Kerajinan","BonusTrip"])->lockForUpdate()->update(['salary_paid_id'=>null]);
 
       array_push( $SYSNOTES ,"Change rpt_salary_id field in standby trx and salary bonus to ".$model_query->id." and insert new Details \n");
       $this->reInsertDetails($model_query);
