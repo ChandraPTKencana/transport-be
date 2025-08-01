@@ -27,8 +27,7 @@
           <th colspan="3" style="border: 1px solid black; font-weight:bold;">Standby 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">U.Kerajinan</th>
-          <th colspan="3" style="border: 1px solid black; font-weight:bold;">Bonus Trip</th>
-          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Penyesuaian Bonus Trip</th>
+          <th colspan="4" style="border: 1px solid black; font-weight:bold;">Bonus Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 2</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 1+2</th>
 
@@ -52,6 +51,7 @@
           <th style="border: 1px solid black; font-weight:bold;">Jmlh</th>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
+          <th style="border: 1px solid black; font-weight:bold;">Potongan</th>
           <th style="border: 1px solid black; font-weight:bold;">Gaji</th>
           <th style="border: 1px solid black; font-weight:bold;">Makan</th>
           <th style="border: 1px solid black; font-weight:bold;">Dinas</th>
@@ -119,7 +119,7 @@
           <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AE{{$loop->iteration+$row_jump}}+AF{{$loop->iteration+$row_jump}}+AG{{$loop->iteration+$row_jump}}+AI{{$loop->iteration+$row_jump}}+AJ{{$loop->iteration+$row_jump}}+AK{{$loop->iteration+$row_jump}}+AM{{$loop->iteration+$row_jump}}+AN{{$loop->iteration+$row_jump}}-AO{{$loop->iteration+$row_jump}}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AP{{$loop->iteration+$row_jump}}-AQ{{$loop->iteration+$row_jump}}-AR{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AD{{$loop->iteration+$row_jump}} + AP{{$loop->iteration+$row_jump}}-AQ{{$loop->iteration+$row_jump}}-AR{{$loop->iteration+$row_jump}}</td>
         </tr>
         @endforeach
         <tr>

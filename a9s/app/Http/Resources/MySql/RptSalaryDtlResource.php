@@ -69,6 +69,7 @@ class RptSalaryDtlResource extends JsonResource
             'trip_tunggu'               => $this->trip_tunggu,
             'trip_tunggu_gaji'          => $this->trip_tunggu_gaji,
             'trip_tunggu_dinas'         => $this->trip_tunggu_dinas,
+            'salary_bonus_bonus_trip'   => $this->salary_bonus_bonus_trip,
         ];
     }
 }

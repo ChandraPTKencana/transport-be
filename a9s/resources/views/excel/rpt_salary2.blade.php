@@ -111,7 +111,7 @@
           </td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AM{{$loop->iteration+$row_jump}}-AN{{$loop->iteration+$row_jump}}-AO{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AA{{$loop->iteration+$row_jump}} + AM{{$loop->iteration+$row_jump}}-AN{{$loop->iteration+$row_jump}}-AO{{$loop->iteration+$row_jump}}</td>
         </tr>
         @endforeach
         <tr>
