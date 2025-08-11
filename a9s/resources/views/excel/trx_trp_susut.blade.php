@@ -8,6 +8,7 @@
       <th rowspan="2" style="border: 1px solid black;">No Pol</th>
       <th rowspan="2" style="border: 1px solid black;">Jenis</th>
       <th rowspan="2" style="border: 1px solid black;">Tujuan</th>
+      <th rowspan="2" style="border: 1px solid black;">Tipe</th>
 
       <th rowspan="2" style="border: 1px solid black;">Berangkat</th>
       <th rowspan="2" style="border: 1px solid black;">Kembali</th>
@@ -41,6 +42,7 @@
       <td>{{ $v["no_pol"] }}</td>
       <td>{{ $v["jenis"] }}</td>
       <td>{{ $v["xto"] }}</td>
+      <td>{{ $v["tipe"] }}</td>
 
       <td>{{ $v["ticket_a_out_at"] }}</td>
       <td>{{ $v["ticket_b_in_at"] }}</td>
