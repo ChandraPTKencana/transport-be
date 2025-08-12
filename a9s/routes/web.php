@@ -72,6 +72,7 @@ Route::get('/trx_trp/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxT
 Route::post('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'store']);
 Route::put('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'update']);
 Route::put('/trx_trp/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'mandorGetVerifySet']);
+Route::get('/trx_trp/report_raw_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportRawExcel']);
 
 Route::delete('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete']);
 Route::delete('/trx_trp_req_delete', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reqDelete']);
