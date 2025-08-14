@@ -23,9 +23,15 @@ use App\Models\MySql\IsUser;
 
 use App\Http\Requests\MySql\UjalanRequest;
 
+use Barryvdh\DomPDF\Facade\PDF;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\File;
+
 use App\Http\Resources\IsUserResource;
 use App\Http\Resources\MySql\UjalanResource;
 use App\Models\MySql\TrxTrp;
+
+use App\Exports\MyReport;
 
 class UjalanController extends Controller
 {
@@ -1462,5 +1468,28 @@ class UjalanController extends Controller
       ], 400);
     }
 
+  }
+
+  public function downloadExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'ujalan.download_file');
+
+    set_time_limit(0);
+    
+    $ujalan = Ujalan::where("id",$request->id)->with(['details','details2'])->first();
+    
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-ujalan_master'.'(#'.$request->id.')';
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$ujalan],'excel.ujalan_master'), $mime["exportType"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
   }
 }
