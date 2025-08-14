@@ -47,7 +47,7 @@ class UjalanController extends Controller
 
   }
 
-  public function index(Request $request)
+  public function index(Request $request,$download = false)
   {
     MyAdmin::checkScope($this->permissions, 'ujalan.views');
  
@@ -213,6 +213,10 @@ class UjalanController extends Controller
       $model_query = $model_query->where("deleted",0);
     }
 
+    if($download){
+      $model_query = $model_query->with(['details','details2']);
+    }
+    
     $model_query = $model_query->with(['val_by','val1_by','deleted_by'])->get();
 
     return response()->json([
@@ -1475,14 +1479,34 @@ class UjalanController extends Controller
 
     set_time_limit(0);
     
-    $ujalan = Ujalan::where("id",$request->id)->with(['details','details2'])->first();
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
     
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+      array_push($newDetails,$value);
+    }
+
+    // $filter_model = json_decode($request->filter_model,true);
+    // $tanggal = $filter_model['tanggal'];    
+
+
+    // $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    // $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
     $date = new \DateTime();
-    $filename=$date->format("YmdHis").'-ujalan_master'.'(#'.$request->id.')';
+    $filename=$date->format("YmdHis").'-ujalan_master';
+
+
+    // $date = new \DateTime();
+    // $filename=$date->format("YmdHis").'-ujalan_master'.'(#'.$request->id.')';
 
     $mime=MyLib::mime("xlsx");
     // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$ujalan],'excel.ujalan_master'), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.ujalan_master'), $mime["exportType"]));
 
     $result = [
       "contentType" => $mime["contentType"],
