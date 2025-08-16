@@ -1654,8 +1654,8 @@ class ExtraMoneyTrxController extends Controller
     $amount_paid = $extra_money->nominal * $extra_money->qty; // call from child
 
     if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==2){
-      $adm_cost = 2500;
-      // $adm_cost = 5000;
+      // $adm_cost = 2500;
+      $adm_cost = 5000;
       $adm_qty = 1;
 
       $amount_paid += ($adm_cost * $adm_qty);
