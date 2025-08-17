@@ -14,7 +14,6 @@
       <tbody>
         @foreach($data as $k=>$v)
         @php
-          $amount=mb_strtoupper("'".$v["amount"],'UTF-8');
           $bank_account_number=mb_strtoupper("'".$v["bank_account_number"],'UTF-8');
         @endphp
         <tr>
