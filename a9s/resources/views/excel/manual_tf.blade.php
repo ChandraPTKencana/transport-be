@@ -17,7 +17,7 @@
           $bank_account_number=mb_strtoupper("'".$v["bank_account_number"],'UTF-8');
         @endphp
         <tr>
-          <td style="border: 1px solid black;">{{ $amount }}</td>
+          <td style="border: 1px solid black;">{{ $v["amount"] }}</td>
           <td style="border: 1px solid black;">{{ $v["bank_code"] }}</td>
           <td style="border: 1px solid black;">{{ $v["bank_name"] }}</td>
           <td style="border: 1px solid black;">{{ $v["bank_account_name"] }}</td>
