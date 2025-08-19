@@ -193,6 +193,8 @@ Route::put('/standby_trx_validasi', [\App\Http\Controllers\Standby\StandbyTrxCon
 Route::put('/standby_trx_unvalidasi', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'unvalidasi']);
 Route::post('/standby_trx_do_gen_pvr', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doGenPVR']);
 Route::post('/standby_trx_do_update_pv', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doUpdatePV']);
+Route::get('/standby_trx/download_excel', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'downloadExcel']);
+
 
 Route::get('/report/ramp/get_locations', [\App\Http\Controllers\Report\RampController::class, 'getLocations']);
 Route::get('/report/ramp/pdf_preview', [\App\Http\Controllers\Report\RampController::class, 'pdfPreview']);

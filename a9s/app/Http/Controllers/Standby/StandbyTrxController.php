@@ -31,6 +31,9 @@ use App\Http\Resources\MySql\StandbyTrxResource;
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\TrxTrp;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\MyReport;
+
 class StandbyTrxController extends Controller
 {
   private $admin;
@@ -278,6 +281,10 @@ class StandbyTrxController extends Controller
 
     if($filter_status=="req_deleted"){
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
+    }
+    
+    if($download){
+      $model_query = $model_query->with(['standby_mst']);
     }
 
     $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','salary_paid','details'=>function($q) {
@@ -1725,6 +1732,49 @@ class StandbyTrxController extends Controller
 
   }
 
+
+  public function downloadExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'standby_trx.download_file');
+
+    set_time_limit(0);
+    
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+      array_push($newDetails,$value);
+    }
+
+    // $filter_model = json_decode($request->filter_model,true);
+    // $tanggal = $filter_model['tanggal'];    
+
+
+    // $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    // $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-standby_trx';
+
+
+    // $date = new \DateTime();
+    // $filename=$date->format("YmdHis").'-ujalan_master'.'(#'.$request->id.')';
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.standby_trx'), $mime["exportType"]));
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
   // public function doGenPVR(Request $request){
   //   MyAdmin::checkScope($this->permissions, 'standby_trx.generate_pvr');
   //   $rules = [
