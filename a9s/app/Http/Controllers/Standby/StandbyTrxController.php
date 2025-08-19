@@ -1746,6 +1746,13 @@ class StandbyTrxController extends Controller
     $newDetails = [];
 
     foreach ($ori["data"] as $key => $value) {
+
+      $be_paid = array_filter($value['details'],function($x){
+        return $x['be_paid']==1;
+      });
+
+      $value['details_count']=count($be_paid);
+
       array_push($newDetails,$value);
     }
 

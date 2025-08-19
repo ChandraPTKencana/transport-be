@@ -101,6 +101,7 @@ Route::put('/trx_trp/gen_csv_mandiri', [\App\Http\Controllers\Transaction\TrxTrp
 
 
 Route::get('/trx_trp_tickets', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'index']);
+Route::get('/trx_trp_tickets/download_excel', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'downloadExcel']);
 Route::put('/trx_trp_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'updateTicket']);
 Route::get('/trx_trps/ticket_over', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'ticketOver']);
 Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'doUpdateTicket']);
