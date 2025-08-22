@@ -145,13 +145,17 @@ class TrfDuitku {
 
     // }
 
-    public static function generate_invoice($bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){
+    public static function generate_invoice($bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose='',$payment_method_id){
         $userId     = env("DK_I");
         $secretKey  = env("DK_S");
         $email      = env("DK_E");
         $timestamp  = round(microtime(true) * 1000);
 
-        $paramSignature    = $email . $timestamp . $bankCode . self::$type . $bankAccount . $amountTransfer . $purpose . $secretKey; 
+        if($payment_method_id==2){
+            $paramSignature    = $email . $timestamp . $bankCode . self::$type . $bankAccount . $amountTransfer . $purpose . $secretKey; 
+        }else if($payment_method_id==3){
+            $paramSignature    = $email . $timestamp . $bankCode . $bankAccount . $amountTransfer . $purpose . $secretKey; 
+        }
 
         $signature = hash('sha256', $paramSignature);
 
@@ -172,7 +176,11 @@ class TrfDuitku {
 
         $params_string = json_encode($params);
         // $url = 'http://192.168.120.247/duitku/duitkuInvoice.php';
-        $url = 'http://192.168.99.246/duitku/duitkuInvoice.php';
+        if($payment_method_id==2){
+            $url = 'http://192.168.99.246/duitku/duitkuInvoiceClearing.php';
+        }else if($payment_method_id==3){
+            $url = 'http://192.168.99.246/duitku/duitkuInvoice.php';
+        }
         // $url = 'https://passport.duitku.com/webapi/api/disbursement/inquiryclearing';
         // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/inquiryclearingsandbox';
         $ch = curl_init();
@@ -206,13 +214,18 @@ class TrfDuitku {
         // ];
     }
 
-    public static function generate_transfer($disburseId,$bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose=''){
+    public static function generate_transfer($disburseId,$bankCode,$bankAccount,$amountTransfer,$custRefNumber,$purpose='',$payment_method_id){
         $userId     = env("DK_I");
         $secretKey  = env("DK_S");
         $email      = env("DK_E");
         $accountName    = '';
         $timestamp      = round(microtime(true) * 1000);
-        $paramSignature = $email . $timestamp . $bankCode . self::$type . $bankAccount . $accountName . $custRefNumber . $amountTransfer . $purpose . $disburseId . $secretKey; 
+
+        if($payment_method_id==2){
+            $paramSignature = $email . $timestamp . $bankCode . self::$type . $bankAccount . $accountName . $custRefNumber . $amountTransfer . $purpose . $disburseId . $secretKey; 
+        }else if($payment_method_id==3){
+            $paramSignature = $email . $timestamp . $bankCode . $bankAccount . $accountName . $custRefNumber . $amountTransfer . $purpose . $disburseId . $secretKey; 
+        }
 
         $signature = hash('sha256', $paramSignature);
 
@@ -233,7 +246,12 @@ class TrfDuitku {
 
         $params_string = json_encode($params);
         // $url = 'http://192.168.120.247/duitku/duitkuTransfer.php';
-        $url = 'http://192.168.99.246/duitku/duitkuTransfer.php';
+        if($payment_method_id==2){
+            $url = 'http://192.168.99.246/duitku/duitkuTransferClearing.php';
+        }else if($payment_method_id==3){
+            $url = 'http://192.168.99.246/duitku/duitkuTransfer.php';
+        }
+
         // $url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
         // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/transferclearingsandbox';
     

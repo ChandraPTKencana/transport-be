@@ -322,7 +322,7 @@ class ExtraMoneyTrxTransferController extends Controller
 
     $filter_status = $request->filter_status;
     
-    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val1',1)->where('val2',1)->where('val3',1)->where('received_payment',0)->whereNull('trx_trp_id');
+    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3])->where('val1',1)->where('val2',1)->where('val3',1)->where('received_payment',0)->whereNull('trx_trp_id');
 
     $model_query = $model_query->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method','extra_money','employee'])->get();
 
@@ -419,7 +419,7 @@ class ExtraMoneyTrxTransferController extends Controller
 
       if(isset($employee) && $employee_money > 0){
         if(!$model_query->duitku_employee_disburseId){
-          $result = TrfDuitku::generate_invoice($employee->bank->code_duitku,$employee->rek_no,$employee_money,"EM#".$model_query->id);
+          $result = TrfDuitku::generate_invoice($employee->bank->code_duitku,$employee->rek_no,$employee_money,"EM#".$model_query->id,'',$model_query->payment_method_id);
           if($result){
             $model_query->duitku_employee_disburseId   = $result['disburseId'];
             $model_query->duitku_employee_inv_res_code = $result['responseCode'];
@@ -429,7 +429,7 @@ class ExtraMoneyTrxTransferController extends Controller
         }
         
         if($model_query->duitku_employee_disburseId && $model_query->duitku_employee_inv_res_code == "00" && $model_query->duitku_employee_trf_res_code!="00"){
-          $result = TrfDuitku::generate_transfer($model_query->duitku_employee_disburseId,$employee->bank->code_duitku,$employee->rek_no,$employee_money,"EM#".$model_query->id);
+          $result = TrfDuitku::generate_transfer($model_query->duitku_employee_disburseId,$employee->bank->code_duitku,$employee->rek_no,$employee_money,"EM#".$model_query->id,'',$model_query->payment_method_id);
           if($result){
             $model_query->duitku_employee_trf_res_code = $result['responseCode'];
             $model_query->duitku_employee_trf_res_desc = $result['responseDesc'];

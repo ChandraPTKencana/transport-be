@@ -127,15 +127,20 @@ class RunData extends Command
         //     }
         // }
 
-        $rpts = \App\Models\MySql\RptSalaryDtl::get();
+        // $rpts = \App\Models\MySql\RptSalaryDtl::get();
 
-        foreach ($rpts as $k => $v) {
-            $emp = \App\Models\MySql\Employee::selectRaw("id,name,rek_name")->where("id",$v->employee_id)->first();
-            \App\Models\MySql\RptSalaryDtl::where("employee_id",$v->employee_id)->update([
-                "employee_rek_name"=>$emp->rek_name
-            ]);
-            $this->info($v->id."-".$emp->id."-".$emp->rek_name."-".$v->employee_id."-".$v->employee_name."\n ");
-        }
+        // foreach ($rpts as $k => $v) {
+        //     $emp = \App\Models\MySql\Employee::selectRaw("id,name,rek_name")->where("id",$v->employee_id)->first();
+        //     \App\Models\MySql\RptSalaryDtl::where("employee_id",$v->employee_id)->update([
+        //         "employee_rek_name"=>$emp->rek_name
+        //     ]);
+        //     $this->info($v->id."-".$emp->id."-".$emp->rek_name."-".$v->employee_id."-".$v->employee_name."\n ");
+        // }
+
+        $pm = new \App\Models\MySql\PaymentMethod();
+        $pm->name = 'TRANSFER-DUITKU-5000';
+        $pm->account_code = '01.100.013';
+        $pm->save();
         
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");

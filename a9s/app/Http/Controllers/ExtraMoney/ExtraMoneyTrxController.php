@@ -343,7 +343,7 @@ class ExtraMoneyTrxController extends Controller
       if(!$employee)
       throw new \Exception("Pekerja tidak terdaftar",1);
 
-      if($request->payment_method_id == 2){
+      if(in_array($request->payment_method_id,[2,3])){
         if(!$employee->rek_no && $employee->id != 1)
         throw new \Exception("Tidak ada no rekening pekerja",1);
       }
@@ -545,7 +545,7 @@ class ExtraMoneyTrxController extends Controller
         if(!$employee)
         throw new \Exception("Pekerja tidak terdaftar",1);
   
-        if($request->payment_method_id == 2){
+        if(in_array($request->payment_method_id,[2,3])){
           if(!$employee->rek_no && $employee->id != 1)
           throw new \Exception("Tidak ada no rekening pekerja",1);
         }
@@ -1528,7 +1528,7 @@ class ExtraMoneyTrxController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->where("payment_method_id",2);
+          $q1->whereIn("payment_method_id",[2,3]);
           $q1->where("received_payment",1);                 
         });
       })->get();
@@ -1661,6 +1661,14 @@ class ExtraMoneyTrxController extends Controller
       $amount_paid += ($adm_cost * $adm_qty);
     }
 
+    if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==3){
+      // $adm_cost = 2500;
+      $adm_cost = 5000;
+      $adm_qty = 1;
+
+      $amount_paid += ($adm_cost * $adm_qty);
+    }
+
     $exclude_in_ARAP = 0;
     $login_name = $this->admin->the_user->username;
     $expense_or_revenue_type_id=0;
@@ -1764,7 +1772,7 @@ class ExtraMoneyTrxController extends Controller
       // }
     }
 
-    if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==2){
+    if($extra_money_trx->duitku_employee_disburseId && in_array($extra_money_trx->payment_method->id,[2,3])){
       $admin_cost_code=env("PVR_ADMIN_COST");
   
       $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
@@ -1881,7 +1889,7 @@ class ExtraMoneyTrxController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->where("payment_method_id",2);
+          $q1->whereIn("payment_method_id",[2,3]);
           $q1->where("received_payment",1);                 
         });
       })->get();      

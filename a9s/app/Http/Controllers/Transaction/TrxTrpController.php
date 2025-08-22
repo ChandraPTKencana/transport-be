@@ -558,7 +558,7 @@ class TrxTrpController extends Controller
       if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
-      if($request->payment_method_id == 2){
+      if(in_array($request->payment_method_id , [2,3])){
         if(!$supir_dt->rek_no && $supir_dt->id != 1)
         throw new \Exception("Tidak ada no rekening supir",1);
 
@@ -686,7 +686,7 @@ class TrxTrpController extends Controller
       if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
-      if($request->payment_method_id == 2){
+      if(in_array($request->payment_method_id ,[2,3])){
         if(!$supir_dt->rek_no && $supir_dt->id != 1)
         throw new \Exception("Tidak ada no rekening supir",1);
 
@@ -2853,7 +2853,7 @@ class TrxTrpController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->where("payment_method_id",2);
+          $q1->whereIn("payment_method_id",[2,3]);
           $q1->where("received_payment",1);                 
         });
       })->get();      
@@ -3011,6 +3011,14 @@ class TrxTrpController extends Controller
       $amount_paid += ($adm_cost * $adm_qty);
     }
 
+    if($trx_trp->payment_method->id==3){
+      // $adm_cost = 2500;
+      $adm_cost = 5000;
+      $adm_qty = ($supir && $kernet) ? 2 : 1;
+
+      $amount_paid += ($adm_cost * $adm_qty);
+    }
+
     $exclude_in_ARAP = 0;
     $login_name = $this->admin->the_user->username;
     $expense_or_revenue_type_id=0;
@@ -3115,7 +3123,7 @@ class TrxTrpController extends Controller
     }
 
 
-    if($trx_trp->payment_method->id==2){
+    if(in_array($trx_trp->payment_method->id,[2,3])){
       $admin_cost_code=env("PVR_ADMIN_COST");
   
       $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
@@ -3234,7 +3242,7 @@ class TrxTrpController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->where("payment_method_id",2);
+          $q1->whereIn("payment_method_id",[2,3]);
           $q1->where("received_payment",1);                 
         });
       })->get();      

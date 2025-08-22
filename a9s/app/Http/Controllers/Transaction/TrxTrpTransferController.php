@@ -340,7 +340,7 @@ class TrxTrpTransferController extends Controller
 
     $filter_status = $request->filter_status;
     
-    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where('payment_method_id',2)->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
+    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
       $q->where('val5',1)->orWhere('val6',1);
     })->where('received_payment',0);
 
@@ -354,7 +354,7 @@ class TrxTrpTransferController extends Controller
     foreach ($model_query as $key => $mq) {
       ExtraMoneyTrx::where(function ($q)use($mq){
         $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
-      })->where("payment_method_id",2)->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)->where('val1',1)->where('val2',1)->where('val3',1)
+      })->whereIn("payment_method_id",[2,3])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)->where('val1',1)->where('val2',1)->where('val3',1)
       ->update([
         'trx_trp_id'=>$mq->id
       ]);
@@ -556,7 +556,7 @@ class TrxTrpTransferController extends Controller
 
       if(isset($supir) && $supir_money > 0){
         if(!$model_query->duitku_supir_disburseId){
-          $result = TrfDuitku::generate_invoice($supir->bank->code_duitku,$supir->rek_no,$supir_money,$supir_remarks);
+          $result = TrfDuitku::generate_invoice($supir->bank->code_duitku,$supir->rek_no,$supir_money,$supir_remarks,'',$model_query->payment_method_id);
           if($result){
             $model_query->duitku_supir_disburseId   = $result['disburseId'];
             $model_query->duitku_supir_inv_res_code = $result['responseCode'];
@@ -567,7 +567,7 @@ class TrxTrpTransferController extends Controller
         }
         
         if($model_query->duitku_supir_disburseId && $model_query->duitku_supir_inv_res_code == "00" && $model_query->duitku_supir_trf_res_code!="00"){
-          $result = TrfDuitku::generate_transfer($model_query->duitku_supir_disburseId,$supir->bank->code_duitku,$supir->rek_no,$supir_money,$supir_remarks);
+          $result = TrfDuitku::generate_transfer($model_query->duitku_supir_disburseId,$supir->bank->code_duitku,$supir->rek_no,$supir_money,$supir_remarks,'',$model_query->payment_method_id);
           if($result){
             $model_query->duitku_supir_trf_res_code = $result['responseCode'];
             $model_query->duitku_supir_trf_res_desc = $result['responseDesc'];
@@ -583,7 +583,7 @@ class TrxTrpTransferController extends Controller
 
       if(isset($kernet) && $kernet_money > 0 && $model_query->duitku_supir_trf_res_code=="00"){
         if(!$model_query->duitku_kernet_disburseId){
-          $result = TrfDuitku::generate_invoice($kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,$kernet_remarks);
+          $result = TrfDuitku::generate_invoice($kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,$kernet_remarks,'',$model_query->payment_method_id);
           if($result){
             $model_query->duitku_kernet_disburseId   = $result['disburseId'];
             $model_query->duitku_kernet_inv_res_code = $result['responseCode'];
@@ -593,7 +593,7 @@ class TrxTrpTransferController extends Controller
         }
         
         if($model_query->duitku_kernet_disburseId && $model_query->duitku_kernet_inv_res_code=="00" && $model_query->duitku_kernet_trf_res_code!="00"){
-          $result = TrfDuitku::generate_transfer($model_query->duitku_kernet_disburseId,$kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,$kernet_remarks);
+          $result = TrfDuitku::generate_transfer($model_query->duitku_kernet_disburseId,$kernet->bank->code_duitku,$kernet->rek_no,$kernet_money,$kernet_remarks,'',$model_query->payment_method_id);
           if($result){
             $model_query->duitku_kernet_trf_res_code = $result['responseCode'];
             $model_query->duitku_kernet_trf_res_desc = $result['responseDesc'];
@@ -761,7 +761,7 @@ class TrxTrpTransferController extends Controller
     DB::beginTransaction();
     try {
       $model_querys = TrxTrp::where("deleted",0)->where("req_deleted",0)
-      ->where('payment_method_id',2)->where('received_payment',0)
+      ->whereIn('payment_method_id',[2,3])->where('received_payment',0)
       ->where('val',1)->where('val1',1)->where('val2',1)
       ->where('val4',1)->where('val5',1)->where('val6',1)
       ->where(function ($q) {
