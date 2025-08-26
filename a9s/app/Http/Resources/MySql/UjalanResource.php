@@ -4,6 +4,7 @@ namespace App\Http\Resources\MySql;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\IsUserResource;
+use App\Helpers\MyAdmin;
 
 class UjalanResource extends JsonResource
 {
@@ -16,7 +17,7 @@ class UjalanResource extends JsonResource
     public function toArray($request)
     {
         // return parent::toArray($request);
-        return [
+        $data = [
             'id'                => $this->id,
             'xto'               => $this->xto,
             'km_range'          => $this->km_range,
@@ -34,7 +35,7 @@ class UjalanResource extends JsonResource
             'updated_user'      => $this->updated_user,
             'details'           => UjalanDetailResource::collection($this->whenLoaded('details')),
             'details2'          => UjalanDetail2Resource::collection($this->whenLoaded('details2')),
-
+            
             'val'               => $this->val,
             'val_user'          => $this->val_user ?? "",
             'val_by'            => new IsUserResource($this->whenLoaded('val_by')),
@@ -51,5 +52,13 @@ class UjalanResource extends JsonResource
             'deleted_by'        => new IsUserResource($this->whenLoaded('deleted_by')),
             'deleted_reason'    => $this->deleted_reason ?? "",
         ];
+
+        $admin = MyAdmin::user();
+        $permissions = $admin->the_user->listPermissions();
+        if(MyAdmin::checkScope($permissions, 'ujalan.batas_persen_susut.full_act',true)){
+            $data['batas_persen_susut'] = $this->batas_persen_susut ?? '';
+        }
+
+        return $data;
     }
 }

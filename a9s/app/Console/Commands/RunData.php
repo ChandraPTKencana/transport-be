@@ -137,10 +137,12 @@ class RunData extends Command
         //     $this->info($v->id."-".$emp->id."-".$emp->rek_name."-".$v->employee_id."-".$v->employee_name."\n ");
         // }
 
-        $pm = new \App\Models\MySql\PaymentMethod();
-        $pm->name = 'TRANSFER-DUITKU-5000';
-        $pm->account_code = '01.100.013';
-        $pm->save();
+        // $pm = new \App\Models\MySql\PaymentMethod();
+        // $pm->name = 'TRANSFER-DUITKU-5000';
+        // $pm->account_code = '01.100.013';
+        // $pm->save();
+
+        $trxtrp= \App\Models\MySql\TrxTrp::where("tanggal","<","2025-08-01")->update(["salary_paid_id"=>1]);
         
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");

@@ -62,6 +62,7 @@ Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 
 Route::put('/ujalan_validasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'validasi']);
 Route::put('/ujalan_unvalidasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'unvalidasi']);
 Route::get('/ujalan/download_excel', [\App\Http\Controllers\Ujalan\UjalanController::class, 'downloadExcel']);
+Route::put('/ujalan/batas_persen_susut', [\App\Http\Controllers\Ujalan\UjalanController::class, 'batasPersenSusut']);
 
 Route::get('/trx_trp_nologs', [\App\Http\Controllers\Transaction\TrxTrpNologController::class, 'index']);
 Route::get('/trx_trp_nolog', [\App\Http\Controllers\Transaction\TrxTrpNologController::class, 'show']);
@@ -105,6 +106,11 @@ Route::get('/trx_trp_tickets/download_excel', [\App\Http\Controllers\Transaction
 Route::put('/trx_trp_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'updateTicket']);
 Route::get('/trx_trps/ticket_over', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'ticketOver']);
 Route::post('/trx_trp_do_update_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'doUpdateTicket']);
+Route::put('/trx_trp_val_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'valTicket']);
+Route::put('/trx_trp_unval_ticket', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'unvalTicket']);
+Route::put('/trx_trp_val_tickets', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'valTickets']);
+Route::put('/trx_trp_unval_tickets', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'unvalTickets']);
+Route::put('/trx_trp_clear_tickets', [\App\Http\Controllers\Transaction\TrxTrpTicketController::class, 'clearTickets']);
 
 Route::put('/trx_trp_validasis', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'validasis']);
 
@@ -115,11 +121,6 @@ Route::put('/trx_trp_unvalidasi', [\App\Http\Controllers\Transaction\TrxTrpContr
 Route::post('/trx_trp_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);
 Route::post('/trx_trp_do_gen_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPV']);
 Route::post('/trx_trp_do_update_pv', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doUpdatePV']);
-Route::put('/trx_trp_val_ticket', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'valTicket']);
-Route::put('/trx_trp_unval_ticket', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'unvalTicket']);
-Route::put('/trx_trp_val_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'valTickets']);
-Route::put('/trx_trp_unval_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'unvalTickets']);
-Route::put('/trx_trp_clear_tickets', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'clearTickets']);
 
 Route::get('/trx_load_cost_center', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'cost_center']);
 Route::get('/trx_load_for_trp', [\App\Http\Controllers\Transaction\TrxLoadDataController::class, 'trp']);

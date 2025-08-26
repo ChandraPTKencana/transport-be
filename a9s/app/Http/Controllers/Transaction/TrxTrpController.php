@@ -395,7 +395,7 @@ class TrxTrpController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','potongan','uj','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','potongan','uj','salary_paid','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -1245,41 +1245,41 @@ class TrxTrpController extends Controller
   }
 
 
-  public function getTicketA($connection_name,$request){
-    $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
-    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut','OriginalBruto','OriginalTara')
-    ->where("TicketID",$request->ticket_a_id)
-    ->where("TicketNo",$request->ticket_a_no);
-    if($request->jenis=="CPO"){
-      $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
-    }else if($request->jenis=="PK"){
-      $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
-    }else{ 
-      $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
-    }
-    $get_data_ticket =$get_data_ticket->first();
+  // public function getTicketA($connection_name,$request){
+  //   $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
+  //   ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut','OriginalBruto','OriginalTara')
+  //   ->where("TicketID",$request->ticket_a_id)
+  //   ->where("TicketNo",$request->ticket_a_no);
+  //   if($request->jenis=="CPO"){
+  //     $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
+  //   }else if($request->jenis=="PK"){
+  //     $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
+  //   }else{ 
+  //     $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
+  //   }
+  //   $get_data_ticket =$get_data_ticket->first();
     
-    return $get_data_ticket;
-  }
+  //   return $get_data_ticket;
+  // }
 
-  public function getTicketB($connection_name,$request){
-    $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
-    ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut','OriginalBruto','OriginalTara')
-    ->where("TicketID",$request->ticket_b_id)
-    ->where("TicketNo",$request->ticket_b_no);
+  // public function getTicketB($connection_name,$request){
+  //   $get_data_ticket = DB::connection($connection_name)->table('palm_tickets')
+  //   ->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','DateTimeIn','DateTimeOut','OriginalBruto','OriginalTara')
+  //   ->where("TicketID",$request->ticket_b_id)
+  //   ->where("TicketNo",$request->ticket_b_no);
 
-    // if($request->jenis!=="TBS" || $connection_name!=='sqlsrv'){
-    //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
-    // }else {
-    //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
-    // }
-    $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+  //   // if($request->jenis!=="TBS" || $connection_name!=='sqlsrv'){
+  //   //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+  //   // }else {
+  //   //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
+  //   // }
+  //   $get_data_ticket=$get_data_ticket->whereIn('ProductName',["RTBS","TBS"]);
 
 
-    $get_data_ticket=$get_data_ticket->first();
+  //   $get_data_ticket=$get_data_ticket->first();
     
-    return $get_data_ticket;
-  }
+  //   return $get_data_ticket;
+  // }
 
   public function previewFile(Request $request){
     MyAdmin::checkScope($this->permissions, 'trp_trx.preview_file');
@@ -2342,138 +2342,138 @@ class TrxTrpController extends Controller
 
   }
 
-  public function valTicket(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
+  // public function valTicket(Request $request){
+  //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
-    $rules = [
-      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
-    ];
+  //   $rules = [
+  //     'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+  //   ];
 
-    $messages = [
-      'id.required' => 'ID tidak boleh kosong',
-      'id.exists' => 'ID tidak terdaftar',
-    ];
+  //   $messages = [
+  //     'id.required' => 'ID tidak boleh kosong',
+  //     'id.exists' => 'ID tidak terdaftar',
+  //   ];
 
-    $validator = Validator::make($request->all(), $rules, $messages);
+  //   $validator = Validator::make($request->all(), $rules, $messages);
 
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
 
-    $t_stamp = date("Y-m-d H:i:s");
-    DB::beginTransaction();
-    try {
-      $model_query = TrxTrp::lockForUpdate()->find($request->id);
-      if($model_query->val_ticket){
-        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
-      }
-      $SYSOLD                     = clone($model_query);
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_query = TrxTrp::lockForUpdate()->find($request->id);
+  //     if($model_query->val_ticket){
+  //       throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+  //     }
+  //     $SYSOLD                     = clone($model_query);
 
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$model_query->val_ticket){
-        $model_query->val_ticket = 1;
-        $model_query->val_ticket_user = $this->admin_id;
-        $model_query->val_ticket_at = $t_stamp;
-        $model_query->updated_user = $this->admin_id;
-        $model_query->updated_at = $t_stamp;
-      }
-      $model_query->save();
-      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
-      MyLog::sys("trx_trp",$request->id,"approve ticket",$SYSNOTE);
+  //     if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$model_query->val_ticket){
+  //       $model_query->val_ticket = 1;
+  //       $model_query->val_ticket_user = $this->admin_id;
+  //       $model_query->val_ticket_at = $t_stamp;
+  //       $model_query->updated_user = $this->admin_id;
+  //       $model_query->updated_at = $t_stamp;
+  //     }
+  //     $model_query->save();
+  //     $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+  //     MyLog::sys("trx_trp",$request->id,"approve ticket",$SYSNOTE);
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses validasi data berhasil",
-        "val_ticket"=>$model_query->val_ticket,
-        "val_ticket_user"=>$model_query->val_ticket_user,
-        "val_ticket_at"=>$model_query->val_ticket_at,
-        "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
-        "updated_at"=>$model_query->updated_at,
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses ubah data gagal",
-      ], 400);
-    }
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses validasi data berhasil",
+  //       "val_ticket"=>$model_query->val_ticket,
+  //       "val_ticket_user"=>$model_query->val_ticket_user,
+  //       "val_ticket_at"=>$model_query->val_ticket_at,
+  //       "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
+  //       "updated_at"=>$model_query->updated_at,
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses ubah data gagal",
+  //     ], 400);
+  //   }
 
-  }
+  // }
 
-  public function unvalTicket(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
+  // public function unvalTicket(Request $request){
+  //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
 
-    $rules = [
-      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
-    ];
+  //   $rules = [
+  //     'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+  //   ];
 
-    $messages = [
-      'id.required' => 'ID tidak boleh kosong',
-      'id.exists' => 'ID tidak terdaftar',
-    ];
+  //   $messages = [
+  //     'id.required' => 'ID tidak boleh kosong',
+  //     'id.exists' => 'ID tidak terdaftar',
+  //   ];
 
-    $validator = Validator::make($request->all(), $rules, $messages);
+  //   $validator = Validator::make($request->all(), $rules, $messages);
 
-    if ($validator->fails()) {
-      throw new ValidationException($validator);
-    }
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
 
-    $t_stamp = date("Y-m-d H:i:s");
-    DB::beginTransaction();
-    try {
-      $model_query = TrxTrp::lockForUpdate()->find($request->id);
-      // if($model_query->val_ticket){
-      //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
-      // }
-      $SYSOLD                     = clone($model_query);
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_query = TrxTrp::lockForUpdate()->find($request->id);
+  //     // if($model_query->val_ticket){
+  //     //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+  //     // }
+  //     $SYSOLD                     = clone($model_query);
 
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $model_query->val_ticket){
-        $model_query->val_ticket = 0;
-        // $model_query->val_ticket_user = $this->admin_id;
-        // $model_query->val_ticket_at = $t_stamp;
-        $model_query->updated_user = $this->admin_id;
-        $model_query->updated_at = $t_stamp;
-      }
-      $model_query->save();
+  //     if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $model_query->val_ticket){
+  //       $model_query->val_ticket = 0;
+  //       // $model_query->val_ticket_user = $this->admin_id;
+  //       // $model_query->val_ticket_at = $t_stamp;
+  //       $model_query->updated_user = $this->admin_id;
+  //       $model_query->updated_at = $t_stamp;
+  //     }
+  //     $model_query->save();
 
-      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
-      MyLog::sys("trx_trp",$request->id,"unvalidasi ticket",$SYSNOTE);
+  //     $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+  //     MyLog::sys("trx_trp",$request->id,"unvalidasi ticket",$SYSNOTE);
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses validasi data berhasil",
-        "val_ticket"=>$model_query->val_ticket,
-        "val_ticket_user"=>$model_query->val_ticket_user,
-        "val_ticket_at"=>$model_query->val_ticket_at,
-        "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
-        "updated_at"=>$model_query->updated_at,
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses ubah data gagal",
-      ], 400);
-    }
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses validasi data berhasil",
+  //       "val_ticket"=>$model_query->val_ticket,
+  //       "val_ticket_user"=>$model_query->val_ticket_user,
+  //       "val_ticket_at"=>$model_query->val_ticket_at,
+  //       "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
+  //       "updated_at"=>$model_query->updated_at,
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses ubah data gagal",
+  //     ], 400);
+  //   }
 
-  }
+  // }
 
   public function validasis(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.val','trp_trx.val1','trp_trx.val2','trp_trx.val3','trp_trx.val4','trp_trx.val5','trp_trx.val6']);
@@ -2612,200 +2612,200 @@ class TrxTrpController extends Controller
 
   }
 
-  public function valTickets(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
+  // public function valTickets(Request $request){
+  //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
-    $ids = json_decode($request->ids, true);
-    $t_stamp = date("Y-m-d H:i:s");
-    DB::beginTransaction();
-    try {
-      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
-      $valList = [];
-      $SYSNOTES = [];
-      foreach ($model_querys as $key => $v) {
-        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
-          $SYSOLD                     = clone($v);
-          $v->val_ticket = 1;
-          $v->val_ticket_user = $this->admin_id;
-          $v->val_ticket_at = $t_stamp;
-          $v->updated_user = $this->admin_id;
-          $v->updated_at = $t_stamp;
-          $v->save();
-          array_push($valList,[
-            "id"=>$v->id,
-            "val_ticket"=>$v->val_ticket,
-            "val_ticket_user"=>$v->val_ticket_user,
-            "val_ticket_at"=>$v->val_ticket_at,
-            "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
-            "updated_at"=>$v->updated_at,
-          ]);
-          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
-          array_push($SYSNOTES,$SYSNOTE);
-        }
-      }
+  //   $ids = json_decode($request->ids, true);
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
+  //     $valList = [];
+  //     $SYSNOTES = [];
+  //     foreach ($model_querys as $key => $v) {
+  //       if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+  //         $SYSOLD                     = clone($v);
+  //         $v->val_ticket = 1;
+  //         $v->val_ticket_user = $this->admin_id;
+  //         $v->val_ticket_at = $t_stamp;
+  //         $v->updated_user = $this->admin_id;
+  //         $v->updated_at = $t_stamp;
+  //         $v->save();
+  //         array_push($valList,[
+  //           "id"=>$v->id,
+  //           "val_ticket"=>$v->val_ticket,
+  //           "val_ticket_user"=>$v->val_ticket_user,
+  //           "val_ticket_at"=>$v->val_ticket_at,
+  //           "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
+  //           "updated_at"=>$v->updated_at,
+  //         ]);
+  //         $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+  //         array_push($SYSNOTES,$SYSNOTE);
+  //       }
+  //     }
 
-      MyLog::sys($this->syslog_db,null,"val_tickets",implode(",",$SYSNOTES));
+  //     MyLog::sys($this->syslog_db,null,"val_tickets",implode(",",$SYSNOTES));
 
-      $nids = array_map(function($x) {
-        return $x['id'];        
-      },$valList);
+  //     $nids = array_map(function($x) {
+  //       return $x['id'];        
+  //     },$valList);
 
-      // MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
+  //     // MyLog::sys("trx_trp",null,"val_tickets",implode(",",$nids));
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses validasi data berhasil",
-        "val_lists"=>$valList
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses validasi data gagal",
-      ], 400);
-    }
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses validasi data berhasil",
+  //       "val_lists"=>$valList
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses validasi data gagal",
+  //     ], 400);
+  //   }
 
-  }
+  // }
 
-  public function unvalTickets(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
+  // public function unvalTickets(Request $request){
+  //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
 
-    $ids = json_decode($request->ids, true);
-    $t_stamp = date("Y-m-d H:i:s");
-    DB::beginTransaction();
-    try {
-      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
-      $valList = [];
-      $SYSNOTES =[];
-      foreach ($model_querys as $key => $v) {
-        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $v->val_ticket){
-          $SYSOLD                     = clone($v);
-          $v->val_ticket = 0;
-          // $v->val_ticket_user = $this->admin_id;
-          // $v->val_ticket_at = $t_stamp;
-          $v->updated_user = $this->admin_id;
-          $v->updated_at = $t_stamp;
-          $v->save();
-          array_push($valList,[
-            "id"=>$v->id,
-            "val_ticket"=>$v->val_ticket,
-            "val_ticket_user"=>$v->val_ticket_user,
-            "val_ticket_at"=>$v->val_ticket_at,
-            "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
-            "updated_at"=>$v->updated_at,
-          ]);
-          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
-          array_push($SYSNOTES,$SYSNOTE);
-        }
-      }
+  //   $ids = json_decode($request->ids, true);
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
+  //     $valList = [];
+  //     $SYSNOTES =[];
+  //     foreach ($model_querys as $key => $v) {
+  //       if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $v->val_ticket){
+  //         $SYSOLD                     = clone($v);
+  //         $v->val_ticket = 0;
+  //         // $v->val_ticket_user = $this->admin_id;
+  //         // $v->val_ticket_at = $t_stamp;
+  //         $v->updated_user = $this->admin_id;
+  //         $v->updated_at = $t_stamp;
+  //         $v->save();
+  //         array_push($valList,[
+  //           "id"=>$v->id,
+  //           "val_ticket"=>$v->val_ticket,
+  //           "val_ticket_user"=>$v->val_ticket_user,
+  //           "val_ticket_at"=>$v->val_ticket_at,
+  //           "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
+  //           "updated_at"=>$v->updated_at,
+  //         ]);
+  //         $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+  //         array_push($SYSNOTES,$SYSNOTE);
+  //       }
+  //     }
 
-      MyLog::sys($this->syslog_db,null,"unval_tickets",implode(",",$SYSNOTES));
+  //     MyLog::sys($this->syslog_db,null,"unval_tickets",implode(",",$SYSNOTES));
 
-      $nids = array_map(function($x) {
-        return $x['id'];        
-      },$valList);
+  //     $nids = array_map(function($x) {
+  //       return $x['id'];        
+  //     },$valList);
 
-      // MyLog::sys("trx_trp",null,"unval_tickets",implode(",",$nids));
+  //     // MyLog::sys("trx_trp",null,"unval_tickets",implode(",",$nids));
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses unvalidasi data berhasil",
-        "val_lists"=>$valList
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses unvalidasi data gagal",
-      ], 400);
-    }
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses unvalidasi data berhasil",
+  //       "val_lists"=>$valList
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses unvalidasi data gagal",
+  //     ], 400);
+  //   }
 
-  }
+  // }
 
-  public function clearTickets(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
+  // public function clearTickets(Request $request){
+  //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
-    $ids = json_decode($request->ids, true);
-    $t_stamp = date("Y-m-d H:i:s");
-    DB::beginTransaction();
-    try {
-      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->where('val_ticket',0)->get();
-      $clearList = [];
-      $SYSNOTES =[];
+  //   $ids = json_decode($request->ids, true);
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->where('val_ticket',0)->get();
+  //     $clearList = [];
+  //     $SYSNOTES =[];
 
-      foreach ($model_querys as $key => $v) {
-        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
-          $SYSOLD                     = clone($v);
-          $v->ticket_a_id = null;
-          $v->ticket_a_no = null;
-          $v->ticket_b_id = null;
-          $v->ticket_b_no = null;
-          $v->updated_user = $this->admin_id;
-          $v->updated_at = $t_stamp;
+  //     foreach ($model_querys as $key => $v) {
+  //       if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+  //         $SYSOLD                     = clone($v);
+  //         $v->ticket_a_id = null;
+  //         $v->ticket_a_no = null;
+  //         $v->ticket_b_id = null;
+  //         $v->ticket_b_no = null;
+  //         $v->updated_user = $this->admin_id;
+  //         $v->updated_at = $t_stamp;
 
-          $v->save();
-          array_push($clearList,[
-            "id"=>$v->id,
-            "ticket_a_id"=>$v->ticket_a_id,
-            "ticket_a_no"=>$v->ticket_a_no,
-            "ticket_b_id"=>$v->ticket_b_id,
-            "ticket_b_no"=>$v->ticket_b_no,
-            "updated_at"=>$v->updated_at,
-          ]);
-          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
-          array_push($SYSNOTES,$SYSNOTE);
-        }
-      }
+  //         $v->save();
+  //         array_push($clearList,[
+  //           "id"=>$v->id,
+  //           "ticket_a_id"=>$v->ticket_a_id,
+  //           "ticket_a_no"=>$v->ticket_a_no,
+  //           "ticket_b_id"=>$v->ticket_b_id,
+  //           "ticket_b_no"=>$v->ticket_b_no,
+  //           "updated_at"=>$v->updated_at,
+  //         ]);
+  //         $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+  //         array_push($SYSNOTES,$SYSNOTE);
+  //       }
+  //     }
 
-      MyLog::sys($this->syslog_db,null,"clear_tickets",implode(",",$SYSNOTES));
+  //     MyLog::sys($this->syslog_db,null,"clear_tickets",implode(",",$SYSNOTES));
 
-      $nids = array_map(function($x) {
-        return $x['id'];        
-      },$clearList);
+  //     $nids = array_map(function($x) {
+  //       return $x['id'];        
+  //     },$clearList);
 
-      // MyLog::sys("trx_trp",null,"clear_tickets",implode(",",$nids));
+  //     // MyLog::sys("trx_trp",null,"clear_tickets",implode(",",$nids));
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses clear tiket berhasil",
-        "clear_lists"=>$clearList
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Proses clear tiket gagal",
-      ], 400);
-    }
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses clear tiket berhasil",
+  //       "clear_lists"=>$clearList
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses clear tiket gagal",
+  //     ], 400);
+  //   }
 
-  }
+  // }
 
   public function genPersen($a,$b){
     $a = (float)$a;

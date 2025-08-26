@@ -405,6 +405,9 @@ class SalaryBonusController extends Controller
       if( $model_query->val3==1 )
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
+      if( $model_query->trx_trp_id > 0 )
+      throw new \Exception("Data Bersumber Dari Trx Trp Tiket Tidak Dapat Diubah",1);
+
       // if($model_query->salary_paid_id) 
       // throw new \Exception("Data Sudah Digunakan Dan Tidak Dapat Di Ubah",1);
 

@@ -19,6 +19,8 @@ use App\Helpers\MyLog;
 
 use App\Models\MySql\TrxTrp;
 use App\Models\MySql\IsUser;
+use App\Models\MySql\SalaryBonus;
+
 use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\Ujalan;
 use App\Models\MySql\UjalanDetail;
@@ -1811,14 +1813,263 @@ class TrxTrpTicketController extends Controller
 
   // }
 
+  public function valTicket(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    $tanggal = date("Y-m-d");
+
+    DB::beginTransaction();
+    try {
+      $model_query = TrxTrp::lockForUpdate()->find($request->id);
+      if($model_query->val_ticket){
+        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      }
+      $SYSOLD                     = clone($model_query);
+
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$model_query->val_ticket){
+        $model_query->val_ticket = 1;
+        $model_query->val_ticket_user = $this->admin_id;
+        $model_query->val_ticket_at = $t_stamp;
+        $model_query->updated_user = $this->admin_id;
+        $model_query->updated_at = $t_stamp;
+
+
+
+        $gen_salary_bonus = false;
+
+        if(in_array($model_query->jenis,['CPO','PK'])){
+          $nonorinet = $model_query->ticket_a_netto - $model_query->ticket_b_netto;
+          if($nonorinet<0) $nonorinet*=-1;
+          $pembanding = ($model_query->ticket_a_netto>$model_query->ticket_b_netto)?$model_query->ticket_a_netto:$model_query->ticket_b_netto;
+          
+          $model_query->batas_persen_susut = 0.3;
+          if(($nonorinet/$pembanding)*100 > $model_query->batas_persen_susut ){
+            $gen_salary_bonus = true;
+          }
+          
+        }else if(in_array($model_query->jenis,['TBS'])){
+          $orinet = $model_query->ticket_a_ori_netto - $model_query->ticket_b_ori_netto;
+          if($orinet<0) $orinet*=-1;
+          $pembanding = ($model_query->ticket_a_ori_netto>$model_query->ticket_b_ori_netto)?$model_query->ticket_a_ori_netto:$model_query->ticket_b_ori_netto;
+
+          $model_query->batas_persen_susut = $model_query->uj->batas_persen_susut;
+          if(($orinet/$pembanding)*100 > $model_query->batas_persen_susut){
+            $gen_salary_bonus = true;
+          }
+        }
+
+        if($gen_salary_bonus){
+          $salary_bonuses = SalaryBonus::where("trx_trp_id",$model_query->id)->get();
+          if(count($salary_bonuses)>0){
+            foreach ($salary_bonuses as $key => $sb) {
+              if($sb->deleted){
+                $sb->deleted = 0;
+                $sb->deleted_user = null;
+                $sb->save();
+                MyLog::sys("salary_bonus",$sb->id,"update","Undelete from ticket[".$model_query->id."]");
+              }
+            }
+          }else{              
+            if($model_query->supir_id){
+              $model_query2                  = new SalaryBonus();
+              $model_query2->tanggal         = $tanggal;
+              $model_query2->type            = 'BonusTrip';
+              $model_query2->employee_id     = $model_query->supir_id;
+              $model_query2->nominal         = $model_query->uj->bonus_trip_supir*-1;
+              $model_query2->note            = "Sumber Potongan Dari Validasi Tiket [".$model_query->id."]";
+              $model_query2->trx_trp_id      = $model_query->id;
+  
+              $model_query2->created_at      = $t_stamp;
+              $model_query2->created_user    = 1;
+  
+              $model_query2->updated_at      = $t_stamp;
+              $model_query2->updated_user    = 1;
+
+              $model_query2->val1            = 1;
+              $model_query2->val1_user       = 1;
+              $model_query2->val1_at         = $t_stamp;
+              $model_query2->val2            = 1;
+              $model_query2->val2_user       = 1;
+              $model_query2->val2_at         = $t_stamp;
+              $model_query2->val3            = 1;
+              $model_query2->val3_user       = 1;
+              $model_query2->val3_at         = $t_stamp;
+
+              $model_query2->save();
+
+              MyLog::sys("salary_bonus",$model_query2->id,"insert","Source ticket[".$model_query->id."]->valtickets");
+            }
+
+            if($model_query->kernet_id){
+              $model_query2                  = new SalaryBonus();
+              $model_query2->tanggal         = $tanggal;
+              $model_query2->type            = 'BonusTrip';
+              $model_query2->employee_id     = $model_query->kernet_id;
+              $model_query2->nominal         = $model_query->uj->bonus_trip_kernet*-1;
+              $model_query2->note            = "Sumber Potongan Dari Validasi Tiket [".$model_query->id."]";
+              $model_query2->trx_trp_id      = $model_query->id;
+  
+              $model_query2->created_at      = $t_stamp;
+              $model_query2->created_user    = 1;
+  
+              $model_query2->updated_at      = $t_stamp;
+              $model_query2->updated_user    = 1;
+
+              $model_query2->val1            = 1;
+              $model_query2->val1_user       = 1;
+              $model_query2->val1_at         = $t_stamp;
+              $model_query2->val2            = 1;
+              $model_query2->val2_user       = 1;
+              $model_query2->val2_at         = $t_stamp;
+              $model_query2->val3            = 1;
+              $model_query2->val3_user       = 1;
+              $model_query2->val3_at         = $t_stamp;
+              $model_query2->save();
+
+              MyLog::sys("salary_bonus",$model_query2->id,"insert","Source ticket[".$model_query->id."]->valtickets");
+            }
+          }
+        }
+      }
+      $model_query->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"approve ticket",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val_ticket"=>$model_query->val_ticket,
+        "val_ticket_user"=>$model_query->val_ticket_user,
+        "val_ticket_at"=>$model_query->val_ticket_at,
+        "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
+        "updated_at"=>$model_query->updated_at,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function unvalTicket(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = TrxTrp::lockForUpdate()->find($request->id);
+      // if($model_query->val_ticket){
+      //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
+      // }
+      $SYSOLD                     = clone($model_query);
+
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $model_query->val_ticket){
+        $model_query->val_ticket = 0;
+        // $model_query->val_ticket_user = $this->admin_id;
+        // $model_query->val_ticket_at = $t_stamp;
+        $model_query->updated_user = $this->admin_id;
+        $model_query->updated_at = $t_stamp;
+
+        $salary_bonuses = SalaryBonus::where("trx_trp_id",$model_query->id)->get();
+        if(count($salary_bonuses)>0){
+          foreach ($salary_bonuses as $key => $sb) {
+            if($sb->deleted==0){
+              $sb->deleted = 1;
+              $sb->deleted_at = $t_stamp;
+              $sb->deleted_user = 1;
+              $sb->deleted_reason = "Unval Ticket";
+              $sb->save();
+              MyLog::sys("salary_bonus",$sb->id,"update","Delete from ticket[".$model_query->id."]");
+            }
+          }
+        }
+
+      }
+      $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"unvalidasi ticket",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses validasi data berhasil",
+        "val_ticket"=>$model_query->val_ticket,
+        "val_ticket_user"=>$model_query->val_ticket_user,
+        "val_ticket_at"=>$model_query->val_ticket_at,
+        "val_ticket_by"=>$model_query->val_ticket_user ? new IsUserResource(IsUser::find($model_query->val_ticket_user)) : null,
+        "updated_at"=>$model_query->updated_at,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
   public function valTickets(Request $request){
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
 
     $ids = json_decode($request->ids, true);
     $t_stamp = date("Y-m-d H:i:s");
+    $tanggal = date("Y-m-d");
     DB::beginTransaction();
     try {
-      $model_querys = TrxTrp::whereIn("id",$ids)->get();
+      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->with('uj')->get();
       $valList = [];
       $SYSNOTES = [];
 
@@ -1828,6 +2079,108 @@ class TrxTrpTicketController extends Controller
           $v->val_ticket = 1;
           $v->val_ticket_user = $this->admin_id;
           $v->val_ticket_at = $t_stamp;
+          $v->updated_user = $this->admin_id;
+          $v->updated_at = $t_stamp;
+
+
+          $gen_salary_bonus = false;
+
+          if(in_array($v->jenis,['CPO','PK'])){
+            $nonorinet = $v->ticket_a_netto - $v->ticket_b_netto;
+            if($nonorinet<0) $nonorinet*=-1;
+            $pembanding = ($v->ticket_a_netto>$v->ticket_b_netto)?$v->ticket_a_netto:$v->ticket_b_netto;
+            
+            $v->batas_persen_susut = 0.3;
+            if(($nonorinet/$pembanding)*100 > $v->batas_persen_susut ){
+              $gen_salary_bonus = true;
+            }
+            
+          }else if(in_array($v->jenis,['TBS'])){
+            $orinet = $v->ticket_a_ori_netto - $v->ticket_b_ori_netto;
+            if($orinet<0) $orinet*=-1;
+            $pembanding = ($v->ticket_a_ori_netto>$v->ticket_b_ori_netto)?$v->ticket_a_ori_netto:$v->ticket_b_ori_netto;
+
+            $v->batas_persen_susut = $v->uj->batas_persen_susut;
+            if(($orinet/$pembanding)*100 > $v->batas_persen_susut){
+              $gen_salary_bonus = true;
+            }
+          }
+
+          if($gen_salary_bonus){
+            $salary_bonuses = SalaryBonus::where("trx_trp_id",$v->id)->get();
+            if(count($salary_bonuses)>0){
+              foreach ($salary_bonuses as $key => $sb) {
+                if($sb->deleted){
+                  $sb->deleted = 0;
+                  $sb->deleted_user = null;
+                  $sb->save();
+                  MyLog::sys("salary_bonus",$sb->id,"update","Undelete from ticket[".$v->id."]");
+                }
+              }
+            }else{              
+              if($v->supir_id){
+                $model_query                  = new SalaryBonus();
+                $model_query->tanggal         = $tanggal;
+                $model_query->type            = 'BonusTrip';
+                $model_query->employee_id     = $v->supir_id;
+                $model_query->nominal         = $v->uj->bonus_trip_supir*-1;
+                $model_query->note            = "Sumber Potongan Dari Validasi Tiket [".$v->id."]";
+                $model_query->trx_trp_id      = $v->id;
+    
+                $model_query->created_at      = $t_stamp;
+                $model_query->created_user    = 1;
+    
+                $model_query->updated_at      = $t_stamp;
+                $model_query->updated_user    = 1;
+
+                $model_query->val1            = 1;
+                $model_query->val1_user       = 1;
+                $model_query->val1_at         = $t_stamp;
+                $model_query->val2            = 1;
+                $model_query->val2_user       = 1;
+                $model_query->val2_at         = $t_stamp;
+                $model_query->val3            = 1;
+                $model_query->val3_user       = 1;
+                $model_query->val3_at         = $t_stamp;
+
+
+                $model_query->save();
+
+                MyLog::sys("salary_bonus",$model_query->id,"insert","Source ticket[".$v->id."]>valtickets");
+              }
+  
+              if($v->kernet_id){
+                $model_query                  = new SalaryBonus();
+                $model_query->tanggal         = $tanggal;
+                $model_query->type            = 'BonusTrip';
+                $model_query->employee_id     = $v->kernet_id;
+                $model_query->nominal         = $v->uj->bonus_trip_kernet*-1;
+                $model_query->note            = "Sumber Potongan Dari Validasi Tiket [".$v->id."]";
+                $model_query->trx_trp_id      = $v->id;
+    
+                $model_query->created_at      = $t_stamp;
+                $model_query->created_user    = 1;
+    
+                $model_query->updated_at      = $t_stamp;
+                $model_query->updated_user    = 1;
+
+                $model_query->val1            = 1;
+                $model_query->val1_user       = 1;
+                $model_query->val1_at         = $t_stamp;
+                $model_query->val2            = 1;
+                $model_query->val2_user       = 1;
+                $model_query->val2_at         = $t_stamp;
+                $model_query->val3            = 1;
+                $model_query->val3_user       = 1;
+                $model_query->val3_at         = $t_stamp;
+
+                $model_query->save();
+
+                MyLog::sys("salary_bonus",$model_query->id,"insert","Source ticket[".$v->id."]->valtickets");
+              }
+            }
+          }
+
           $v->save();
           array_push($valList,[
             "id"=>$v->id,
@@ -1868,6 +2221,152 @@ class TrxTrpTicketController extends Controller
       // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function unvalTickets(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.unval_ticket']);
+
+    $ids = json_decode($request->ids, true);
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->get();
+      $valList = [];
+      $SYSNOTES =[];
+      foreach ($model_querys as $key => $v) {
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $v->val_ticket){
+          $SYSOLD                     = clone($v);
+          $v->val_ticket = 0;
+          // $v->val_ticket_user = $this->admin_id;
+          // $v->val_ticket_at = $t_stamp;
+          $v->updated_user = $this->admin_id;
+          $v->updated_at = $t_stamp;
+
+          $salary_bonuses = SalaryBonus::where("trx_trp_id",$v->id)->get();
+          if(count($salary_bonuses)>0){
+            foreach ($salary_bonuses as $key => $sb) {
+              if($sb->deleted==0){
+                $sb->deleted = 1;
+                $sb->deleted_at = $t_stamp;
+                $sb->deleted_user = 1;
+                $sb->deleted_reason = "Unval Tickets";
+                $sb->save();
+                MyLog::sys("salary_bonus",$sb->id,"update","Multi Delete from ticket[".$v->id."]");
+              }
+            }
+          }
+
+          $v->save();
+          array_push($valList,[
+            "id"=>$v->id,
+            "val_ticket"=>$v->val_ticket,
+            "val_ticket_user"=>$v->val_ticket_user,
+            "val_ticket_at"=>$v->val_ticket_at,
+            "val_ticket_by"=>$v->val_ticket_user ? new IsUserResource(IsUser::find($v->val_ticket_user)) : null,
+            "updated_at"=>$v->updated_at,
+          ]);
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+          array_push($SYSNOTES,$SYSNOTE);
+        }
+      }
+
+      MyLog::sys($this->syslog_db,null,"unval_tickets",implode(",",$SYSNOTES));
+
+      $nids = array_map(function($x) {
+        return $x['id'];        
+      },$valList);
+
+      // MyLog::sys("trx_trp",null,"unval_tickets",implode(",",$nids));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses unvalidasi data berhasil",
+        "val_lists"=>$valList
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses unvalidasi data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function clearTickets(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.val_ticket']);
+
+    $ids = json_decode($request->ids, true);
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_querys = TrxTrp::lockForUpdate()->whereIn("id",$ids)->where('val_ticket',0)->get();
+      $clearList = [];
+      $SYSNOTES =[];
+
+      foreach ($model_querys as $key => $v) {
+        if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
+          $SYSOLD                     = clone($v);
+          $v->ticket_a_id = null;
+          $v->ticket_a_no = null;
+          $v->ticket_b_id = null;
+          $v->ticket_b_no = null;
+          $v->updated_user = $this->admin_id;
+          $v->updated_at = $t_stamp;
+
+          $v->save();
+          array_push($clearList,[
+            "id"=>$v->id,
+            "ticket_a_id"=>$v->ticket_a_id,
+            "ticket_a_no"=>$v->ticket_a_no,
+            "ticket_b_id"=>$v->ticket_b_id,
+            "ticket_b_no"=>$v->ticket_b_no,
+            "updated_at"=>$v->updated_at,
+          ]);
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
+          array_push($SYSNOTES,$SYSNOTE);
+        }
+      }
+
+      MyLog::sys($this->syslog_db,null,"clear_tickets",implode(",",$SYSNOTES));
+
+      $nids = array_map(function($x) {
+        return $x['id'];        
+      },$clearList);
+
+      // MyLog::sys("trx_trp",null,"clear_tickets",implode(",",$nids));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses clear tiket berhasil",
+        "clear_lists"=>$clearList
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses clear tiket gagal",
       ], 400);
     }
 

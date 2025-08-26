@@ -457,6 +457,7 @@ class UjalanController extends Controller
       $model_query->km_range          = $request->km_range ?? 0;
       $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
       $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+      $model_query->batas_persen_susut = $request->batas_persen_susut ?? 0;
       $model_query->tipe              = $request->tipe;
       $model_query->jenis             = $request->jenis;
       // $model_query->status          = $request->status;
@@ -674,6 +675,7 @@ class UjalanController extends Controller
         $model_query->km_range          = $request->km_range ?? 0;
         $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
         $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+        $model_query->batas_persen_susut = $request->batas_persen_susut ?? 0;
         $model_query->tipe              = $request->tipe;
         $model_query->jenis             = $request->jenis;
         $model_query->harga             = 0;
@@ -1515,5 +1517,71 @@ class UjalanController extends Controller
       "filename" => $filename . "." . $mime["ext"],
     ];
     return $result;
+  }
+
+  public function batasPersenSusut(Request $request)
+  {
+    MyAdmin::checkMultiScope($this->permissions, ['ujalan.batas_persen_susut.full_act']);
+    
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\Ujalan,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    $transition_from = $request->transition_from;
+    if($transition_from==env("app_name") || !in_array($transition_from,MyLib::$list_pabrik)){
+      $transition_from="";
+    }
+    DB::beginTransaction();
+    try {
+      $model_query = Ujalan::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD      = clone($model_query);
+
+      if($model_query->deleted==1)
+      throw new \Exception("Data Sudah Dihapus",1);
+      
+      $model_query->batas_persen_susut  = $request->batas_persen_susut;
+      $model_query->updated_at          = $t_stamp;
+      $model_query->updated_user        = $this->admin_id;  
+
+      $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("ujalan_mst",$request->id,"update",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses ubah data berhasil",
+        "updated_at"=>$t_stamp
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
   }
 }

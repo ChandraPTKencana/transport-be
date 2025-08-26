@@ -26,7 +26,7 @@ use App\Http\Requests\MySql\UjalanRequest;
 use App\Http\Resources\IsUserResource;
 use App\Http\Resources\MySql\UjalanResource;
 
-class UjalanController extends Controller
+class UjalanxController extends Controller
 {
   private $admin;
   private $admin_id;

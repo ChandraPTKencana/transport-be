@@ -176,6 +176,9 @@ class TrxTrpResource extends JsonResource
             'duitku_kernet_inv_res_desc'    => $this->duitku_kernet_inv_res_desc,
             'duitku_kernet_trf_res_code'    => $this->duitku_kernet_trf_res_code,
             'duitku_kernet_trf_res_desc'    => $this->duitku_kernet_trf_res_desc,
+
+            'salary_paid_id'    => $this->salary_paid_id,
+            'salary_paid'       => new SalaryPaidResource($this->whenLoaded('salary_paid')),
         ];
     }
 }
