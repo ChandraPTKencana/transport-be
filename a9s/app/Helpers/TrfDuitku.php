@@ -177,9 +177,11 @@ class TrfDuitku {
         $params_string = json_encode($params);
         // $url = 'http://192.168.120.247/duitku/duitkuInvoice.php';
         if($payment_method_id==2){
-            $url = 'http://192.168.99.246/duitku/duitkuInvoiceClearing.php';
+            $url = 'http://110.232.82.16:8880/duitku/duitkuInvoiceClearing.php';
+            // $url = 'http://192.168.99.246/duitku/duitkuInvoiceClearing.php';
         }else if($payment_method_id==3){
-            $url = 'http://192.168.99.246/duitku/duitkuInvoice.php';
+            $url = 'http://110.232.82.16:8880/duitku/duitkuInvoice.php';
+            // $url = 'http://192.168.99.246/duitku/duitkuInvoice.php';
         }
         // $url = 'https://passport.duitku.com/webapi/api/disbursement/inquiryclearing';
         // $url = 'https://sandbox.duitku.com/webapi/api/disbursement/inquiryclearingsandbox';
@@ -247,9 +249,11 @@ class TrfDuitku {
         $params_string = json_encode($params);
         // $url = 'http://192.168.120.247/duitku/duitkuTransfer.php';
         if($payment_method_id==2){
-            $url = 'http://192.168.99.246/duitku/duitkuTransferClearing.php';
+            $url = 'http://110.232.82.16:8880/duitku/duitkuTransferClearing.php';
+            // $url = 'http://192.168.99.246/duitku/duitkuTransferClearing.php';
         }else if($payment_method_id==3){
-            $url = 'http://192.168.99.246/duitku/duitkuTransfer.php';
+            $url = 'http://110.232.82.16:8880/duitku/duitkuTransfer.php';
+            // $url = 'http://192.168.99.246/duitku/duitkuTransfer.php';
         }
 
         // $url = 'https://passport.duitku.com/webapi/api/disbursement/transferclearing';
