@@ -1855,21 +1855,21 @@ class TrxTrpTicketController extends Controller
 
         if(in_array($model_query->jenis,['CPO','PK'])){
           $nonorinet = $model_query->ticket_a_netto - $model_query->ticket_b_netto;
-          if($nonorinet<0) $nonorinet*=-1;
+          // if($nonorinet<0) $nonorinet*=-1;
           $pembanding = ($model_query->ticket_a_netto>$model_query->ticket_b_netto)?$model_query->ticket_a_netto:$model_query->ticket_b_netto;
           
-          $model_query->batas_persen_susut = 0.3;
-          if(($nonorinet/$pembanding)*100 > $model_query->batas_persen_susut ){
+          $model_query->batas_persen_susut = -0.3;
+          if(round(($nonorinet/$pembanding)*100,2) < $model_query->batas_persen_susut ){
             $gen_salary_bonus = true;
           }
           
         }else if(in_array($model_query->jenis,['TBS'])){
           $orinet = $model_query->ticket_a_ori_netto - $model_query->ticket_b_ori_netto;
-          if($orinet<0) $orinet*=-1;
+          // if($orinet<0) $orinet*=-1;
           $pembanding = ($model_query->ticket_a_ori_netto>$model_query->ticket_b_ori_netto)?$model_query->ticket_a_ori_netto:$model_query->ticket_b_ori_netto;
 
           $model_query->batas_persen_susut = $model_query->uj->batas_persen_susut;
-          if(($orinet/$pembanding)*100 > $model_query->batas_persen_susut){
+          if(round(($orinet/$pembanding)*100,2) < $model_query->batas_persen_susut){
             $gen_salary_bonus = true;
           }
         }
@@ -2087,21 +2087,21 @@ class TrxTrpTicketController extends Controller
 
           if(in_array($v->jenis,['CPO','PK'])){
             $nonorinet = $v->ticket_a_netto - $v->ticket_b_netto;
-            if($nonorinet<0) $nonorinet*=-1;
+            // if($nonorinet<0) $nonorinet*=-1;
             $pembanding = ($v->ticket_a_netto>$v->ticket_b_netto)?$v->ticket_a_netto:$v->ticket_b_netto;
             
-            $v->batas_persen_susut = 0.3;
-            if(($nonorinet/$pembanding)*100 > $v->batas_persen_susut ){
+            $v->batas_persen_susut = -0.3;
+            if(round(($nonorinet/$pembanding)*100,2) < $v->batas_persen_susut ){
               $gen_salary_bonus = true;
             }
             
           }else if(in_array($v->jenis,['TBS'])){
             $orinet = $v->ticket_a_ori_netto - $v->ticket_b_ori_netto;
-            if($orinet<0) $orinet*=-1;
+            // if($orinet<0) $orinet*=-1;
             $pembanding = ($v->ticket_a_ori_netto>$v->ticket_b_ori_netto)?$v->ticket_a_ori_netto:$v->ticket_b_ori_netto;
 
             $v->batas_persen_susut = $v->uj->batas_persen_susut;
-            if(($orinet/$pembanding)*100 > $v->batas_persen_susut){
+            if(round(($orinet/$pembanding)*100,2) < $v->batas_persen_susut){
               $gen_salary_bonus = true;
             }
           }
