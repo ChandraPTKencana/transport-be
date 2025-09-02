@@ -144,7 +144,9 @@ class RunData extends Command
 
         // $trxtrp= \App\Models\MySql\TrxTrp::where("tanggal","<","2025-08-01")->update(["salary_paid_id"=>1]);
 
-        \App\Models\MySql\Ujalan::whereIn("jenis",['CPO','PK'])->where('deleted',0)->update([
+        \App\Models\MySql\Ujalan::whereIn("jenis",['CPO','PK'])->where(function ($q){
+            $q->where("deleted",0)->orWhere('deleted_at',">=","2025-08-01 00:00:00");
+        })->update([
             'batas_persen_susut'=>-0.3
         ]);
 
