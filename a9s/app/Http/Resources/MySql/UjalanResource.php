@@ -59,7 +59,7 @@ class UjalanResource extends JsonResource
             $data['batas_persen_susut'] = $this->batas_persen_susut ?? '';
         }
         
-        $data['status_batas_susut'] = $this->batas_persen_susut != 0.00 ? 'Terisi' : 'Kosong';
+        $data['status_batas_susut'] = $this->batas_persen_susut ? 'Terisi' : 'Kosong';
 
         return $data;
     }

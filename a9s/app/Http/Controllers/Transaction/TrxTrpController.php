@@ -1783,7 +1783,7 @@ class TrxTrpController extends Controller
       $total_b_tara+=$ticket_b_tara;
       $total_b_netto+=$ticket_b_netto;
 
-      $limitSusut = 0.4;
+      $limitSusut = 0.3;
 
       $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
       $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
@@ -2816,7 +2816,7 @@ class TrxTrpController extends Controller
 
     if($bigger==0) return [$diff,0];
 
-    return [$diff , $diff / $bigger * 100];
+    return [$diff , $diff / $a * 100];
   }
 
   public function doGenPVR(Request $request){
