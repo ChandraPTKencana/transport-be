@@ -57,6 +57,8 @@ class UjalanResource extends JsonResource
         $permissions = $admin->the_user->listPermissions();
         if(MyAdmin::checkScope($permissions, 'ujalan.batas_persen_susut.full_act',true)){
             $data['batas_persen_susut'] = $this->batas_persen_susut ?? '';
+        }else{
+            $data['batas_persen_susut'] = $this->batas_persen_susut != 0.00 ? 'Terisi' : 'Kosong';
         }
 
         return $data;
