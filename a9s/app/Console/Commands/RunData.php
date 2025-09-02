@@ -142,8 +142,12 @@ class RunData extends Command
         // $pm->account_code = '01.100.013';
         // $pm->save();
 
-        $trxtrp= \App\Models\MySql\TrxTrp::where("tanggal","<","2025-08-01")->update(["salary_paid_id"=>1]);
-        
+        // $trxtrp= \App\Models\MySql\TrxTrp::where("tanggal","<","2025-08-01")->update(["salary_paid_id"=>1]);
+
+        \App\Models\MySql\Ujalan::whereIn("jenis",['CPO','PK'])->where('deleted',0)->update([
+            'batas_persen_susut'=>-0.3
+        ]);
+
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");
     }
