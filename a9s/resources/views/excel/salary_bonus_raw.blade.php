@@ -22,9 +22,9 @@
       <td style="border: 1px solid black;">{{$loop->iteration}}</td>
       <td style="border: 1px solid black;">{{ $v["tanggal"] }}</td>
       <td style="border: 1px solid black;">{{ $v["type"] }}</td>
-      <td style="border: 1px solid black;">{{ $v["employee_name"] }}</td>
-      <td style="border: 1px solid black;">{{ $v["employee_ktp_no"] }}</td>
-      <td style="border: 1px solid black;">{{ $v["employee_sim_no"] }}</td>
+      <td style="border: 1px solid black;">{{ $v["employee"]?$v["employee"]["name"]:'' }}</td>
+      <td style="border: 1px solid black;">{{ $v["employee"]?$v["employee"]["ktp_no"]:'' }}</td>
+      <td style="border: 1px solid black;">{{ $v["employee"]?$v["employee"]["sim_no"]:'' }}</td>
       <td style="border: 1px solid black;">{{ $v["nominal"] }}</td>
       <td style="border: 1px solid black;">{{ $v["note"] }}</td>
       <td style="border: 1px solid black;">{{ $v["created_at"] }}</td>
