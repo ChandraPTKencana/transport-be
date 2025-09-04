@@ -39,4 +39,9 @@ class SalaryBonus extends Model
     {
         return $this->hasOne(IsUser::class, 'id', "deleted_user");
     }
+
+    public function trx_trp()
+    {
+        return $this->belongsTo(TrxTrp::class, "trx_trp_id", 'id');
+    }
 }

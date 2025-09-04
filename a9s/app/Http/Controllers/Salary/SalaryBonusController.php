@@ -56,7 +56,7 @@ class SalaryBonusController extends Controller
       "list_employee" => $list_employee,
     ], 200);
   }
-  public function index(Request $request)
+  public function index(Request $request, $download = false)
   {
     MyAdmin::checkScope($this->permissions, 'salary_bonus.views');
  
@@ -281,6 +281,9 @@ class SalaryBonusController extends Controller
     // ==============
     // Model Filter
     // ==============
+    if ($download){
+      $model_query = $model_query->with(['trx_trp']);
+    }
     $model_query = $model_query->exclude(['attachment_1']);
     $model_query = $model_query->with(['employee','deleted_by'])->get();
     return response()->json([
