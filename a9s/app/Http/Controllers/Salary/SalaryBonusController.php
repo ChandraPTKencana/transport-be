@@ -656,7 +656,7 @@ class SalaryBonusController extends Controller
       $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
       $value['created_at']=date("d-m-Y H:i:s",strtotime($value["created_at"]));
       $value['updated_at']=date("d-m-Y H:i:s",strtotime($value["updated_at"]));
-      $value['deleted_at']=date("d-m-Y H:i:s",strtotime($value["deleted_at"]));
+      $value['deleted_at']=$value["deleted_at"] ? date("d-m-Y H:i:s",strtotime($value["deleted_at"])) : '';
       array_push($newDetails,$value);
     }
 
