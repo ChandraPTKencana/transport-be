@@ -150,7 +150,8 @@ class RunPermit extends Command
             // ["permit"=>'standby_trx.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],            
             // ["permit"=>'trp_trx_ticket.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],            
 
-            ["permit"=>'ujalan.batas_persen_susut.full_act',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'salary_bonus.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],
+            // ["permit"=>'ujalan.batas_persen_susut.full_act',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
 
             // tidak jadi ["permit"=>'employee.transfer_data',"to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
 

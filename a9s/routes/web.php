@@ -276,6 +276,7 @@ Route::put('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController:
 Route::get('/salary_bonus_load_local', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'loadLocal']);
 Route::delete('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'delete']);
 Route::put('/salary_bonus_validasi', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'validasi']);
+Route::get('/salary_bonus/download_excel', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'downloadExcel']);
 // Route::get('/salary_bonus_generate_detail', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFiles']);
 // Route::get('/salary_bonus_preview_file', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'previewFile']);
 
