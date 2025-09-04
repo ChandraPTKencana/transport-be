@@ -29,7 +29,6 @@
       <td style="border: 1px solid black;">{{ $v["note"] }}</td>
       <td style="border: 1px solid black;">{{ $v["created_at"] }}</td>
       <td style="border: 1px solid black;">{{ $v["updated_at"] }}</td>
-      <td style="border: 1px solid black;">{{ $v["cost_center_desc"] }}</td>
       <td style="border: 1px solid black;">{{ $v["deleted_at"] }}</td>
       <td style="border: 1px solid black;">{{ $v["deleted_by"] ?$v["deleted_by"]["username"] :'' }}</td>
       <td style="border: 1px solid black;">{{ $v["deleted_reason"] }}</td>
