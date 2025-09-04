@@ -55,6 +55,7 @@ class SalaryBonusResource extends JsonResource
             'deleted_reason'    => $this->deleted_reason ?? "",
 
             'salary_paid_id'     => $this->salary_paid_id,
+            'trx_trp'            => new TrxTrpResource($this->whenLoaded('trx_trp')),
 
         ];
     }
