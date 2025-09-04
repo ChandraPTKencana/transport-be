@@ -24,8 +24,8 @@
       <td style="border: 1px solid black;">{{$loop->iteration}}</td>
       <td style="border: 1px solid black;">{{ $v["tanggal"] }}</td>
       <td style="border: 1px solid black;">{{ $v["type"] }}</td>
-      <td style="border: 1px solid black;">{{ $v["trx_trp"]?$v["trx_trp"]["xto"]:'' }}</td>
       <td style="border: 1px solid black;">{{ $v["trx_trp"]?$v["trx_trp"]["jenis"]:'' }}</td>
+      <td style="border: 1px solid black;">{{ $v["trx_trp"]?$v["trx_trp"]["xto"]:'' }}</td>
       <td style="border: 1px solid black;">{{ $v["employee"]?$v["employee"]["name"]:'' }}</td>
       <td style="border: 1px solid black;">{{ $v["employee"]?$v["employee"]["ktp_no"]:'' }}</td>
       <td style="border: 1px solid black;">{{ $v["employee"]?$v["employee"]["sim_no"]:'' }}</td>
