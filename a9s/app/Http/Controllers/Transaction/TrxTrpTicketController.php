@@ -1853,7 +1853,7 @@ class TrxTrpTicketController extends Controller
 
         $gen_salary_bonus = false;
 
-        if(in_array($model_query->jenis,['CPO','PK'])){
+        if(in_array($model_query->jenis,['CPO','PK']) && $model_query->tanggal >= '2025-08-01'){
           $nonorinet = $model_query->ticket_b_netto - $model_query->ticket_a_netto;
           // if($nonorinet<0) $nonorinet*=-1;
           $pembanding = $model_query->ticket_a_netto;
@@ -1863,7 +1863,7 @@ class TrxTrpTicketController extends Controller
             $gen_salary_bonus = true;
           }
           
-        }else if(in_array($model_query->jenis,['TBS'])){
+        }else if(in_array($model_query->jenis,['TBS']) && $model_query->tanggal >= '2025-08-01'){
           $orinet = $model_query->ticket_b_ori_netto - $model_query->ticket_a_ori_netto;
           // if($orinet<0) $orinet*=-1;
           $pembanding = $model_query->ticket_a_ori_netto;
@@ -2085,7 +2085,7 @@ class TrxTrpTicketController extends Controller
 
           $gen_salary_bonus = false;
 
-          if(in_array($v->jenis,['CPO','PK'])){
+          if(in_array($v->jenis,['CPO','PK']) && $v->tanggal >= '2025-08-01'){
             $nonorinet = $v->ticket_b_netto - $v->ticket_a_netto ;
             // if($nonorinet<0) $nonorinet*=-1;
             $pembanding = $v->ticket_a_netto;
@@ -2095,7 +2095,7 @@ class TrxTrpTicketController extends Controller
               $gen_salary_bonus = true;
             }
             
-          }else if(in_array($v->jenis,['TBS'])){
+          }else if(in_array($v->jenis,['TBS']) && $v->tanggal >= '2025-08-01'){
             $orinet = $v->ticket_b_ori_netto - $v->ticket_a_ori_netto;
             // if($orinet<0) $orinet*=-1;
             $pembanding = $v->ticket_a_ori_netto;
@@ -4140,13 +4140,23 @@ class TrxTrpTicketController extends Controller
 
     $final = $table1->unionAll($table2);
 
+    // $pabrik = strtolower($request->pabrik);
+    // if(strtolower(env("app_name"))!=$pabrik){
+    //   $pabrik = "ms_".$pabrik;
+    //   $table3 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no");
+    //   $table4 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
+    
+    //   $final = $final->unionAll($table3)->unionAll($table4);
+    // }
+
     $querySql = $final->toSql();
      
     $model_query = DB::table(DB::raw("($querySql) as a"))->mergeBindings($final);
      
     //Now you can do anything u like:
      
-    $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->offset($offset)->limit($limit)->get(); 
+    // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->offset($offset)->limit($limit)->get(); 
+    $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->get();
     return response()->json([
       "data" => $model_query,
     ], 200);    
