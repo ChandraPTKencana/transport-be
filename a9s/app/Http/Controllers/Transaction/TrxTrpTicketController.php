@@ -4140,15 +4140,6 @@ class TrxTrpTicketController extends Controller
 
     $final = $table1->unionAll($table2);
 
-    // $pabrik = strtolower($request->pabrik);
-    // if(strtolower(env("app_name"))!=$pabrik){
-    //   $pabrik = "ms_".$pabrik;
-    //   $table3 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no");
-    //   $table4 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
-    
-    //   $final = $final->unionAll($table3)->unionAll($table4);
-    // }
-
     $querySql = $final->toSql();
      
     $model_query = DB::table(DB::raw("($querySql) as a"))->mergeBindings($final);
@@ -4156,7 +4147,54 @@ class TrxTrpTicketController extends Controller
     //Now you can do anything u like:
      
     // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->offset($offset)->limit($limit)->get(); 
-    $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->get();
+    // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->get();
+
+    $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis');
+
+    $pabrik = strtolower("KPN");
+    if(strtolower(env("app_name"))==$pabrik){
+        $model_query = $model_query->having('lebih',">",1)->get();
+    }else{
+        $model_query = $model_query->get();
+    }
+
+    if(strtolower(env("app_name"))!=$pabrik){
+      $pabrik = "ms_".$pabrik;
+
+      $table3 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no");
+      $table4 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
+  
+      $final = $table3->unionAll($table4);
+
+      $querySql = $final->toSql();
+      
+      $model_query2 = DB::connection($pabrik)->table(DB::raw("($querySql) as a"))->mergeBindings($final);
+      
+      $model_query2 = $model_query2->selectRaw("ticket_no")->groupBy('ticket_no')->pluck("ticket_no")->toArray();
+
+      $mq = $model_query->toArray();
+      $model_query = [];
+      foreach ($mq as $k => $v) {
+
+          $lebih = $v->lebih;
+          if(array_search( $v->ticket_no, $model_query2) === false){
+          }else{
+            $lebih+=1;
+          }
+          
+          array_push($model_query,[
+            "jenis"=>$v->jenis,
+            "ticket_no"=>$v->ticket_no,
+            "lebih"=>$lebih,
+          ]);
+      }
+      
+      // $final = $final->unionAll($table3)->unionAll($table4);
+      $model_query = array_filter($model_query,function ($x){
+          return $x['lebih'] >= 2;
+      });
+    }
+
     return response()->json([
       "data" => $model_query,
     ], 200);    

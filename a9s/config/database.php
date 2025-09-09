@@ -73,6 +73,186 @@ return [
             'retry_delay' => 200, // Delay antar percobaan dalam detik
         ],
 
+        'ms_kpn' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => "10.10.26.197",
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'pool' => [
+                'max_connections' => 100,  // Ukuran pool
+                'idle_timeout' => 60,     // Dalam detik
+            ],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => 5, // 5 menit
+                PDO::ATTR_PERSISTENT => true, // Koneksi persisten,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
+            ]) : [],
+            'retries' => 3, // Jumlah percobaan ulang
+            'retry_delay' => 200, // Delay antar percobaan dalam detik
+        ],
+
+        'ms_kas' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => "10.10.88.197",
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'pool' => [
+                'max_connections' => 100,  // Ukuran pool
+                'idle_timeout' => 60,     // Dalam detik
+            ],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => 5, // 5 menit
+                PDO::ATTR_PERSISTENT => true, // Koneksi persisten,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
+            ]) : [],
+            'retries' => 3, // Jumlah percobaan ulang
+            'retry_delay' => 200, // Delay antar percobaan dalam detik
+        ],
+
+        'ms_kap' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => "10.10.7.197",
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'pool' => [
+                'max_connections' => 100,  // Ukuran pool
+                'idle_timeout' => 60,     // Dalam detik
+            ],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => 5, // 5 menit
+                PDO::ATTR_PERSISTENT => true, // Koneksi persisten,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
+            ]) : [],
+            'retries' => 3, // Jumlah percobaan ulang
+            'retry_delay' => 200, // Delay antar percobaan dalam detik
+        ],
+
+        'ms_arp' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => "10.10.30.196",
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'pool' => [
+                'max_connections' => 100,  // Ukuran pool
+                'idle_timeout' => 60,     // Dalam detik
+            ],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => 5, // 5 menit
+                PDO::ATTR_PERSISTENT => true, // Koneksi persisten,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
+            ]) : [],
+            'retries' => 3, // Jumlah percobaan ulang
+            'retry_delay' => 200, // Delay antar percobaan dalam detik
+        ],
+
+        'ms_kus' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => "10.10.29.196",
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'pool' => [
+                'max_connections' => 100,  // Ukuran pool
+                'idle_timeout' => 60,     // Dalam detik
+            ],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => 5, // 5 menit
+                PDO::ATTR_PERSISTENT => true, // Koneksi persisten,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
+            ]) : [],
+            'retries' => 3, // Jumlah percobaan ulang
+            'retry_delay' => 200, // Delay antar percobaan dalam detik
+        ],
+
+        'ms_smp' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => "10.10.77.196",
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'pool' => [
+                'max_connections' => 100,  // Ukuran pool
+                'idle_timeout' => 60,     // Dalam detik
+            ],
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => 5, // 5 menit
+                PDO::ATTR_PERSISTENT => true, // Koneksi persisten,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION wait_timeout=300, net_read_timeout=300, net_write_timeout=300",
+            ]) : [],
+            'retries' => 3, // Jumlah percobaan ulang
+            'retry_delay' => 200, // Delay antar percobaan dalam detik
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),
