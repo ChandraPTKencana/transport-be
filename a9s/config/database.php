@@ -76,7 +76,7 @@ return [
         'ms_kpn' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => "10.10.26.197",
+            'host' => "169.254.12.129",
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
@@ -106,7 +106,7 @@ return [
         'ms_kas' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => "10.10.88.197",
+            'host' => "169.254.46.74",
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
@@ -136,7 +136,7 @@ return [
         'ms_kap' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => "10.10.7.197",
+            'host' => "169.254.42.97",
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
@@ -166,7 +166,7 @@ return [
         'ms_arp' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => "10.10.30.196",
+            'host' => "169.254.143.70",
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
@@ -196,7 +196,7 @@ return [
         'ms_kus' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => "10.10.29.196",
+            'host' => "169.254.36.52",
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
@@ -226,7 +226,7 @@ return [
         'ms_smp' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => "10.10.77.196",
+            'host' => "169.254.180.37",
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
