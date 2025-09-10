@@ -87,8 +87,10 @@ class SalaryBonusController extends Controller
     //======================================================================================================
     // Init Model
     //======================================================================================================
-    $model_query = SalaryBonus::offset($offset)->limit($limit);
-
+    $model_query = new SalaryBonus();
+    if (!$download) {
+      $model_query = $model_query->offset($offset)->limit($limit);
+    }
     $first_row=[];
     if($request->first_row){
       $first_row 	= json_decode($request->first_row, true);

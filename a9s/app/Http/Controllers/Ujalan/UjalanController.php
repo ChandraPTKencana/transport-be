@@ -78,7 +78,10 @@ class UjalanController extends Controller
     //======================================================================================================
     // Init Model
     //======================================================================================================
-    $model_query = Ujalan::offset($offset)->limit($limit);
+    $model_query = new Ujalan();
+    if (!$download) {
+      $model_query = $model_query->offset($offset)->limit($limit);
+    }
 
     $first_row=[];
     if($request->first_row){
