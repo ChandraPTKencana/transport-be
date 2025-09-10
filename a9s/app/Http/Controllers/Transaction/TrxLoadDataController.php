@@ -151,7 +151,7 @@ class TrxLoadDataController extends Controller
 
     try {
       $arr_tickets = [];
-      $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date_from)->get();
+      $used_ticket_pvs = \App\Models\MySql\TrxTrp::where("created_at",">=",$date_from)->where("created_at","<=",$date_to)->get();
       foreach ($used_ticket_pvs as $key=>$val){    
         if($val->ticket_a_no){
           array_push($arr_tickets,$val->ticket_a_no);
