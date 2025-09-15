@@ -63,7 +63,7 @@
       
       <td style="border: 1px solid black;">
         @foreach($v['details'] as $kd=>$vd)
-          {{ $vd["tanggal"] }} [{{ $vd["attachment_1_type"] ? 'HAS IMG' : 'NO IMG }}]
+          {{ $vd["tanggal"] }} [{{ $vd["attachment_1_type"] ? 'HAS IMG' : 'NO IMG' }}]
         @endforeach
       </td>
       <td style="border: 1px solid black;">{{ $v["salary_paid_periode"] }}</td>
