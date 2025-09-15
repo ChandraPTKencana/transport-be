@@ -1752,6 +1752,7 @@ class StandbyTrxController extends Controller
       });
 
       $value['details_count']=count($be_paid);
+      $value['salary_paid_periode']=$value['salary_paid'] ? date("m-Y",strtotime($value["salary_paid"]['period_end']))."[".$value["salary_paid"]['period_part']."]" :'';
 
       array_push($newDetails,$value);
     }

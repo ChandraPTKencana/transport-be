@@ -66,7 +66,7 @@
           {{ $vd["tanggal"] }}
         @endforeach
       </td>
-      <td style="border: 1px solid black;">{{ $v["salary_paid"] }}</td>
+      <td style="border: 1px solid black;">{{ $v["salary_paid_periode"] }}</td>
 
       <td style="border: 1px solid black;">{{ $v["supir"] }}</td>
       <td style="border: 1px solid black;">{{ $v["supir_rek_no"] ? mb_strtoupper("'".$v["supir_rek_no"],'UTF-8') : '' }}</td>
