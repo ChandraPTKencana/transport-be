@@ -1753,6 +1753,8 @@ class StandbyTrxController extends Controller
 
       $value['details_count']=count($be_paid);
       $value['salary_paid_periode']=$value['salary_paid'] ? date("m-Y",strtotime($value["salary_paid"]['period_end']))."[".$value["salary_paid"]['period_part']."]" :'';
+      $value['updated_at']=date("d-m-Y H:i:s",strtotime($value["updated_at"]));
+      $value['created_at']=date("d-m-Y H:i:s",strtotime($value["created_at"]));
 
       array_push($newDetails,$value);
     }
