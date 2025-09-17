@@ -52,6 +52,7 @@ class EmployeeTrip extends Controller
       ->where("ritase_val2",0)
       ->where("deleted",0)
       ->where("req_deleted",0)
+      ->where("tanggal",">=","2025-09-17")
       ->orderBy("id","asc")
       ->first();
 
