@@ -80,22 +80,19 @@ class EmployeeTrip extends Controller
         // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
         $img = "data:image/png;base64,";
         if(mb_detect_encoding($v->gambar)===false){
-          // Buat instance gambar dari data biner
-          $image = Image::make($v->gambar);
-           // Mengubah ukuran gambar (misalnya, menjadi lebar 600px)
-          $image->resize(600, null, function ($constraint) {
-            $constraint->aspectRatio();
-          });
+          // $img.=base64_encode($v->gambar);
+          $image = Image::read($v->gambar);
 
-          // Mengurangi kualitas gambar (misalnya, 75%)
-          // Kualitas diatur antara 0 (kualitas terburuk) hingga 100 (kualitas terbaik)
-          $compressedImage = $image->encode('jpg', 50);
+            // Mengubah ukuran gambar (misalnya, menjadi lebar 600px).
+            // Gunakan scale() untuk menjaga rasio aspek secara otomatis.
+            $image->scale(width: 300);
 
-          // Dapatkan data biner dari gambar yang sudah dikompresi
-          $compressedImageData = (string) $compressedImage;
+            // Mengubah ke format JPEG dengan kualitas 75 (dapat disesuaikan).
+            // toJpeg() mengembalikan objek EncodedImage.
+            $compressedImage = $image->toJpeg(quality: 50);
 
-          // Konversi ke Base64
-          $img .= base64_encode($compressedImageData);
+            // Mengonversi data biner dari objek EncodedImage ke Base64
+            $img .= base64_encode($compressedImage);
         }else{
           $img.=$v->gambar;        
         }
