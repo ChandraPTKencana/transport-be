@@ -4108,7 +4108,7 @@ class TrxTrpTicketController extends Controller
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.views']);
 
     $pabrik = strtoupper($request->pabrik);
-    if(array_search($pabrik,MyLib::$list_pabrik)==false){
+    if(array_search($pabrik,MyLib::$list_pabrik)===false){
       throw new MyException(["message" => "Nama Pabrik Tidak Terdaftar"]);
     }
     $pabrik = strtolower($pabrik);
