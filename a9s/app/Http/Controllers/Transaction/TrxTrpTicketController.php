@@ -4156,13 +4156,11 @@ class TrxTrpTicketController extends Controller
     // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->offset($offset)->limit($limit)->get(); 
     // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->get();
 
-    $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis');
-
     
     if(strtolower(env("app_name"))==$pabrik){
-        $model_query = $model_query->having('lebih',">",1)->get();
+        $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->get();
     }else{
-        $model_query = $model_query->get();
+        $model_query = $model_query->selectRaw("jenis, ticket_no,concat('1') as lebih")->groupBy('ticket_no','jenis')->get();
     }
 
     if(strtolower(env("app_name"))!=$pabrik){
