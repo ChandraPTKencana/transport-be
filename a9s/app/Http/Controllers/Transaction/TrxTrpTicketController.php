@@ -4106,6 +4106,11 @@ class TrxTrpTicketController extends Controller
   public function ticketOver(Request $request)
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.ticket.views']);
+    $pabrik = strtolower($request->pabrik);
+
+    if(array_search($pabrik,MyLib::$list_pabrik)==false){
+      throw new MyException(["message" => "Nama Pabrik Tidak Terdaftar"]);
+    }
 
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -4151,7 +4156,7 @@ class TrxTrpTicketController extends Controller
 
     $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis');
 
-    $pabrik = strtolower("KPN");
+    
     if(strtolower(env("app_name"))==$pabrik){
         $model_query = $model_query->having('lebih',">",1)->get();
     }else{
