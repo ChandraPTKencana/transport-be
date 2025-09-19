@@ -586,6 +586,11 @@ class TrxTrpSusutController extends Controller
 
     if($bigger==0) return [$diff,0];
 
+    if($a!=0)
     return [$diff , $diff / $a * 100];
+    else
+    return [$diff , $diff];
+
+    // return [$diff , $diff / $a * 100];
   }
 }

@@ -2888,7 +2888,11 @@ class TrxTrpController extends Controller
 
     if($bigger==0) return [$diff,0];
 
+    // return [$diff , $diff / $a * 100];
+    if($a!=0)
     return [$diff , $diff / $a * 100];
+    else
+    return [$diff , $diff];
   }
 
   public function doGenPVR(Request $request){
