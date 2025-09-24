@@ -155,6 +155,9 @@ class StandbyTrxController extends Controller
         ["val_name","val_user"],
         ["val1_name","val1_user"],
         ["val2_name","val2_user"],
+        ["val3_name","val3_user"],
+        ["val4_name","val4_user"],
+        ["val5_name","val5_user"],
         ["req_deleted_name","req_deleted_user"],
         ["deleted_name","deleted_user"],
       ];
@@ -287,7 +290,7 @@ class StandbyTrxController extends Controller
       $model_query = $model_query->with(['standby_mst']);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','standby_mst','salary_paid','details'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','deleted_by','req_deleted_by','standby_mst','salary_paid','details'=>function($q) {
       $q->orderBy("tanggal","asc");
       $q->select("id", "tanggal","standby_trx_id","attachment_1_type","be_paid");
     }])
@@ -302,7 +305,7 @@ class StandbyTrxController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'standby_trx.view');
 
-    $model_query = StandbyTrx::with(['val_by','val1_by','val2_by','deleted_by','req_deleted_by','details'=>function($q){
+    $model_query = StandbyTrx::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','deleted_by','req_deleted_by','details'=>function($q){
       $q->orderby("ordinal","asc");      
     },'standby_mst'])->find($request->id);
     return response()->json([
@@ -315,6 +318,7 @@ class StandbyTrxController extends Controller
       'details'                          => 'required|array',
       'details.*.p_status'               => 'required|in:Remove,Add,Edit',
       'details.*.tanggal'                => 'required_if:details.*.p_status,Add,Edit|date_format:Y-m-d',
+      'details.*.waktu'                  => 'required_if:details.*.p_status,Add,Edit|date_format:H:i',
     ];
 
     $messages = [
@@ -326,6 +330,9 @@ class StandbyTrxController extends Controller
     foreach ($details_in as $index => $msg) {
       $messages["details.{$index}.tanggal.required_if"] = "Baris #" . ($index + 1) . ". Tanggal tidak boleh kosong.";
       $messages["details.{$index}.tanggal.date_format"] = "Baris #" . ($index + 1) . ". Format Tanggal Salah.";
+
+      $messages["details.{$index}.waktu.required_if"] = "Baris #" . ($index + 1) . ". Waktu tidak boleh kosong.";
+      $messages["details.{$index}.waktu.date_format"] = "Baris #" . ($index + 1) . ". Format Waktu Salah.";
     }
 
     $validator = Validator::make(['details' => $details_in], $rules, $messages);
@@ -1530,7 +1537,7 @@ class StandbyTrxController extends Controller
   // }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.val','standby_trx.val1','standby_trx.val2']);
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.val','standby_trx.val1','standby_trx.val2','standby_trx.val3','standby_trx.val4','standby_trx.val5']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
@@ -1557,7 +1564,7 @@ class StandbyTrxController extends Controller
       // if($model_query->cost_center_code=="")
       // throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
 
-      if($model_query->val && $model_query->val1 && $model_query->val2){
+      if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3 && $model_query->val4 && $model_query->val5){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
@@ -1582,6 +1589,36 @@ class StandbyTrxController extends Controller
         if($model_query->val1==0){
           throw new \Exception("Mandor Harus Memvalidasi Terlebih Dahulu",1);
         }
+
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+        
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val3',true) && !$model_query->val3){
+        if($model_query->val2==0){
+          throw new \Exception("Staff Logistik Harus Memvalidasi Terlebih Dahulu",1);
+        }
+        $model_query->val3 = 1;
+        $model_query->val3_user = $this->admin_id;
+        $model_query->val3_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val4',true) && !$model_query->val4){
+        if($model_query->val2==0){
+          throw new \Exception("Staff Logistik Harus Memvalidasi Terlebih Dahulu",1);
+        }
+        $model_query->val4 = 1;
+        $model_query->val4_user = $this->admin_id;
+        $model_query->val4_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.val5',true) && !$model_query->val5){
+        if($model_query->val2==0){
+          throw new \Exception("Staff Logistik Harus Memvalidasi Terlebih Dahulu",1);
+        }
+
         if(MyAdmin::checkScope($this->permissions, 'standby_trx.detail.decide_paid',true)){
           $details_in = json_decode($request->details, true);
           // $this->validateItems($details_in);
@@ -1595,13 +1632,11 @@ class StandbyTrxController extends Controller
             MyLog::sys("standby_trx_dtl",$model_query->id,"change","update be_paid =>".$value['be_paid']." | standby trx id ".$model_query->id);
           }
         }
-
-        $model_query->val2 = 1;
-        $model_query->val2_user = $this->admin_id;
-        $model_query->val2_at = $t_stamp;
-        
+        $model_query->val5 = 1;
+        $model_query->val5_user = $this->admin_id;
+        $model_query->val5_at = $t_stamp;
       }
-
+      
       $model_query->save();
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys("standby_trx",$request->id,"approve",$SYSNOTE);
@@ -1621,6 +1656,18 @@ class StandbyTrxController extends Controller
         "val2_user"=>$model_query->val2_user,
         "val2_at"=>$model_query->val2_at,
         "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null,
+        "val4"=>$model_query->val4,
+        "val4_user"=>$model_query->val4_user,
+        "val4_at"=>$model_query->val4_at,
+        "val4_by"=>$model_query->val4_user ? new IsUserResource(IsUser::find($model_query->val4_user)) : null,
+        "val5"=>$model_query->val5,
+        "val5_user"=>$model_query->val5_user,
+        "val5_at"=>$model_query->val5_at,
+        "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -1642,7 +1689,7 @@ class StandbyTrxController extends Controller
   }
 
   public function unvalidasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.unval','standby_trx.unval1','standby_trx.unval2']);
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.unval','standby_trx.unval1','standby_trx.unval2','standby_trx.unval3','standby_trx.unval4','standby_trx.unval5']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\StandbyTrx,id",
@@ -1669,7 +1716,7 @@ class StandbyTrxController extends Controller
       // if($model_query->cost_center_code=="")
       // throw new \Exception("Harap Mengisi Cost Center Code Sebelum validasi",1);
 
-      if(!$model_query->val && !$model_query->val1 && !$model_query->val2){
+      if(!$model_query->val && !$model_query->val1 && !$model_query->val2 && !$model_query->val3 && !$model_query->val4 && !$model_query->val5){
         throw new \Exception("Data Sudah Terunvalidasi Sepenuhnya",1);
       }
       $SYSOLD                     = clone($model_query);
@@ -1692,6 +1739,24 @@ class StandbyTrxController extends Controller
         // $model_query->val2_at = $t_stamp;
       }
 
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval3',true) && $model_query->val3){
+        $model_query->val3 = 0;
+        // $model_query->val3_user = $this->admin_id;
+        // $model_query->val3_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval4',true) && $model_query->val4){
+        $model_query->val4 = 0;
+        // $model_query->val4_user = $this->admin_id;
+        // $model_query->val4_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'standby_trx.unval5',true) && $model_query->val5){
+        $model_query->val5 = 0;
+        // $model_query->val5_user = $this->admin_id;
+        // $model_query->val5_at = $t_stamp;
+      }
+
       $model_query->save();
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
 
@@ -1712,6 +1777,18 @@ class StandbyTrxController extends Controller
         "val2_user"=>$model_query->val2_user,
         "val2_at"=>$model_query->val2_at,
         "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null,
+        "val4"=>$model_query->val4,
+        "val4_user"=>$model_query->val4_user,
+        "val4_at"=>$model_query->val4_at,
+        "val4_by"=>$model_query->val4_user ? new IsUserResource(IsUser::find($model_query->val4_user)) : null,
+        "val5"=>$model_query->val5,
+        "val5_user"=>$model_query->val5_user,
+        "val5_at"=>$model_query->val5_at,
+        "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

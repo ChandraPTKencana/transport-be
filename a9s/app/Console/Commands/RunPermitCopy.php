@@ -37,9 +37,28 @@ class RunPermitCopy extends Command
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
         // Schema::disableForeignKeyConstraints();
+        $this->info("Create New Role Start\n ");
+        $lists = [
+            'LOGISTIC_ADM'
+        ];
+
+        foreach ($lists as $k => $v) {
+            if(!PermissionGroup::where('name',$v)->first()){
+                $this->info("insert permission group".$v."\n ");
+    
+                PermissionGroup::insert([
+                    'name'=>$v,
+                    'created_user'=>1,
+                    'updated_user'=>1,
+                ]);
+            }
+        }
+        $this->info("Create New Role Done\n ");
+
+        $this->info("Copy Role Start\n ");
 
         $from_name = "LOGISTIC_STAFF";
-        $to_name = ['LOGISTIC_SPV','LOGISTIC_MANAGER'];
+        $to_name = ['LOGISTIC_ADM'];
 
 
         $from_id = PermissionGroup::where('name', $from_name)->first()->id;

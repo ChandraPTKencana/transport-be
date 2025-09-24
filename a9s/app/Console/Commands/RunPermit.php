@@ -152,9 +152,17 @@ class RunPermit extends Command
 
             // ["permit"=>'salary_bonus.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],
             // ["permit"=>'ujalan.batas_persen_susut.full_act',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'trp_trx.absen.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],
+            // ["permit"=>'trp_trx.absen.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],
 
             // tidak jadi ["permit"=>'employee.transfer_data',"to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+
+            ["permit"=>'standby_trx.val3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM']],
+            ["permit"=>'standby_trx.val4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV']],
+            ["permit"=>'standby_trx.val5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+
+            ["permit"=>'standby_trx.unval3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'standby_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'standby_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
 
         ];
 

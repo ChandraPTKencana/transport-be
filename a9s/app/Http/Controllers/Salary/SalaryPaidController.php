@@ -683,7 +683,8 @@ class SalaryPaidController extends Controller
     // }
 
     $sts = StandbyTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
-    ->where('val2',1)->whereNull('salary_paid_id')->where('req_deleted',0)->where('deleted',0)->with(['details'=>function ($q){
+    ->where('val',1)->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)
+    ->whereNull('salary_paid_id')->where('req_deleted',0)->where('deleted',0)->with(['details'=>function ($q){
       $q->where("be_paid",1);      
     }])->lockForUpdate()->get();
 

@@ -27,6 +27,21 @@ class StandbyTrx extends Model
         return $this->hasOne(IsUser::class, 'id', "val2_user");
     }
 
+    public function val3_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val3_user");
+    }
+
+    public function val4_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val4_user");
+    }
+
+    public function val5_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val5_user");
+    }
+
     public function deleted_by()
     {
         return $this->hasOne(IsUser::class, 'id', "deleted_user");

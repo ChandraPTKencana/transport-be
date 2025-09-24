@@ -1,0 +1,26 @@
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
+
+function encryptText($plainText, $password) {
+    $salt = Str::random(16);
+    $key = hash_pbkdf2('sha256', $password, $salt, 100000, 32, true);
+    $encrypted = openssl_encrypt($plainText, 'aes-256-cbc', $key, 0, substr($key, 0, 16));
+    return ['encrypted' => base64_encode($encrypted), 'salt' => $salt];
+}
+
+function decryptText($encryptedText, $password, $salt) {
+    $key = hash_pbkdf2('sha256', $password, $salt, 100000, 32, true);
+    $decrypted = openssl_decrypt(base64_decode($encryptedText), 'aes-256-cbc', $key, 0, substr($key, 0, 16));
+    return $decrypted;
+}
+
+// Example usage:
+$password = 'secure_password';
+$plainText = 'Secret Message';
+
+$result = encryptText($plainText, $password);
+echo "Encrypted: {$result['encrypted']}\n";
+echo "Salt: {$result['salt']}\n";
+
+$decrypted = decryptText($result['encrypted'], $password, $result['salt']);
+echo "Decrypted: $decrypted\n";
