@@ -359,6 +359,10 @@ class StandbyTrxController extends Controller
       MyAdmin::checkScope($this->permissions, 'standby_trx.detail.insert');
     }
 
+    if(count($details_in)>1){
+      throw new MyException(["message" => "Isi Detail Standby Trx hanya boleh 1"], 400);
+    }
+
     $t_stamp = date("Y-m-d H:i:s");
     // $online_status=$request->online_status;
     
@@ -600,6 +604,10 @@ class StandbyTrxController extends Controller
 
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
+
+    if(count($details_in)>1){
+      throw new MyException(["message" => "Isi Detail Standby Trx hanya boleh 1"], 400);
+    }
 
     DB::beginTransaction();
     try {
