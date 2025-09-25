@@ -1178,7 +1178,9 @@ class RptSalaryController extends Controller
         }
       }
 
-      $v->salary_paid_id = $salary_paid[1]->id;
+      $v->bonus_trip_supir  = $smd->bonus_trip_supir;
+      $v->bonus_trip_kernet = $smd->bonus_trip_kernet;
+      $v->salary_paid_id    = $salary_paid[1]->id;
       $v->save();
     }
 

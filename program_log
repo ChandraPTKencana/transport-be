@@ -1,0 +1,37 @@
+25-09-2025
+-> Ujalan (Bonus Trip)
+- Tambahkan Field Bonus Trip Supir dan kernet di trx_trp (php artisan migrate)
+- Semua uang jalan yang ada bonus trip supir dan kernet nya inject ke trx_trp (php artisan run_data)
+- Pengisian bonus trip hanya di lakukan oleh manager selain itu sudah tidak diizinkan ( di form yang sama dengan batas persen susut )
+- saat Generate Salary Report (Perbulan) Bonus Trip akan diambil dari nilai terakhir yang di set di uang jalan.
+- saat Generate Salary Report (Perbulan) Bonus Trip akan di record ke trx trp juga.
+ 
+24-09-2025
+->Standby TRX 
+ - (php artisan migrate)
+ - Tambahkan Role Admin (php artisan run_permit_copy)
+ - Tambahkan approve/validasi untuk adm(val3),spv(val4),dan manager(val5) (php artisan run_permit)
+ - Saat manager approve , adm dan spv langsung terapprove  (php artisan run_permit)
+ - Saat spv approve, adm langsung terapprove (php artisan run_permit)
+ - Manager Yang Menentukan dibayar tidaknya standby trx (set standby_trx.detail.decide_paid true)
+ - Selain manager sudah tidak menentukan bayar atau tidaknya standby trx(set standby_trx.detail.decide_paid false) 
+ - Manager, spv ,adm tidak melakukan approve(val2) lagi (set standby_trx.val2 false)
+ 
+ - Staff Logistik harus approve/validasi dulu sebelum dilanjutkan oleh adm,spv,manager 
+ - Waktu wajib diisi sesuai dengan gambar yang di masukkan
+ - Isi Detail Standby Trx hanya boleh 1
+ - Standby trx yang sudah di validasi oleh semua pihak dan dipilih untuk dibayarkan saja yang akan di generate ke salary paid
+
+Pemberitahuan Informasi Update Program 25-09-2025 10:00
+->Standby TRX 
+ - Tambahkan Role Admin
+ - Tambahkan approve/validasi untuk adm(val3),spv(val4),dan manager(val5)
+ - Saat manager approve , adm dan spv langsung terapprove 
+ - Saat spv approve, adm langsung terapprove
+ - Manager Yang Menentukan dibayar tidaknya standby trx
+ - Selain manager sudah tidak menentukan bayar atau tidaknya standby trx 
+ - Manager, spv ,adm tidak melakukan approve(val2) lagi
+ - Waktu wajib diisi sesuai dengan gambar yang di masukkan
+ - Staff Logistik harus approve/validasi dulu sebelum dilanjutkan oleh adm,spv,manager 
+ - Isi Detail Standby Trx hanya boleh 1
+ - Standby trx yang sudah di validasi oleh semua pihak dan dipilih untuk dibayarkan saja yang akan di generate ke salary paid

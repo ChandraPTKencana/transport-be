@@ -458,8 +458,8 @@ class UjalanController extends Controller
       $model_query                    = new Ujalan();      
       $model_query->xto               = $request->xto;
       $model_query->km_range          = $request->km_range ?? 0;
-      $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
-      $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+      // $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
+      // $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
       // $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
       $model_query->tipe              = $request->tipe;
       $model_query->jenis             = $request->jenis;
@@ -676,8 +676,8 @@ class UjalanController extends Controller
       if(MyAdmin::checkScope($this->permissions,'ujalan.modify',true)){
         $model_query->xto               = $request->xto;
         $model_query->km_range          = $request->km_range ?? 0;
-        $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
-        $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+        // $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
+        // $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
         // $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
         $model_query->tipe              = $request->tipe;
         $model_query->jenis             = $request->jenis;
@@ -1556,6 +1556,9 @@ class UjalanController extends Controller
       
       // $model_query->batas_persen_susut  = $request->batas_persen_susut;
       $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
+      $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
+      $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+
       $model_query->updated_at          = $t_stamp;
       $model_query->updated_user        = $this->admin_id;  
 
