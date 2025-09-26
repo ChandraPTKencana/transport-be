@@ -620,7 +620,12 @@ class TrxTrpTransferController extends Controller
       }
 
 
-      if((!isset($kernet) && $model_query->duitku_supir_trf_res_code=="00") || (isset($kernet) && $model_query->duitku_supir_trf_res_code=="00" && $model_query->duitku_kernet_trf_res_code=="00")){
+      if(
+      //   (!isset($kernet) && $model_query->duitku_supir_trf_res_code=="00") || 
+      // (isset($kernet) && $model_query->duitku_supir_trf_res_code=="00" && $model_query->duitku_kernet_trf_res_code=="00") ||
+      (!isset($kernet) && $model_query->rp_supir_user)||
+      (isset($kernet) && $model_query->rp_supir_user && $model_query->rp_kernet_user)
+      ){
         $model_query->received_payment=1;
         $model_query->supir_rek_no = $supir->rek_no;
         if(isset($kernet)){
@@ -687,7 +692,7 @@ class TrxTrpTransferController extends Controller
       DB::commit();
 
       $error=[];
-      if($model_query->duitku_supir_inv_res_code!=="00"){
+      if($supir_money > 0 && $model_query->duitku_supir_inv_res_code!=="00"){
         $msg = TrfDuitku::info_inv($model_query->duitku_supir_inv_res_code);
         if($msg==""){
           array_push($error,"Supir:Unknown Error");
@@ -696,7 +701,7 @@ class TrxTrpTransferController extends Controller
         }
       }
 
-      if($model_query->duitku_supir_trf_res_code!=="00"){
+      if($supir_money > 0 && $model_query->duitku_supir_trf_res_code!=="00"){
         $msg = TrfDuitku::info_inv($model_query->duitku_supir_trf_res_code);
         if($msg==""){
           array_push($error,"Supir:Unknown Error");
@@ -705,7 +710,7 @@ class TrxTrpTransferController extends Controller
         }
       }
 
-      if(isset($kernet) && $model_query->duitku_kernet_inv_res_code!=="00"){
+      if(isset($kernet) && $kernet_money > 0 && $model_query->duitku_kernet_inv_res_code!=="00"){
         $msg = TrfDuitku::info_inv($model_query->duitku_kernet_inv_res_code);
         if($msg==""){
           array_push($error,"Kernet:Unknown Error");
@@ -714,7 +719,7 @@ class TrxTrpTransferController extends Controller
         }
       }
 
-      if(isset($kernet) && $model_query->duitku_kernet_trf_res_code!=="00"){
+      if(isset($kernet) && $kernet_money > 0 && $model_query->duitku_kernet_trf_res_code!=="00"){
         $msg = TrfDuitku::info_inv($model_query->duitku_kernet_trf_res_code);
         if($msg==""){
           array_push($error,"Kernet:Unknown Error");
