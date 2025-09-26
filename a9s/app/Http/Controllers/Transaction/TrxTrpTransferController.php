@@ -473,11 +473,16 @@ class TrxTrpTransferController extends Controller
 
       $supir_money = 0;
       $kernet_money = 0;
+      $xfor_supir_exists = 0;
+      $xfor_kernet_exists = 0;
+
       foreach ($model_query->uj_details2 as $key => $val) {
         if($val->xfor=='Kernet'){
           $kernet_money+=$val->amount*$val->qty;
+          $xfor_kernet_exists++;
         }else{
           $supir_money+=$val->amount*$val->qty;
+          $xfor_supir_exists++;
         }
       }
 
@@ -530,8 +535,8 @@ class TrxTrpTransferController extends Controller
         if(!$supir->rek_no)
         throw new \Exception("Supir Belum Memiliki rekening",1);
 
-        if($supir_money==0)
-        throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi supir atau semua berisikan kernet",1);
+        if($supir_money==0 && $xfor_supir_exists == 0)
+        throw new \Exception("Cek kembali master uang jalan detail PVR xfor tidak ada berisi supir",1);
 
         if($supir_money < 0)
         throw new \Exception("Potongan Supir tidak Diterima Karna Nilai Potongan Lebih Besar Dari Uang Yang Akan Ditransfer kan",1);
@@ -546,8 +551,8 @@ class TrxTrpTransferController extends Controller
         if(!$kernet->rek_no)
         throw new \Exception("Supir Belum Memiliki rekening",1);
 
-        if($kernet_money==0)
-        throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi kernet atau semua berisikan kernet",1);
+        if($kernet_money==0  && $xfor_kernet_exists == 0)
+        throw new \Exception("Cek kembali master uang jalan detail PVR xfor tidak ada berisi kernet",1);
 
         if($kernet_money < 0)
         throw new \Exception("Potongan Kernet tidak Diterima Karna Nilai Potongan Lebih Besar Dari Uang Yang Akan Ditransfer kan",1);
@@ -580,6 +585,9 @@ class TrxTrpTransferController extends Controller
           $model_query->rp_supir_user = $this->admin_id;               
           $model_query->rp_supir_at   = $t_stamp;               
         }
+      }elseif (isset($supir) && $supir_money == 0) {
+        $model_query->rp_supir_user = $this->admin_id;               
+        $model_query->rp_supir_at   = $t_stamp;
       }
 
       if(isset($kernet) && $kernet_money > 0 && $model_query->duitku_supir_trf_res_code=="00"){
@@ -606,6 +614,9 @@ class TrxTrpTransferController extends Controller
           $model_query->rp_kernet_user = $this->admin_id;               
           $model_query->rp_kernet_at   = $t_stamp;    
         }
+      }elseif (isset($kernet) && $kernet_money == 0 && $model_query->duitku_supir_trf_res_code=="00") {
+        $model_query->rp_kernet_user = $this->admin_id;               
+        $model_query->rp_kernet_at   = $t_stamp;    
       }
 
 
@@ -808,11 +819,16 @@ class TrxTrpTransferController extends Controller
 
         $supir_money = 0;
         $kernet_money = 0;
+        $xfor_supir_exists = 0;
+        $xfor_kernet_exists = 0;
+
         foreach ($model_query->uj_details2 as $key => $val) {
           if($val->xfor=='Kernet'){
             $kernet_money+=$val->amount*$val->qty;
+            $xfor_kernet_exists++;
           }else{
             $supir_money+=$val->amount*$val->qty;
+            $xfor_supir_exists++;
           }
         }
   
@@ -864,9 +880,9 @@ class TrxTrpTransferController extends Controller
           if(!$supir->rek_no)
           throw new \Exception("Supir Belum Memiliki rekening",1);
   
-          if($supir_money==0)
-          throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi supir atau semua berisikan kernet",1);
-  
+          if($supir_money==0 && $xfor_supir_exists == 0)
+          throw new \Exception("Cek kembali master uang jalan detail PVR xfor tidak ada berisi supir",1);
+    
           if($supir_money < 0)
           throw new \Exception("Potongan Supir tidak Diterima Karna Nilai Potongan Lebih Besar Dari Uang Yang Akan Ditransfer kan",1);
   
@@ -880,9 +896,9 @@ class TrxTrpTransferController extends Controller
           if(!$kernet->rek_no)
           throw new \Exception("Supir Belum Memiliki rekening",1);
   
-          if($kernet_money==0)
-          throw new \Exception("Cek kembali master uang jalan detail PVR apakah xfor tidak ada berisi kernet atau semua berisikan kernet",1);
-  
+          if($kernet_money==0  && $xfor_kernet_exists == 0)
+          throw new \Exception("Cek kembali master uang jalan detail PVR xfor tidak ada berisi kernet",1);
+    
           if($kernet_money < 0)
           throw new \Exception("Potongan Kernet tidak Diterima Karna Nilai Potongan Lebih Besar Dari Uang Yang Akan Ditransfer kan",1);
   

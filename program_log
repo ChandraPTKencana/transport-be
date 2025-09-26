@@ -1,7 +1,15 @@
-25-09-2025
+25-09-2025 13:50
 -> Ujalan (Bonus Trip)
 - Tambahkan Field Bonus Trip Supir dan kernet di trx_trp (php artisan migrate)
 - Semua uang jalan yang ada bonus trip supir dan kernet nya inject ke trx_trp (php artisan run_data)
+- Pengisian bonus trip hanya di lakukan oleh manager selain itu sudah tidak diizinkan ( di form yang sama dengan batas persen susut )
+- saat Generate Salary Report (Perbulan) Bonus Trip akan diambil dari nilai terakhir yang di set di uang jalan.
+- saat Generate Salary Report (Perbulan) Bonus Trip akan di record ke trx trp juga.
+
+Pemberitahuan Informasi Update Program 25-09-2025 13:50
+-> Ujalan (Bonus Trip)
+- Tambahkan Field Bonus Trip Supir dan kernet di trx_trp
+- Semua uang jalan yang ada bonus trip supir dan kernet nya inject ke trx_trp
 - Pengisian bonus trip hanya di lakukan oleh manager selain itu sudah tidak diizinkan ( di form yang sama dengan batas persen susut )
 - saat Generate Salary Report (Perbulan) Bonus Trip akan diambil dari nilai terakhir yang di set di uang jalan.
 - saat Generate Salary Report (Perbulan) Bonus Trip akan di record ke trx trp juga.
