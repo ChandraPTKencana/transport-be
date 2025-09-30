@@ -77,6 +77,21 @@ class StandbyTrxResource extends JsonResource
             'val2_by'           => new IsUserResource($this->whenLoaded('val2_by')),
             'val2_at'           => $this->val2_at ?? "",
 
+            'val3'               => $this->val3,
+            'val3_user'          => $this->val3_user ?? "",
+            'val3_by'            => new IsUserResource($this->whenLoaded('val3_by')),
+            'val3_at'            => $this->val3_at ?? "",
+            
+            'val4'              => $this->val4,
+            'val4_user'         => $this->val4_user ?? "",
+            'val4_by'           => new IsUserResource($this->whenLoaded('val4_by')),
+            'val4_at'           => $this->val4_at ?? "",
+
+            'val5'              => $this->val5,
+            'val5_user'         => $this->val5_user ?? "",
+            'val5_by'           => new IsUserResource($this->whenLoaded('val5_by')),
+            'val5_at'           => $this->val5_at ?? "",
+
             'deleted'           => $this->deleted,
             'deleted_user'      => $this->deleted_user ?? "",
             'deleted_at'        => $this->deleted_at ?? "",
