@@ -757,38 +757,9 @@ class TrxTrpAbsenController extends Controller
     $newDetails = [];
 
     foreach ($ori["data"] as $key => $value) {
-      // $ticket_a_bruto = (float)$value["ticket_a_bruto"];
-      // $ticket_b_bruto = (float)$value["ticket_b_bruto"];
-      // list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
-      // $ticket_a_tara = (float)$value["ticket_a_tara"];
-      // $ticket_b_tara = (float)$value["ticket_b_tara"];
-      // list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
-      // $ticket_a_netto = (float)$value["ticket_a_netto"];
-      // $ticket_b_netto = (float)$value["ticket_b_netto"];
-      // list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
-
       $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
-      // $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";
-      // $value['ticket_b_in_at']=$value["ticket_b_in_at"] ? date("d-m-Y H:i",strtotime($value["ticket_b_in_at"])) : "";
-      // $value['ticket_a_bruto']=$ticket_a_bruto;
-      // $value['ticket_b_bruto']=$ticket_b_bruto;
-      // $value['ticket_b_a_bruto']=$ticket_b_a_bruto;
-      // $value['ticket_b_a_bruto_persen']=$ticket_b_a_bruto_persen;
-      // $value['ticket_a_tara']=$ticket_a_tara;
-      // $value['ticket_b_tara']=$ticket_b_tara;
-      // $value['ticket_b_a_tara']=$ticket_b_a_tara;
-      // $value['ticket_b_a_tara_persen']=$ticket_b_a_tara_persen;
-      // $value['ticket_a_netto']=$ticket_a_netto;
-      // $value['ticket_b_netto']=$ticket_b_netto;
-      // $value['ticket_b_a_netto']=$ticket_b_a_netto;
-      // $value['ticket_b_a_netto_persen']=$ticket_b_a_netto_persen;
-      // $value['amount']=$value["amount"];
-      // $value['pv_total']=$value["pv_total"];
-      // $value['pv_datetime']=$value["pv_datetime"] ? date("d-m-Y",strtotime($value["pv_datetime"])) : "";
       array_push($newDetails,$value);
     }
-
-    // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
 
     $filter_model = json_decode($request->filter_model,true);
     $tanggal = $filter_model['tanggal'];    

@@ -665,8 +665,6 @@ class SalaryBonusController extends Controller
       array_push($newDetails,$value);
     }
 
-    // <td>{{ number_format($v["ticket_a_bruto"] ?( ((float)$v["ticket_b_netto"] - (float)$v["ticket_a_netto"])/(float)$v["ticket_a_bruto"] * 100):0, 2,',','.') }}</td>
-
     $filter_model = json_decode($request->filter_model,true);
     $tanggal = $filter_model['tanggal'];
 

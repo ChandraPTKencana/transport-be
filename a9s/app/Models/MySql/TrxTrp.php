@@ -153,4 +153,8 @@ class TrxTrp extends Model
         return $this->belongsTo(SalaryPaid::class, "salary_paid_id", 'id');
     }
 
+    public function standby_trxs()
+    {
+        return $this->hasMany(StandbyTrx::class, "trx_trp_id", 'id');
+    }
 }

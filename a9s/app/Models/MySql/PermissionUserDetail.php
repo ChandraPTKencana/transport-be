@@ -13,10 +13,10 @@ class PermissionUserDetail extends Model
     // public $timestamps = false;
     // protected $primaryKey = null;
 
-    // public function warehouse()
-    // {
-    //     return $this->belongsTo(\App\Models\HrmRevisiLokasi::class, "hrm_revisi_lokasi_id", 'id');
-    // }
+    public function user()
+    {
+        return $this->belongsTo(IsUser::class, "user_id", 'id');
+    }
 
     // public function warehouse_source()
     // {

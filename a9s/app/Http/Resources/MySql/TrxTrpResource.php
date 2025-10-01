@@ -153,8 +153,12 @@ class TrxTrpResource extends JsonResource
             'ritase_val2_at'    => $this->ritase_val2_at ?? "",
 
             'details_uj'        => UjalanDetailResource::collection($this->whenLoaded('uj_details')),
+            'uj_details2'       => UjalanDetail2Resource::collection($this->whenLoaded('uj_details2')),
             'uj'                => new UjalanResource($this->whenLoaded('uj')),
             'potongan'          => PotonganTrxResource::collection($this->whenLoaded('potongan')),
+
+            'extra_money_trxs'  => ExtraMoneyTrxResource::collection($this->whenLoaded('extra_money_trxs')),
+            'standby_trxs'      => StandbyTrxResource::collection($this->whenLoaded('standby_trxs')),
 
             'payment_method'    => new PaymentMethodResource($this->whenLoaded('payment_method')),
             'payment_method_id' => $this->payment_method_id,

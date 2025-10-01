@@ -13,10 +13,10 @@ class PermissionGroupDetail extends Model
     // public $timestamps = false;
     // protected $primaryKey = null;
 
-    // public function warehouse()
-    // {
-    //     return $this->belongsTo(\App\Models\HrmRevisiLokasi::class, "hrm_revisi_lokasi_id", 'id');
-    // }
+    public function permission_group()
+    {
+        return $this->belongsTo(PermissionGroup::class, "permission_group_id", 'id');
+    }
 
     // public function warehouse_source()
     // {

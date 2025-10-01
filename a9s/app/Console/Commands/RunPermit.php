@@ -156,13 +156,19 @@ class RunPermit extends Command
 
             // tidak jadi ["permit"=>'employee.transfer_data',"to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
 
-            ["permit"=>'standby_trx.val3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM']],
-            ["permit"=>'standby_trx.val4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV']],
-            ["permit"=>'standby_trx.val5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'standby_trx.val3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM']],
+            // ["permit"=>'standby_trx.val4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV']],
+            // ["permit"=>'standby_trx.val5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
 
-            ["permit"=>'standby_trx.unval3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'standby_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'standby_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'standby_trx.unval3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'standby_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'standby_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+
+            ["permit"=>'trp_trx.ticket.show_weight',"to"=>[
+                'SUPERADMIN','VIEW_ONLY','MARKETING','MIS','WAKIL_KTU','KTU',
+                'LOGISTIC_MANAGER','LOGITSTIC_SPV','LOGISTIC_ADM','LOGISTIC_STAFF'
+            ]],
+
 
         ];
 
@@ -172,7 +178,7 @@ class RunPermit extends Command
 
             $pid = PermissionList::where('name',$v['permit'])->first();
             if(!$pid){
-                $this->info("insert permission list".$v['permit']."\n ");
+                $this->info("insert permission list ".$v['permit']."\n ");
                 PermissionList::insert([
                     'name'=>$v['permit']
                 ]);

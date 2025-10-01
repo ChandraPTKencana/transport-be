@@ -25,7 +25,7 @@ use App\Models\MySql\Ujalan;
 use App\Models\MySql\UjalanDetail;
 use Illuminate\Support\Facades\Validator;
 
-class TrxTrpController extends Controller
+class TrxTrpControllerx extends Controller
 {
   private $admin;
   private $admin_id;
