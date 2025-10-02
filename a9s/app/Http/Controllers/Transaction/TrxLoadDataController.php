@@ -225,7 +225,7 @@ class TrxLoadDataController extends Controller
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)){
           $list_ticket=$list_ticket->select('TicketID','TicketNo','Date','VehicleNo','Bruto','Tara','Netto','NamaSupir','VehicleNo','ProductName','DateTimeIn','DateTimeOut');
         }else{
-          $list_ticket=$list_ticket->selectRaw('TicketID,TicketNo,Date,VehicleNo,CONCAT(0) as Bruto,CONCAT(0) as Tara,CONCAT(0) as Netto,NamaSupir,VehicleNo,ProductName,DateTimeIn,DateTimeOut');
+          $list_ticket=$list_ticket->selectRaw('TicketID,TicketNo,Date,VehicleNo,0 as Bruto,0 as Tara,0 as Netto,NamaSupir,VehicleNo,ProductName,DateTimeIn,DateTimeOut');
         }
         
         $ad_list_ticket=$ad_list_ticket->whereDate('Date','>=', $date_from)
