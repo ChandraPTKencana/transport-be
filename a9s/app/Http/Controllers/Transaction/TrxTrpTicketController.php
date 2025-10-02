@@ -1483,9 +1483,9 @@ class TrxTrpTicketController extends Controller
                         "id"                  => $trx_trp->id,
                         "ticket_a_id"         => $trx_trp->ticket_a_id,
                         "ticket_a_no"         => $trx_trp->ticket_a_no,
-                        "ticket_a_bruto"      => $trx_trp->ticket_a_bruto,
-                        "ticket_a_tara"       => $trx_trp->ticket_a_tara,
-                        "ticket_a_netto"      => $trx_trp->ticket_a_netto,
+                        "ticket_a_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_bruto,
+                        "ticket_a_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_tara,
+                        "ticket_a_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_netto,
                         "ticket_a_supir"      => $trx_trp->ticket_a_supir,
                         "ticket_a_no_pol"     => $trx_trp->ticket_a_no_pol,
                         "ticket_a_in_at"      => $trx_trp->ticket_a_in_at,
@@ -1493,9 +1493,9 @@ class TrxTrpTicketController extends Controller
   
                         "ticket_b_id"         => $trx_trp->ticket_b_id,
                         "ticket_b_no"         => $trx_trp->ticket_b_no,
-                        "ticket_b_bruto"      => $trx_trp->ticket_b_bruto,
-                        "ticket_b_tara"       => $trx_trp->ticket_b_tara,
-                        "ticket_b_netto"      => $trx_trp->ticket_b_netto,
+                        "ticket_b_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_bruto,
+                        "ticket_b_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_tara,
+                        "ticket_b_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_netto,
                         "ticket_b_supir"      => $trx_trp->ticket_b_supir,
                         "ticket_b_no_pol"     => $trx_trp->ticket_b_no_pol,
                         "ticket_b_in_at"      => $trx_trp->ticket_b_in_at,
@@ -1558,9 +1558,9 @@ class TrxTrpTicketController extends Controller
                         "id"                  => $trx_trp->id,
                         "ticket_a_id"         => $trx_trp->ticket_a_id,
                         "ticket_a_no"         => $trx_trp->ticket_a_no,
-                        "ticket_a_bruto"      => $trx_trp->ticket_a_bruto,
-                        "ticket_a_tara"       => $trx_trp->ticket_a_tara,
-                        "ticket_a_netto"      => $trx_trp->ticket_a_netto,
+                        "ticket_a_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_bruto,
+                        "ticket_a_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_tara,
+                        "ticket_a_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_netto,
                         "ticket_a_supir"      => $trx_trp->ticket_a_supir,
                         "ticket_a_no_pol"     => $trx_trp->ticket_a_no_pol,
                         "ticket_a_in_at"      => $trx_trp->ticket_a_in_at,
@@ -1568,9 +1568,9 @@ class TrxTrpTicketController extends Controller
   
                         "ticket_b_id"         => $trx_trp->ticket_b_id,
                         "ticket_b_no"         => $trx_trp->ticket_b_no,
-                        "ticket_b_bruto"      => $trx_trp->ticket_b_bruto,
-                        "ticket_b_tara"       => $trx_trp->ticket_b_tara,
-                        "ticket_b_netto"      => $trx_trp->ticket_b_netto,
+                        "ticket_b_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_bruto,
+                        "ticket_b_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_tara,
+                        "ticket_b_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_netto,
                         "ticket_b_supir"      => $trx_trp->ticket_b_supir,
                         "ticket_b_no_pol"     => $trx_trp->ticket_b_no_pol,
                         "ticket_b_in_at"      => $trx_trp->ticket_b_in_at,
@@ -1615,9 +1615,9 @@ class TrxTrpTicketController extends Controller
                         "id"                  => $trx_trp->id,
                         "ticket_a_id"         => $trx_trp->ticket_a_id,
                         "ticket_a_no"         => $trx_trp->ticket_a_no,
-                        "ticket_a_bruto"      => $trx_trp->ticket_a_bruto,
-                        "ticket_a_tara"       => $trx_trp->ticket_a_tara,
-                        "ticket_a_netto"      => $trx_trp->ticket_a_netto,
+                        "ticket_a_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_bruto,
+                        "ticket_a_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_tara,
+                        "ticket_a_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_netto,
                         "ticket_a_supir"      => $trx_trp->ticket_a_supir,
                         "ticket_a_no_pol"     => $trx_trp->ticket_a_no_pol,
                         "ticket_a_in_at"      => $trx_trp->ticket_a_in_at,
@@ -1625,9 +1625,9 @@ class TrxTrpTicketController extends Controller
   
                         "ticket_b_id"         => $trx_trp->ticket_b_id,
                         "ticket_b_no"         => $trx_trp->ticket_b_no,
-                        "ticket_b_bruto"      => $trx_trp->ticket_b_bruto,
-                        "ticket_b_tara"       => $trx_trp->ticket_b_tara,
-                        "ticket_b_netto"      => $trx_trp->ticket_b_netto,
+                        "ticket_b_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_bruto,
+                        "ticket_b_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_tara,
+                        "ticket_b_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_netto,
                         "ticket_b_supir"      => $trx_trp->ticket_b_supir,
                         "ticket_b_no_pol"     => $trx_trp->ticket_b_no_pol,
                         "ticket_b_in_at"      => $trx_trp->ticket_b_in_at,
@@ -1686,9 +1686,9 @@ class TrxTrpTicketController extends Controller
                         "id"                  => $trx_trp->id,
                         "ticket_a_id"         => $trx_trp->ticket_a_id,
                         "ticket_a_no"         => $trx_trp->ticket_a_no,
-                        "ticket_a_bruto"      => $trx_trp->ticket_a_bruto,
-                        "ticket_a_tara"       => $trx_trp->ticket_a_tara,
-                        "ticket_a_netto"      => $trx_trp->ticket_a_netto,
+                        "ticket_a_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_bruto,
+                        "ticket_a_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_tara,
+                        "ticket_a_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_netto,
                         "ticket_a_supir"      => $trx_trp->ticket_a_supir,
                         "ticket_a_no_pol"     => $trx_trp->ticket_a_no_pol,
                         "ticket_a_in_at"      => $trx_trp->ticket_a_in_at,
@@ -1696,9 +1696,9 @@ class TrxTrpTicketController extends Controller
   
                         "ticket_b_id"         => $trx_trp->ticket_b_id,
                         "ticket_b_no"         => $trx_trp->ticket_b_no,
-                        "ticket_b_bruto"      => $trx_trp->ticket_b_bruto,
-                        "ticket_b_tara"       => $trx_trp->ticket_b_tara,
-                        "ticket_b_netto"      => $trx_trp->ticket_b_netto,
+                        "ticket_b_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_bruto,
+                        "ticket_b_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_tara,
+                        "ticket_b_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_netto,
                         "ticket_b_supir"      => $trx_trp->ticket_b_supir,
                         "ticket_b_no_pol"     => $trx_trp->ticket_b_no_pol,
                         "ticket_b_in_at"      => $trx_trp->ticket_b_in_at,
@@ -1749,9 +1749,9 @@ class TrxTrpTicketController extends Controller
                         "id"                  => $trx_trp->id,
                         "ticket_a_id"         => $trx_trp->ticket_a_id,
                         "ticket_a_no"         => $trx_trp->ticket_a_no,
-                        "ticket_a_bruto"      => $trx_trp->ticket_a_bruto,
-                        "ticket_a_tara"       => $trx_trp->ticket_a_tara,
-                        "ticket_a_netto"      => $trx_trp->ticket_a_netto,
+                        "ticket_a_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_bruto,
+                        "ticket_a_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_tara,
+                        "ticket_a_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_netto,
                         "ticket_a_supir"      => $trx_trp->ticket_a_supir,
                         "ticket_a_no_pol"     => $trx_trp->ticket_a_no_pol,
                         "ticket_a_in_at"      => $trx_trp->ticket_a_in_at,
@@ -1759,9 +1759,9 @@ class TrxTrpTicketController extends Controller
   
                         "ticket_b_id"         => $trx_trp->ticket_b_id,
                         "ticket_b_no"         => $trx_trp->ticket_b_no,
-                        "ticket_b_bruto"      => $trx_trp->ticket_b_bruto,
-                        "ticket_b_tara"       => $trx_trp->ticket_b_tara,
-                        "ticket_b_netto"      => $trx_trp->ticket_b_netto,
+                        "ticket_b_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_bruto,
+                        "ticket_b_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_tara,
+                        "ticket_b_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_netto,
                         "ticket_b_supir"      => $trx_trp->ticket_b_supir,
                         "ticket_b_no_pol"     => $trx_trp->ticket_b_no_pol,
                         "ticket_b_in_at"      => $trx_trp->ticket_b_in_at,
@@ -1808,9 +1808,9 @@ class TrxTrpTicketController extends Controller
                       "id"                  => $trx_trp->id,
                       "ticket_a_id"         => $trx_trp->ticket_a_id,
                       "ticket_a_no"         => $trx_trp->ticket_a_no,
-                      "ticket_a_bruto"      => $trx_trp->ticket_a_bruto,
-                      "ticket_a_tara"       => $trx_trp->ticket_a_tara,
-                      "ticket_a_netto"      => $trx_trp->ticket_a_netto,
+                      "ticket_a_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_bruto,
+                      "ticket_a_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_tara,
+                      "ticket_a_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_a_netto,
                       "ticket_a_supir"      => $trx_trp->ticket_a_supir,
                       "ticket_a_no_pol"     => $trx_trp->ticket_a_no_pol,
                       "ticket_a_in_at"      => $trx_trp->ticket_a_in_at,
@@ -1818,9 +1818,9 @@ class TrxTrpTicketController extends Controller
 
                       "ticket_b_id"         => $trx_trp->ticket_b_id,
                       "ticket_b_no"         => $trx_trp->ticket_b_no,
-                      "ticket_b_bruto"      => $trx_trp->ticket_b_bruto,
-                      "ticket_b_tara"       => $trx_trp->ticket_b_tara,
-                      "ticket_b_netto"      => $trx_trp->ticket_b_netto,
+                      "ticket_b_bruto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_bruto,
+                      "ticket_b_tara"       => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_tara,
+                      "ticket_b_netto"      => (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : $trx_trp->ticket_b_netto,
                       "ticket_b_supir"      => $trx_trp->ticket_b_supir,
                       "ticket_b_no_pol"     => $trx_trp->ticket_b_no_pol,
                       "ticket_b_in_at"      => $trx_trp->ticket_b_in_at,
@@ -1988,15 +1988,15 @@ class TrxTrpTicketController extends Controller
     $newDetails = [];
 
     foreach ($ori["data"] as $key => $value) {
-      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
-      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
-      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
-      $ticket_a_tara = (float)$value["ticket_a_tara"];
-      $ticket_b_tara = (float)$value["ticket_b_tara"];
-      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
-      $ticket_a_netto = (float)$value["ticket_a_netto"];
-      $ticket_b_netto = (float)$value["ticket_b_netto"];
-      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
+      $ticket_a_bruto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_a_bruto"];
+      $ticket_b_bruto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_b_bruto"];
+      $ticket_a_tara = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_a_tara"];
+      $ticket_b_tara = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_b_tara"];
+      $ticket_a_netto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_a_netto"];
+      $ticket_b_netto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_b_netto"];
+      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($ticket_a_bruto,$ticket_b_bruto);
+      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($ticket_a_tara,$ticket_b_tara);
+      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($ticket_a_netto,$ticket_b_netto);
 
       $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
       $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";

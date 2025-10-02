@@ -403,15 +403,15 @@ class TrxTrpSusutController extends Controller
     $total_b_a_tara = 0;
     $total_b_a_netto = 0;
     foreach ($ori["data"] as $key => $value) {
-      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
-      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
-      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
-      $ticket_a_tara = (float)$value["ticket_a_tara"];
-      $ticket_b_tara = (float)$value["ticket_b_tara"];
-      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
-      $ticket_a_netto = (float)$value["ticket_a_netto"];
-      $ticket_b_netto = (float)$value["ticket_b_netto"];
-      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
+      $ticket_a_bruto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_a_bruto"];
+      $ticket_b_bruto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_b_bruto"];
+      $ticket_a_tara = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_a_tara"];
+      $ticket_b_tara = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_b_tara"];
+      $ticket_a_netto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 : (float)$value["ticket_a_netto"];
+      $ticket_b_netto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 :(float)$value["ticket_b_netto"];
+      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($ticket_a_bruto,$ticket_b_bruto);
+      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($ticket_a_tara,$ticket_b_tara);
+      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($ticket_a_netto,$ticket_b_netto);
 
       $total_a_bruto+=$ticket_a_bruto;
       $total_a_tara+=$ticket_a_tara;
@@ -520,15 +520,15 @@ class TrxTrpSusutController extends Controller
     $newDetails = [];
 
     foreach ($ori["data"] as $key => $value) {
-      $ticket_a_bruto = (float)$value["ticket_a_bruto"];
-      $ticket_b_bruto = (float)$value["ticket_b_bruto"];
-      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($value["ticket_a_bruto"],$value["ticket_b_bruto"]);
-      $ticket_a_tara = (float)$value["ticket_a_tara"];
-      $ticket_b_tara = (float)$value["ticket_b_tara"];
-      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($value["ticket_a_tara"],$value["ticket_b_tara"]);
-      $ticket_a_netto = (float)$value["ticket_a_netto"];
-      $ticket_b_netto = (float)$value["ticket_b_netto"];
-      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($value["ticket_a_netto"],$value["ticket_b_netto"]);
+      $ticket_a_bruto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 :(float)$value["ticket_a_bruto"];
+      $ticket_b_bruto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 :(float)$value["ticket_b_bruto"];
+      $ticket_a_tara = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 :(float)$value["ticket_a_tara"];
+      $ticket_b_tara = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 :(float)$value["ticket_b_tara"];
+      $ticket_a_netto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 :(float)$value["ticket_a_netto"];
+      $ticket_b_netto = (!MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.show_weight',true)) ? 0 :(float)$value["ticket_b_netto"];
+      list($ticket_b_a_bruto, $ticket_b_a_bruto_persen) =  $this->genPersen($ticket_a_bruto,$ticket_b_bruto);
+      list($ticket_b_a_tara, $ticket_b_a_tara_persen) =  $this->genPersen($ticket_a_tara,$ticket_b_tara);
+      list($ticket_b_a_netto, $ticket_b_a_netto_persen) =  $this->genPersen($ticket_a_netto,$ticket_b_netto);
 
       $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
       $value['ticket_a_out_at']=$value["ticket_a_out_at"] ? date("d-m-Y H:i",strtotime($value["ticket_a_out_at"])) : "";

@@ -4,6 +4,7 @@ namespace App\Http\Resources\MySql;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\IsUserResource;
+use App\Helpers\MyAdmin;
 
 class TrxTrpResource extends JsonResource
 {
@@ -16,7 +17,7 @@ class TrxTrpResource extends JsonResource
     public function toArray($request)
     {
         // return parent::toArray($request);
-        return [
+        $data= [
             'id'                => $this->id,
             'tanggal'           => $this->tanggal,
 
@@ -184,5 +185,18 @@ class TrxTrpResource extends JsonResource
             'salary_paid_id'    => $this->salary_paid_id,
             'salary_paid'       => new SalaryPaidResource($this->whenLoaded('salary_paid')),
         ];
+        $admin = MyAdmin::user();
+        $permissions = $admin->the_user->listPermissions();
+        if(!MyAdmin::checkScope($permissions, 'trp_trx.ticket.show_weight',true)){
+            $data['ticket_a_bruto'] ='';
+            $data['ticket_a_tara'] ='';
+            $data['ticket_a_netto'] ='';
+
+            $data['ticket_b_bruto'] ='';
+            $data['ticket_b_tara'] ='';
+            $data['ticket_b_netto'] ='';
+        }
+
+        return $data;
     }
 }
