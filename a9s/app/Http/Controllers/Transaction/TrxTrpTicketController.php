@@ -770,6 +770,9 @@ class TrxTrpTicketController extends Controller
           // if($orinet<0) $orinet*=-1;
           $pembanding = $model_query->ticket_a_ori_netto;
 
+          if($model_query->uj->batas_persen_susut == null) 
+          throw new \Exception("Batas Persen Susut Belum Di Tentukan",1);
+
           $model_query->batas_persen_susut = $model_query->uj->batas_persen_susut;
           if(round(($orinet/$pembanding)*100,2) < $model_query->batas_persen_susut){
             $gen_salary_bonus = true;
@@ -869,11 +872,11 @@ class TrxTrpTicketController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);
@@ -1001,6 +1004,9 @@ class TrxTrpTicketController extends Controller
             $orinet = $v->ticket_b_ori_netto - $v->ticket_a_ori_netto;
             // if($orinet<0) $orinet*=-1;
             $pembanding = $v->ticket_a_ori_netto;
+
+            if($v->uj->batas_persen_susut == null) 
+            throw new \Exception("Batas Persen Susut Belum Di Tentukan",1);
 
             $v->batas_persen_susut = $v->uj->batas_persen_susut;
             if(round(($orinet/$pembanding)*100,2) < $v->batas_persen_susut){
