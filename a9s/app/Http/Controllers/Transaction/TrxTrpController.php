@@ -30,6 +30,7 @@ use App\Http\Resources\MySql\TrxTrpResource;
 use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
+use App\Models\MySql\ExtraMoneyTrx;
 use App\PS\PSPotonganTrx;
 
 class TrxTrpController extends Controller
@@ -465,61 +466,9 @@ class TrxTrpController extends Controller
     $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','ritase_val_by','ritase_val1_by','ritase_val2_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','uj_details','uj_details2'
     ,'extra_money_trxs'=>function ($q){
       $q->with(['employee','extra_money','payment_method','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by']);
-    },'trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar");
-    },'standby_trxs'=>function ($q){
-      $q->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','deleted_by','req_deleted_by',
-      'details'=>function($q){
-        $q->orderby("ordinal","asc");      
-      },'standby_mst']);
     },'potongan'])->find($request->id);
 
-
     $data = new TrxTrpResource($model_query);
-    $data = collect($data);
-
-    $data["img_leave_ts"]      = $model_query->ritase_leave_at;
-    $data["img_arrive_ts"]     = $model_query->ritase_arrive_at;
-    $data["img_return_ts"]     = $model_query->ritase_return_at;
-    $data["img_till_ts"]       = $model_query->ritase_till_at;
-
-    $img_leaves = [];
-    $data['img_leave']="";
-    foreach ($model_query->trx_absens as $k => $v) {
-      // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
-      $img = "data:image/png;base64,";
-      if(mb_detect_encoding($v->gambar)===false){
-        $img.=base64_encode($v->gambar);
-      }else{
-        $img.=$v->gambar;        
-      }
-      
-      if($v['status']=="B") {
-        $data["img_leave"]   = $img;
-        array_push($img_leaves,[
-          "id"=>$v["id"],
-          "gambar"=>$img,
-          "is_manual"=>$v["is_manual"],
-        ]);
-      }
-
-      if($v['status']=="T") {
-        $data["img_arrive"]   = $img;
-        $data["img_arrive_is_manual"]   = $v["is_manual"];
-      }
-
-      if($v['status']=="K") {
-        $data["img_return"]   = $img;
-        $data["img_return_is_manual"]   = $v["is_manual"];
-      }
-
-      if($v['status']=="S") {
-        $data["img_till"]   = $img;
-        $data["img_till_is_manual"]   = $v["is_manual"];
-      }
-
-    }
-    $data['img_leaves']=$img_leaves;
 
     return response()->json([
       // "data" => new TrxTrpResource($model_query),
@@ -3112,6 +3061,57 @@ class TrxTrpController extends Controller
     }
     
   }
+
+  public function LinkToExtraMoneyTrx(Request $request)
+  {
+
+    DB::beginTransaction();
+    try {
+      $model_query = new TrxTrp();
+      
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
+        $q->where('val5',1)->orWhere('val6',1);
+      })->where('received_payment',0)->get();
+      $update=0;
+      foreach ($model_query as $key => $mq) {
+        if(ExtraMoneyTrx::where(function ($q)use($mq){
+          $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
+        })->whereIn("payment_method_id",[2,3])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
+        ->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)->where('val6',1)
+        ->whereNull("trx_trp_id")
+        ->update([
+          'trx_trp_id'=>$mq->id
+        ])){
+          $update++;
+        };
+      }
+      DB::commit();
+      if($update==0){
+        return response()->json([
+          "message" => "Extra Money Tidak ada yang Dihubungkan",
+        ], 400);  
+      }
+      return response()->json([
+        "message" => "Extra Money Berhasil Dihubungkan",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Extra Money Gagal Dihubungkan",
+      ], 400);
+    }
+  }
+
 
   // public function indexold(Request $request, $download = false)
   // {

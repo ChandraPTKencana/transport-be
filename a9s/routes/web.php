@@ -183,6 +183,7 @@ Route::get('/standby_trx_load_sqlsrv', [\App\Http\Controllers\Standby\StandbyTrx
 
 
 Route::get('/standby_trx', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'show']);
+Route::get('/standby_trx/full_view', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'fullView']);
 // Route::get('/standby_trx/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'mandorGetVerifyTrx']);
 Route::post('/standby_trx', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'store']);
 Route::put('/standby_trx', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'update']);

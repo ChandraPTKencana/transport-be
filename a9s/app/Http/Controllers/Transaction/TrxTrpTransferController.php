@@ -350,16 +350,15 @@ class TrxTrpTransferController extends Controller
     // }
     ])->get();
 
-
-    foreach ($model_query as $key => $mq) {
-      ExtraMoneyTrx::where(function ($q)use($mq){
-        $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
-      })->whereIn("payment_method_id",[2,3])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
-      ->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)->where('val6',1)
-      ->update([
-        'trx_trp_id'=>$mq->id
-      ]);
-    }
+    // foreach ($model_query as $key => $mq) {
+    //   ExtraMoneyTrx::where(function ($q)use($mq){
+    //     $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
+    //   })->whereIn("payment_method_id",[2,3])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
+    //   ->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)->where('val6',1)
+    //   ->update([
+    //     'trx_trp_id'=>$mq->id
+    //   ]);
+    // }
 
     return response()->json([
       "data" => TrxTrpResource::collection($model_query),

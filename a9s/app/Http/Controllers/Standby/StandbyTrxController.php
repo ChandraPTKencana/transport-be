@@ -33,6 +33,7 @@ use App\Models\MySql\TrxTrp;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MyReport;
+use App\Http\Resources\MySql\TrxTrpResource;
 
 class StandbyTrxController extends Controller
 {
@@ -1623,6 +1624,92 @@ class StandbyTrxController extends Controller
     ];
     return $result;
   }
+
+  public function fullView(Request $request)
+  {
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.view']);
+
+
+    $rules = [
+      'trx_trp_id' => "required|exists:\App\Models\MySql\TrxTrp,id",
+    ];
+
+    $messages = [
+      'trx_trp_id.required' => 'Trip ID tidak boleh kosong',
+      'trx_trp_id.exists' => 'Trip ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','ritase_val_by','ritase_val1_by','ritase_val2_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','uj_details','uj_details2'
+    ,'trx_absens'=>function($q) {
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar");
+    },'standby_trxs'=>function ($q){
+      $q->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','deleted_by','req_deleted_by',
+      'details'=>function($q){
+        $q->orderby("ordinal","asc");      
+      },'standby_mst']);
+    },'potongan'])->find($request->trx_trp_id);
+
+
+    $data = new TrxTrpResource($model_query);
+    $data = collect($data);
+
+    $data["img_leave_ts"]      = $model_query->ritase_leave_at;
+    $data["img_arrive_ts"]     = $model_query->ritase_arrive_at;
+    $data["img_return_ts"]     = $model_query->ritase_return_at;
+    $data["img_till_ts"]       = $model_query->ritase_till_at;
+
+    $img_leaves = [];
+    $data['img_leave']="";
+    foreach ($model_query->trx_absens as $k => $v) {
+      // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
+      $img = "data:image/png;base64,";
+      if(mb_detect_encoding($v->gambar)===false){
+        $img.=base64_encode($v->gambar);
+      }else{
+        $img.=$v->gambar;        
+      }
+      
+      if($v['status']=="B") {
+        $data["img_leave"]   = $img;
+        array_push($img_leaves,[
+          "id"=>$v["id"],
+          "gambar"=>$img,
+          "is_manual"=>$v["is_manual"],
+        ]);
+      }
+
+      if($v['status']=="T") {
+        $data["img_arrive"]   = $img;
+        $data["img_arrive_is_manual"]   = $v["is_manual"];
+      }
+
+      if($v['status']=="K") {
+        $data["img_return"]   = $img;
+        $data["img_return_is_manual"]   = $v["is_manual"];
+      }
+
+      if($v['status']=="S") {
+        $data["img_till"]   = $img;
+        $data["img_till_is_manual"]   = $v["is_manual"];
+      }
+
+    }
+    $data['img_leaves']=$img_leaves;
+
+    return response()->json([
+      // "data" => new TrxTrpResource($model_query),
+      "data" => $data,
+    ], 200);
+  }
+
+
+
   // public function doGenPVR(Request $request){
   //   MyAdmin::checkScope($this->permissions, 'standby_trx.generate_pvr');
   //   $rules = [
