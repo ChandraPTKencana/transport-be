@@ -71,6 +71,7 @@ Route::get('/trx_trp_nolog', [\App\Http\Controllers\Transaction\TrxTrpNologContr
 Route::get('/trx_trps', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'index']);
 Route::get('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'show']);
 Route::get('/trx_trp/full_view', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'fullView']);
+Route::get('/trx_trp/link_to_extramoney_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'LinkToExtraMoneyTrx']);
 Route::get('/trx_trp/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'mandorGetVerifyTrx']);
 Route::post('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'store']);
 Route::put('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'update']);
