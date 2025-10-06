@@ -869,11 +869,11 @@ class TrxTrpTicketController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);
