@@ -594,6 +594,14 @@ class TrxTrpAbsenController extends Controller
       if(!$model_query->ritase_note && (!$model_query->ritase_leave_at || !$model_query->ritase_arrive_at || !$model_query->ritase_return_at || !$model_query->ritase_till_at) )
       throw new \Exception("Gambar Belum Lengkap dan tidak disertai Catatan",1);
 
+      $permit_continue_trx = TrxTrpController::permit_continue_trx($model_query,true);
+      // throw new \Exception("ID ".$permit_continue_trx."Absensinya Masih Belum Lengkap",1);
+      
+      if(count($permit_continue_trx) > 1){
+        throw new \Exception("ID ".implode(",",$permit_continue_trx)." Absensinya Masih Belum Lengkap",1);
+      }
+
+      // cari trx absen yang belum lengkap diisi apabila ada lebih dari 1 maka tidak bisa validasi
       $SYSOLD                     = clone($model_query);
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val',true) && !$model_query->ritase_val){

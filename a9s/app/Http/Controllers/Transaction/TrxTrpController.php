@@ -409,34 +409,50 @@ class TrxTrpController extends Controller
     if ($filter_status == "pv_not_done") {
       $resources = $resources->map(function ($resource) {
         $newResource = collect($resource);
-        $supir_absen = TrxTrp::where(function($q)use($resource){
-            $q->where("supir_id",$resource['supir_id']);
-            $q->orWhere("kernet_id",$resource['supir_id']);
-        })
-        ->where("deleted",0)
-        ->where("req_deleted",0)
-        ->orderBy("tanggal","desc")
-        ->orderBy("id","desc")
-        ->limit(2)->get();
-        
-        $return = [];
-        if(count($supir_absen)==2 && !$supir_absen[1]->ritase_val2)
-        array_push($return,$supir_absen[1]->id);
+        $return = self::permit_continue_trx($resource,true);
+        // $supir_absen = TrxTrp::where(function($q)use($resource){
+        //     $q->where("supir_id",$resource['supir_id']);
+        //     $q->orWhere("kernet_id",$resource['supir_id']);
+        // })
+        // ->where("deleted",0)
+        // ->where("req_deleted",0)
+        // ->orderBy("tanggal","desc")
+        // ->orderBy("id","desc")
+        // // ->where("tanggal",">=","2025-10-01")
+        // ->where(
+        //   function ($q){
+        //     $q->whereNull('ritase_leave_at');
+        //     $q->orWhereNull('ritase_arrive_at');
+        //     $q->orWhereNull('ritase_return_at');
+        //     $q->orWhereNull('ritase_till_at');
+        //   }
+        // )->get();
+                
+        // if(count($supir_absen) > 1 && !$supir_absen[1]->ritase_val2)
+        // array_push($return,$supir_absen[1]->id);
       
-        if($resource['kernet_id']){
-            $kernet_absen=TrxTrp::where(function($q)use($resource){
-                $q->where("supir_id",$resource['kernet_id']);
-                $q->orWhere("kernet_id",$resource['kernet_id']);
-            })
-            ->where("deleted",0)
-            ->where("req_deleted",0)
-            ->orderBy("tanggal","desc")
-            ->orderBy("id","desc")
-            ->limit(2)->get();
+        // if($resource['kernet_id']){
+        //     $kernet_absen=TrxTrp::where(function($q)use($resource){
+        //         $q->where("supir_id",$resource['kernet_id']);
+        //         $q->orWhere("kernet_id",$resource['kernet_id']);
+        //     })
+        //     ->where("deleted",0)
+        //     ->where("req_deleted",0)
+        //     ->orderBy("tanggal","desc")
+        //     ->orderBy("id","desc")
+        //     // ->where("tanggal",">=","2025-10-01")
+        //     ->where(
+        //       function ($q){
+        //         $q->whereNull('ritase_leave_at');
+        //         $q->orWhereNull('ritase_arrive_at');
+        //         $q->orWhereNull('ritase_return_at');
+        //         $q->orWhereNull('ritase_till_at');
+        //       }
+        //     )->get();
             
-            if(count($kernet_absen)==2 && !$kernet_absen[1]->ritase_val2)
-            array_push($return,$kernet_absen[1]->id);
-        }
+        //     if(count($kernet_absen) > 1 && !$kernet_absen[1]->ritase_val2)
+        //     array_push($return,$kernet_absen[1]->id);
+        // }
         $newResource['absen_not_done'] = $return; // Assign the modified values to the new array
         return $newResource; // Return the new array
       });
@@ -520,7 +536,7 @@ class TrxTrpController extends Controller
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
   
-      $this->permit_continue_trx($model_query);
+      self::permit_continue_trx($model_query);
 
       $SYSOLD                     = clone($model_query);
       $model_query->val1 = 1;
@@ -1501,7 +1517,7 @@ class TrxTrpController extends Controller
       }
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$model_query->val1){
-        $this->permit_continue_trx($model_query);
+        self::permit_continue_trx($model_query);
         $model_query->val1 = 1;
         $model_query->val1_user = $this->admin_id;
         $model_query->val1_at = $t_stamp;
@@ -1870,7 +1886,7 @@ class TrxTrpController extends Controller
         }
   
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.val1',true) && !$v->val1){
-          $this->permit_continue_trx($v);
+          self::permit_continue_trx($v);
           $v->val1 = 1;
           $v->val1_user = $this->admin_id;
           $v->val1_at = $t_stamp;
@@ -3030,7 +3046,8 @@ class TrxTrpController extends Controller
   }
 
 
-  public function permit_continue_trx($trx_trp) {
+  public static function permit_continue_trx($trx_trp, $return = false) {
+    
     $supir_absen=TrxTrp::where(function($q)use($trx_trp){
       $q->where("supir_id",$trx_trp->supir_id);
       $q->orWhere("kernet_id",$trx_trp->supir_id);
@@ -3039,11 +3056,21 @@ class TrxTrpController extends Controller
     ->where("req_deleted",0)
     ->orderBy("tanggal","desc")
     ->orderBy("id","desc")
-    ->limit(2)->get();
+    ->where("tanggal",">=","2025-10-01")
+    ->where(
+      function ($q){
+        $q->whereNull('ritase_leave_at');
+        $q->orWhereNull('ritase_arrive_at');
+        $q->orWhereNull('ritase_return_at');
+        $q->orWhereNull('ritase_till_at');
+      }
+    )
+    ->pluck('id')->toArray();
     
-    if(count($supir_absen)==2 && !$supir_absen[1]->ritase_val2)
-    throw new \Exception("Absen Belum Selesai [ID:".$supir_absen[1]->id."]",1);
+    if(count($supir_absen) > 1 && !$return)
+    throw new \Exception("Absen Supir Belum Selesai [ID:".implode(",",$supir_absen)."]",1);
 
+    $res = $supir_absen;
 
     if($trx_trp->kernet_id){
       $kernet_absen=TrxTrp::where(function($q)use($trx_trp){
@@ -3054,12 +3081,25 @@ class TrxTrpController extends Controller
       ->where("req_deleted",0)
       ->orderBy("tanggal","desc")
       ->orderBy("id","desc")
-      ->limit(2)->get();
+      ->where("tanggal",">=","2025-10-01")
+      ->where(
+        function ($q){
+          $q->whereNull('ritase_leave_at');
+          $q->orWhereNull('ritase_arrive_at');
+          $q->orWhereNull('ritase_return_at');
+          $q->orWhereNull('ritase_till_at');
+        }
+      )->pluck('id')->toArray();
       
-      if(count($kernet_absen)==2 && !$kernet_absen[1]->ritase_val2)
-      throw new \Exception("Absen Kernet Belum Selesai [ID:".$kernet_absen[1]->id."]",1);
+      $res+=$kernet_absen;
+      // return $supir_absen;
+      if(count($kernet_absen) > 1 && !$return)
+      throw new \Exception("Absen Kernet Belum Selesai [ID:".implode(",",$kernet_absen)."]",1);
     }
-    
+
+    if($return){
+      return array_unique($res);
+    }
   }
 
   public function LinkToExtraMoneyTrx(Request $request)

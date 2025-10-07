@@ -166,7 +166,7 @@ class RunPermit extends Command
 
             ["permit"=>'trp_trx.ticket.show_weight',"to"=>[
                 'SUPERADMIN','VIEW_ONLY','MARKETING','MIS','WAKIL_KTU','KTU',
-                'LOGISTIC_MANAGER','LOGITSTIC_SPV','LOGISTIC_ADM','LOGISTIC_STAFF'
+                'LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM','LOGISTIC_STAFF'
             ]],
 
 
