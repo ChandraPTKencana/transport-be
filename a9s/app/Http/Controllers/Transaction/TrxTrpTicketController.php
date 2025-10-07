@@ -1910,9 +1910,9 @@ class TrxTrpTicketController extends Controller
     //======================================================================================================
     // Init Model
     //======================================================================================================
-    $table1 = DB::table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no");
+    $table1 = DB::table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no")->where("tanggal",">=","2025-10-01");
 
-    $table2 = DB::table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
+    $table2 = DB::table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no")->where("tanggal",">=","2025-10-01");
 
     $final = $table1->unionAll($table2);
 
@@ -1935,8 +1935,8 @@ class TrxTrpTicketController extends Controller
     if(strtolower(env("app_name"))!=$pabrik){
       $pabrik = "ms_".$pabrik;
 
-      $table3 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no");
-      $table4 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
+      $table3 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no")->where("tanggal",">=","2025-10-01");
+      $table4 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no")->where("tanggal",">=","2025-10-01");
   
       $final = $table3->unionAll($table4);
 
