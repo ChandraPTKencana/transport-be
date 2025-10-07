@@ -3065,6 +3065,7 @@ class TrxTrpController extends Controller
         $q->orWhereNull('ritase_till_at');
       }
     )
+    ->where("id","!=",$trx_trp->id)
     ->pluck('id')->toArray();
     
     if(count($supir_absen) > 1 && !$return)
@@ -3089,7 +3090,9 @@ class TrxTrpController extends Controller
           $q->orWhereNull('ritase_return_at');
           $q->orWhereNull('ritase_till_at');
         }
-      )->pluck('id')->toArray();
+      )
+      ->where("id","!=",$trx_trp->id)
+      ->pluck('id')->toArray();
       
       $res+=$kernet_absen;
       // return $supir_absen;
