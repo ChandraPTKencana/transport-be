@@ -3067,6 +3067,7 @@ class TrxTrpController extends Controller
       }
     )
     ->where("id","!=",$trx_trp->id)
+    ->where("id","<",$trx_trp->id)
     ->pluck('id')->toArray();
     
     if(count($supir_absen) > 1 && !$return)
@@ -3094,6 +3095,7 @@ class TrxTrpController extends Controller
         }
       )
       ->where("id","!=",$trx_trp->id)
+      ->where("id","<",$trx_trp->id)
       ->pluck('id')->toArray();
       
       $res+=$kernet_absen;
