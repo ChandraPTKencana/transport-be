@@ -3052,6 +3052,7 @@ class TrxTrpController extends Controller
       $q->where("supir_id",$trx_trp->supir_id);
       $q->orWhere("kernet_id",$trx_trp->supir_id);
     })
+    ->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN'])
     ->where("deleted",0)
     ->where("req_deleted",0)
     ->orderBy("tanggal","desc")
@@ -3078,6 +3079,7 @@ class TrxTrpController extends Controller
           $q->where("supir_id",$trx_trp->kernet_id);
           $q->orWhere("kernet_id",$trx_trp->kernet_id);
       })
+      ->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN'])
       ->where("deleted",0)
       ->where("req_deleted",0)
       ->orderBy("tanggal","desc")
