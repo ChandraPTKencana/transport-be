@@ -336,7 +336,7 @@ class ExtraMoneyTrxTransferController extends Controller
     $this->checkGATimeout();
     MyAdmin::checkMultiScope($this->permissions, ['extra_money_trx.transfer.view']);
 
-    $model_query = ExtraMoneyTrx::where("deleted",0)->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method','extra_money','employee'])->find($request->id);
+    $model_query = ExtraMoneyTrx::where("req_deleted",0)->where("deleted",0)->with(['val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','deleted_by','req_deleted_by','payment_method','extra_money','employee'])->find($request->id);
     return response()->json([
       "data" => new ExtraMoneyTrxResource($model_query),
     ], 200);

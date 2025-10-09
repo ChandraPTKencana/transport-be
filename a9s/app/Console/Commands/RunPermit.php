@@ -164,12 +164,18 @@ class RunPermit extends Command
             // ["permit"=>'standby_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             // ["permit"=>'standby_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
 
-            ["permit"=>'trp_trx.ticket.show_weight',"to"=>[
-                'SUPERADMIN','VIEW_ONLY','MARKETING','MIS','WAKIL_KTU','KTU',
-                'LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM','LOGISTIC_STAFF'
-            ]],
+            // ["permit"=>'trp_trx.ticket.show_weight',"to"=>[
+            //     'SUPERADMIN','VIEW_ONLY','MARKETING','MIS','WAKIL_KTU','KTU',
+            //     'LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM','LOGISTIC_STAFF'
+            // ]],
 
 
+            ["permit"=>'extra_money_trx.unval1',"to"=>['SUPERADMIN','TRANSPORT_KASIR']],
+            ["permit"=>'extra_money_trx.unval2',"to"=>['SUPERADMIN','TRANSPORT_MANDOR']],
+            ["permit"=>'extra_money_trx.unval3',"to"=>['SUPERADMIN','WAKIL_KTU','KTU']],
+            ["permit"=>'extra_money_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_STAFF']],
+            ["permit"=>'extra_money_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_SPV']],
+            ["permit"=>'extra_money_trx.unval6',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
         ];
 
         foreach ($re_lists as $k => $v) {

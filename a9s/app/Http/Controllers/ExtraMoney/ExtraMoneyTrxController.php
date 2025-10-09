@@ -768,19 +768,33 @@ class ExtraMoneyTrxController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
 
-      if($model_query->val2 || $model_query->req_deleted==1  || $model_query->deleted==1) 
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+      if($model_query->req_deleted==1  || $model_query->deleted==1) 
+      throw new \Exception("Data Sudah Di (Permintaan) Hapus",1);
 
-      if($model_query->pvr_id!="" || $model_query->pvr_id!=null)
+      if($model_query->pvr_id)
       throw new \Exception("Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
 
-      if($model_query->trx_trp_id) 
-      throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
+      if($model_query->received_payment==1) 
+      throw new \Exception("Pembayaran Sudah Dilakukan. Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
+
+      if($model_query->trx_trp_id){
+        if(TrxTrp::where('id',$model_query->trx_trp_id)->lockForUpdate()->first()->pvr_no){
+          throw new \Exception("Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
+        }
+      }
+
+      if($model_query->val1 || $model_query->val2 || $model_query->val3 || $model_query->val4 || $model_query->val5 || $model_query->val6)
+      throw new \Exception("Unvalidasi terlebih dahulu untuk menghapus",1);
 
       $deleted_reason = $request->deleted_reason;
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
 
+      
+
+      // if($model_query->trx_trp_id) 
+      // throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di hapus",1);
+      $model_query->trx_trp_id = null;
       $model_query->deleted = 1;
       $model_query->deleted_user = $this->admin_id;
       $model_query->deleted_at = date("Y-m-d H:i:s");
@@ -838,17 +852,14 @@ class ExtraMoneyTrxController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if($model_query->val2)
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
-
       if($model_query->deleted==1 || $model_query->req_deleted==1 )
       throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);
 
-      if($model_query->pvr_id=="" || $model_query->pvr_id==null)
+      if($model_query->pvr_id==null)
       throw new \Exception("Harap Lakukan Penghapusan",1);
 
-      if($model_query->trx_trp_id) 
-      throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
+      // if($model_query->trx_trp_id) 
+      // throw new \Exception("Data Sudah Terlink Dengan Trx Trp Dan Tidak Dapat Di Ubah",1);
 
       $req_deleted_reason = $request->req_deleted_reason;
       if(!$req_deleted_reason)
@@ -916,17 +927,15 @@ class ExtraMoneyTrxController extends Controller
       if (!$model_query) {
         throw new \Exception("Data tidak terdaftar", 1);
       }
-      
-      if($model_query->val2)
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
 
       if($model_query->deleted==1 )
       throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);
 
-      if($model_query->pvr_id=="" || $model_query->pvr_id==null)
+      if($model_query->pvr_id==null)
       throw new \Exception("Harap Lakukan Penghapusan",1);
 
-      $deleted_reason = $model_query->req_deleted_reason;
+      $reason_adder = $request->reason_adder;
+      $deleted_reason = $model_query->req_deleted_reason.($reason_adder?" | ".$reason_adder:"");
       if(!$deleted_reason)
       throw new \Exception("Sertakan Alasan Penghapusan",1);
       
@@ -1144,7 +1153,7 @@ class ExtraMoneyTrxController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
-      $model_query = ExtraMoneyTrx::find($request->id);
+      $model_query = ExtraMoneyTrx::where("id",$request->id)->lockForUpdate()->first();
       
       if(!$model_query->attachment_1_loc)
       throw new \Exception("Harap Mengisi Attachment Terlebih dahulu",1);
@@ -1203,6 +1212,131 @@ class ExtraMoneyTrxController extends Controller
       DB::commit();
       return response()->json([
         "message" => "Proses validasi data berhasil",
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null,
+        "val4"=>$model_query->val4,
+        "val4_user"=>$model_query->val4_user,
+        "val4_at"=>$model_query->val4_at,
+        "val4_by"=>$model_query->val4_user ? new IsUserResource(IsUser::find($model_query->val4_user)) : null,
+        "val5"=>$model_query->val5,
+        "val5_user"=>$model_query->val5_user,
+        "val5_at"=>$model_query->val5_at,
+        "val5_by"=>$model_query->val5_user ? new IsUserResource(IsUser::find($model_query->val5_user)) : null,
+        "val6"=>$model_query->val6,
+        "val6_user"=>$model_query->val6_user,
+        "val6_at"=>$model_query->val6_at,
+        "val6_by"=>$model_query->val6_user ? new IsUserResource(IsUser::find($model_query->val6_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function unvalidasi(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['extra_money_trx.unval1','extra_money_trx.unval2','extra_money_trx.unval3','extra_money_trx.unval4','extra_money_trx.unval5','extra_money_trx.unval6']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\ExtraMoneyTrx,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $model_query = ExtraMoneyTrx::where("id",$request->id)->lockForUpdate()->first();
+      
+      $SYSOLD                     = clone($model_query);
+
+      if($model_query->pvr_no || $model_query->received_payment)
+      throw new \Exception("Extra money ini sudah tidak bisa di unvalidasi",1);
+    
+      $run_val = 0; 
+  
+      if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.unval1',true) && $model_query->val1){
+        $run_val++;
+        $model_query->val1 = 0;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.unval2',true) && $model_query->val2){
+        $run_val++;
+        $model_query->val2 = 0;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.unval3',true) && $model_query->val3){
+        $run_val++;
+        $model_query->val3 = 0;
+        $model_query->val3_user = $this->admin_id;
+        $model_query->val3_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.unval4',true) && $model_query->val4){
+        $run_val++;
+        $model_query->val4 = 0;
+        $model_query->val4_user = $this->admin_id;
+        $model_query->val4_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.unval5',true) && $model_query->val5){
+        $run_val++;
+        $model_query->val5 = 0;
+        $model_query->val5_user = $this->admin_id;
+        $model_query->val5_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.unval6',true) && $model_query->val6){
+        $run_val++;
+        $model_query->val6 = 0;
+        $model_query->val6_user = $this->admin_id;
+        $model_query->val6_at = $t_stamp;
+      }
+
+
+      $model_query->save();
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+
+      MyLog::sys("extra_money_trx",$request->id,"unvalidate",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses unvalidasi data berhasil",
         "val1"=>$model_query->val1,
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,

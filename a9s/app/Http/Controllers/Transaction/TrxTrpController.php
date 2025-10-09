@@ -892,11 +892,17 @@ class TrxTrpController extends Controller
         throw new \Exception("Data tidak terdaftar", 1);
       }
       
-      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val6,$model_query->val_ticket]) || $model_query->req_deleted==1  || $model_query->deleted==1) 
-      throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+      if($model_query->req_deleted==1  || $model_query->deleted==1) 
+      throw new \Exception("Data Sudah Di (Permintaan) Hapus",1);
 
-      if($model_query->pvr_id!="" || $model_query->pvr_id!=null)
+      if($model_query->pvr_id!=null)
       throw new \Exception("Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
+
+      if($model_query->received_payment==1) 
+      throw new \Exception("Pembayaran Sudah Dilakukan. Harap Lakukan Permintaan Penghapusan Terlebih Dahulu",1);
+
+      if(in_array(1,[$model_query->val2,$model_query->val3,$model_query->val4,$model_query->val5,$model_query->val6,$model_query->val_ticket]) || $model_query->req_deleted==1  || $model_query->deleted==1) 
+      throw new \Exception("Unvalidasi terlebih dahulu untuk menghapus kecuali kasir dan mandor",1);
 
       $deleted_reason = $request->deleted_reason;
       if(!$deleted_reason)
@@ -974,7 +980,7 @@ class TrxTrpController extends Controller
       if($model_query->deleted==1 || $model_query->req_deleted==1 )
       throw new \Exception("Data Tidak Dapat Di Hapus Lagi",1);
 
-      if($model_query->pvr_id=="" || $model_query->pvr_id==null)
+      if($model_query->pvr_id==null)
       throw new \Exception("Harap Lakukan Penghapusan",1);
 
       $req_deleted_reason = $request->req_deleted_reason;
@@ -1631,9 +1637,14 @@ class TrxTrpController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::lockForUpdate()->find($request->id);
+      if($model_query->pvr_no || $model_query->received_payment){
+        throw new \Exception("Data sudah tidak bisa di unvalidasi",1);
+      }
+
       if(!$model_query->val1 && !$model_query->val2 && !$model_query->val3 && !$model_query->val4 && !$model_query->val5 && !$model_query->val6){
         throw new \Exception("Data Sudah Terunvalidasi Sepenuhnya",1);
       }
+
 
       // if($model_query->duitku_supir_disburseId!==null && $request->confirm==0){
       //   throw new \Exception("need_confirm",1);
@@ -1651,8 +1662,10 @@ class TrxTrpController extends Controller
         $model_query->val6 = 0;
       }
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.unval5',true) && $model_query->val5){
-        if($model_query->val6==1)
-        throw new \Exception("Minta Manager Logistik untuk unvalidasi terlebih dahulu",1);
+        // if($model_query->val6==1)
+        // throw new \Exception("Minta Manager Logistik untuk unvalidasi terlebih dahulu",1);
+        if($model_query->val4==1)
+        throw new \Exception("Minta Staff Logistik untuk unvalidasi terlebih dahulu",1);
 
         $model_query->val5 = 0;
       }      

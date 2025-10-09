@@ -301,9 +301,12 @@ Route::get('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxCo
 Route::post('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'store']);
 Route::put('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'update']);
 Route::delete('/extra_money_trx', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'delete']);
+Route::delete('/extra_money_trx_req_delete', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'reqDelete']);
+Route::delete('/extra_money_trx_approve_req_delete', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'approveReqDelete']);
 Route::get('/extra_money_trx_load_local', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'loadLocal']);
 Route::get('/extra_money_trx_load_sqlsrv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'loadSqlSrv']);
 Route::put('/extra_money_trx_validasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'validasi']);
+Route::put('/extra_money_trx_unvalidasi', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'unvalidasi']);
 Route::get('/extra_money_trx_preview_file', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFile']);
 Route::post('/extra_money_trx_do_gen_pvr', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doGenPVR']);
 Route::post('/extra_money_trx_do_gen_pv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doGenPV']);
