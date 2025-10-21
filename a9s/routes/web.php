@@ -224,6 +224,9 @@ Route::put('/fin_payment_req', [\App\Http\Controllers\Finance\FinPaymentReqContr
 Route::delete('/fin_payment_req', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'delete']);
 Route::put('/fin_payment_req_validasi', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'validasi']);
 
+Route::put('/fin_payment_req_dtl/renew_data', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'renewData']);
+Route::put('/fin_payment_req/get_update', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'getUpdate']);
+Route::put('/fin_payment_req/gen_csv_and_send_mandiri', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'generateCSVMandiriAndSend']);
 Route::get('/fin_payment_req/get_trx_trp_unprocessed', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'get_trx_trp_unprocessed']);
 Route::get('/fin_payment_req/download_view', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'excelDownload']);
 

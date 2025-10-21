@@ -234,7 +234,7 @@ class StandbyTrxController extends Controller
           if(array_search($key,['status'])!==false){
           }else if(array_search($key,['standby_trx_dtl_tanggal'])!==false){
             MyLib::queryCheckC1("standby_trx_dtl","standby_trx",$value,$key,$q);
-          }else if(array_search($key,['standby_mst_name'])!==false){
+          }else if(array_search($key,['standby_mst_name','standby_mst_tipe'])!==false){
             MyLib::queryCheckP1("standby_mst",$value,$key,$q,"standby_mst");
           } else{
             MyLib::queryCheck($value,$key,$q);

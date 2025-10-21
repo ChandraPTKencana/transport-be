@@ -91,7 +91,8 @@ class Employee extends Authenticatable
 
     public function potongan(){
         return $this->hasOne(PotonganMst::class,"employee_id","id")->exclude(['attachment_1','attachment_2'])
-        ->where('val1',1)->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
+        ->where('val',1)->where('val1',1)
+        ->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc');
     }
 
     public function bank(){

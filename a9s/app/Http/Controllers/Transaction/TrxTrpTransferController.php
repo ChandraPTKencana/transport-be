@@ -340,9 +340,18 @@ class TrxTrpTransferController extends Controller
 
     $filter_status = $request->filter_status;
     
-    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
+    $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3])->where('val',1)->where('val1',1)->where('val2',1)->where('val4',1)->where(function ($q){
       $q->where('val5',1)->orWhere('val6',1);
-    })->where('received_payment',0);
+    })
+    ->where('received_payment',0)
+    ->where(function ($q){
+      $q->where(function ($q1){
+        $q1->whereNotIn('jenis',['CPO','PK']);
+      });
+      $q->orWhere(function ($q1){
+        $q1->whereIn('jenis',['CPO','PK'])->where('val3',1);
+      });
+    });
 
     $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj',
     // 'trx_absens'=>function($q) {
@@ -426,6 +435,10 @@ class TrxTrpTransferController extends Controller
 
       if(($model_query->jenis=='CPO' || $model_query->jenis=='PK') && $model_query->val3==0){
         throw new \Exception("Data Perlu Divalidasi oleh marketing terlebih dahulu",1);
+      }
+
+      if($model_query->val5==0 && $model_query->val6==0){
+        throw new \Exception("Data Perlu Divalidasi oleh SPV / Manager Logistik terlebih dahulu",1);
       }
 
       // $app5 = $model_query->val5;

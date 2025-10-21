@@ -54,7 +54,8 @@ class PSPotonganTrx
         if($trx_trp->supir_id != $employee->id && $trx_trp->kernet_id != $employee->id )
         throw new \Exception("Pekerja tidak cocok dengan data di Trx Trp",1);
 
-        $potongan_mst   = PotonganMst::exclude(['attachment_1','attachment_2'])->where('employee_id',$employee->id)->where('val1',1)
+        $potongan_mst   = PotonganMst::exclude(['attachment_1','attachment_2'])->where('employee_id',$employee->id)
+        ->where('val',1)->where('val1',1)
         ->where('deleted',0)->where('status','Open')->where('remaining_cut',">",0)->orderBy('created_at','asc')
         ->lockForUpdate()
         ->first();
