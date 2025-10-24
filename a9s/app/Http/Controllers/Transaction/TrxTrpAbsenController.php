@@ -681,34 +681,36 @@ class TrxTrpAbsenController extends Controller
       
       foreach ($model_query as $key => $v) {
         $SYSOLD                     = clone($v);
+        if($v->salary_paid_id != null){
+          throw new \Exception("Data #".$v->id." Tidak Bisa Di unvalidasi lagi karna sudah memiliki Salary Paid ID",1);
+        }
+        $change=0;
+        if($v->ritase_val != 0){
+          $v->ritase_val        = 0;
+          $change++;
+        }
+        if($v->ritase_val1 != 0){
+          $v->ritase_val1       = 0;
+          $change++;
+        }
+        if($v->ritase_val2 != 0){
+          $v->ritase_val2       = 0;
+          $change++;
+        }
+        if($change > 0){
+          $v->updated_at        = $t_stamp;
+          $v->updated_user      = $this->admin_id;
+  
+          $v->save();
 
-          $change=0;
-          if($v->ritase_val != 0){
-            $v->ritase_val        = 0;
-            $change++;
-          }
-          if($v->ritase_val1 != 0){
-            $v->ritase_val1       = 0;
-            $change++;
-          }
-          if($v->ritase_val2 != 0){
-            $v->ritase_val2       = 0;
-            $change++;
-          }
-          if($change > 0){
-            $v->updated_at        = $t_stamp;
-            $v->updated_user      = $this->admin_id;
-    
-            $v->save();
-
-            array_push($valList,[
-              "id"          => $v->id,
-              "ritase_val"  => $v->ritase_val,
-              "ritase_val1" => $v->ritase_val1,
-              "ritase_val2" => $v->ritase_val2,
-              "updated_at"  => $v->updated_at,
-            ]);
-          }
+          array_push($valList,[
+            "id"          => $v->id,
+            "ritase_val"  => $v->ritase_val,
+            "ritase_val1" => $v->ritase_val1,
+            "ritase_val2" => $v->ritase_val2,
+            "updated_at"  => $v->updated_at,
+          ]);
+        }
 
         $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);         
         array_push($SYSNOTES,$SYSNOTE);

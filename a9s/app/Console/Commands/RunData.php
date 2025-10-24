@@ -2,6 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\MySql\PaymentMethod;
+use App\Models\MySql\PermissionGroupDetail;
+use App\Models\MySql\PermissionGroupUser;
+use App\Models\MySql\PermissionList;
+use App\Models\MySql\PermissionUserDetail;
 use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\TrxTrp;
 use App\Models\MySql\Ujalan;
@@ -152,13 +157,13 @@ class RunData extends Command
         // ]);
 
 
-        // $nonorinet = 30900 - 31000 ;
+        // $nonorinet = 28840 - 28870 ;
         // $this->info($nonorinet."\n ");
         // // if($nonorinet<0) $nonorinet*=-1;
-        // $pembanding = 31000;
+        // $pembanding = 28870;
         // $this->info($pembanding."\n ");
         
-        // $bps = -0.3;
+        // $bps = 0;
         // $this->info((($nonorinet/$pembanding)*100)."\n ");
 
         // $this->info(round(($nonorinet/$pembanding)*100,2)."\n ");
@@ -247,15 +252,22 @@ class RunData extends Command
         // $this->info(json_encode($model_query)."\n ");
 
 
-        $uj = Ujalan::where("bonus_trip_supir","!=",0)->orWhere('bonus_trip_kernet',"!=",0)->get();
+        // $uj = Ujalan::where("bonus_trip_supir","!=",0)->orWhere('bonus_trip_kernet',"!=",0)->get();
 
-        foreach ($uj as $k => $v) {
-         TrxTrp::where("id_uj",$v->id)->update(["bonus_trip_supir"=>$v->bonus_trip_supir,"bonus_trip_supir"=>$v->bonus_trip_kernet]);
-        }
+        // foreach ($uj as $k => $v) {
+        //  TrxTrp::where("id_uj",$v->id)->update(["bonus_trip_supir"=>$v->bonus_trip_supir,"bonus_trip_supir"=>$v->bonus_trip_kernet]);
+        // }
         // $this->info(json_encode($uj)."\n ");
 
-        $trp=TrxTrp::where("bonus_trip_supir","!=",0)->orWhere('bonus_trip_kernet',"!=",0)->get();
-        $this->info(json_encode($trp)."\n ");
+        // $trp=TrxTrp::where("bonus_trip_supir","!=",0)->orWhere('bonus_trip_kernet',"!=",0)->get();
+        // $this->info(json_encode($trp)."\n ");
+
+        $prev = PaymentMethod::where("id",2)->first();
+
+        $pm = new PaymentMethod();
+        $pm->name = 'TRANSFER-MANDIRI';
+        $pm->account_code = $prev->account_code;;
+        $pm->save();
 
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");

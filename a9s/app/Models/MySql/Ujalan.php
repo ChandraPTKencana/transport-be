@@ -52,10 +52,10 @@ class Ujalan extends Model
         return $this->hasOne(IsUser::class, 'id', "deleted_user");
     }
 
-    // public function requester()
-    // {
-    //     return $this->hasOne(\App\Models\IsUser::class, 'id_user', "requested_by");
-    // }
+    public function destination_location()
+    {
+        return $this->hasOne(DestinationLocation::class, 'id', "destination_location_id");
+    }
 
     // public function confirmer()
     // {

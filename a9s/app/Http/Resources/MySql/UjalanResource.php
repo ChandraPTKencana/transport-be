@@ -51,6 +51,9 @@ class UjalanResource extends JsonResource
             'deleted_at'        => $this->deleted_at ?? "",
             'deleted_by'        => new IsUserResource($this->whenLoaded('deleted_by')),
             'deleted_reason'    => $this->deleted_reason ?? "",
+
+            'destination_location' => new DestinationLocationResource($this->whenLoaded('destination_location')),
+
         ];
 
         $admin = MyAdmin::user();

@@ -328,6 +328,16 @@ class MyLib
     //              $days, $hours, $minutes, $seconds);
   }
 
+  public static function hoursDiff($date1,$date2){
+    //minute matter, seconds no.
+    // ordinal no matter
+    $datetime1 = \DateTime::createFromFormat('Y-m-d H:i:s', $date1);
+    $datetime2 = \DateTime::createFromFormat('Y-m-d H:i:s', $date2);
+
+    $interval = $datetime1->diff($datetime2);
+    return ($interval->days * 24) + $interval->h + ($interval->i / 60);
+  }
+
 
   public static function queryCheck($value,$key,$q,$request=""){
     if(array_search($value['type'],['string','number'])!==false && $value['value_1']!==''){

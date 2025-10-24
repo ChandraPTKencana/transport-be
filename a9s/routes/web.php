@@ -54,6 +54,7 @@ Route::put('/update_profile', [\App\Http\Controllers\User\UserAccount::class, 'u
 
 
 
+Route::get('/ujalan/load_local', [\App\Http\Controllers\Ujalan\UjalanController::class, 'loadLocal']);
 Route::get('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'index']);
 Route::get('/ujalan_', [\App\Http\Controllers\Ujalan\UjalanController::class, 'show']);
 Route::post('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'store']);
@@ -319,6 +320,13 @@ Route::get('/extra_money_trx/transfers', [\App\Http\Controllers\ExtraMoney\Extra
 Route::put('/extra_money_trx/transfer', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'validasiAndTransfer']);
 Route::get('/extra_money_trx/transfer/detail', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'show']);
 Route::get('/extra_money_trx_preview_file_bt', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'previewFileBT']);
+
+Route::get('/destination_locations', [\App\Http\Controllers\DestinationLocation\DestinationLocationController::class, 'index']);
+Route::get('/destination_location', [\App\Http\Controllers\DestinationLocation\DestinationLocationController::class, 'show']);
+Route::post('/destination_location', [\App\Http\Controllers\DestinationLocation\DestinationLocationController::class, 'store']);
+Route::put('/destination_location', [\App\Http\Controllers\DestinationLocation\DestinationLocationController::class, 'update']);
+Route::delete('/destination_location', [\App\Http\Controllers\DestinationLocation\DestinationLocationController::class, 'delete']);
+Route::put('/destination_location_validasi', [\App\Http\Controllers\DestinationLocation\DestinationLocationController::class, 'validasi']);
 
 // Route::get('/payment_methods', [\App\Http\Controllers\PaymentMethodController::class, 'index']);
 Route::get('/banks', [\App\Http\Controllers\BankController::class, 'index']);

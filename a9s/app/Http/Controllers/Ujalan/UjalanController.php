@@ -47,6 +47,18 @@ class UjalanController extends Controller
 
   }
 
+  public function loadLocal()
+  {
+    // MyAdmin::checkMultiScope($this->permissions, ['extra_money.create','extra_money.modify']);
+
+    // $list_destination_location = \App\Models\MySql\DestinationLocation::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');    
+    $list_destination_location = \App\Models\MySql\DestinationLocation::get();    
+    return response()->json([
+      "list_destination_location" => $list_destination_location,
+    ], 200);
+  }
+
+
   public function index(Request $request,$download = false)
   {
     MyAdmin::checkScope($this->permissions, 'ujalan.views');
@@ -220,7 +232,7 @@ class UjalanController extends Controller
       $model_query = $model_query->with(['details','details2']);
     }
     
-    $model_query = $model_query->with(['val_by','val1_by','deleted_by'])->get();
+    $model_query = $model_query->with(['val_by','val1_by','deleted_by','destination_location'])->get();
 
     return response()->json([
       "data" => UjalanResource::collection($model_query),
@@ -244,7 +256,9 @@ class UjalanController extends Controller
       $q->orderBy("ordinal","asc");
     }
     //end for details2
-    ])->with(['val_by','val1_by','deleted_by'])->find($request->id);
+    ])
+    ->with(['val_by','val1_by','deleted_by','destination_location'])
+    ->find($request->id);
 
     // if($model_query->requested_by != $this->admin_id){
     //   return response()->json([
@@ -1528,11 +1542,15 @@ class UjalanController extends Controller
     
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Ujalan,id",
+      'destination_location_id' => "nullable|exists:\App\Models\MySql\DestinationLocation,id",
     ];
 
     $messages = [
       'id.required' => 'ID tidak boleh kosong',
       'id.exists' => 'ID tidak terdaftar',
+
+      'destination_location_id.required' => 'Destination Location ID tidak boleh kosong',
+      'destination_location_id.exists' => 'Destination Location ID tidak terdaftar',
     ];
 
     $validator = Validator::make($request->all(), $rules, $messages);
@@ -1558,6 +1576,7 @@ class UjalanController extends Controller
       $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
       $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
       $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+      $model_query->destination_location_id = $request->destination_location_id;
 
       $model_query->updated_at          = $t_stamp;
       $model_query->updated_user        = $this->admin_id;  

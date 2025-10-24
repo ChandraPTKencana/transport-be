@@ -751,11 +751,19 @@ class TrxTrpTicketController extends Controller
         $model_query->updated_user = $this->admin_id;
         $model_query->updated_at = $t_stamp;
 
-
-
+        $reason_cut = "";
         $gen_salary_bonus = false;
 
         if(in_array($model_query->jenis,['CPO','PK']) && $model_query->tanggal >= '2025-08-01'){
+          
+          if(!$model_query->ritase_leave_at || !$model_query->ritase_till_at){
+            throw new \Exception("#".$model_query->id." Gambar Belum Lengkap",1);
+          }
+
+          if(!$model_query->ritase_val || !$model_query->ritase_val1 || !$model_query->ritase_val2){
+            throw new \Exception("#".$model_query->id." Absensi Harus Tervalidasi Sepenuhnya untuk melakukan validasi tiket",1);
+          }
+
           $nonorinet = $model_query->ticket_b_netto - $model_query->ticket_a_netto;
           // if($nonorinet<0) $nonorinet*=-1;
           $pembanding = $model_query->ticket_a_netto;
@@ -763,21 +771,29 @@ class TrxTrpTicketController extends Controller
           $model_query->batas_persen_susut = -0.3;
           if(round(($nonorinet/$pembanding)*100,2) < $model_query->batas_persen_susut ){
             $gen_salary_bonus = true;
+            $reason_cut .= "Susut.";
+          }
+
+          $totalHours = MyLib::hoursDiff($model_query->ritase_leave_at,$model_query->ritase_till_at);
+          if($totalHours>72){
+            $gen_salary_bonus = true;
+            $reason_cut .= "Melewati waktu maksimal 72 Jam (".$totalHours.").";
           }
           
-        }else if(in_array($model_query->jenis,['TBS']) && $model_query->tanggal >= '2025-08-01'){
-          $orinet = $model_query->ticket_b_ori_netto - $model_query->ticket_a_ori_netto;
-          // if($orinet<0) $orinet*=-1;
-          $pembanding = $model_query->ticket_a_ori_netto;
-
-          if($model_query->uj->batas_persen_susut == null) 
-          throw new \Exception("Batas Persen Susut Belum Di Tentukan",1);
-
-          $model_query->batas_persen_susut = $model_query->uj->batas_persen_susut;
-          if(round(($orinet/$pembanding)*100,2) < $model_query->batas_persen_susut){
-            $gen_salary_bonus = true;
-          }
         }
+        // else if(in_array($model_query->jenis,['TBS']) && $model_query->tanggal >= '2025-08-01'){
+        //   $orinet = $model_query->ticket_b_ori_netto - $model_query->ticket_a_ori_netto;
+        //   // if($orinet<0) $orinet*=-1;
+        //   $pembanding = $model_query->ticket_a_ori_netto;
+
+        //   if($model_query->uj->batas_persen_susut == null) 
+        //   throw new \Exception("Batas Persen Susut Belum Di Tentukan",1);
+
+        //   $model_query->batas_persen_susut = $model_query->uj->batas_persen_susut;
+        //   if(round(($orinet/$pembanding)*100,2) < $model_query->batas_persen_susut){
+        //     $gen_salary_bonus = true;
+        //   }
+        // }
 
         if($gen_salary_bonus){
           $salary_bonuses = SalaryBonus::where("trx_trp_id",$model_query->id)->get();
@@ -797,7 +813,7 @@ class TrxTrpTicketController extends Controller
               $model_query2->type            = 'BonusTrip';
               $model_query2->employee_id     = $model_query->supir_id;
               $model_query2->nominal         = $model_query->uj->bonus_trip_supir*-1;
-              $model_query2->note            = "Sumber Potongan Dari Validasi Tiket [".$model_query->id."]";
+              $model_query2->note            = "Sumber Potongan Dari Validasi Tiket [".$model_query->id."] : ".$reason_cut;
               $model_query2->trx_trp_id      = $model_query->id;
   
               $model_query2->created_at      = $t_stamp;
@@ -906,9 +922,9 @@ class TrxTrpTicketController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::lockForUpdate()->find($request->id);
-      // if($model_query->val_ticket){
-      //   throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
-      // }
+      if($model_query->salary_paid_id != null){
+        throw new \Exception("Data Tidak Bisa Di unvalidasi lagi karna sudah memiliki Salary Paid ID",1);
+      }
       $SYSOLD                     = clone($model_query);
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $model_query->val_ticket){
@@ -987,10 +1003,19 @@ class TrxTrpTicketController extends Controller
           $v->updated_user = $this->admin_id;
           $v->updated_at = $t_stamp;
 
-
+          $reason_cut = "";
           $gen_salary_bonus = false;
 
           if(in_array($v->jenis,['CPO','PK']) && $v->tanggal >= '2025-08-01'){
+
+            if(!$v->ritase_leave_at || !$v->ritase_till_at){
+              throw new \Exception("#".$v->id." Gambar Belum Lengkap",1);
+            }
+
+            if(!$v->ritase_val || !$v->ritase_val1 || !$v->ritase_val2){
+              throw new \Exception("#".$v->id." Absensi Harus Tervalidasi Sepenuhnya untuk melakukan validasi tiket",1);
+            }
+            
             $nonorinet = $v->ticket_b_netto - $v->ticket_a_netto ;
             // if($nonorinet<0) $nonorinet*=-1;
             $pembanding = $v->ticket_a_netto;
@@ -998,21 +1023,28 @@ class TrxTrpTicketController extends Controller
             $v->batas_persen_susut = -0.3;
             if(round(($nonorinet/$pembanding)*100,2) < $v->batas_persen_susut ){
               $gen_salary_bonus = true;
+              $reason_cut .= "Susut.";
             }
-            
-          }else if(in_array($v->jenis,['TBS']) && $v->tanggal >= '2025-08-01'){
-            $orinet = $v->ticket_b_ori_netto - $v->ticket_a_ori_netto;
-            // if($orinet<0) $orinet*=-1;
-            $pembanding = $v->ticket_a_ori_netto;
 
-            if($v->uj->batas_persen_susut == null) 
-            throw new \Exception("Batas Persen Susut Belum Di Tentukan",1);
-
-            $v->batas_persen_susut = $v->uj->batas_persen_susut;
-            if(round(($orinet/$pembanding)*100,2) < $v->batas_persen_susut){
+            $totalHours = MyLib::hoursDiff($v->ritase_leave_at,$v->ritase_till_at);
+            if($totalHours>72){
               $gen_salary_bonus = true;
+              $reason_cut .= "Melewati waktu maksimal 72 Jam (".$totalHours.").";
             }
           }
+          // else if(in_array($v->jenis,['TBS']) && $v->tanggal >= '2025-08-01'){
+          //   $orinet = $v->ticket_b_ori_netto - $v->ticket_a_ori_netto;
+          //   // if($orinet<0) $orinet*=-1;
+          //   $pembanding = $v->ticket_a_ori_netto;
+
+          //   if($v->uj->batas_persen_susut == null) 
+          //   throw new \Exception("Batas Persen Susut Belum Di Tentukan",1);
+
+          //   $v->batas_persen_susut = $v->uj->batas_persen_susut;
+          //   if(round(($orinet/$pembanding)*100,2) < $v->batas_persen_susut){
+          //     $gen_salary_bonus = true;
+          //   }
+          // }
 
           if($gen_salary_bonus){
             $salary_bonuses = SalaryBonus::where("trx_trp_id",$v->id)->get();
@@ -1032,7 +1064,7 @@ class TrxTrpTicketController extends Controller
                 $model_query->type            = 'BonusTrip';
                 $model_query->employee_id     = $v->supir_id;
                 $model_query->nominal         = $v->uj->bonus_trip_supir*-1;
-                $model_query->note            = "Sumber Potongan Dari Validasi Tiket [".$v->id."]";
+                $model_query->note            = "Sumber Potongan Dari Validasi Tiket [".$v->id."] : ".$reason_cut;
                 $model_query->trx_trp_id      = $v->id;
     
                 $model_query->created_at      = $t_stamp;
@@ -1146,6 +1178,9 @@ class TrxTrpTicketController extends Controller
       $SYSNOTES =[];
       foreach ($model_querys as $key => $v) {
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.unval_ticket',true) && $v->val_ticket){
+          if($v->salary_paid_id != null){
+            throw new \Exception("Data #".$v->id." Tidak Bisa Di unvalidasi lagi karna sudah memiliki Salary Paid ID",1);
+          }
           $SYSOLD                     = clone($v);
           $v->val_ticket = 0;
           // $v->val_ticket_user = $this->admin_id;
@@ -1227,21 +1262,55 @@ class TrxTrpTicketController extends Controller
       foreach ($model_querys as $key => $v) {
         if(MyAdmin::checkScope($this->permissions, 'trp_trx.ticket.val_ticket',true) && !$v->val_ticket){
           $SYSOLD                     = clone($v);
-          $v->ticket_a_id = null;
-          $v->ticket_a_no = null;
-          $v->ticket_b_id = null;
-          $v->ticket_b_no = null;
-          $v->updated_user = $this->admin_id;
-          $v->updated_at = $t_stamp;
+          $v->ticket_a_id         = null;
+          $v->ticket_a_no         = null;
+          $v->ticket_a_bruto      = null;
+          $v->ticket_a_tara       = null;
+          $v->ticket_a_netto      = null;
+          $v->ticket_a_ori_bruto  = null;
+          $v->ticket_a_ori_tara   = null;
+          $v->ticket_a_ori_netto  = null;
+          $v->ticket_a_supir      = null;
+          $v->ticket_a_no_pol     = null;
+          $v->ticket_a_in_at      = null;
+          $v->ticket_a_out_at     = null;
+          $v->ticket_b_id         = null;
+          $v->ticket_b_no         = null;
+          $v->ticket_b_bruto      = null;
+          $v->ticket_b_tara       = null;
+          $v->ticket_b_netto      = null;
+          $v->ticket_b_ori_bruto  = null;
+          $v->ticket_b_ori_tara   = null;
+          $v->ticket_b_ori_netto  = null;
+          $v->ticket_b_supir      = null;
+          $v->ticket_b_no_pol     = null;
+          $v->ticket_b_in_at      = null;
+          $v->ticket_b_out_at     = null;
+          $v->updated_user        = $this->admin_id;
+          $v->updated_at          = $t_stamp;
 
           $v->save();
           array_push($clearList,[
             "id"=>$v->id,
-            "ticket_a_id"=>$v->ticket_a_id,
-            "ticket_a_no"=>$v->ticket_a_no,
-            "ticket_b_id"=>$v->ticket_b_id,
-            "ticket_b_no"=>$v->ticket_b_no,
-            "updated_at"=>$v->updated_at,
+            "ticket_a_id"     =>$v->ticket_a_id,
+            "ticket_a_no"     =>$v->ticket_a_no,
+            "ticket_a_bruto"  =>$v->ticket_a_bruto,
+            "ticket_a_tara"   =>$v->ticket_a_tara,
+            "ticket_a_netto"  =>$v->ticket_a_netto,
+            "ticket_a_supir"  =>$v->ticket_a_supir,
+            "ticket_a_no_pol" =>$v->ticket_a_no_pol,
+            "ticket_a_in_at"  =>$v->ticket_a_in_at,
+            "ticket_a_out_at" =>$v->ticket_a_out_at,
+            "ticket_b_id"     =>$v->ticket_b_id,
+            "ticket_b_no"     =>$v->ticket_b_no,
+            "ticket_b_bruto"  =>$v->ticket_b_bruto,
+            "ticket_b_tara"   =>$v->ticket_b_tara,
+            "ticket_b_netto"  =>$v->ticket_b_netto,
+            "ticket_b_supir"  =>$v->ticket_b_supir,
+            "ticket_b_no_pol" =>$v->ticket_b_no_pol,
+            "ticket_b_in_at"  =>$v->ticket_b_in_at,
+            "ticket_b_out_at" =>$v->ticket_b_out_at,
+            "updated_at"      =>$v->updated_at,
           ]);
           $SYSNOTE = MyLib::compareChange($SYSOLD,$v); 
           array_push($SYSNOTES,$SYSNOTE);
