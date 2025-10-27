@@ -400,7 +400,7 @@ class TrxTrpTicketController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','salary_paid','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B");
     }])->get();
 
@@ -800,8 +800,9 @@ class TrxTrpTicketController extends Controller
           if(count($salary_bonuses)>0){
             foreach ($salary_bonuses as $key => $sb) {
               if($sb->deleted){
-                $sb->deleted = 0;
+                $sb->deleted      = 0;
                 $sb->deleted_user = null;
+                $sb->note         = "Sumber Potongan Dari Validasi Tiket [".$model_query->id."] : ".$reason_cut;
                 $sb->save();
                 MyLog::sys("salary_bonus",$sb->id,"update","Undelete from ticket[".$model_query->id."]");
               }
@@ -843,7 +844,7 @@ class TrxTrpTicketController extends Controller
               $model_query2->type            = 'BonusTrip';
               $model_query2->employee_id     = $model_query->kernet_id;
               $model_query2->nominal         = $model_query->uj->bonus_trip_kernet*-1;
-              $model_query2->note            = "Sumber Potongan Dari Validasi Tiket [".$model_query->id."]";
+              $model_query2->note            = "Sumber Potongan Dari Validasi Tiket [".$model_query->id."] : ".$reason_cut;
               $model_query2->trx_trp_id      = $model_query->id;
   
               $model_query2->created_at      = $t_stamp;
@@ -1051,8 +1052,9 @@ class TrxTrpTicketController extends Controller
             if(count($salary_bonuses)>0){
               foreach ($salary_bonuses as $key => $sb) {
                 if($sb->deleted){
-                  $sb->deleted = 0;
+                  $sb->deleted      = 0;
                   $sb->deleted_user = null;
+                  $sb->note         = "Sumber Potongan Dari Validasi Tiket [".$v->id."] : ".$reason_cut;
                   $sb->save();
                   MyLog::sys("salary_bonus",$sb->id,"update","Undelete from ticket[".$v->id."]");
                 }
@@ -1095,7 +1097,7 @@ class TrxTrpTicketController extends Controller
                 $model_query->type            = 'BonusTrip';
                 $model_query->employee_id     = $v->kernet_id;
                 $model_query->nominal         = $v->uj->bonus_trip_kernet*-1;
-                $model_query->note            = "Sumber Potongan Dari Validasi Tiket [".$v->id."]";
+                $model_query->note            = "Sumber Potongan Dari Validasi Tiket [".$v->id."] : ".$reason_cut;
                 $model_query->trx_trp_id      = $v->id;
     
                 $model_query->created_at      = $t_stamp;
