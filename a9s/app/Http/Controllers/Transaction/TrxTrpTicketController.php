@@ -774,11 +774,11 @@ class TrxTrpTicketController extends Controller
             $reason_cut .= "Susut.";
           }
 
-          $totalHours = MyLib::hoursDiff($model_query->ritase_leave_at,$model_query->ritase_till_at);
-          if($totalHours>72){
-            $gen_salary_bonus = true;
-            $reason_cut .= "Melewati waktu maksimal 72 Jam (".$totalHours.").";
-          }
+          // $totalHours = MyLib::hoursDiff($model_query->ritase_leave_at,$model_query->ritase_till_at);
+          // if($totalHours>72){
+          //   $gen_salary_bonus = true;
+          //   $reason_cut .= "Melewati waktu maksimal 72 Jam (".$totalHours.").";
+          // }
           
         }
         // else if(in_array($model_query->jenis,['TBS']) && $model_query->tanggal >= '2025-08-01'){
@@ -1027,11 +1027,11 @@ class TrxTrpTicketController extends Controller
               $reason_cut .= "Susut.";
             }
 
-            $totalHours = MyLib::hoursDiff($v->ritase_leave_at,$v->ritase_till_at);
-            if($totalHours>72){
-              $gen_salary_bonus = true;
-              $reason_cut .= "Melewati waktu maksimal 72 Jam (".$totalHours.").";
-            }
+            // $totalHours = MyLib::hoursDiff($v->ritase_leave_at,$v->ritase_till_at);
+            // if($totalHours>72){
+            //   $gen_salary_bonus = true;
+            //   $reason_cut .= "Melewati waktu maksimal 72 Jam (".$totalHours.").";
+            // }
           }
           // else if(in_array($v->jenis,['TBS']) && $v->tanggal >= '2025-08-01'){
           //   $orinet = $v->ticket_b_ori_netto - $v->ticket_a_ori_netto;
