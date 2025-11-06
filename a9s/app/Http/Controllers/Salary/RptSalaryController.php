@@ -952,170 +952,7 @@ class RptSalaryController extends Controller
         // $q1->where("tanggal",">=",$smp_bulan."-01");                  
         $q1->where("tanggal","<=",$model_query->period_end);                  
       });
-      $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-        $q1->whereIn("payment_method_id",[2,3]);
-        $q1->where(function ($q2)use($model_query,$smp_bulan){
-          // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
-          $q2->where(function ($q3) use($model_query,$smp_bulan) {            
-            // $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
-            $q3->where("rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
-          });
-          $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
-            // $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
-            $q3->where("rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
-          });
-        });                         
-      });
-    })->get();
 
-
-    foreach ($tt as $k => $v) {
-      $smd = $v->uj;
-      $smd2 = $v->uj_details2;
-
-      // $is_gaji_s = 0;
-      // $is_dinas_s = 0;
-
-      // $is_gaji_k = 0;
-      // $is_dinas_k = 0;
-      
-      $gd_s="";
-      $gd_k="";
-
-      // $v1->ac_account_code=='01.510.001'Gaji-'01.510.005'Makan-'01.575.002'Dinas
-      foreach ($smd2 as $k1 => $v1) {
-        $amount = $v1->amount * $v1->qty;
-        if($v1->xfor == 'Supir'){
-          // if($v1->ac_account_code=='01.510.001') $is_gaji_s++;
-          // if($v1->ac_account_code=='01.575.002') $is_dinas_s++;
-
-          if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
-          if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
-        }
-
-        if($v1->xfor == 'Kernet'){
-          // if($v1->ac_account_code=='01.510.001') $is_gaji_k++;
-          // if($v1->ac_account_code=='01.575.002') $is_dinas_k++;
-
-          if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
-          if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
-        }
-      }
-
-
-      if($v->supir_id){
-
-        $map_s = array_map(function($x){
-          return $x['employee_id'];
-        },$data);
-
-        $search = array_search($v->supir_id,$map_s);
-
-        if(count($data)==0 || $search===false){
-
-          $emp = $v->employee_s;
-          $newData = $temp;
-          $newData["rpt_salary_id"]=$model_query->id;
-          $newData["employee_id"]=$emp->id;
-
-          // if($is_gaji_s > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_supir;
-
-          // if($is_gaji_s > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_supir;
-
-          $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_s]=$smd->bonus_trip_supir;
-
-          array_push($data,$newData);
-        }else{
-          // if($is_gaji_s > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
-
-          // if($is_gaji_s > 0 &&$smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_supir;
-          
-          $data[$search]["trip_".strtolower($smd->jenis)."_bonus_".$gd_s]+=$smd->bonus_trip_supir;
-        }
-      }
-
-      if($v->kernet_id){
-
-        $map_k = array_map(function($x){
-          return $x['employee_id'];
-        },$data);
-
-        $search = array_search($v->kernet_id,$map_k);
-
-        if(count($data)==0 || $search===false){
-          $emp = $v->employee_k;
-          $newData = $temp;
-          $newData["rpt_salary_id"]=$model_query->id;
-          $newData["employee_id"]=$emp->id;
-
-          // if($is_gaji_k > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_kernet;
-
-          // if($is_gaji_k > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_kernet;
-          $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]=$smd->bonus_trip_kernet;
-          array_push($data,$newData);
-        }else{
-          // if($is_gaji_k > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
-
-          // if($is_gaji_k > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_kernet;
-          $data[$search]["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]+=$smd->bonus_trip_kernet;
-        }
-      }
-
-      $v->bonus_trip_supir  = $smd->bonus_trip_supir;
-      $v->bonus_trip_kernet = $smd->bonus_trip_kernet;
-      $v->salary_paid_id    = $salary_paid[1]->id;
-      $v->save();
-    }
-
-    $tt = TrxTrp::whereNotNull("pv_id")
-    ->whereNull("salary_paid_id")
-    ->where("req_deleted",0)
-    ->where("deleted",0)
-    ->where('val',1)
-    ->where('val1',1)
-    ->where('val2',1)
-    ->where('val_ticket',1)
-    ->whereIn('jenis',['TBS','TBSK'])
-    ->whereIn('tanggal',"<","2025-10-15")
-    ->where(function ($q) use($model_query,$smp_bulan) {
-      $q->where(function ($q1)use($model_query,$smp_bulan){
-        $q1->where("payment_method_id",1);       
-        $q1->where("received_payment",0);                  
-        // $q1->where("tanggal",">=",$smp_bulan."-01");                  
-        $q1->where("tanggal","<=",$model_query->period_end);                  
-      });
       $q->orWhere(function ($q1)use($model_query,$smp_bulan){
         $q1->whereIn("payment_method_id",[2,3]);
         $q1->where(function ($q2)use($model_query,$smp_bulan){
@@ -1299,7 +1136,7 @@ class RptSalaryController extends Controller
     ->where('trx_trp.val2',1)
     ->where('trx_trp.val_ticket',1)
     ->whereIn('trx_trp.jenis',['TBS','TBSK'])
-    // ->where('trx_trp.tanggal',">=","2025-10-15")
+    ->where('trx_trp.tanggal',">=","2025-10-15")
     ->where(function ($q) use($model_query,$smp_bulan) {
         $q->where(function ($q1)use($model_query,$smp_bulan){
             $q1->where("trx_trp.payment_method_id",1);       
@@ -1314,15 +1151,12 @@ class RptSalaryController extends Controller
                 // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
                 $q2->where(function ($q3) use($model_query,$smp_bulan) {            
                     // $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
-                    // $q3->where("trx_trp.rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
-                    $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
-                    $q3->where("trx_trp.ticket_b_out_at",">=","2025-10-15 00:00:00");                  
+                    $q3->where("trx_trp.rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
                 });
-                // $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
-                //     // $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
-                //     // $q3->where("trx_trp.rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
-                //     $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
-                // });
+                $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
+                    // $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
+                    $q3->where("trx_trp.rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
+                });
             });                         
         });
     })
