@@ -187,7 +187,7 @@ class TrxTrpResource extends JsonResource
         ];
         $admin = MyAdmin::user();
         $permissions = $admin->the_user->listPermissions();
-        if(!MyAdmin::checkScope($permissions, 'trp_trx.ticket.show_weight',true)){
+        if(!MyAdmin::checkScope($permissions, 'trp_trx.ticket.show_weight',true) && $this->jenis=='TBS'){
             $data['ticket_a_bruto'] ='';
             $data['ticket_a_tara'] ='';
             $data['ticket_a_netto'] ='';

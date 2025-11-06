@@ -810,7 +810,7 @@ class TrxTrpTicketController extends Controller
           }else{              
             if($model_query->supir_id){
               $model_query2                  = new SalaryBonus();
-              $model_query2->tanggal         = $tanggal;
+              $model_query2->tanggal         = $model_query->tanggal;
               $model_query2->type            = 'BonusTrip';
               $model_query2->employee_id     = $model_query->supir_id;
               $model_query2->nominal         = $model_query->uj->bonus_trip_supir*-1;
@@ -840,7 +840,7 @@ class TrxTrpTicketController extends Controller
 
             if($model_query->kernet_id){
               $model_query2                  = new SalaryBonus();
-              $model_query2->tanggal         = $tanggal;
+              $model_query2->tanggal         = $model_query->tanggal;
               $model_query2->type            = 'BonusTrip';
               $model_query2->employee_id     = $model_query->kernet_id;
               $model_query2->nominal         = $model_query->uj->bonus_trip_kernet*-1;
@@ -1062,7 +1062,7 @@ class TrxTrpTicketController extends Controller
             }else{              
               if($v->supir_id){
                 $model_query                  = new SalaryBonus();
-                $model_query->tanggal         = $tanggal;
+                $model_query->tanggal         = $v->tanggal;
                 $model_query->type            = 'BonusTrip';
                 $model_query->employee_id     = $v->supir_id;
                 $model_query->nominal         = $v->uj->bonus_trip_supir*-1;
@@ -1093,7 +1093,7 @@ class TrxTrpTicketController extends Controller
   
               if($v->kernet_id){
                 $model_query                  = new SalaryBonus();
-                $model_query->tanggal         = $tanggal;
+                $model_query->tanggal         = $v->tanggal;
                 $model_query->type            = 'BonusTrip';
                 $model_query->employee_id     = $v->kernet_id;
                 $model_query->nominal         = $v->uj->bonus_trip_kernet*-1;

@@ -128,7 +128,7 @@ class EmployeeTrip extends Controller
       //   "message"       => "Proses Generate Code berhasil",
       // ], 200);
     } catch (\Exception $e) {
-      MyLog::logging($e->getMessage(),"img_error");
+      // MyLog::logging($e->getMessage(),"img_error");
 
       DB::rollback();
       if ($e->getCode() == 1) {

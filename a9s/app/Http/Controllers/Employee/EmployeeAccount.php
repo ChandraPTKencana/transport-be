@@ -245,13 +245,13 @@ class EmployeeAccount extends Controller
 
       if(!$admin->the_employee->face_loc_target)
       throw new \Exception("Anda Masih Belum Memiliki Foto, Kabari Ke Pihak Logistik",1);
-      MyLog::logging("get source","img_error");
+      // MyLog::logging("get source","img_error");
 
 $employee_source_face = File::get(files_path($admin->the_employee->face_loc_target));
-MyLog::logging("res source","img_error");
+// MyLog::logging("res source","img_error");
 
 if($request->hasFile('image')){
-MyLog::logging("get hasFile","img_error");
+// MyLog::logging("get hasFile","img_error");
 
   $file = $request->file('image');
   $path = $file->getRealPath();
@@ -261,7 +261,7 @@ MyLog::logging("get hasFile","img_error");
 
     $endpoint = "http://127.0.0.1:5000/compare_face";
 
-    MyLog::logging("call api","img_error");
+    // MyLog::logging("call api","img_error");
 
       $response = $client->post($endpoint, [
         'multipart' => [
@@ -282,10 +282,10 @@ MyLog::logging("get hasFile","img_error");
             'Accept'        => 'application/json',
         ]
       ]);
-      MyLog::logging("get api","img_error");
+      // MyLog::logging("get api","img_error");
 
       $data = json_decode($response->getBody(), true);
-MyLog::logging("data hasFile","img_error");
+// MyLog::logging("data hasFile","img_error");
 
       return response()->json([
         "message"=>"test",
@@ -301,7 +301,7 @@ MyLog::logging("data hasFile","img_error");
         "message"       => "Proses Generate Code berhasil",
       ], 200);
     } catch (\Exception $e) {
-      MyLog::logging($e->getMessage(),"img_error");
+      // MyLog::logging($e->getMessage(),"img_error");
 
       DB::rollback();
       if ($e->getCode() == 1) {

@@ -1322,14 +1322,18 @@ class FinPaymentReqController extends Controller
   
       Storage::put($filePath, $csv.$csv_data);
 
-    // $remotePath = 'csvf/'.$filename . '.' . $mime["ext"];
-    // try {
-    //     // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
-    //     Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
-    // } catch (\Exception $e) {
-    //     // Handle the exception
-    //     MyLog::logging($e->getMessage());
-    // }
+      // $remotePath = 'csvf/'.$filePath . '.' . $mime["ext"];
+      // $remotePath = $filePath . '.' . $mime["ext"];
+      // $remotePath = "Upload/Users/MCM_BatchUpload/".$data['filename'] . '.' . $mime["ext"];
+      $remotePath = "Upload/Users/MCM_BatchUpload/".$data['filename'] . '.' . $mime["ext"];
+      try {
+          // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
+          Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
+          // MyLog::logging("kirim berhasil","kirim");
+      } catch (\Exception $e) {
+          // Handle the exception
+          // MyLog::logging($e->getMessage(),"kirim");
+      }
 
       FinPaymentReqDtl::where('fin_payment_req_id',$data['id'])->update([
         "status"=>"INQUIRY_PROCESS"
@@ -1392,7 +1396,7 @@ class FinPaymentReqController extends Controller
       $had_failed = 0;
       foreach ($fin_payment_req_details as $k => $v) {
         $SYSOLD                     = clone($model_query);
-        if($k==1){
+        if($k==0){
           $had_failed++;
           $v->status = 'INQUIRY_FAILED';
           $v->failed_reason = 'Update Dl Nama Rek Nya';

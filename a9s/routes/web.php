@@ -337,6 +337,10 @@ Route::post('/ga_pin', [\App\Http\Controllers\GAController::class, 'pin']);
 
 Route::get('/temp_data/vehiclesAllowedUpdateTicket', [\App\Http\Controllers\TempDataController::class, 'vehiclesAllowedUpdateTicket']);
 
+// use Illuminate\Support\Facades\Storage;
+// Route::get("/getftp",function ($x){
+//     Storage::disk('ftp')->get("/");
+// });
 
 // use Illuminate\Support\Facades\Storage;
 // use App\Helpers\MyLog;
