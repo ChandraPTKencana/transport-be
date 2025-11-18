@@ -47,6 +47,16 @@ class Ujalan extends Model
         return $this->hasOne(IsUser::class, 'id', "val1_user");
     }
 
+    public function val2_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val2_user");
+    }
+
+    public function val3_by()
+    {
+        return $this->hasOne(IsUser::class, 'id', "val3_user");
+    }
+
     public function deleted_by()
     {
         return $this->hasOne(IsUser::class, 'id', "deleted_user");

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Resources\MySql\TrxTrpAbsenResource;
 use App\Models\MySql\PaymentMethod;
 use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
@@ -38,6 +39,10 @@ class RunData extends Command
      */
     public function handle()
     {
+
+        $date = new \DateTime();
+        $timestamp = $date->format("Y-m-d H:i:s");
+
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
 
@@ -262,12 +267,104 @@ class RunData extends Command
         // $trp=TrxTrp::where("bonus_trip_supir","!=",0)->orWhere('bonus_trip_kernet',"!=",0)->get();
         // $this->info(json_encode($trp)."\n ");
 
-        $prev = PaymentMethod::where("id",2)->first();
+        // $prev = PaymentMethod::where("id",2)->first();
 
-        $pm = new PaymentMethod();
-        $pm->name = 'TRANSFER-MANDIRI';
-        $pm->account_code = $prev->account_code;;
-        $pm->save();
+        // $pm = new PaymentMethod();
+        // $pm->name = 'TRANSFER-MANDIRI';
+        // $pm->account_code = $prev->account_code;;
+        // $pm->save();
+
+        // $user_id = 1022;
+
+        // $model_query = TrxTrp::where(function ($q)use($user_id){
+        //     $q->where("supir_id",$user_id);
+        //     $q->orWhere("kernet_id",$user_id);
+        //   })->where(function ($q)use($user_id){
+        //     $q->whereNull("ritase_leave_at");
+        //     $q->orwhereNull("ritase_arrive_at");
+        //     $q->orwhereNull("ritase_return_at");
+        //     $q->orwhereNull("ritase_till_at");
+        //   })
+        //   ->where("ritase_val2",0)
+        //   ->where("deleted",0)
+        //   ->where("req_deleted",0)
+        //   ->where("tanggal",">=","2025-09-17")
+        //   ->orderBy("id","asc")
+        //   ->first();
+
+        //   // $this->info(json_encode($model_query)."\n ");
+    
+        //   if(!$model_query)
+        //     return response()->json([
+        //       "data"=>["id"=>-1],
+        //     ],200);
+    
+    
+        //   $data = new TrxTrpAbsenResource($model_query);
+        //   $data = collect($data);
+    
+        //   $data['tanggal'] = date("d-m-Y",strtotime($data['tanggal']));
+        //   $data['ritase_leave_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_leave_at']));
+        //   $data['ritase_arrive_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_arrive_at']));
+        //   $data['ritase_return_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_return_at']));
+        //   $data['ritase_till_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_till_at']));
+    
+        //   $data['supir_name'] = $model_query->employee_s->name;
+        //   $data['kernet_name'] = $model_query->employee_k ? $model_query->employee_k->name : "";
+    
+        //   // $img_leaves = [];
+        //   $data['img_leave']="";
+        //   foreach ($model_query->trx_absens as $k => $v) {
+        //     // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
+        //     $img = "data:image/png;base64,";
+        //     if(mb_detect_encoding($v->gambar)===false){
+        //       // $img.=base64_encode($v->gambar);
+        //       $image = Image::read($v->gambar);
+    
+        //         // Mengubah ukuran gambar (misalnya, menjadi lebar 600px).
+        //         // Gunakan scale() untuk menjaga rasio aspek secara otomatis.
+        //         $image->scale(width: 300);
+    
+        //         // Mengubah ke format JPEG dengan kualitas 75 (dapat disesuaikan).
+        //         // toJpeg() mengembalikan objek EncodedImage.
+        //         $compressedImage = $image->toJpeg(quality: 50);
+    
+        //         // Mengonversi data biner dari objek EncodedImage ke Base64
+        //         $img .= base64_encode($compressedImage);
+        //     }else{
+        //       $img.=$v->gambar;        
+        //     }
+            
+        //     if($v['status']=="B") {
+        //       $data["img_leave"]   = $img;
+        //       // array_push($img_leaves,[
+        //       //   "id"=>$v["id"],
+        //       //   "gambar"=>$img,
+        //       // ]);
+        //     }
+      
+        //     if($v['status']=="T") 
+        //     $data["img_arrive"]   = $img;
+      
+        //     if($v['status']=="K") 
+        //     $data["img_return"]   = $img;
+      
+        //     if($v['status']=="S") 
+        //     $data["img_till"]   = $img;
+        //   }
+
+
+        //   $this->info(json_encode($data)."\n ");
+
+        $uj = Ujalan::where("deleted",0)->where('val',1)->where('val1',1)->update([
+            'val2'      => 1,
+            'val2_at'   => $timestamp,
+            'val2_user' => 1,
+            'val3'      => 1,
+            'val3_at'   => $timestamp,
+            'val3_user' => 1
+        ]);
+
 
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");

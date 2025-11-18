@@ -43,7 +43,7 @@ class ExtraMoneyController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['extra_money.create','extra_money.modify']);
 
-    $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->groupBy('xto')->get()->pluck('xto');    
+    $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->where('val2',1)->where('val3',1)->groupBy('xto')->get()->pluck('xto');    
     return response()->json([
       "list_xto" => $list_xto,
     ], 200);

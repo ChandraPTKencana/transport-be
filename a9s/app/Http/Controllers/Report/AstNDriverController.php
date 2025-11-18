@@ -37,7 +37,7 @@ class AstNDriverController extends Controller
 
     MyAdmin::checkScope($this->permissions, 'report.ast_n_driver.download_file');
 
-    $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->orderBy('xto','asc')->groupBy('xto')->get()->pluck('xto');
+    $list_xto = \App\Models\MySql\Ujalan::select('xto')->where("deleted",0)->where('val',1)->where('val1',1)->where('val2',1)->where('val3',1)->orderBy('xto','asc')->groupBy('xto')->get()->pluck('xto');
     $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->orderBy('name','asc')->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->orderBy('no_pol','asc')->get();
     return response()->json([

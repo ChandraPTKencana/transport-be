@@ -56,15 +56,19 @@ return [
             'throw' => false,
         ],
         'ftp' => [
-            'driver' => 'ftp',
+            'driver' => 'sftp',
             'host' => env('MFT_HOST'),
             'username' => env('MFT_USERNAME'),
             'password' => env('MFT_PASSWORD'),
-            'port' => env('MFT_PORT', 21),
+            'port' => (int)env('MFT_PORT', 2226),
             'root' => env('MFT_ROOT', '/'),
             'passive' => true,
             'ssl' => true,
             'timeout' => 30,
+            // Additional options for better debugging:
+            // 'ignorePassiveAddress' => false,
+            // 'utf8' => true,
+            // 'sysType' => 'windows',
         ],
     ],
 

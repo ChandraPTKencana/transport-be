@@ -3099,14 +3099,16 @@ class TrxTrpController extends Controller
       ->orderBy("tanggal","desc")
       ->orderBy("id","desc")
       ->where("tanggal",">=","2025-10-01")
-      ->where(
-        function ($q){
-          $q->whereNull('ritase_leave_at');
-          $q->orWhereNull('ritase_arrive_at');
-          $q->orWhereNull('ritase_return_at');
-          $q->orWhereNull('ritase_till_at');
-        }
-      )
+      // ->where(
+      //   function ($q){
+      //     $q->whereNull('ritase_leave_at');
+      //     $q->orWhereNull('ritase_arrive_at');
+      //     $q->orWhereNull('ritase_return_at');
+      //     $q->orWhereNull('ritase_till_at');
+      //     $q->orWhere("ritase_val2",0);
+      //   }
+      // )
+      ->where("ritase_val2",0)
       ->where("id","!=",$trx_trp->id)
       ->where("id","<",$trx_trp->id)
       ->pluck('id')->toArray();

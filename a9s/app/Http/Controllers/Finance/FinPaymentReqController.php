@@ -249,9 +249,9 @@ class FinPaymentReqController extends Controller
       'pabrik'      => env('app_name')
     ];
 
-    if($for_gen){
-      $data['filename'] = $model_query->filename;
-    }
+    // if($for_gen){
+    //   $data['filename'] = $model_query->filename;
+    // }
     return response()->json([
       "data" => $data,
     ], 200);
@@ -304,8 +304,8 @@ class FinPaymentReqController extends Controller
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
       $model_query->status          = "OPEN";
-      $date = new \DateTime();
-      $model_query->filename        = env('MCM_ID').'14'.$date->format("Ymd").$date->format("His");
+      // $date = new \DateTime();
+      // $model_query->filename        = env('MCM_ID').'14'.$date->format("Ymd").$date->format("His");
       $model_query->save();
       $rollback_id = $model_query->id - 1;
 
@@ -1284,6 +1284,10 @@ class FinPaymentReqController extends Controller
     set_time_limit(0);
     $date = new \DateTime();
     // $filename=$date->format("YmdHis").'-'.env('APP_NAME');
+
+    $date = new \DateTime();
+    $filename        = env('MCM_ID').'14'.$date->format("Ymd").$date->format("His");
+
     $t_stamp = date("Y-m-d H:i:s");
 
     set_time_limit(0);
@@ -1298,9 +1302,13 @@ class FinPaymentReqController extends Controller
       
       $data = $raw_data;
       $csv_data = "";
+      $records = count($data['details']);
+
       foreach ($raw_data['details'] as $k => $v) {
         $jumlah = (int) $v['jumlah'];
-        $csv_data .= "{$v['rek_no']},{$v['rek_name']},,,,IDR,{$jumlah},,,IBU,,,,,,,N,,,,,Y,,,,,,,,,,,,,,,,,BEN,1,E,,,\n";
+        $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};;;IBU;;;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
+        if($k<$records-1)
+        $csv_data .= "\r\n";
         // $csv_data .= "{$v['rek_no']},{$v['rek_name']},,,,IDR,{$v['jumlah']},,,IBU,,,,,,,N,,,,,Y,,,,,,,,,,,,,,,,,BEN,1,E,,,\n";
       }
   
@@ -1308,32 +1316,40 @@ class FinPaymentReqController extends Controller
         return $carry+=(int) $item['jumlah'];      
       });
   
-      $mime = MyLib::mime("csv");
+      // $mime = MyLib::mime("csv");
+      $mime = ["ext"=>'txt'];
   
-      $filePath = 'public/' .$data['filename'] . '.' . $mime["ext"];
+      $filePath = 'public/' .$filename . '.' . $mime["ext"];
   
       $mandiri_bank_no =env('MANDIRI_BANK_NO');
-      $records = count($data['details']);
-      $csv = "P,{$date->format('Ymd')},{$mandiri_bank_no},{$records},{$total}\n";
+      $csv = "P;{$date->format('Ymd')};{$mandiri_bank_no};{$records};{$total}\r\n";
   
       // foreach($data as $k=>$v) {
       //   $csv .= str_replace('"', '', $v["supir"]) . "," . str_replace('"', '', $v["kernet"]) . "\n";
       // }
+      
   
       Storage::put($filePath, $csv.$csv_data);
 
-      // $remotePath = 'csvf/'.$filePath . '.' . $mime["ext"];
-      // $remotePath = $filePath . '.' . $mime["ext"];
-      // $remotePath = "Upload/Users/MCM_BatchUpload/".$data['filename'] . '.' . $mime["ext"];
-      $remotePath = "Upload/Users/MCM_BatchUpload/".$data['filename'] . '.' . $mime["ext"];
-      try {
-          // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
-          Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
-          // MyLog::logging("kirim berhasil","kirim");
-      } catch (\Exception $e) {
-          // Handle the exception
-          // MyLog::logging($e->getMessage(),"kirim");
-      }
+      
+
+      // // $remotePath = 'csvf/'.$filePath . '.' . $mime["ext"];
+      // // $remotePath = $filePath . '.' . $mime["ext"];
+      // // $remotePath = "Upload/Users/MCM_BatchUpload/".$data['filename'] . '.' . $mime["ext"];
+      $remotePath = "Upload/Users/MCM_BatchUpload/".$filename. '.' . $mime["ext"];
+      Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
+      // try {
+      //     // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
+      //     // MyLog::logging("kirim berhasil","kirim");
+      // } catch (\Exception $e) {
+      //     // Handle the exception
+      //     // MyLog::logging($e->getMessage(),"kirim");
+      //   throw new \Exception("Data Gagal Dikirim",1);
+      // }
+
+      FinPaymentReq::where('id',$data['id'])->update([
+        "filename"=>$filename
+      ]);
 
       FinPaymentReqDtl::where('fin_payment_req_id',$data['id'])->update([
         "status"=>"INQUIRY_PROCESS"
@@ -1387,8 +1403,46 @@ class FinPaymentReqController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
+      
       $model_query = FinPaymentReq::with('details')->find($request->id);
-     
+
+      $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.ack');
+      
+      if($getFtp==null){
+        throw new \Exception("Data Belum Siap Untuk Diambil",1);
+      }
+
+      $lines = explode("\r\n", trim($getFtp));
+      $result = [];
+
+      foreach ($lines as $index => $line) {
+          // Skip baris pertama (header) dan baris kosong
+          if ($index === 0 || empty(trim($line))) {
+              continue;
+          }
+          
+          $fields = explode(';', $line);
+          
+          // Pastikan ada cukup field sebelum mengakses
+          if (count($fields) >= 25) {
+              $no = $fields[0];
+              $nama = $fields[1];
+              $status = $fields[24]; // Status ada di index 24
+              $reason = $fields[25];
+              
+              array_push($result,[
+                'no' => $no,
+                'nama' => $nama,
+                'status' => $status,
+                'reason' => $reason
+              ]);
+          }
+      }
+      $nos = array_map(function ($o){
+        return $o['no']; 
+      },$result);
+
+
       $fin_payment_req_details = $model_query->details;
       $r_data = [];
       $SYSNOTES = [];
@@ -1396,13 +1450,32 @@ class FinPaymentReqController extends Controller
       $had_failed = 0;
       foreach ($fin_payment_req_details as $k => $v) {
         $SYSOLD                     = clone($model_query);
-        if($k==0){
-          $had_failed++;
-          $v->status = 'INQUIRY_FAILED';
-          $v->failed_reason = 'Update Dl Nama Rek Nya';
+
+        $index = array_search($v->employee_rek_no,$nos);
+        if($index===false){
+          $st="INQUIRY_FAILED";
+          $stm = "NOT REGISTERED";
         }else{
-          $v->status = 'INQUIRY_SUCCESS';
+          if($result[$index]['status']=="SUCCESS"){
+            $st = "INQUIRY_SUCCESS";
+            $stm = null;
+          }else{
+            $st = 'INQUIRY_FAILED';
+            $stm = $result[$index]['reason'];
+          }
         }
+
+        // if($k==0){
+        //   $had_failed++;
+        //   $v->status = 'INQUIRY_FAILED';
+        //   $v->failed_reason = 'Update Dl Nama Rek Nya';
+        // }else{
+        //   $v->status = 'INQUIRY_SUCCESS';
+        // }
+
+        $v->status = $st;
+        $v->failed_reason = $stm;
+
         $v->save();
         $SYSNOTE = MyLib::compareChange($SYSOLD,$v);
         array_push($r_data,$v);

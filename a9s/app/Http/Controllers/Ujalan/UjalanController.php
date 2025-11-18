@@ -211,12 +211,12 @@ class UjalanController extends Controller
     $filter_status = $request->filter_status;
     
     if($filter_status=="available"){
-      $model_query = $model_query->where("deleted",0)->where("val",1)->where("val1",1);
+      $model_query = $model_query->where("deleted",0)->where("val",1)->where("val1",1)->where("val2",1)->where("val3",1);
     }
 
     if($filter_status=="unapprove"){
       $model_query = $model_query->where("deleted",0)->where(function($q){
-       $q->where("val",0)->orwhere("val1",0); 
+       $q->where("val",0)->orwhere("val1",0)->orwhere("val2",0)->orwhere("val3",0); 
       });
     }
 
@@ -232,7 +232,7 @@ class UjalanController extends Controller
       $model_query = $model_query->with(['details','details2']);
     }
     
-    $model_query = $model_query->with(['val_by','val1_by','deleted_by','destination_location'])->get();
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','deleted_by','destination_location'])->get();
 
     return response()->json([
       "data" => UjalanResource::collection($model_query),
@@ -257,7 +257,7 @@ class UjalanController extends Controller
     }
     //end for details2
     ])
-    ->with(['val_by','val1_by','deleted_by','destination_location'])
+    ->with(['val_by','val1_by','val2_by','val3_by','deleted_by','destination_location'])
     ->find($request->id);
 
     // if($model_query->requested_by != $this->admin_id){
@@ -614,9 +614,11 @@ class UjalanController extends Controller
       throw new \Exception("Data Sudah Dihapus",1);
       
       if(
-        ($model_query->val==1 && $model_query->val1==1) || 
+        ($model_query->val==1 || $model_query->val1==1 || $model_query->val2==1 || $model_query->val3==1) || 
         (MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && $model_query->val == 1) ||
-        (MyAdmin::checkScope($this->permissions, 'ujalan.val1',true) && $model_query->val1 == 1)
+        (MyAdmin::checkScope($this->permissions, 'ujalan.val1',true) && $model_query->val1 == 1) ||
+        (MyAdmin::checkScope($this->permissions, 'ujalan.val2',true) && $model_query->val2 == 1) ||
+        (MyAdmin::checkScope($this->permissions, 'ujalan.val3',true) && $model_query->val3 == 1)
       ) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
@@ -1334,7 +1336,7 @@ class UjalanController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['ujalan.val','ujalan.val1']);
+    MyAdmin::checkMultiScope($this->permissions, ['ujalan.val','ujalan.val1','ujalan.val2','ujalan.val3']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Ujalan,id",
@@ -1363,6 +1365,14 @@ class UjalanController extends Controller
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
 
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.val2',true) &&  $model_query->val2){
+        throw new \Exception("Data Sudah Tervalidasi",1);
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.val3',true) &&  $model_query->val3){
+        throw new \Exception("Data Sudah Tervalidasi",1);
+      }
+
       $uj2 = UjalanDetail2::where("id_uj",$request->id)->selectRaw("sum(amount * qty) as total")->groupBy("id_uj")->first();
       if($uj2 && $uj2->total != $model_query->harga)
       throw new \Exception("Total Tidak Cocok",1);
@@ -1382,6 +1392,25 @@ class UjalanController extends Controller
         $model_query->val1_user = $this->admin_id;
         $model_query->val1_at = $t_stamp;
       }
+
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.val2',true) && !$model_query->val2){
+
+        if($model_query->val==0 || $model_query->val1==0){
+          throw new \Exception("Kasir Dan Staff Perlu Validasi Terlebih Dahulu",1);
+        }
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.val3',true) && !$model_query->val3){
+        if($model_query->val==0 || $model_query->val1==0 || $model_query->val2==0){
+          throw new \Exception("Kasir , Staff dan SPV Perlu Validasi Terlebih Dahulu",1);
+        }
+        $model_query->val3 = 1;
+        $model_query->val3_user = $this->admin_id;
+        $model_query->val3_at = $t_stamp;
+      }
       $model_query->save();
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
@@ -1398,6 +1427,14 @@ class UjalanController extends Controller
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,
         "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null, 
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null, 
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -1412,14 +1449,14 @@ class UjalanController extends Controller
       //   "message" => $e->getMessage(),
       // ], 400);
       return response()->json([
-        "message" => "Proses ubah data gagal",
+        "message" => "Proses validasi data gagal",
       ], 400);
     }
 
   }
 
   public function unvalidasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['ujalan.unval','ujalan.unval1']);
+    MyAdmin::checkMultiScope($this->permissions, ['ujalan.unval','ujalan.unval1','ujalan.unval2','ujalan.unval3']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Ujalan,id",
@@ -1445,16 +1482,39 @@ class UjalanController extends Controller
       }
       $SYSOLD                     = clone($model_query);
       
-      if(MyAdmin::checkScope($this->permissions, 'ujalan.unval',true) && $model_query->val){
-        $model_query->val = 0;
-        // $model_query->val_user = $this->admin_id;
-        // $model_query->val_at = $t_stamp;
+      
+
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.unval3',true) && $model_query->val3){
+        $model_query->val3 = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.unval2',true) && $model_query->val2){
+        if($model_query->val3){
+          throw new \Exception("Manager Perlu Unvalidasi Terlebih Dahulu",1);
+        }
+        $model_query->val2 = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
       }
 
       if(MyAdmin::checkScope($this->permissions, 'ujalan.unval1',true) && $model_query->val1){
+        if($model_query->val2){
+          throw new \Exception("SPV Perlu Unvalidasi Terlebih Dahulu",1);
+        }
         $model_query->val1 = 0;
         // $model_query->val1_user = $this->admin_id;
         // $model_query->val1_at = $t_stamp;
+      }
+
+      if(MyAdmin::checkScope($this->permissions, 'ujalan.unval',true) && $model_query->val){
+        if($model_query->val1){
+          throw new \Exception("Kasir Perlu Unvalidasi Terlebih Dahulu",1);
+        }
+        $model_query->val = 0;
+        // $model_query->val_user = $this->admin_id;
+        // $model_query->val_at = $t_stamp;
       }
       
       $model_query->save();
@@ -1464,7 +1524,7 @@ class UjalanController extends Controller
 
       DB::commit();
       return response()->json([
-        "message" => "Proses validasi data berhasil",
+        "message" => "Proses unvalidasi data berhasil",
         "val"=>$model_query->val,
         "val_user"=>$model_query->val_user,
         "val_at"=>$model_query->val_at,
@@ -1472,7 +1532,15 @@ class UjalanController extends Controller
         "val1"=>$model_query->val1,
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,
-        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+        "val3"=>$model_query->val3,
+        "val3_user"=>$model_query->val3_user,
+        "val3_at"=>$model_query->val3_at,
+        "val3_by"=>$model_query->val3_user ? new IsUserResource(IsUser::find($model_query->val3_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -1487,7 +1555,7 @@ class UjalanController extends Controller
       //   "message" => $e->getMessage(),
       // ], 400);
       return response()->json([
-        "message" => "Proses ubah data gagal",
+        "message" => "Proses unvalidasi data gagal",
       ], 400);
     }
 

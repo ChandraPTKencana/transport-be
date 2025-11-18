@@ -177,11 +177,15 @@ class RunPermit extends Command
             // ["permit"=>'extra_money_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_SPV']],
             // ["permit"=>'extra_money_trx.unval6',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
         
-            ["permit"=>'destination_location.views', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'destination_location.view',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'destination_location.create',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'destination_location.modify',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'destination_location.views', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'destination_location.view',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'destination_location.create',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'destination_location.modify',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
 
+            ["permit"=>'ujalan.val2', "to"=>['SUPERADMIN','LOGISTIC_SPV']],
+            ["permit"=>'ujalan.val3', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'ujalan.unval2', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'ujalan.unval3', "to"=>['SUPERADMIN']],
         ];
 
         foreach ($re_lists as $k => $v) {
