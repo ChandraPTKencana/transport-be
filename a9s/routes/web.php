@@ -134,6 +134,7 @@ Route::delete('/trx_trp_absen', [\App\Http\Controllers\Transaction\TrxTrpControl
 Route::get('/trx_trp/absens', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'index']);
 Route::get('/trx_trp/absen', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'show']);
 Route::put('/trx_trp/absen', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'update']);
+Route::get('/trx_trp/absen_b', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'showBAbsen']);
 Route::put('/trx_trp/absen/validasi', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'validasi']);
 Route::put('/trx_trp/absen/clear_valval1', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'clearValVal1']);
 Route::get('/trx_trp/absen/download_excel', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'downloadExcel']);

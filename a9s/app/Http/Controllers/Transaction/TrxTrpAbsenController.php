@@ -31,6 +31,7 @@ use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
 use App\Http\Resources\MySql\TrxAbsenResource;
+use App\Http\Resources\MySql\TrxTrpResource;
 use InvalidArgumentException;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
@@ -263,6 +264,18 @@ class TrxTrpAbsenController extends Controller
 
     return response()->json([
       "data" => TrxTrpAbsenResource::collection($model_query),
+    ], 200);
+  }
+
+  public function showBAbsen(TrxTrpAbsenRequest $request)
+  {
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
+
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function ($q){
+      $q->where("status","B");
+    },'potongan'])->find($request->id);
+    return response()->json([
+      "data" => new TrxTrpResource($model_query),
     ], 200);
   }
 

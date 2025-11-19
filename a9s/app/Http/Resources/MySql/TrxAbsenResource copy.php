@@ -6,7 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\IsUserResource;
 use Illuminate\Support\Facades\File;
 
-class TrxAbsenResource extends JsonResource
+class TrxAbsenResourcex extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,15 +16,18 @@ class TrxAbsenResource extends JsonResource
      */
     public function toArray($request)
     {
+        $img="x";
         // $imageData = base64_encode($this->gambar);
         if($this->gambar_loc){
             $img = File::exists(files_path($this->gambar_loc)) ? "data:image/png;base64,".base64_encode(File::get(files_path($this->gambar_loc))) :"";
         }else{
-            $img = "data:image/png;base64,";
-            if(mb_detect_encoding($this->gambar)===false){
-                $img.=base64_encode($this->gambar);
-            }else{
-                $img.=$this->gambar;        
+            if($this->gambar!=null){
+                $img = "data:image/png;base64,";
+                if(mb_detect_encoding($this->gambar)===false){
+                    $img.=base64_encode($this->gambar);
+                }else{
+                    $img.=$this->gambar;        
+                }
             }
         }
         // return parent::toArray($request);
