@@ -1357,21 +1357,26 @@ class UjalanController extends Controller
     DB::beginTransaction();
     try {
       $model_query = Ujalan::lockForUpdate()->find($request->id);
-      if(MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && $model_query->val){
-        throw new \Exception("Data Sudah Tervalidasi",1);
+
+      if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3){
+        throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
-      if(MyAdmin::checkScope($this->permissions, 'ujalan.val1',true) &&  $model_query->val1){
-        throw new \Exception("Data Sudah Tervalidasi",1);
-      }
+      // if(MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && $model_query->val){
+      //   throw new \Exception("Data Sudah Tervalidasi",1);
+      // }
 
-      if(MyAdmin::checkScope($this->permissions, 'ujalan.val2',true) &&  $model_query->val2){
-        throw new \Exception("Data Sudah Tervalidasi",1);
-      }
+      // if(MyAdmin::checkScope($this->permissions, 'ujalan.val1',true) &&  $model_query->val1){
+      //   throw new \Exception("Data Sudah Tervalidasi",1);
+      // }
 
-      if(MyAdmin::checkScope($this->permissions, 'ujalan.val3',true) &&  $model_query->val3){
-        throw new \Exception("Data Sudah Tervalidasi",1);
-      }
+      // if(MyAdmin::checkScope($this->permissions, 'ujalan.val2',true) &&  $model_query->val2){
+      //   throw new \Exception("Data Sudah Tervalidasi",1);
+      // }
+
+      // if(MyAdmin::checkScope($this->permissions, 'ujalan.val3',true) &&  $model_query->val3){
+      //   throw new \Exception("Data Sudah Tervalidasi",1);
+      // }
 
       $uj2 = UjalanDetail2::where("id_uj",$request->id)->selectRaw("sum(amount * qty) as total")->groupBy("id_uj")->first();
       if($uj2 && $uj2->total != $model_query->harga)
