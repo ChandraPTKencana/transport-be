@@ -182,7 +182,7 @@ class RunPermit extends Command
             // ["permit"=>'destination_location.create',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             // ["permit"=>'destination_location.modify',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
 
-            ["permit"=>'ujalan.val2', "to"=>['SUPERADMIN','LOGISTIC_SPV']],
+            ["permit"=>'ujalan.val2', "to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
             ["permit"=>'ujalan.val3', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             ["permit"=>'ujalan.unval2', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             ["permit"=>'ujalan.unval3', "to"=>['SUPERADMIN']],
