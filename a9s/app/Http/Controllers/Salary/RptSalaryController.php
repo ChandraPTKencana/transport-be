@@ -1346,6 +1346,10 @@ class RptSalaryController extends Controller
         $gd_s = "";
         $gd_k = "";
         
+        //agar yang memang tidak valid langsung di kelompokkan ke salary paid terakhir
+        $v->salary_paid_id    = $salary_paid[1]->id;
+        $v->save();
+
         // Exclude Trip
         if($v->jenis=="TBS" && ($v->ticket_a_id == null || $v->ticket_b_id == null)){
             continue;
@@ -1356,9 +1360,6 @@ class RptSalaryController extends Controller
         if($v->destination_location_id== null){
             continue;
         }
-        
-        $v->salary_paid_id    = $salary_paid[1]->id;
-        $v->save();
   
         foreach ($smd2 as $k1 => $v1) {
             if($v1->xfor == 'Supir'){
