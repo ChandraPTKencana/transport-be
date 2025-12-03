@@ -1108,7 +1108,7 @@ class RptSalaryController extends Controller
     ->where('val2',1)
     ->where('val_ticket',1)
     ->whereIn('jenis',['TBS','TBSK'])
-    ->whereIn('tanggal',"<","2025-10-15")
+    ->where('tanggal',"<","2025-10-15")
     ->where(function ($q) use($model_query,$smp_bulan) {
       $q->where(function ($q1)use($model_query,$smp_bulan){
         $q1->where("payment_method_id",1);       
