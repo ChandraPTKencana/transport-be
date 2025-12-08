@@ -655,7 +655,6 @@ class RptSalaryController extends Controller
         }
       }
 
-
       if($v->supir_id){
 
         $map_s = array_map(function($x){
@@ -933,6 +932,11 @@ class RptSalaryController extends Controller
           //   ],"reportcheck");
           // }
         }
+      }
+
+      if(!in_array($v->jenis,["CPO","PK","TBS","TBSK"])){
+        $v->salary_paid_id    = $salary_paid[1]->id;
+        $v->save();
       }
     }
 
@@ -1354,7 +1358,7 @@ class RptSalaryController extends Controller
         if($v->jenis=="TBS" && ($v->ticket_a_id == null || $v->ticket_b_id == null)){
             continue;
         }
-        if($v->jenis=="TBSK" && ($v->ticket_a_in_at == null || $v->ticket_b_id == null)){
+        if($v->jenis=="TBSK" && ( $v->ticket_b_id == null)){
             continue;
         }
         if($v->destination_location_id== null){
