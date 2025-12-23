@@ -59,7 +59,7 @@ class AcAccountController extends Controller
     //======================================================================================================
     
     $model_query = DB::connection('sqlsrv')->table('AC_Accounts')
-    ->select('AccountID','AccountCode','AccountName');
+    ->select('AccountID','AccountCode','AccountName')->where('isdisabled',0);
 
     $model_query = $model_query->offset($offset)->limit($limit);
 

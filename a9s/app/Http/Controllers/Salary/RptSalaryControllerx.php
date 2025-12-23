@@ -1163,6 +1163,7 @@ class RptSalaryControllerx extends Controller
         $acc = DB::connection('sqlsrv')->table("AC_Accounts")
         ->select('AccountID','AccountCode','AccountName')
         ->where('AccountCode',$value)
+        ->where('isdisabled',0)
         ->first();
 
         if(!$acc)

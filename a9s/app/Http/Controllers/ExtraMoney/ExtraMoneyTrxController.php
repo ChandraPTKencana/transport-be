@@ -1664,6 +1664,7 @@ class ExtraMoneyTrxController extends Controller
   
       $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
       ->select('AccountID')
+      ->where('isdisabled',0)
       ->where("AccountCode",$admin_cost_code)
       ->first();
       if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);

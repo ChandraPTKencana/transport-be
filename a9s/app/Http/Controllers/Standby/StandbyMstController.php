@@ -314,6 +314,7 @@ class StandbyMstController extends Controller
         $connectionDB = DB::connection('sqlsrv');
         $temp_ac_accounts = $connectionDB->table("AC_Accounts")
         ->select('AccountID','AccountCode','AccountName')
+        ->where('isdisabled',0)
         ->whereIn('AccountCode',$unique_acc_code)
         ->get();
   
@@ -468,6 +469,7 @@ class StandbyMstController extends Controller
         $connectionDB = DB::connection('sqlsrv');
         $temp_ac_accounts = $connectionDB->table("AC_Accounts")
         ->select('AccountID','AccountCode','AccountName')
+        ->where('isdisabled',0)
         ->whereIn('AccountCode',$unique_acc_code) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
         ->get();
   

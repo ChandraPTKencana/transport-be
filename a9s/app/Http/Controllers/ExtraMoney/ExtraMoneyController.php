@@ -58,6 +58,7 @@ class ExtraMoneyController extends Controller
     try {
       $list_accs = DB::connection('sqlsrv')->table("AC_Accounts")
       ->select('AccountID','AccountCode','AccountName')
+      ->where('isdisabled',0)
       ->get();
       $list_accs= MyLib::objsToArray($list_accs); 
     } catch (\Exception $e) {
@@ -270,6 +271,7 @@ class ExtraMoneyController extends Controller
 
       $acc = DB::connection('sqlsrv')->table("AC_Accounts")
       ->select('AccountID','AccountCode','AccountName')
+      ->where('isdisabled',0)
       ->where('AccountID',$request->ac_account_id)
       ->first();
       if(!$acc)
@@ -347,6 +349,7 @@ class ExtraMoneyController extends Controller
       
       $acc = DB::connection('sqlsrv')->table("AC_Accounts")
       ->select('AccountID','AccountCode','AccountName')
+      ->where('isdisabled',0)
       ->where('AccountID',$request->ac_account_id)
       ->first();
       if(!$acc)
