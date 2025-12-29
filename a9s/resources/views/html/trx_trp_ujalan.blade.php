@@ -202,7 +202,7 @@
   </script>
   <script type="text/javascript">
     // let id = '<?php echo $asal."^".$id."^".$jenis."^".$xto."^".$no_pol."^".$supir."^".$kernet ?>';
-    let id = '<?php echo $asal."^".$id."^".$jenis."^".$no_pol."^".$supir."^".$kernet ?>';
+    let id = '<?php echo $asal."^".$id."^".$jenis."^".$no_pol."^".$supir ?>';
     var qrcode = new QRCode(document.getElementById("qrcode"), {
       text: id,
       width: 128,
