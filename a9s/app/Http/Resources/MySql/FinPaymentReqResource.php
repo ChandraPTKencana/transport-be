@@ -22,6 +22,8 @@ class FinPaymentReqResource extends JsonResource
             'details'     => FinPaymentReqDtlResource::collection($this->whenLoaded('details')),
             'created_at'  => $this->created_at,
             'updated_at'  => $this->updated_at,
+            'status'      => $this->status,
+            'batch_no'    => $this->batch_no,
 
             'val'         => $this->val,
             'val_user'    => $this->val_user ?? "",

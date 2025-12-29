@@ -16,6 +16,4 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-FinPayment*
-*fin_payment*
 .env_*

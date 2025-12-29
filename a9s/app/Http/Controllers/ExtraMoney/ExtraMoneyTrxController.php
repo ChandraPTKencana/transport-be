@@ -343,7 +343,7 @@ class ExtraMoneyTrxController extends Controller
       if(!$employee)
       throw new \Exception("Pekerja tidak terdaftar",1);
 
-      if(in_array($request->payment_method_id,[2,3])){
+      if(in_array($request->payment_method_id,[2,3,4])){
         if(!$employee->rek_no && $employee->id != 1)
         throw new \Exception("Tidak ada no rekening pekerja",1);
       }
@@ -545,7 +545,7 @@ class ExtraMoneyTrxController extends Controller
         if(!$employee)
         throw new \Exception("Pekerja tidak terdaftar",1);
   
-        if(in_array($request->payment_method_id,[2,3])){
+        if(in_array($request->payment_method_id,[2,3,4])){
           if(!$employee->rek_no && $employee->id != 1)
           throw new \Exception("Tidak ada no rekening pekerja",1);
         }
@@ -1415,7 +1415,7 @@ class ExtraMoneyTrxController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->whereIn("payment_method_id",[2,3]);
+          $q1->whereIn("payment_method_id",[2,3,4]);
           $q1->where("received_payment",1);                 
         });
       })->get();
@@ -1540,21 +1540,24 @@ class ExtraMoneyTrxController extends Controller
 
     $amount_paid = $extra_money->nominal * $extra_money->qty; // call from child
 
-    if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==2){
-      $adm_cost = 2500;
-      // $adm_cost = 5000;
-      $adm_qty = 1;
+    //A=== karena tidak bayar terpisah maka ini tidak perlu di aktifkan
+    // if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==2){
+    //   $adm_cost = 2500;
+    //   // $adm_cost = 5000;
+    //   $adm_qty = 1;
 
-      $amount_paid += ($adm_cost * $adm_qty);
-    }
+    //   $amount_paid += ($adm_cost * $adm_qty);
+    // }
 
-    if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==3){
-      // $adm_cost = 2500;
-      $adm_cost = 5000;
-      $adm_qty = 1;
+    // if($extra_money_trx->duitku_employee_disburseId && $extra_money_trx->payment_method->id==3){
+    //   // $adm_cost = 2500;
+    //   $adm_cost = 5000;
+    //   $adm_qty = 1;
 
-      $amount_paid += ($adm_cost * $adm_qty);
-    }
+    //   $amount_paid += ($adm_cost * $adm_qty);
+    // }
+    //A=== sehingga untuk payment_method 4 tidak di pertimbangkan.
+
 
     $exclude_in_ARAP = 0;
     $login_name = $this->admin->the_user->username;
@@ -1659,51 +1662,54 @@ class ExtraMoneyTrxController extends Controller
       // }
     }
 
-    if($extra_money_trx->duitku_employee_disburseId && in_array($extra_money_trx->payment_method->id,[2,3])){
-      $admin_cost_code=env("PVR_ADMIN_COST");
+    //A=== karena tidak bayar terpisah maka ini tidak perlu di aktifkan
+    
+    // if($extra_money_trx->duitku_employee_disburseId && in_array($extra_money_trx->payment_method->id,[2,3])){
+    //   $admin_cost_code=env("PVR_ADMIN_COST");
   
-      $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
-      ->select('AccountID')
-      ->where('isdisabled',0)
-      ->where("AccountCode",$admin_cost_code)
-      ->first();
-      if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
+    //   $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
+    //   ->select('AccountID')
+    //   ->where('isdisabled',0)
+    //   ->where("AccountCode",$admin_cost_code)
+    //   ->first();
+    //   if(!$admin_cost_db) throw new \Exception("GL account code tidak terdaftar ,segera infokan ke tim IT",1);
 
-      $adm_cost_id = $admin_cost_db->AccountID;
-      $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
-      ->select('VoucherID')
-      ->where("VoucherID",$d_voucher_id)
-      ->where("AccountID",$adm_cost_id)
-      ->first();
+    //   $adm_cost_id = $admin_cost_db->AccountID;
+    //   $adm_fee_exists= DB::connection('sqlsrv')->table('FI_APRequestExtraItems')
+    //   ->select('VoucherID')
+    //   ->where("VoucherID",$d_voucher_id)
+    //   ->where("AccountID",$adm_cost_id)
+    //   ->first();
 
-      if(!$adm_fee_exists){
-        $d_description  = "Biaya Admin";
-        $d_account_id   = $adm_cost_id;
-        $d_dept         = '112';
-        $d_qty          = $adm_qty;
-        $d_unit_price   = $adm_cost;
-        $d_amount       = $d_qty * $d_unit_price;
+    //   if(!$adm_fee_exists){
+    //     $d_description  = "Biaya Admin";
+    //     $d_account_id   = $adm_cost_id;
+    //     $d_dept         = '112';
+    //     $d_qty          = $adm_qty;
+    //     $d_unit_price   = $adm_cost;
+    //     $d_amount       = $d_qty * $d_unit_price;
   
-        DB::connection('sqlsrv')->update("exec 
-        USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
-        @VoucherExtraItemID=:d_voucher_extra_item_id,
-        @Description=:d_description,@Amount=:d_amount,
-        @AccountID=:d_account_id,@TypeID=:d_type,
-        @Department=:d_dept,@LoginName=:login_name,
-        @Qty=:d_qty,@UnitPrice=:d_unit_price",[
-          ":d_voucher_id"=>$d_voucher_id,
-          ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
-          ":d_description"=>$d_description,
-          ":d_amount"=>$d_amount,
-          ":d_account_id"=>$d_account_id,
-          ":d_type"=>$d_type,
-          ":d_dept"=>$d_dept,
-          ":login_name"=>$login_name,
-          ":d_qty"=>$d_qty,
-          ":d_unit_price"=>$d_unit_price
-        ]);
-      }
-    }
+    //     DB::connection('sqlsrv')->update("exec 
+    //     USP_FI_APRequestExtraItems_Update @VoucherID=:d_voucher_id,
+    //     @VoucherExtraItemID=:d_voucher_extra_item_id,
+    //     @Description=:d_description,@Amount=:d_amount,
+    //     @AccountID=:d_account_id,@TypeID=:d_type,
+    //     @Department=:d_dept,@LoginName=:login_name,
+    //     @Qty=:d_qty,@UnitPrice=:d_unit_price",[
+    //       ":d_voucher_id"=>$d_voucher_id,
+    //       ":d_voucher_extra_item_id"=>$d_voucher_extra_item_id,
+    //       ":d_description"=>$d_description,
+    //       ":d_amount"=>$d_amount,
+    //       ":d_account_id"=>$d_account_id,
+    //       ":d_type"=>$d_type,
+    //       ":d_dept"=>$d_dept,
+    //       ":login_name"=>$login_name,
+    //       ":d_qty"=>$d_qty,
+    //       ":d_unit_price"=>$d_unit_price
+    //     ]);
+    //   }
+    // }
+    //A=== sehingga untuk payment_method 4 tidak di pertimbangkan.
 
     $tocheck = DB::connection('sqlsrv')->table('FI_APRequest')->where("VoucherID",$d_voucher_id)->first();
 
@@ -1777,7 +1783,7 @@ class ExtraMoneyTrxController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->whereIn("payment_method_id",[2,3]);
+          $q1->whereIn("payment_method_id",[2,3,4]);
           $q1->where("received_payment",1);                 
         });
       })->get();      

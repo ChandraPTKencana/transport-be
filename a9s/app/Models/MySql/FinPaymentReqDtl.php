@@ -56,4 +56,9 @@ class FinPaymentReqDtl extends Model
     {
         return $this->belongsTo(Employee::class, "employee_id", 'id');
     }
+
+    public function fin_payment_req()
+    {
+        return $this->belongsTo(FinPaymentReq::class, "fin_payment_req_id", 'id');
+    }
 }

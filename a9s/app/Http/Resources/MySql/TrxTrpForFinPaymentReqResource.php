@@ -43,7 +43,8 @@ class TrxTrpForFinPaymentReqResource extends JsonResource
             'transition_target' => $this->transition_target ?? "",
             'trx_absens'        => TrxAbsenResource::collection($this->whenLoaded('trx_absens')),
 
-            'details_uj'        => UjalanDetailResource::collection($this->whenLoaded('uj_details')),
+            'uj_details'        => UjalanDetailResource::collection($this->whenLoaded('uj_details')),
+            'uj'                => new UjalanResource($this->whenLoaded('uj')),
         ];
     }
 }

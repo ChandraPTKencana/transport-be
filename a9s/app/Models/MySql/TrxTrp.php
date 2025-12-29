@@ -157,4 +157,9 @@ class TrxTrp extends Model
     {
         return $this->hasMany(StandbyTrx::class, "trx_trp_id", 'id');
     }
+
+    public function fin_payment_req_dtl()
+    {
+        return $this->hasMany(FinPaymentReqDtl::class, 'trx_trp_id');
+    }
 }

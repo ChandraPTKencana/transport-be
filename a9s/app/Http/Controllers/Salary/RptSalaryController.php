@@ -579,7 +579,7 @@ class RptSalaryController extends Controller
       });
 
       $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-        $q1->whereIn("payment_method_id",[2,3]);
+        $q1->whereIn("payment_method_id",[2,3,4]);
         $q1->where(function ($q2)use($model_query,$smp_bulan){
           // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
           $q2->where(function ($q3) use($model_query,$smp_bulan) {            
@@ -957,7 +957,7 @@ class RptSalaryController extends Controller
         $q1->where("tanggal","<=",$model_query->period_end);                  
       });
       $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-        $q1->whereIn("payment_method_id",[2,3]);
+        $q1->whereIn("payment_method_id",[2,3,4]);
         $q1->where(function ($q2)use($model_query,$smp_bulan){
           // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
           $q2->where(function ($q3) use($model_query,$smp_bulan) {            
@@ -1121,7 +1121,7 @@ class RptSalaryController extends Controller
         $q1->where("tanggal","<=",$model_query->period_end);                  
       });
       $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-        $q1->whereIn("payment_method_id",[2,3]);
+        $q1->whereIn("payment_method_id",[2,3,4]);
         $q1->where(function ($q2)use($model_query,$smp_bulan){
           // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
           $q2->where(function ($q3) use($model_query,$smp_bulan) {            
@@ -1313,7 +1313,7 @@ class RptSalaryController extends Controller
         });
 
         $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-            $q1->whereIn("trx_trp.payment_method_id",[2,3]);
+            $q1->whereIn("trx_trp.payment_method_id",[2,3,4]);
             $q1->where(function ($q2)use($model_query,$smp_bulan){
                 // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
                 $q2->where(function ($q3) use($model_query,$smp_bulan) {            
@@ -1957,7 +1957,7 @@ class RptSalaryController extends Controller
         (SELECT * FROM trx_trp WHERE pv_id is NOT NULL AND req_deleted = '0' AND deleted ='0' AND val='1' AND val1='1' 
         AND val2='1' 
         and ( (payment_method_id = '1' AND received_payment = '0' AND tanggal >='".$period_start."' AND tanggal <= '".$period_end."') 
-        OR ((payment_method_id='2' or payment_method_id='3') AND ((rp_supir_at>= '".$period_start." 00:00:00' AND rp_supir_at<='".$period_end." 23:59:59') OR 
+        OR ((payment_method_id='2' or payment_method_id='3' or payment_method_id='4') AND ((rp_supir_at>= '".$period_start." 00:00:00' AND rp_supir_at<='".$period_end." 23:59:59') OR 
         (rp_kernet_at>='".$period_start." 00:00:00' AND rp_kernet_at<='".$period_end." 23:59:59')) )  ))  a
         join
         is_ujdetails2 b on a.id_uj = b.id_uj where (b.xfor ='Kernet' or b.xfor='Supir') and b.ac_account_code ='".$value."'");

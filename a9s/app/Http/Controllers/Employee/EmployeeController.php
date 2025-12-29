@@ -168,10 +168,22 @@ class EmployeeController extends Controller
         foreach ($filter_model as $key => $value) {
           if(!isset($value['type'])) continue;
 
+          // if(array_search($key,['status'])!==false){
+          // }else{
+          //   MyLib::queryCheck($value,$key,$q);
+          // }
+
           if(array_search($key,['status'])!==false){
-          }else{
+          }
+          // else if(array_search($key,['standby_trx_dtl_tanggal'])!==false){
+          //   // MyLib::queryCheckC1("standby_trx_dtl","standby_trx",$value,$key,$q);
+          // }
+          else if(array_search($key,['bank_code'])!==false){
+            MyLib::queryCheckP1("bank",$value,$key,$q,"bank");
+          } else{
             MyLib::queryCheck($value,$key,$q);
           }
+
         }
         
          

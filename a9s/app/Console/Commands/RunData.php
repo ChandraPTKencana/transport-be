@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Resources\MySql\TrxTrpAbsenResource;
+use App\Models\MySql\Bank;
 use App\Models\MySql\PaymentMethod;
 use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
@@ -42,329 +43,314 @@ class RunData extends Command
 
         $date = new \DateTime();
         $timestamp = $date->format("Y-m-d H:i:s");
+        $id = 14;
+
 
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
 
-        // $ujs =  \App\Models\MySql\Ujalan::where("deleted",0)->get();
+        $bankExists = Bank::where('code',"BCA")->first();
+        if(!$bankExists){
+            $banknew = new Bank();
+            $banknew->code='BCA';
+            $banknew->name = 'Bank Central Asia';
+            $banknew->code_duitku = '014';
+            $banknew->save();
+        }
 
-        // foreach ($ujs as $key => $uj) {
-        //     $there_kernet = 0;
-        //     foreach ($uj->details2 as $key1 => $ujd) {
-        //         if($ujd->xfor=="Kernet") $there_kernet=1;
+        DB::statement("create view v_maintenance as select `v`.`no_pol` AS `no_pol`,count(`t`.`id`) AS `total_trip`,sum(`u`.`km_range`) AS `total_km`,`s`.`reminder_service` AS `reminder_service`,case when sum(`u`.`km_range`) >= `s`.`reminder_service` then 'WARNING SERVICE' else 'AMAN' end AS `status_service`,`ms`.`terakhir_service` AS `terakhir_service`,`ms`.`terakhir_service_id` AS `terakhir_service_id` from ((((`logistikori2`.`vehicle_mst` `v` join `logistikori2`.`trx_trp` `t` on(`t`.`no_pol` = `v`.`no_pol`)) join `logistikori2`.`is_uj` `u` on(`u`.`id` = `t`.`id_uj`)) join `logistikori2`.`setup` `s` on(1 = 1)) left join (select `m1`.`no_pol` AS `no_pol`,`m1`.`id` AS `terakhir_service_id`,`m1`.`tanggal` AS `terakhir_service` from (`logistikori2`.`trx_maintenance` `m1` join (select `logistikori2`.`trx_maintenance`.`no_pol` AS `no_pol`,max(`logistikori2`.`trx_maintenance`.`id`) AS `max_id` from `logistikori2`.`trx_maintenance` where `logistikori2`.`trx_maintenance`.`status` = 'Y' group by `logistikori2`.`trx_maintenance`.`no_pol`) `m2` on(`m2`.`max_id` = `m1`.`id`))) `ms` on(`ms`.`no_pol` = `v`.`no_pol`)) where `v`.`deleted` = 0 and `t`.`tanggal` >= ifnull(`ms`.`terakhir_service`,'1970-01-01') group by `v`.`no_pol`,`s`.`reminder_service`,`ms`.`terakhir_service`,`ms`.`terakhir_service_id` order by `v`.`no_pol`");
+
+        // DB::statement("DROP VIEW v_maintenance");
+
+
+        // $data = [];
+        // $temp = [
+        //   "rpt_salary_id"           => 0,
+        //   "employee_id"             => 0,
+        //   "sb_gaji"                 => 0,
+        //   "sb_makan"                => 0,
+        //   "sb_dinas"                => 0,
+        //   "sb_gaji_2"               => 0,
+        //   "sb_makan_2"              => 0,
+        //   "sb_dinas_2"              => 0,
+        //   "uj_gaji"                 => 0,
+        //   "uj_makan"                => 0,
+        //   "uj_dinas"                => 0,
+        //   "nominal_cut"             => 0,
+        //   "salary_bonus_nominal"    => 0,
+        //   "salary_bonus_nominal_2"  => 0,
+        //   "trip_cpo"                => 0,
+        //   "trip_cpo_bonus_gaji"     => 0,
+        //   "trip_cpo_bonus_dinas"    => 0,
+        //   "trip_pk"                 => 0,
+        //   "trip_pk_bonus_gaji"      => 0,
+        //   "trip_pk_bonus_dinas"     => 0,
+        //   "trip_tbs"                => 0,
+        //   "trip_tbs_bonus_gaji"     => 0,
+        //   "trip_tbs_bonus_dinas"    => 0,
+        //   "trip_tbsk"               => 0,
+        //   "trip_tbsk_bonus_gaji"    => 0,
+        //   "trip_tbsk_bonus_dinas"   => 0,
+        //   "trip_lain"               => 0,
+        //   "trip_lain_gaji"          => 0,
+        //   "trip_lain_makan"         => 0,
+        //   "trip_lain_dinas"         => 0,
+        //   "trip_tunggu"             => 0,
+        //   "trip_tunggu_gaji"        => 0,
+        //   "trip_tunggu_dinas"       => 0,
+        // ];
+
+        // $period_end = '2025-11-30';
+        // $smp_bulan = '2025-11';
+
+        // $tt = TrxTrp::whereNotNull("pv_id")
+        // ->where("req_deleted",0)
+        // ->where("deleted",0)
+        // ->where('val',1)
+        // ->where('val1',1)
+        // ->where('val2',1)
+        // ->where(function ($q){
+        //     $q->where("supir_id",1001);
+        //     $q->orWhere("kernet_id",1001);
+        // })
+        // ->where(function ($q) use($period_end,$smp_bulan) {
+        //   $q->where(function ($q1)use($period_end,$smp_bulan){
+        //     $q1->where("payment_method_id",1);       
+        //     $q1->where("received_payment",0);                  
+        //     $q1->where("tanggal",">=",$smp_bulan."-01");                  
+        //     $q1->where("tanggal","<=",$period_end);                  
+        //   });
+    
+        //   $q->orWhere(function ($q1)use($period_end,$smp_bulan){
+        //     $q1->whereIn("payment_method_id",[2,3]);
+        //     $q1->where(function ($q2)use($period_end,$smp_bulan){
+        //       // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
+        //       $q2->where(function ($q3) use($period_end,$smp_bulan) {            
+        //         $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
+        //         $q3->where("rp_supir_at","<=",$period_end." 23:59:59");                  
+        //       });
+        //       $q2->orWhere(function ($q3) use($period_end,$smp_bulan) {
+        //         $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
+        //         $q3->where("rp_kernet_at","<=",$period_end." 23:59:59");                  
+        //       });
+        //     });                         
+        //   });
+        // })->get();
+    
+    
+        // foreach ($tt as $k => $v) {
+        //   $smd = $v->uj;
+        //   $smd2 = $v->uj_details2;
+    
+        //   $nominal_s = 0;
+        //   $uj_gaji_s = 0;
+        //   $uj_makan_s = 0;
+        //   $uj_dinas_s = 0;
+    
+        //   $nominal_k = 0;
+        //   $uj_gaji_k = 0;
+        //   $uj_makan_k = 0;
+        //   $uj_dinas_k = 0;
+    
+        //   $trip_tunggu_gaji_s = 0;
+        //   $trip_tunggu_dinas_s = 0;
+    
+        //   $trip_tunggu_gaji_k = 0;
+        //   $trip_tunggu_dinas_k = 0;
+          
+        //   $trip_lain_gaji_s = 0;
+        //   $trip_lain_makan_s = 0;
+        //   $trip_lain_dinas_s = 0;
+    
+        //   $trip_lain_gaji_k = 0;
+        //   $trip_lain_makan_k = 0;
+        //   $trip_lain_dinas_k = 0;
+    
+        //   foreach ($smd2 as $k1 => $v1) {
+        //     $amount = $v1->amount * $v1->qty;
+        //     if($v1->xfor == 'Supir'){
+        //       $nominal_s += $amount;
+        //       if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_gaji_s += $amount;
+        //       if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_makan_s += $amount;
+        //       if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_dinas_s += $amount;
+              
+        //       if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_gaji_s += $amount;
+        //       if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_dinas_s += $amount;
+    
+        //       if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["LAIN"])) $trip_lain_gaji_s += $amount;
+        //       if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["LAIN"])) $trip_lain_makan_s += $amount;
+        //       if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["LAIN"])) $trip_lain_dinas_s += $amount;
+    
         //     }
-        //     if($there_kernet==1){
-        //         $uj->asst_opt = "DENGAN KERNET";
-        //         $uj->save();
+    
+        //     if($v1->xfor == 'Kernet'){
+        //       $nominal_k += $amount;
+        //       if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_gaji_k += $amount;
+        //       if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_makan_k += $amount;
+        //       if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_dinas_k += $amount;
+              
+        //       if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_gaji_k += $amount;
+        //       if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_dinas_k += $amount;
+    
+        //       if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["LAIN"])) $trip_lain_gaji_k += $amount;
+        //       if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["LAIN"])) $trip_lain_makan_k += $amount;
+        //       if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["LAIN"])) $trip_lain_dinas_k += $amount;
         //     }
-        // }
-
-        // $standbys =  \App\Models\MySql\StandbyMst::where("deleted",0)->get();
-
-        // foreach ($standbys as $key => $st) {
-        //     $there_supir = 0;
-        //     $there_kernet = 0;
-        //     foreach ($st->details as $key1 => $std) {
-        //         if($std->xfor=="Kernet") $there_kernet=1;
-        //         if($std->xfor=="Supir") $there_supir=1;
-        //     }
-        //     if($there_kernet==1 && $there_supir==1){
-        //         $st->driver_asst_opt = "SUPIR KERNET";
-        //         $st->save();
-        //     }elseif ($there_kernet==1 && $there_supir==0) {
-        //         $st->driver_asst_opt = "KERNET";
-        //         $st->save();
-        //     }elseif ($there_kernet==0 && $there_supir==1) {
-        //         $st->driver_asst_opt = "SUPIR";
-        //         $st->save();
-        //     }
-        // }
-
-
-        // $standby_trx_dtl = \App\Models\MySql\StandbyTrxDtl::whereHas("standby_trx",function ($q){
-        //     $q->where('val',1);            
-        // })->update(['be_paid'=>1]);
-
-        // $trx_trps = \App\Models\MySql\TrxTrp::whereNotNull("pv_id")->update(['pv_complete'=>1]);
-        // $extra_moneys = \App\Models\MySql\ExtraMoneyTrx::whereNotNull("pv_id")->update(['pv_complete'=>1]);
-
-
-        // $trx_absens = TrxAbsen::exclude(['gambar'])->get();
-        // foreach ($trx_absens as $key => $value) {
-        //     $gmbr = TrxAbsen::select('gambar','gambar_loc','created_at')->where("id",$value->id)->first();
-        //     // $this->info(json_encode($gmbr->gambar)."\n ");
-
-        //     if($gmbr->gambar){
-        //         $img = "data:image/png;base64,";
-        //         if(mb_detect_encoding($gmbr->gambar)===false){
-        //             $img.=base64_encode($gmbr->gambar);
-        //         }else{
-        //             $img.=$gmbr->gambar;        
-        //         }
-                
-        //         $date = new \DateTime();
-        //         $timestamp = $date->format("Y-m-d H:i:s.v");
-        //         $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . 'png';
-
-        //         // $location = "/files/trx_absen";
-        //         // File::ensureDirectoryExists($location);
-        //         // $location = $location."/{$ca_path[0]}";
-        //         // File::ensureDirectoryExists($location);
-        //         // $location = $location."/{$ca_path[1]}";
-        //         // File::ensureDirectoryExists($location);
-        //         $ca_path = explode("-",$gmbr->created_at);
-        //         $location = "/files/trx_absen/{$ca_path[0]}/{$ca_path[1]}";
-
-        //         $full_lf = $location."/{$file_name}";
-
-        //         File::ensureDirectoryExists(files_path($location));
-
-        //         Image::read($img)->save(files_path($full_lf));
-
-        //         $gmbr->gambar_loc = $location;
-        //         // $gmbr->gambar = null;
-        //         $gmbr->save();
-        //     }
-        // }
-
-
-        // foreach (\App\Models\MySql\StandbyTrx::whereNotNull("ref")->get() as $key => $value) {
-        //     $trx_trp =\App\Models\MySql\TrxTrp::where("id",$value->ref)->first();
-        //     if($trx_trp){
-        //         $value->trx_trp_id = $value->ref;
-        //         $value->save();
-        //     }else{
-        //         $this->info("ID ".$value->id.",ref not found in trx trp \n ");
-        //     }
-        // }
-
-        // $rpts = \App\Models\MySql\RptSalaryDtl::get();
-
-        // foreach ($rpts as $k => $v) {
-        //     $emp = \App\Models\MySql\Employee::selectRaw("id,name,rek_name")->where("id",$v->employee_id)->first();
-        //     \App\Models\MySql\RptSalaryDtl::where("employee_id",$v->employee_id)->update([
-        //         "employee_rek_name"=>$emp->rek_name
-        //     ]);
-        //     $this->info($v->id."-".$emp->id."-".$emp->rek_name."-".$v->employee_id."-".$v->employee_name."\n ");
-        // }
-
-        // $pm = new \App\Models\MySql\PaymentMethod();
-        // $pm->name = 'TRANSFER-DUITKU-5000';
-        // $pm->account_code = '01.100.013';
-        // $pm->save();
-
-        // $trxtrp= \App\Models\MySql\TrxTrp::where("tanggal","<","2025-08-01")->update(["salary_paid_id"=>1]);
-
-        // \App\Models\MySql\Ujalan::whereIn("jenis",['CPO','PK'])->where(function ($q){
-        //     $q->where("deleted",0)->orWhere('deleted_at',">=","2025-08-01 00:00:00");
-        // })->update([
-        //     'batas_persen_susut'=>-0.3
-        // ]);
-
-
-        // $nonorinet = 28840 - 28870 ;
-        // $this->info($nonorinet."\n ");
-        // // if($nonorinet<0) $nonorinet*=-1;
-        // $pembanding = 28870;
-        // $this->info($pembanding."\n ");
-        
-        // $bps = 0;
-        // $this->info((($nonorinet/$pembanding)*100)."\n ");
-
-        // $this->info(round(($nonorinet/$pembanding)*100,2)."\n ");
-
-        // $this->info(round(($nonorinet/$pembanding)*100,2) < $bps."\n ");
-
-
-        // if(round(($nonorinet/$pembanding)*100,2) < $bps ){
-        //     $gen_salary_bonus = true;
-        // }
-
-        
-
-        // $this->info("ms_".strtolower(env("app_name")));
-        // $table1 = DB::table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no");
-
-        // $table2 = DB::table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
-    
-        // $final = $table1->unionAll($table2);
-    
-        // $querySql = $final->toSql();
-        // $this->info("sql|".$querySql."\n ");
-         
-        // $model_query = DB::table(DB::raw("($querySql) as a"))->mergeBindings($final);
-         
-        // //Now you can do anything u like:
-         
-        // // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->offset($offset)->limit($limit)->get(); 
-        // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis');
-
-        // $pabrik = strtolower("KPN");
-        // if(strtolower(env("app_name"))==$pabrik){
-        //     $model_query = $model_query->having('lebih',">",1)->get();
-        // }else{
-        //     $model_query = $model_query->get();
-        // }
-
-        // if(strtolower(env("app_name"))!=$pabrik){
-        //     $this->info($pabrik ."|".strtolower(env("app_name")));
-
-        //     $pabrik = "ms_".$pabrik;
-
-        //     $this->info("new pab|".$pabrik);
-
-        //     $table3 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('A') as jenis, ticket_a_no as ticket_no")->whereNotNull("ticket_a_no");
-        //     $table4 = DB::connection($pabrik)->table('trx_trp')->selectRaw("concat('B') as jenis, ticket_b_no as ticket_no")->whereNotNull("ticket_b_no");
-        
-        //     $final = $table3->unionAll($table4);
-    
-        //     $querySql = $final->toSql();
-        //     $this->info("sql|".$querySql."\n ");
-            
-        //     $model_query2 = DB::connection($pabrik)->table(DB::raw("($querySql) as a"))->mergeBindings($final);
-            
-        //     //Now you can do anything u like:
-            
-        //     // $model_query = $model_query->selectRaw("jenis, ticket_no,count(*) as lebih")->groupBy('ticket_no','jenis')->having('lebih',">",1)->offset($offset)->limit($limit)->get(); 
-        //     $model_query2 = $model_query2->selectRaw("ticket_no")->groupBy('ticket_no')->pluck("ticket_no")->toArray();
-
-        //     $mq = $model_query->toArray();
-        //     $model_query = [];
-        //     foreach ($mq as $k => $v) {
-
-
-        //         // $this->info($v->ticket_no."\n ");
-        //         $lebih = $v->lebih;
-        //         if(array_search( $v->ticket_no, $model_query2) ===false){
-
-        //         }else{
-        //             $lebih+=1;
-        //         }
-                
-        //         array_push($model_query,[
-        //             "jenis"=>$v->jenis,
-        //             "ticket_no"=>$v->ticket_no,
-        //             "lebih"=>$lebih,
-        //         ]);
-        //     }
-            
-        //     // $final = $final->unionAll($table3)->unionAll($table4);
-        //     $model_query = array_filter($model_query,function ($x){
-        //         return $x['lebih'] >= 2;
-        //     });
-        // }
-
-        // $this->info(json_encode($model_query)."\n ");
-
-
-        // $uj = Ujalan::where("bonus_trip_supir","!=",0)->orWhere('bonus_trip_kernet',"!=",0)->get();
-
-        // foreach ($uj as $k => $v) {
-        //  TrxTrp::where("id_uj",$v->id)->update(["bonus_trip_supir"=>$v->bonus_trip_supir,"bonus_trip_supir"=>$v->bonus_trip_kernet]);
-        // }
-        // $this->info(json_encode($uj)."\n ");
-
-        // $trp=TrxTrp::where("bonus_trip_supir","!=",0)->orWhere('bonus_trip_kernet',"!=",0)->get();
-        // $this->info(json_encode($trp)."\n ");
-
-        // $prev = PaymentMethod::where("id",2)->first();
-
-        // $pm = new PaymentMethod();
-        // $pm->name = 'TRANSFER-MANDIRI';
-        // $pm->account_code = $prev->account_code;;
-        // $pm->save();
-
-        // $user_id = 1022;
-
-        // $model_query = TrxTrp::where(function ($q)use($user_id){
-        //     $q->where("supir_id",$user_id);
-        //     $q->orWhere("kernet_id",$user_id);
-        //   })->where(function ($q)use($user_id){
-        //     $q->whereNull("ritase_leave_at");
-        //     $q->orwhereNull("ritase_arrive_at");
-        //     $q->orwhereNull("ritase_return_at");
-        //     $q->orwhereNull("ritase_till_at");
-        //   })
-        //   ->where("ritase_val2",0)
-        //   ->where("deleted",0)
-        //   ->where("req_deleted",0)
-        //   ->where("tanggal",">=","2025-09-17")
-        //   ->orderBy("id","asc")
-        //   ->first();
-
-        //   // $this->info(json_encode($model_query)."\n ");
-    
-        //   if(!$model_query)
-        //     return response()->json([
-        //       "data"=>["id"=>-1],
-        //     ],200);
-    
-    
-        //   $data = new TrxTrpAbsenResource($model_query);
-        //   $data = collect($data);
-    
-        //   $data['tanggal'] = date("d-m-Y",strtotime($data['tanggal']));
-        //   $data['ritase_leave_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_leave_at']));
-        //   $data['ritase_arrive_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_arrive_at']));
-        //   $data['ritase_return_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_return_at']));
-        //   $data['ritase_till_at'] = date("d-m-Y H:i:s",strtotime($data['ritase_till_at']));
-    
-        //   $data['supir_name'] = $model_query->employee_s->name;
-        //   $data['kernet_name'] = $model_query->employee_k ? $model_query->employee_k->name : "";
-    
-        //   // $img_leaves = [];
-        //   $data['img_leave']="";
-        //   foreach ($model_query->trx_absens as $k => $v) {
-        //     // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
-        //     $img = "data:image/png;base64,";
-        //     if(mb_detect_encoding($v->gambar)===false){
-        //       // $img.=base64_encode($v->gambar);
-        //       $image = Image::read($v->gambar);
-    
-        //         // Mengubah ukuran gambar (misalnya, menjadi lebar 600px).
-        //         // Gunakan scale() untuk menjaga rasio aspek secara otomatis.
-        //         $image->scale(width: 300);
-    
-        //         // Mengubah ke format JPEG dengan kualitas 75 (dapat disesuaikan).
-        //         // toJpeg() mengembalikan objek EncodedImage.
-        //         $compressedImage = $image->toJpeg(quality: 50);
-    
-        //         // Mengonversi data biner dari objek EncodedImage ke Base64
-        //         $img .= base64_encode($compressedImage);
-        //     }else{
-        //       $img.=$v->gambar;        
-        //     }
-            
-        //     if($v['status']=="B") {
-        //       $data["img_leave"]   = $img;
-        //       // array_push($img_leaves,[
-        //       //   "id"=>$v["id"],
-        //       //   "gambar"=>$img,
-        //       // ]);
-        //     }
-      
-        //     if($v['status']=="T") 
-        //     $data["img_arrive"]   = $img;
-      
-        //     if($v['status']=="K") 
-        //     $data["img_return"]   = $img;
-      
-        //     if($v['status']=="S") 
-        //     $data["img_till"]   = $img;
         //   }
+    
+    
+        //   if($v->supir_id){
+    
+        //     $map_s = array_map(function($x){
+        //       return $x['employee_id'];
+        //     },$data);
+    
+        //     $search = array_search($v->supir_id,$map_s);
+    
+        //     if(count($data)==0 || $search===false){
+    
+        //       $emp = $v->employee_s;
+        //       $newData = $temp;
+        //       $newData["rpt_salary_id"]=$id;
+        //       $newData["employee_id"]=$emp->id;
+        //       $newData["uj_gaji"]=$uj_gaji_s;
+        //       $newData["uj_makan"]=$uj_makan_s;
+        //       $newData["uj_dinas"]=$uj_dinas_s;
+    
+        //       $newData["trip_tunggu_gaji"]=$trip_tunggu_gaji_s;
+        //       $newData["trip_tunggu_dinas"]=$trip_tunggu_dinas_s;
+    
+        //       $newData["trip_lain_gaji"]=$trip_lain_gaji_s;
+        //       $newData["trip_lain_makan"]=$trip_lain_makan_s;
+        //       $newData["trip_lain_dinas"]=$trip_lain_dinas_s;
+    
+        //       if($smd->jenis=='CPO'){
+        //         $newData["trip_cpo"]=1;
+        //       }elseif ($smd->jenis=='PK') {
+        //         $newData["trip_pk"]=1;
+        //       }elseif ($smd->jenis=='TBS') {
+        //         $newData["trip_tbs"]=1;
+        //       }elseif ($smd->jenis=='TBSK') {
+        //         $newData["trip_tbsk"]=1;
+        //       }elseif ($smd->jenis=='LAIN') {
+        //         $newData["trip_lain"]=1;
+        //       }elseif ($smd->jenis=='TUNGGU') {
+        //         $newData["trip_tunggu"]=1;
+        //       }
+    
+        //       array_push($data,$newData);
+        //     }else{
+        //       // $dt_dtl[$search]['standby_nominal']+=$nominal_s;
+        //       $data[$search]['uj_gaji']+=$uj_gaji_s;
+        //       $data[$search]['uj_makan']+=$uj_makan_s;
+        //       $data[$search]['uj_dinas']+=$uj_dinas_s;
+    
+        //       $data[$search]["trip_tunggu_gaji"]+=$trip_tunggu_gaji_s;
+        //       $data[$search]["trip_tunggu_dinas"]+=$trip_tunggu_dinas_s;
+    
+        //       $data[$search]["trip_lain_gaji"]+=$trip_lain_gaji_s;
+        //       $data[$search]["trip_lain_makan"]+=$trip_lain_makan_s;
+        //       $data[$search]["trip_lain_dinas"]+=$trip_lain_dinas_s;
+    
+        //       if($smd->jenis=='CPO'){
+        //         $data[$search]["trip_cpo"]+=1;
+        //       }elseif ($smd->jenis=='PK') {
+        //         $data[$search]["trip_pk"]+=1;
+        //       }elseif ($smd->jenis=='TBS') {
+        //         $data[$search]["trip_tbs"]+=1;
+        //       }elseif ($smd->jenis=='TBSK') {
+        //         $data[$search]["trip_tbsk"]+=1;
+        //       }elseif ($smd->jenis=='LAIN') {
+        //         $data[$search]["trip_lain"]+=1;
+        //       }elseif ($smd->jenis=='TUNGGU') {
+        //         $data[$search]["trip_tunggu"]+=1;
+        //       }
+        //     }
+        //   }
+    
+        //   if($v->kernet_id){
+    
+        //     $map_k = array_map(function($x){
+        //       return $x['employee_id'];
+        //     },$data);
+    
+        //     $search = array_search($v->kernet_id,$map_k);
+    
+        //     if(count($data)==0 || $search===false){
+        //       $emp = $v->employee_k;
+        //       $newData = $temp;
+        //       $newData["rpt_salary_id"]=$id;
+        //       $newData["employee_id"]=$emp->id;
+        //       $newData["uj_gaji"]=$uj_gaji_k;
+        //       $newData["uj_makan"]=$uj_makan_k;
+        //       $newData["uj_dinas"]=$uj_dinas_k;
+    
+        //       $newData["trip_tunggu_gaji"]=$trip_tunggu_gaji_k;
+        //       $newData["trip_tunggu_dinas"]=$trip_tunggu_dinas_k;
+    
+        //       $newData["trip_lain_gaji"]=$trip_lain_gaji_k;
+        //       $newData["trip_lain_makan"]=$trip_lain_makan_k;
+        //       $newData["trip_lain_dinas"]=$trip_lain_dinas_k;
+    
+        //       if($smd->jenis=='CPO'){
+        //         $newData["trip_cpo"]=1;
+        //       }elseif ($smd->jenis=='PK') {
+        //         $newData["trip_pk"]=1;
+        //       }elseif ($smd->jenis=='TBS') {
+        //         $newData["trip_tbs"]=1;
+        //       }elseif ($smd->jenis=='TBSK') {
+        //         $newData["trip_tbsk"]=1;
+        //       }elseif ($smd->jenis=='LAIN') {
+        //         $newData["trip_lain"]=1;
+        //       }elseif ($smd->jenis=='TUNGGU') {
+        //         $newData["trip_tunggu"]=1;
+        //       }
+    
+        //       array_push($data,$newData);
+  
+        //     }else{
+        //       // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
+        //       $data[$search]['uj_gaji']+=$uj_gaji_k;
+        //       $data[$search]['uj_makan']+=$uj_makan_k;
+        //       $data[$search]['uj_dinas']+=$uj_dinas_k;
+    
+        //       $data[$search]["trip_tunggu_gaji"]+=$trip_tunggu_gaji_k;
+        //       $data[$search]["trip_tunggu_dinas"]+=$trip_tunggu_dinas_k;
+    
+        //       $data[$search]["trip_lain_gaji"]+=$trip_lain_gaji_k;
+        //       $data[$search]["trip_lain_makan"]+=$trip_lain_makan_k;
+        //       $data[$search]["trip_lain_dinas"]+=$trip_lain_dinas_k;
+    
+    
+        //       if($smd->jenis=='CPO'){
+        //         $data[$search]["trip_cpo"]+=1;
+        //       }elseif ($smd->jenis=='PK') {
+        //         $data[$search]["trip_pk"]+=1;
+        //       }elseif ($smd->jenis=='TBS') {
+        //         $data[$search]["trip_tbs"]+=1;
+        //       }elseif ($smd->jenis=='TBSK') {
+        //         $data[$search]["trip_tbsk"]+=1;
+        //       }elseif ($smd->jenis=='LAIN') {
+        //         $data[$search]["trip_lain"]+=1;
+        //       }elseif ($smd->jenis=='TUNGGU') {
+        //         $data[$search]["trip_tunggu"]+=1;
+        //       }
+    
+        //       // if($v->kernet_id==1120){
+        //       //   MyLog::logging([
+        //       //     "data"=>"add",
+        //       //     "kernet_id"=>1120,
+        //       //     "kernet_ug"=>$uj_gaji_k,
+        //       //     "trip"=>$v->id,
+        //       //     "export"=>$data[$search]
+        //       //   ],"reportcheck");
+        //       // }
+        //     }
+        //   }
+        // }
 
-
-        //   $this->info(json_encode($data)."\n ");
-
-        $uj = Ujalan::where("deleted",0)->where('val',1)->where('val1',1)->update([
-            'val2'      => 1,
-            'val2_at'   => $timestamp,
-            'val2_user' => 1,
-            'val3'      => 1,
-            'val3_at'   => $timestamp,
-            'val3_user' => 1
-        ]);
-
+        // $this->info(json_encode($data)."\n ");
+        
 
         $this->info("Finish\n ");
         $this->info("------------------------------------------------------------------------------------------\n ");

@@ -45,6 +45,9 @@ class ExtraMoneyTrxTransferController extends Controller
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
     $this->permissions = $this->admin->the_user->listPermissions();
+
+    return "";
+    // apabila ini diaktifkan ingat untuk payment_method 4 atau bayar via bank mandiri belum di sesuaikan
   }
 
   public function checkGATimeout(){

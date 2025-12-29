@@ -182,10 +182,17 @@ class RunPermit extends Command
             // ["permit"=>'destination_location.create',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             // ["permit"=>'destination_location.modify',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
 
-            ["permit"=>'ujalan.val2', "to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'ujalan.val3', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'ujalan.unval2', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'ujalan.unval3', "to"=>['SUPERADMIN']],
+            // ["permit"=>'ujalan.val2', "to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            // ["permit"=>'ujalan.val3', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'ujalan.unval2', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'ujalan.unval3', "to"=>['SUPERADMIN']],
+            
+            ["permit"=>'fin_payment_req.views', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'fin_payment_req.view', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'fin_payment_req.create', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'fin_payment_req.modify', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'fin_payment_req.delete', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'fin_payment_req.val', "to"=>['SUPERADMIN','LOGISTIC_STAFF']],
         ];
 
         foreach ($re_lists as $k => $v) {

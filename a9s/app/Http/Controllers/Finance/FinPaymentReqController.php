@@ -31,6 +31,7 @@ use App\Models\MySql\Employee;
 use App\Models\MySql\IsUser;
 use App\Models\MySql\TrxTrp;
 use App\Exports\MyReport;
+use App\Models\MySql\Bank;
 use Illuminate\Support\Facades\Storage;
 
 class FinPaymentReqController extends Controller
@@ -38,18 +39,22 @@ class FinPaymentReqController extends Controller
   private $admin;
   private $role;
   private $admin_id;
+  private $permissions;
+  private $syslog_db = 'fin_payment_req';
 
   public function __construct(Request $request)
   {
     $this->admin = MyAdmin::user();
     $this->admin_id = $this->admin->the_user->id;
-    $this->role = $this->admin->the_user->hak_akses;
+    // $this->role = $this->admin->the_user->hak_akses;
+    $this->permissions = $this->admin->the_user->listPermissions();
 
   }
 
   public function index(Request $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkScope($this->permissions, 'fin_payment_req.views');
  
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -197,7 +202,8 @@ class FinPaymentReqController extends Controller
 
   public function show(FinPaymentReqRequest $request,$for_gen=false)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkScope($this->permissions, 'fin_payment_req.view');
 
     $model_query = FinPaymentReq::with([
     'details'=>function($q){
@@ -223,6 +229,7 @@ class FinPaymentReqController extends Controller
         "produk"=>$produk,
         "trx_trp_id"=>$trx_trp->id,
         "no_pol"=>$no_pol,
+        "employee_id"=>$v->employee_id,
         "jabatan"=>$v->employee_role,
         "nama"=>$v->employee_name,
         "rek_no"=>$v->employee_rek_no,
@@ -241,6 +248,8 @@ class FinPaymentReqController extends Controller
       'details'     => $lists,
       'created_at'  => $model_query->created_at,
       'updated_at'  => $model_query->updated_at,
+      'batch_no'    => $model_query->batch_no,
+      'status'      => $model_query->status,
 
       'val'         => $model_query->val,
       'val_user'    => $model_query->val_user ?? "",
@@ -287,7 +296,8 @@ class FinPaymentReqController extends Controller
 
   public function store(FinPaymentReqRequest $request)
   {
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic']);
+    MyAdmin::checkScope($this->permissions, 'fin_payment_req.create');
 
     $details_in = json_decode($request->details, true);
     $this->validateItems($details_in);
@@ -314,7 +324,7 @@ class FinPaymentReqController extends Controller
         return $x["id"];
       },$details_in);
 
-      $trx_trps = TrxTrp::where("received_payment","0")->whereIn("id",$trx_trp_ids)->lockForUpdate()->get();
+      $trx_trps = TrxTrp::where("received_payment","0")->whereIn("id",$trx_trp_ids)->whereDoesntHave('fin_payment_req_dtl')->lockForUpdate()->get();
 
       // $ordinal=0;
       foreach ($trx_trps as $key => $trx_trp) {
@@ -426,11 +436,17 @@ class FinPaymentReqController extends Controller
       MyLog::sys("fin_payment_req",$model_query->id,"insert");
 
       DB::commit();
+      $callGet = $this->show( new FinPaymentReqRequest($model_query->toArray()));
+      if ($callGet->getStatusCode() != 200) return $callGet;
+      $ori = json_decode(json_encode($callGet), true)["original"];
+      $data = $ori["data"];  
+
       return response()->json([
         "message" => "Proses tambah data berhasil",
-        "id"=>$model_query->id,
-        "created_at" => $t_stamp,
-        "updated_at" => $t_stamp,
+        "data"=>$data,
+        // "created_at" => $t_stamp,
+        // "updated_at" => $t_stamp,
+        
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -438,14 +454,15 @@ class FinPaymentReqController extends Controller
       if($rollback_id>-1)
       DB::statement("ALTER TABLE fin_payment_req AUTO_INCREMENT = $rollback_id");
       
-      return response()->json([
-        "message" => $e->getMessage(),
-      ], 400);
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
+      // return response()->json([
+      //   "message" => $e->getMessage(),
+      // ], 400);
+
+      // if ($e->getCode() == 1) {
+      //   return response()->json([
+      //     "message" => $e->getMessage(),
+      //   ], 400);
+      // }
 
       return response()->json([
         "message" => "Proses tambah data gagal",
@@ -453,618 +470,184 @@ class FinPaymentReqController extends Controller
     }
   }
 
-  // public function update(FinPaymentReqRequest $request)
-  // {
-  //   // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
-  //   MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
-  //   $t_stamp = date("Y-m-d H:i:s");
-
-  //   DB::beginTransaction();
-  //   try {
-  //     $SYSNOTES=[];
-  //     $model_query             = FinPaymentReq::where("id",$request->id)->lockForUpdate()->first();
-  //     $SYSOLD      = clone($model_query);
-
-  //     if($model_query->deleted==1)
-  //     throw new \Exception("Data Sudah Dihapus",1);
-      
-  //     if(
-  //       ($model_query->val==1 && $model_query->val1==1) || 
-  //       ($this->role=="Logistic" && $model_query->val == 1) ||
-  //       ($this->role=="PabrikTransport" && $model_query->val1 == 1)
-  //     ) 
-  //     throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
-
-  //     if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
-  //       $details_in = json_decode($request->details, true);
-  //       $this->validateItems($details_in);
-  //     }
-  //     //start for details2
-  //     $details_in2 = json_decode($request->details2, true);
-  //     $this->validateItems2($details_in2);   
-  //     //end for details2
-      
-  //     //start for details2
-  //     $unique_items2 = [];
-  //     $unique_acc_code=[];
-  //     foreach ($details_in2 as $key => $value) {
-  //       $unique_data2 = strtolower(trim($value['ac_account_code']).trim($value['description']));
-  //       if (in_array($unique_data2, $unique_items2) == 1) {
-  //         throw new \Exception("Maaf terdapat Item yang sama",1);
-  //       }
-  //       array_push($unique_items2, $unique_data2);
-  //       if($value["p_status"]!="Remove")
-  //       array_push($unique_acc_code,$value['ac_account_code']);
-  //     }
-  //     $unique_acc_code = array_unique($unique_acc_code);
-  
-  //     $temp_ac_accounts = [];
-  //     $listToCheck = [];
-  //     if(count($unique_acc_code)>0){
-  //       $connectionDB = DB::connection('sqlsrv');
-  //       $temp_ac_accounts = $connectionDB->table("AC_Accounts")
-  //       ->select('AccountID','AccountCode','AccountName')
-  //       ->whereIn('AccountCode',$unique_acc_code) // RTBS & MTBS untuk armada TBS CPO & PK untuk armada cpo pk
-  //       ->get();
-  
-  //       $temp_ac_accounts= MyLib::objsToArray($temp_ac_accounts);
-  
-  //       $listToCheck = array_map(function($x){
-  //         return $x["AccountCode"];
-  //       },$temp_ac_accounts);
-
-  //       if(count($temp_ac_accounts)!=count($unique_acc_code)){  
-  //         $diff = array_diff($unique_acc_code,$listToCheck);
-  //         throw new \Exception(implode(",",$diff)."tidak terdaftar",1);
-  //       }
-  //     }
-  //     //end for details2
-
-  //     // if(FinPaymentReq::where("id","!=",$request->id)->where("xto",$request->xto)->where("tipe",$request->tipe)->where("jenis",$request->jenis)->first())
-  //     // throw new \Exception("List sudah terdaftar",1);
-
-  //     // if($model_query->requested_by != $this->admin_id){
-  //     //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan pergantian data",1);
-  //     // }
-
-  //     // if($model_query->ref_id!=null){
-  //     //   throw new \Exception("Ubah data ditolak. Data berasal dari transfer",1);
-  //     // }
-
-  //     // if($model_query->val != null){
-  //     //   throw new \Exception("Ubah ditolak. Data sudah di validasi.",1);
-  //     // }
-
-  //     // $warehouse_id = $request->warehouse_id;
-  //     // if($this->role=='ClientPabrik' || $this->role=='KTU')
-  //     // $warehouse_id = MyAdmin::checkReturnOrFailLocation($this->admin->the_user,$model_query->hrm_revisi_lokasi_id);
-  
-  //     // $dt_before = $this->getLastDataConfirmed($warehouse_id,$request->item_id);
-  //     // if($dt_before && $dt_before->id != $model_query->id){
-  //     //   throw new \Exception("Ubah ditolak. Hanya data terbaru yang bisa diubah.",1);
-  //     // }
-  //     if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
-  //       array_push( $SYSNOTES ,"Details: \n");
-
-  //       $model_query->xto             = $request->xto;
-  //       $model_query->tipe            = $request->tipe;
-  //       $model_query->jenis           = $request->jenis;
-  //       $model_query->harga           = 0;
-  //       $model_query->note_for_remarks= MyLib::emptyStrToNull($request->note_for_remarks);
-
-  //       // $model_query->status          = $request->status;
+  public function update(FinPaymentReqRequest $request)
+  {
+    // MyAdmin::checkRole($this->role, ['Super Admin','User','ClientPabrik','KTU']);
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic','PabrikTransport']);
+    MyAdmin::checkScope($this->permissions, 'fin_payment_req.modify');
     
-  //       // $model_query->created_at      = $t_stamp;
-  //       // $model_query->created_user    = $this->admin_id;
+    $details_in = json_decode($request->details, true);
+    $this->validateItems($details_in);
 
-  //       $model_query->updated_at      = $t_stamp;
-  //       $model_query->updated_user    = $this->admin_id;  
+    $t_stamp = date("Y-m-d H:i:s");
 
-
-  //       $data_from_db = FinPaymentReqDtl::where('id_uj', $model_query->id)
-  //       ->orderBy("ordinal", "asc")->lockForUpdate()
-  //       ->get()->toArray();
-        
-
-  //       $in_keys = array_filter($details_in, function ($x) {
-  //           return isset($x["key"]);
-  //       });
-
-  //       $in_keys = array_map(function ($x) {
-  //           return $x["key"];
-  //       }, $in_keys);
-
-  //       $am_ordinal_db = array_map(function ($x) {
-  //           return $x["ordinal"];
-  //       }, $data_from_db);
-
-  //       if (count(array_diff($in_keys, $am_ordinal_db)) > 0 || count(array_diff($am_ordinal_db, $in_keys)) > 0) {
-  //           throw new Exception('Ada ketidak sesuaian data, harap hubungi staff IT atau refresh browser anda',1);
-  //       }
-
-  //       $id_items = [];
-  //       $ordinal = 0;
-  //       $for_deletes = [];
-  //       $for_edits = [];
-  //       $for_adds = [];
-  //       $data_to_processes = [];
-  //       foreach ($details_in as $k => $v) {
-  //         // $xdesc = $v['xdesc'] ? $v['xdesc'] : "";
-          
-  //         if (in_array($v["p_status"], ["Add", "Edit"])) {
-  //           if (in_array(strtolower($v['xdesc']), $id_items) == 1) {
-  //               throw new \Exception("Maaf terdapat Nama Item yang sama",1);
-  //           }
-  //           array_push($id_items, strtolower($v['xdesc']));
-  //         }
-
-  //         if ($v["p_status"] !== "Remove") {
-  //           $ordinal++;
-  //           $details_in[$k]["ordinal"] = $ordinal;
-  //           if ($v["p_status"] == "Edit")
-  //               array_unshift($for_edits, $details_in[$k]);
-  //           elseif ($v["p_status"] == "Add")
-  //               array_push($for_adds, $details_in[$k]);
-  //         } else
-  //             array_push($for_deletes, $details_in[$k]);
-  //       }
-
-  //       if(count($for_adds)==0 && count($for_edits)==0){
-  //         throw new \Exception("Item harus Diisi",1);
-  //       }
-
-  //       $data_to_processes = array_merge($for_deletes, $for_edits, $for_adds);
-  //       // $ordinal = 0;
-  //       // MyLog::logging([
-  //       //   "data_to_processes"=>$data_to_processes,
-  //       //   "data_from_db"=>$data_from_db,
-  //       // ]);
-
-  //       // return response()->json([
-  //       //   "message" => "test",
-  //       // ], 400);
-  //       $remarksign=0;
-
-  //       foreach ($data_to_processes as $k => $v) {
-  //         $index = false;
-
-  //         if (isset($v["key"])) {
-  //             $index = array_search($v["key"], $am_ordinal_db);
-  //         }
-          
-  //         //         if($k==2)
-  //         // {        MyLog::logging([
-  //         //           "item_name"=>$v["item"]["name"],
-  //         //           "key"=>$v["key"],
-  //         //           "index"=>$index,
-  //         //           "ordinal_arr"=>$am_ordinal_db,
-  //         //           "v"=>$v,
-  //         //           "w"=>$data_from_db,
-  //         //         ]);
-
-  //         //         return response()->json([
-  //         //           "message" => "test",
-  //         //         ], 400);
-  //         // }
+    DB::beginTransaction();
+    try {
+      $SYSNOTES=[];
+      $model_query             = FinPaymentReq::where("id",$request->id)->lockForUpdate()->first();
+      $SYSOLD                  = clone($model_query);
 
 
-  //         if(in_array($v["p_status"],["Add","Edit"])){
-  //           // $ordinal++;
+      $checkDetails = FinPaymentReqDtl::where("fin_payment_req_id",$model_query->id)->pluck('status')->toArray();
 
-  //           // if(($type=="transfer" || $type=="used")){
-  //           //   $v['qty_in']=null;
-  //           //   if($v['qty_out']==0) 
-  //           //     throw new \Exception("Baris #" .$ordinal." Qty Out Tidak Boleh 0",1);
-  //           // }
-
-  //           // if($type=="in"){
-  //           //   $v['qty_out']=null;
-  //           //   if($v['qty_in']==0)
-  //           //   throw new \Exception("Baris #" .$ordinal.".Qty In Tidak Boleh 0",1);
-  //           // }
-
-
-  //           // $indexItem = array_search($v['xdesc'], $items_id);
-  //           // $qty_reminder = 0;
-
-  //           // if ($indexItem !== false){
-  //           //   $qty_reminder = $prev_checks[$indexItem]["qty_reminder"];
-  //           // }
-    
-  //           // if(($type=="used" || $type=="transfer") && $qty_reminder - $v['qty_out'] < 0){
-  //           //   // MyLog::logging($prev_checks);
-
-  //           //   // throw new \Exception("Baris #" .$ordinal.".Qty melebihi stok : ".$qty_reminder, 1);
-  //           // }
-  //         }
-
-
-  //         // $v["item_code"] = MyLib::emptyStrToNull($v["item_code"]);
-  //         // $v["note"] = MyLib::emptyStrToNull($v["note"]);
-  //         // $v["qty_assumption"] = MyLib::emptyStrToNull($v["qty_assumption"]);
-  //         // $v["qty_realization"] = MyLib::emptyStrToNull($v["qty_realization"]);
-  //         // $v["stock"] = MyLib::emptyStrToNull($v["stock"]);
-  //         // $v["price_assumption"] = MyLib::emptyStrToNull($v["price_assumption"]);
-  //         // $v["price_realization"] = MyLib::emptyStrToNull($v["price_realization"]);
-
-  //         if ($v["p_status"] == "Remove") {
-
-  //             if ($index === false) {
-  //                 throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
-  //             } else {
-  //                 $dt = $data_from_db[$index];
-  //                 // $has_permit = count(array_intersect(['ap-project_material_item-remove'], $scopes));
-  //                 // if (!$dt["is_locked"] && $dt["created_by"] == $auth_id && $has_permit) {
-  //                 //     ProjectMaterial::where("project_no", $model_query->no)->where("ordinal", $dt["ordinal"])->delete();
-  //                 // }
-  //                 array_push( $SYSNOTES ,"Ordinal ".$dt["ordinal"]." [Deleted]");
-  //                 FinPaymentReqDtl::where("id_uj",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
-  //             }
-  //         } else if ($v["p_status"] == "Edit") {
-
-  //             if ($index === false) {
-  //                 throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k,1);
-  //             } else {
-  //                 // $dt = $data_from_db[$index];
-  //                 // $has_permit = count(array_intersect(['ap-project_material_item-edit'], $scopes));
-  //                 // if (!$has_permit) {
-  //                 //     throw new Exception('Ubah Project Material Item Tidak diizinkan');
-  //                 // }
-
-  //                 // if ($v["qty_assumption"] != $dt['qty_assumption']) {
-  //                 //     $has_value = count(array_intersect(['dp-project_material-manage-qty_assumption'], $scopes));
-
-  //                 //     if ($dt["is_locked"] || !$has_value || $dt["created_by"] != $auth_id)
-  //                 //         throw new Exception('Ubah Jumlah Asumsi Tidak diizinkan');
-  //                 // }
-              
-
-  //               $model_query->harga          += ($v["qty"] * $v["harga"]);
-
-  //               $mq=FinPaymentReqDtl::where("id_uj", $model_query->id)
-  //               ->where("ordinal", $v["key"])->where("p_change",false)->lockForUpdate()->first();
-                
-  //               $mqToCom = clone($mq);
-
-  //               $mq->ordinal      = $v["ordinal"];
-  //               $mq->xdesc        = $v["xdesc"];
-  //               $mq->qty          = $v["qty"];
-  //               $mq->harga        = $v["harga"];
-  //               $mq->for_remarks  = $v["for_remarks"];
-  //               $mq->p_change     = true;
-  //               $mq->updated_at   = $t_stamp;
-  //               $mq->updated_user = $this->admin_id;
-  //               $mq->save();
-
-  //               $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
-  //               array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
-
-  //               if($v['for_remarks']){
-  //                 $remarksign++;
-  //               }
-  //               // FinPaymentReqDtl::where("id_uj", $model_query->id)
-  //               // ->where("ordinal", $v["key"])->where("p_change",false)->update([
-  //               //     "ordinal"=>$v["ordinal"],
-  //               //     "xdesc" => $v["xdesc"],
-  //               //     "qty" => $v["qty"],
-  //               //     "harga" => $v["harga"],
-  //               //     "for_remarks" => $v["for_remarks"],
-  //               //     // "status" => $v["status"],
-  //               //     "p_change"=> true,
-  //               //     "updated_at"=> $t_stamp,
-  //               //     "updated_user"=> $this->admin_id,
-  //               // ]);
-
-  //             }
-
-  //             // $ordinal++;
-  //         } else if ($v["p_status"] == "Add") {
-
-  //             // if (!count(array_intersect(['ap-project_material_item-add'], $scopes)))
-  //             //     throw new Exception('Tambah Project Material Item Tidak diizinkan');
-
-  //             // if (!count(array_intersect(['dp-project_material-manage-item_code'], $scopes))  && $v["item_code"] != "")
-  //             //     throw new Exception('Tidak ada izin mengelola Kode item');
-  //             array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
-              
-  //             $model_query->harga          += ($v["qty"] * $v["harga"]);
-  //             FinPaymentReqDtl::insert([
-  //                 'id_uj'             => $model_query->id,
-  //                 'ordinal'           => $v["ordinal"],
-  //                 'xdesc'             => $v['xdesc'],
-  //                 'qty'               => $v["qty"],
-  //                 'harga'             => $v['harga'],
-  //                 "for_remarks"       => $v["for_remarks"],
-  //                 // 'status'            => $v['status'],
-  //                 "p_change"          => true,
-  //                 'created_at'        => $t_stamp,
-  //                 'created_user'      => $this->admin_id,
-  //                 'updated_at'        => $t_stamp,
-  //                 'updated_user'      => $this->admin_id,
-  //             ]);
-
-  //             if($v['for_remarks']){
-  //               $remarksign++;
-  //             }
-  //             // $ordinal++;
-  //         }
-  //       }
-  //     }
-
-  //     if($remarksign == 0)
-  //     throw new \Exception("Minimal Harus Memiliki 1 For Remarks Di Detail",1);
-
-  //     //start for details2
-  //     array_push( $SYSNOTES ,"Details PVR: \n");
-
-  //     $data_from_db2 = FinPaymentReqDtl2::where('id_uj', $model_query->id)
-  //     ->orderBy("ordinal", "asc")->lockForUpdate()
-  //     ->get()->toArray();
+      if(!in_array('READY',$checkDetails)){
+        throw new \Exception("Data Sudah Tidak Dapat Ditambahkan",1);
+      }
+      // $t_stamp = date("Y-m-d H:i:s");
       
-
-  //     $in_keys2 = array_filter($details_in2, function ($x) {
-  //         return isset($x["key"]);
-  //     });
-
-  //     $in_keys2 = array_map(function ($x) {
-  //         return $x["key"];
-  //     }, $in_keys2);
-
-  //     $am_ordinal_db2 = array_map(function ($x) {
-  //         return $x["ordinal"];
-  //     }, $data_from_db2);
-
-  //     if (count(array_diff($in_keys2, $am_ordinal_db2)) > 0 || count(array_diff($am_ordinal_db2, $in_keys2)) > 0) {
-  //         throw new Exception('Ada ketidak sesuaian data, harap hubungi staff IT atau refresh browser anda',1);
-  //     }
-
-  //     $id_items2 = [];
-  //     $ordinal2 = 0;
-  //     $for_deletes2 = [];
-  //     $for_edits2 = [];
-  //     $for_adds2 = [];
-  //     $data_to_processes2 = [];
-  //     foreach ($details_in2 as $k => $v) {
-  //       // $xdesc = $v['xdesc'] ? $v['xdesc'] : "";
-        
-  //       if (in_array($v["p_status"], ["Add", "Edit"])) {
-  //         $unique2 = strtolower(trim($v['ac_account_code']).trim($v['description']));
-  //         if (in_array($unique2, $id_items2) == 1) {
-  //             throw new \Exception("Maaf terdapat Nama Item yang sama",1);
-  //         }
-  //         array_push($id_items2, $unique2);
-  //       }
-
-  //       if ($v["p_status"] !== "Remove") {
-  //         $ordinal2++;
-  //         $details_in2[$k]["ordinal"] = $ordinal2;
-  //         if ($v["p_status"] == "Edit")
-  //             array_unshift($for_edits2, $details_in2[$k]);
-  //         elseif ($v["p_status"] == "Add")
-  //             array_push($for_adds2, $details_in2[$k]);
-  //       } else
-  //           array_push($for_deletes2, $details_in2[$k]);
-  //     }
-
-  //     // if(count($details_in2) > 0 && count($for_adds2)==0 && count($for_edits2)==0){
-  //     //   throw new \Exception("Item harus Diisi",1);
-  //     // }
-
-  //     $data_to_processes2 = array_merge($for_deletes2, $for_edits2, $for_adds2);
+      // $date = new \DateTime();
+      // $model_query->filename        = env('MCM_ID').'14'.$date->format("Ymd").$date->format("His");
       
-  //     $temp_amount_details2=0;
+      $trx_trp_ids = array_map(function($x){
+        return $x["id"];
+      },$details_in);
 
-  //     foreach ($data_to_processes2 as $k => $v) {
-  //       $index2 = false;
+      $trx_trps = TrxTrp::where("received_payment","0")->whereIn("id",$trx_trp_ids)->whereDoesntHave('fin_payment_req_dtl')->lockForUpdate()->get();
 
-  //       if (isset($v["key"])) {
-  //           $index2 = array_search($v["key"], $am_ordinal_db2);
-  //       }
+      // $ordinal=0;
+      foreach ($trx_trps as $key => $trx_trp) {
+        // $trx_trp = TrxTrp::where("id",$value['id'])->first();
         
-  //       if(in_array($v["p_status"],["Add","Edit"])){
-  //         // $ordinal++;
-
-  //         // if(($type=="transfer" || $type=="used")){
-  //         //   $v['qty_in']=null;
-  //         //   if($v['qty_out']==0) 
-  //         //     throw new \Exception("Baris #" .$ordinal." Qty Out Tidak Boleh 0",1);
-  //         // }
-
-  //         // if($type=="in"){
-  //         //   $v['qty_out']=null;
-  //         //   if($v['qty_in']==0)
-  //         //   throw new \Exception("Baris #" .$ordinal.".Qty In Tidak Boleh 0",1);
-  //         // }
-
-
-  //         // $indexItem = array_search($v['xdesc'], $items_id);
-  //         // $qty_reminder = 0;
-
-  //         // if ($indexItem !== false){
-  //         //   $qty_reminder = $prev_checks[$indexItem]["qty_reminder"];
-  //         // }
+        $uj_details2= $trx_trp->uj->details2;
+        $supir_money=0;
+        $kernet_money=0;
   
-  //         // if(($type=="used" || $type=="transfer") && $qty_reminder - $v['qty_out'] < 0){
-  //         //   // MyLog::logging($prev_checks);
+        foreach ($uj_details2 as $k1 => $v1) {
+          if($v1->xfor=='Kernet'){
+            $kernet_money += $v1->qty * $v1->amount;
+          }else{
+            $supir_money += $v1->qty * $v1->amount;
+          }
+        }
+  
+        $supir_potongan_trx_money  = 0;
+        $supir_potongan_trx_ids    = "";
+        $kernet_potongan_trx_money = 0;
+        $kernet_potongan_trx_ids   = "";
+        foreach ($trx_trp->potongan as $kx => $v2) {
+          if($v2->potongan_mst->employee_id == $trx_trp->supir_id){
+            $supir_potongan_trx_money+=$v2->nominal_cut;
+            $supir_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
+          }
+    
+          if($v2->potongan_mst->employee_id == $trx_trp->kernet_id){
+            $kernet_potongan_trx_money+=$v2->nominal_cut;
+            $kernet_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
+          }
+        }
+        
+        $supir_extra_money_trx_money  = 0;
+        $supir_extra_money_trx_ids    = "";
+        $kernet_extra_money_trx_money = 0;
+        $kernet_extra_money_trx_ids   = "";
+        foreach ($trx_trp->extra_money_trxs as $k => $emt) {
+          if($emt->employee_id == $trx_trp->supir_id){
+            $supir_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+            $supir_extra_money_trx_ids.="#".$emt->id." ";
+          }
 
-  //         //   // throw new \Exception("Baris #" .$ordinal.".Qty melebihi stok : ".$qty_reminder, 1);
-  //         // }
-  //       }
-
-
-  //       // $v["item_code"] = MyLib::emptyStrToNull($v["item_code"]);
-  //       // $v["note"] = MyLib::emptyStrToNull($v["note"]);
-  //       // $v["qty_assumption"] = MyLib::emptyStrToNull($v["qty_assumption"]);
-  //       // $v["qty_realization"] = MyLib::emptyStrToNull($v["qty_realization"]);
-  //       // $v["stock"] = MyLib::emptyStrToNull($v["stock"]);
-  //       // $v["price_assumption"] = MyLib::emptyStrToNull($v["price_assumption"]);
-  //       // $v["price_realization"] = MyLib::emptyStrToNull($v["price_realization"]);
-
-  //       if ($v["p_status"] == "Remove") {
-
-  //           if ($index2 === false) {
-  //               throw new \Exception("Data yang ingin dihapus tidak ditemukan",1);
-  //           } else {
-  //               $dt2 = $data_from_db2[$index2];
-  //               // $has_permit = count(array_intersect(['ap-project_material_item-remove'], $scopes));
-  //               // if (!$dt["is_locked"] && $dt["created_by"] == $auth_id && $has_permit) {
-  //               //     ProjectMaterial::where("project_no", $model_query->no)->where("ordinal", $dt["ordinal"])->delete();
-  //               // }
-  //               array_push( $SYSNOTES ,"Ordinal ".$dt2["ordinal"]." [Deleted]");
-  //               FinPaymentReqDtl2::where("id_uj",$model_query->id)->where("ordinal",$dt2["ordinal"])->delete();
-  //           }
-  //       } else if ($v["p_status"] == "Edit") {
-
-  //           if ($index2 === false) {
-  //               throw new \Exception("Data yang ingin diubah tidak ditemukan" . $k,1);
-  //           } else {
-  //               // $dt = $data_from_db[$index];
-  //               // $has_permit = count(array_intersect(['ap-project_material_item-edit'], $scopes));
-  //               // if (!$has_permit) {
-  //               //     throw new Exception('Ubah Project Material Item Tidak diizinkan');
-  //               // }
-
-  //               // if ($v["qty_assumption"] != $dt['qty_assumption']) {
-  //               //     $has_value = count(array_intersect(['dp-project_material-manage-qty_assumption'], $scopes));
-
-  //               //     if ($dt["is_locked"] || !$has_value || $dt["created_by"] != $auth_id)
-  //               //         throw new Exception('Ubah Jumlah Asumsi Tidak diizinkan');
-  //               // }
-             
-  //             $temp_amount_details2         += ($v["qty"] * $v["amount"]);
-
-  //             $index_item = array_search($v['ac_account_code'], $listToCheck);
-  //             $ac_account_id   = null;
-  //             $ac_account_name = null;
-  //             $ac_account_code = null;
-  //             if ($index_item !== false){
-  //               $ac_account_id    = $temp_ac_accounts[$index_item]['AccountID'];
-  //               $ac_account_name    = $temp_ac_accounts[$index_item]['AccountName'];
-  //               $ac_account_code    = $temp_ac_accounts[$index_item]['AccountCode'];
-  //             }
+          if($emt->employee_id == $trx_trp->kernet_id){
+            $kernet_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+            $kernet_extra_money_trx_ids.="#".$emt->id." ";
+          }
+        }
 
 
-  //             $mq=FinPaymentReqDtl2::where("id_uj", $model_query->id)
-  //             ->where("ordinal", $v["key"])->where("p_change",false)->lockForUpdate()->first();
-              
-  //             $mqToCom = clone($mq);
-
-  //             $mq->ordinal            = $v["ordinal"];
-  //             $mq->qty                = $v["qty"];
-  //             $mq->amount             = $v["amount"];
-  //             $mq->ac_account_id      = $ac_account_id;
-  //             $mq->ac_account_name    = $ac_account_name;
-  //             $mq->ac_account_code    = $ac_account_code;
-  //             $mq->description        = $v["description"];
-  //             $mq->xfor               = $v["xfor"];
-  //             $mq->p_change           = true;
-  //             $mq->updated_at         = $t_stamp;
-  //             $mq->updated_user       = $this->admin_id;
-  //             $mq->save();
-
-  //             $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
-  //             array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
-
-  //             // FinPaymentReqDtl2::where("id_uj", $model_query->id)
-  //             // ->where("ordinal", $v["key"])->where("p_change",false)->update([
-  //             //     "ordinal"=>$v["ordinal"],
-  //             //     "qty" => $v["qty"],
-  //             //     "amount" => $v["amount"],
-  //             //     "ac_account_id" => $ac_account_id,
-  //             //     "ac_account_name" => $ac_account_name,
-  //             //     "ac_account_code" => $ac_account_code,
-  //             //     "description" => $v["description"],
-  //             //     // "status" => $v["status"],
-  //             //     "p_change"=> true,
-  //             //     "updated_at"=> $t_stamp,
-  //             //     "updated_user"=> $this->admin_id,
-  //             // ]);
-
-  //           }
-
-  //           // $ordinal++;
-  //       } else if ($v["p_status"] == "Add") {
-
-  //           // if (!count(array_intersect(['ap-project_material_item-add'], $scopes)))
-  //           //     throw new Exception('Tambah Project Material Item Tidak diizinkan');
-
-  //           // if (!count(array_intersect(['dp-project_material-manage-item_code'], $scopes))  && $v["item_code"] != "")
-  //           //     throw new Exception('Tidak ada izin mengelola Kode item');
-  //           $temp_amount_details2         += ($v["qty"] * $v["amount"]);
-
-  //           $index_item = array_search($v['ac_account_code'], $listToCheck);
-  //           $ac_account_id   = null;
-  //           $ac_account_name = null;
-  //           $ac_account_code = null;
-  //           if ($index_item !== false){
-  //             $ac_account_id    = $temp_ac_accounts[$index_item]['AccountID'];
-  //             $ac_account_name    = $temp_ac_accounts[$index_item]['AccountName'];
-  //             $ac_account_code    = $temp_ac_accounts[$index_item]['AccountCode'];
-  //           }
-            
-  //           array_push( $SYSNOTES ,"Ordinal ".$v["ordinal"]." [Insert]");
-
-  //           FinPaymentReqDtl2::insert([
-  //               'id_uj'             => $model_query->id,
-  //               'ordinal'           => $v["ordinal"],
-  //               "qty"               => $v["qty"],
-  //               "amount"            => $v["amount"],
-  //               "ac_account_id"     => $ac_account_id,
-  //               "ac_account_name"   => $ac_account_name,
-  //               "ac_account_code"   => $ac_account_code,
-  //               "description"       => $v["description"],
-  //               "xfor"              => $v["xfor"],
-  //               // 'status'            => $v['status'],
-  //               "p_change"          => true,
-  //               'created_at'        => $t_stamp,
-  //               'created_user'      => $this->admin_id,
-  //               'updated_at'        => $t_stamp,
-  //               'updated_user'      => $this->admin_id,
-  //           ]);
-  //           // $ordinal++;
-  //       }
-  //     }
-
-  //     if($temp_amount_details2 > 0 && $model_query->harga!=$temp_amount_details2)
-  //     throw new \Exception("Total Tidak Cocok harap Periksa Kembali",1);
-
-  //   //end for details2
-  //   if(MyAdmin::checkRole($this->role, ['SuperAdmin','Logistic'],null,true)){
-  //     $model_query->save();
-  //     FinPaymentReqDtl::where('id_uj',$model_query->id)->update(["p_change"=>false]);
-  //   }
-  //     //start for details2
-  //   FinPaymentReqDtl2::where('id_uj',$model_query->id)->update(["p_change"=>false]);
-  //   //end for details2
-
-  //     $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
-  //     array_unshift( $SYSNOTES , $SYSNOTE );            
-  //     MyLog::sys("fin_payment_req",$request->id,"update",implode("\n",$SYSNOTES));
-
-  //     DB::commit();
-  //     return response()->json([
-  //       "message" => "Proses ubah data berhasil",
-  //       "updated_at"=>$t_stamp
-  //     ], 200);
-  //   } catch (\Exception $e) {
-  //     DB::rollback();
-  //     // return response()->json([
-  //     //   "getCode" => $e->getCode(),
-  //     //   "line" => $e->getLine(),
-  //     //   "message" => $e->getMessage(),
-  //     // ], 400);
-
-  //     if ($e->getCode() == 1) {
-  //       return response()->json([
-  //         "message" => $e->getMessage(),
-  //       ], 400);
-  //     }
+        $detail                       = new FinPaymentReqDtl();
+        $detail->fin_payment_req_id   = $model_query->id;
+        $detail->trx_trp_id           = $trx_trp->id;
+        $detail->employee_role        = "SUPIR";
+        $detail->employee_id          = $trx_trp->employee_s->id;
+        $detail->employee_name        = $trx_trp->employee_s->name;
+        $detail->employee_rek_no      = $trx_trp->employee_s->rek_no;
+        $detail->employee_rek_name    = $trx_trp->employee_s->rek_name;
+        $detail->employee_bank_code   = $trx_trp->employee_s->bank->code;
+        $detail->nominal              = $supir_money;
+        $detail->potongan_trx_ids     = $supir_potongan_trx_ids;
+        $detail->potongan_trx_ttl     = $supir_potongan_trx_money;
+        $detail->extra_money_trx_ids  = $supir_extra_money_trx_ids;
+        $detail->extra_money_trx_ttl  = $supir_extra_money_trx_money;
+        $detail->jumlah               = $supir_money + $supir_extra_money_trx_money - $supir_potongan_trx_money;
+        $detail->status               = "READY";
+        
+        $detail->created_at         = $t_stamp;
+        $detail->created_user       = $this->admin_id;
+  
+        $detail->updated_at         = $t_stamp;
+        $detail->updated_user       = $this->admin_id;  
       
-  //     return response()->json([
-  //       "message" => "Proses ubah data gagal",
-  //     ], 400);
-  //   }
-  // }
+        $detail->save();
+        if($trx_trp->kernet_id){
+          $detail                       = new FinPaymentReqDtl();
+          $detail->fin_payment_req_id   = $model_query->id;
+          $detail->trx_trp_id           = $trx_trp->id;
+          $detail->employee_role        = "KERNET";
+          $detail->employee_id          = $trx_trp->employee_k->id;
+          $detail->employee_name        = $trx_trp->employee_k->name;
+          $detail->employee_rek_no      = $trx_trp->employee_k->rek_no;
+          $detail->employee_rek_name    = $trx_trp->employee_k->rek_name;
+          $detail->employee_bank_code   = $trx_trp->employee_k->bank->code;
+          $detail->nominal              = $kernet_money;
+          $detail->potongan_trx_ids     = $kernet_potongan_trx_ids;
+          $detail->potongan_trx_ttl     = $kernet_potongan_trx_money;
+          $detail->extra_money_trx_ids  = $kernet_extra_money_trx_ids;
+          $detail->extra_money_trx_ttl  = $kernet_extra_money_trx_money;
+          $detail->jumlah               = $kernet_money + $kernet_extra_money_trx_money - $kernet_potongan_trx_money;
+          $detail->status               = "READY";
+          
+          $detail->created_at         = $t_stamp;
+          $detail->created_user       = $this->admin_id;
+    
+          $detail->updated_at         = $t_stamp;
+          $detail->updated_user       = $this->admin_id;  
+        
+          $detail->save();
+        }
+      }
+
+      // foreach ($trx_trps as $key => $value) {
+      //   $value->fin_status = 'P';
+      //   $value->save();
+      // }
+
+      $model_query->save();
+      // MyLog::sys("fin_payment_req",$model_query->id,"insert");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      array_unshift( $SYSNOTES , $SYSNOTE );            
+      MyLog::sys("fin_payment_req",$request->id,"update",implode("\n",$SYSNOTES));
+
+      DB::commit();
+
+      $callGet = $this->show( new FinPaymentReqRequest($model_query->toArray()));
+      if ($callGet->getStatusCode() != 200) return $callGet;
+      $ori = json_decode(json_encode($callGet), true)["original"];
+      $data = $ori["data"];
+
+
+      return response()->json([
+        "message" => "Proses ubah data berhasil",
+        // "updated_at"=>$t_stamp,
+        "data"=>$data,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+  }
 
   // public function delete(Request $request)
   // {
@@ -1139,7 +722,8 @@ class FinPaymentReqController extends Controller
   // }
 
   public function validasi(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkScope($this->permissions, 'fin_payment_req.val');
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\FinPaymentReq,id",
@@ -1209,13 +793,10 @@ class FinPaymentReqController extends Controller
 
 
   public function get_trx_trp_unprocessed(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
     try {
       $model_query = TrxTrp::where("deleted",0)->where("req_deleted",0)
-      ->where('val',1)->where('val1',1)->where('val2',1)->where('val4',1)
-      ->where(function ($q){
-        $q->where('val5',1)->orWhere('val6',1);
-      })
+      ->where('val',1)->where('val1',1)->where('val2',1)->where('val4',1)->where('val5',1)->Where('val6',1)
       ->where(function ($q){
         $q->where(function ($q1){
           $q1->whereNotIn('jenis',['CPO','PK']);
@@ -1224,7 +805,9 @@ class FinPaymentReqController extends Controller
           $q1->whereIn('jenis',['CPO','PK'])->where('val3',1);
         });
       })
-      ->where('received_payment',0)->where("payment_method_id",4)->get();
+      ->where('received_payment',0)->where("payment_method_id",4)
+      ->whereDoesntHave('fin_payment_req_dtl')
+      ->with('uj')->get();
       return response()->json([
         "data" => TrxTrpForFinPaymentReqResource::collection($model_query),
       ], 200);
@@ -1299,14 +882,23 @@ class FinPaymentReqController extends Controller
     
     DB::beginTransaction();
     try {
-      
       $data = $raw_data;
+
+      $checkDetails = FinPaymentReqDtl::where("fin_payment_req_id",$data['id'])->pluck('status')->toArray();
+
+      if(!in_array('READY',$checkDetails)){
+        throw new \Exception("Data Tidak Dapat Dikirim",1);
+      }  
+      
       $csv_data = "";
       $records = count($data['details']);
 
       foreach ($raw_data['details'] as $k => $v) {
         $jumlah = (int) $v['jumlah'];
-        $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};;;IBU;;;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
+        $jenis_rek = $v['bank_code']=='Mandiri'?'IBU':'BAU';
+        $dbank = Bank::where('code',$v['bank_code'])->first();
+        $code_beda_bank = $dbank->code_duitku;
+        $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};;;{$jenis_rek};{$code_beda_bank};;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
         if($k<$records-1)
         $csv_data .= "\r\n";
         // $csv_data .= "{$v['rek_no']},{$v['rek_name']},,,,IDR,{$v['jumlah']},,,IBU,,,,,,,N,,,,,Y,,,,,,,,,,,,,,,,,BEN,1,E,,,\n";
@@ -1406,10 +998,20 @@ class FinPaymentReqController extends Controller
       
       $model_query = FinPaymentReq::with('details')->find($request->id);
 
-      $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.ack');
+      $checkDetails = FinPaymentReqDtl::where("fin_payment_req_id",$request->id)->pluck('status')->toArray();
+
+      //masih perlu di telusuri
+      if(!in_array('INQUIRY_PROCESS',$checkDetails)){
+        throw new \Exception("Data Sudah Tidak Dapat Ditambahkan",1);
+      }
+
+      $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.nack');
       
       if($getFtp==null){
-        throw new \Exception("Data Belum Siap Untuk Diambil",1);
+        $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.ack');
+        if($getFtp==null){
+          throw new \Exception("Data Belum Siap Untuk Diambil",1);
+        }
       }
 
       $lines = explode("\r\n", trim($getFtp));
@@ -1424,11 +1026,11 @@ class FinPaymentReqController extends Controller
           $fields = explode(';', $line);
           
           // Pastikan ada cukup field sebelum mengakses
-          if (count($fields) >= 25) {
+          if (count($fields) >= 43) {
               $no = $fields[0];
               $nama = $fields[1];
-              $status = $fields[24]; // Status ada di index 24
-              $reason = $fields[25];
+              $status = $fields[42]; // Status ada di index 24
+              $reason = $fields[43];
               
               array_push($result,[
                 'no' => $no,
@@ -1442,7 +1044,6 @@ class FinPaymentReqController extends Controller
         return $o['no']; 
       },$result);
 
-
       $fin_payment_req_details = $model_query->details;
       $r_data = [];
       $SYSNOTES = [];
@@ -1455,6 +1056,7 @@ class FinPaymentReqController extends Controller
         if($index===false){
           $st="INQUIRY_FAILED";
           $stm = "NOT REGISTERED";
+          $had_failed++;
         }else{
           if($result[$index]['status']=="SUCCESS"){
             $st = "INQUIRY_SUCCESS";
@@ -1462,6 +1064,7 @@ class FinPaymentReqController extends Controller
           }else{
             $st = 'INQUIRY_FAILED';
             $stm = $result[$index]['reason'];
+            $had_failed++;
           }
         }
 
@@ -1473,18 +1076,39 @@ class FinPaymentReqController extends Controller
         //   $v->status = 'INQUIRY_SUCCESS';
         // }
 
-        $v->status = $st;
-        $v->failed_reason = $stm;
-
+        $v->status             = $st;
+        $v->failed_reason      = $stm;
+        $v->updated_at         = $t_stamp;
+        $v->updated_user       = $this->admin_id;
         $v->save();
         $SYSNOTE = MyLib::compareChange($SYSOLD,$v);
         array_push($r_data,$v);
         array_push($SYSNOTES,$SYSNOTE);
       }
 
+      // if($had_failed==0){
+      //   FinPaymentReqDtl::where('fin_payment_req_id',$request->id)->update([
+      //     "status"=>"TRANSFER_PROCESS"
+      //   ]);
+
+      //   $r_data = array_map(function ($x) {
+      //     $x->status = 'TRANSFER_PROCESS';
+      //     return $x;
+      //   },$r_data);
+
+      //   MyLog::sys("fin_payment_req",$request->id,"update details","update status to TRANSFER_PROCESS");
+
+      // }
+
+
       if($had_failed==0){
         FinPaymentReqDtl::where('fin_payment_req_id',$request->id)->update([
           "status"=>"TRANSFER_PROCESS"
+        ]);
+
+        FinPaymentReq::where('id',$request->id)->update([
+          "status"=>"WAIT",
+          'wait_at'=>$t_stamp
         ]);
 
         $r_data = array_map(function ($x) {
@@ -1492,8 +1116,10 @@ class FinPaymentReqController extends Controller
           return $x;
         },$r_data);
 
-        MyLog::sys("fin_payment_req",$request->id,"update details","update status to TRANSFER_PROCESS");
 
+
+        MyLog::sys("fin_payment_req_dtl",$request->id,"update details","update details with fin_payment_req_id = '".$request->id."' to TRANSFER_PROCESS");
+        MyLog::sys("fin_payment_req",$request->id,"update master","update status to CLOSE");
       }
       // $trx_trp_ids = array_map(function($x){
       //   return $x['trx_trp_id'];
@@ -1514,8 +1140,9 @@ class FinPaymentReqController extends Controller
 
       DB::commit();
       return response()->json([
-        "message" => "Proses update data berhasil",
-        "details" => $r_data
+        "message" => "Proses cek status berhasil",
+        "details" => $r_data,
+        // "result"=>$fields
         // "val"=>$model_query->val,
         // "val_user"=>$model_query->val_user,
         // "val_at"=>$model_query->val_at,
@@ -1565,6 +1192,10 @@ class FinPaymentReqController extends Controller
 
       $model_query = FinPaymentReqDtl::with(['trx_trp','employee'])->lockForUpdate()->where("id",$request->detail_id)->first();
       $SYSOLD                     = clone($model_query);
+
+      if($model_query->status!='INQUIRY_FAILED'){
+        throw new \Exception("Data Tidak Dapat Diperbaharui",1);
+      }
 
       $model_query->employee_rek_no = $model_query->employee->rek_no;
       $model_query->employee_rek_name = $model_query->employee->rek_name;
@@ -1618,6 +1249,236 @@ class FinPaymentReqController extends Controller
         "line" => $e->getLine(),
         "message" => $e->getMessage(),
       ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function deleteData(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+
+    $rules = [
+      'trx_trp_id' => "required|exists:\App\Models\MySql\FinPaymentReqDtl,trx_trp_id",
+    ];
+
+    $messages = [
+      'trx_trp_id.required' => 'Trx Trp ID tidak boleh kosong',
+      'trx_trp_id.exists' => 'Trx Trp ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $SYSNOTES = [];
+
+      $model_query = FinPaymentReqDtl::with(['fin_payment_req'=>function ($q){
+        $q->where("status","OPEN");
+      }])->where("trx_trp_id",$request->trx_trp_id)->lockForUpdate()->pluck("status")->toArray();
+
+      if(count($model_query)==0){
+        throw new \Exception("Data Sudah Tidak Dapat Di Hapus",1);
+      }
+
+      if(!in_array("READY",$model_query)){
+        throw new \Exception("Data Tidak Diizinkan untuk di Hapus",1);
+      }
+
+      FinPaymentReqDtl::with(['trx_trp','employee','fin_payment_req'=>function ($q){
+        $q->where("status","OPEN");
+      }])->where("trx_trp_id",$request->trx_trp_id)->delete();
+
+      // $SYSNOTE1 = MyLib::compareChange($SYSOLD1,$model_query->trx_trp);
+      // $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      // $model_query->trx_trp->save(); 
+      // $model_query->save(); 
+
+
+      // array_push($SYSNOTES,"Detail:".$SYSNOTE);
+      // array_push($SYSNOTES,"Trx Trp:".$SYSNOTE1);
+
+      MyLog::sys("fin_payment_req_dtl",null,"delete data","delete data which have trx_trp_id:".$request->trx_trp_id);
+      DB::commit();
+      return response()->json([
+        "message" => "Proses delete data berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function setBatchNo(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\FinPaymentReq,id",
+      'batch_no' => "required",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+      'batch_no.required' => 'No Batch tidak boleh kosong',
+      // 'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+
+      $model_query                = FinPaymentReq::where("id",$request->id)->lockForUpdate()->first();
+      
+      if($model_query->status=='CLOSE'){
+        throw new \Exception("Data Sudah Tidak Dapat Diset",1);
+      }
+      
+      $SYSOLD                     = clone($model_query);
+      $model_query->batch_no      = $request->batch_no;
+      $model_query->updated_at    = $t_stamp;
+      $model_query->updated_user  = $this->admin_id;  
+
+      $model_query->save(); 
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      MyLog::sys("fin_payment_req_dtl",null,"renew data",$SYSNOTE);
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses delete data berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function setPaidDone(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\FinPaymentReq,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+
+      $model_query            = FinPaymentReq::with(['details'=>function ($q){ $q->with('trx_trp');}])
+      ->where("id",$request->id)->lockForUpdate()->first();
+
+      if($model_query->status=='CLOSE'){
+        throw new \Exception("Data Sudah Tidak Dapat Diset",1);
+      }
+
+      $SYSOLD                 = clone($model_query);
+      
+
+      
+      $SYSNOTES1=[];
+      $SYSNOTES2=[];
+      foreach ($model_query->details as $k => $v) {
+        $SYSOLD_dtl            = clone($v);
+        $v->status             = 'DONE';
+        $v->created_at         = $t_stamp;
+        $v->created_user       = $this->admin_id;
+        $v->save();
+        $SYSNOTE1 = MyLib::compareChange($SYSOLD_dtl,$v);
+        array_unshift( $SYSNOTES1 , $SYSNOTE1 ); 
+
+        $SYSOLD_trx_trp                 = clone($v->trx_trp);
+        $v->trx_trp->received_payment = 1;
+        if($v->trx_trp->supir_id){
+          $v->trx_trp->rp_supir_at = $t_stamp;
+          $v->trx_trp->rp_supir_user = $this->admin_id;           
+        }
+
+        if($v->trx_trp->kernet_id){
+          $v->trx_trp->rp_kernet_at = $t_stamp;
+          $v->trx_trp->rp_kernet_user = $this->admin_id;           
+        }
+        $v->trx_trp->updated_at         = $t_stamp;
+        $v->trx_trp->updated_user       = $this->admin_id;
+        $v->trx_trp->save();
+        $SYSNOTE2 = MyLib::compareChange($SYSOLD_trx_trp,$v->trx_trp);
+        array_unshift( $SYSNOTES2 , $SYSNOTE2 ); 
+      }
+
+      $model_query->status        = "CLOSE";
+      $model_query->updated_at    = $t_stamp;
+      $model_query->updated_user  = $this->admin_id; 
+      $model_query->save(); 
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      MyLog::sys("fin_payment_req",$request->id,"set paid done",$SYSNOTE);
+      MyLog::sys("fin_payment_req",$request->id,"update detail",implode("\n",$SYSNOTES1));
+      MyLog::sys("fin_payment_req",$request->id,"update trx_trp",implode("\n",$SYSNOTES2));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses delete data berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);
