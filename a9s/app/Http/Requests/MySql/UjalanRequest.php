@@ -31,6 +31,7 @@ class UjalanRequest extends FormRequest
             $rules['id'] = 'required|exists:App\Models\MySql\Ujalan,id';
         }
         if (request()->isMethod('post') || request()->isMethod('put')) {
+            // $rules['km_range'] = 'required|numeric|min:10';
             $rules['xto'] = 'required|max:100';
             $rules['tipe'] = 'required|max:50';
             $rules['jenis'] = 'required|in:CPO,TBS,PK,TBSK,LAIN,TUNGGU';
@@ -53,6 +54,9 @@ class UjalanRequest extends FormRequest
 
             'jenis.required' => 'Jenis tidak boleh kosong',
             'jenis.in' => 'Jenis Harap Dipilih',
+
+            'km_range.required' => 'Jarak KM tidak boleh kosong',
+            'km_range.min' => 'Jarak KM Harap diisi yang sesuai',
 
         ];
     }

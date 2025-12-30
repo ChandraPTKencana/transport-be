@@ -63,7 +63,8 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::put('/ujalan_validasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'validasi']);
     Route::put('/ujalan_unvalidasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'unvalidasi']);
     Route::get('/ujalan/download_excel', [\App\Http\Controllers\Ujalan\UjalanController::class, 'downloadExcel']);
-    Route::put('/ujalan/batas_persen_susut', [\App\Http\Controllers\Ujalan\UjalanController::class, 'batasPersenSusut']);
+    // Route::put('/ujalan/batas_persen_susut', [\App\Http\Controllers\Ujalan\UjalanController::class, 'batasPersenSusut']);
+    Route::put('/ujalan/change_some', [\App\Http\Controllers\Ujalan\UjalanController::class, 'changeSome']);
 
     Route::get('/trx_trp_nologs', [\App\Http\Controllers\Transaction\TrxTrpNologController::class, 'index']);
     Route::get('/trx_trp_nolog', [\App\Http\Controllers\Transaction\TrxTrpNologController::class, 'show']);

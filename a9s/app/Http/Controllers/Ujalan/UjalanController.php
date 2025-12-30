@@ -472,7 +472,7 @@ class UjalanController extends Controller
 
       $model_query                    = new Ujalan();      
       $model_query->xto               = $request->xto;
-      $model_query->km_range          = $request->km_range ?? 0;
+      // $model_query->km_range          = $request->km_range ?? 0;
       // $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
       // $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
       // $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
@@ -693,7 +693,7 @@ class UjalanController extends Controller
 
       if(MyAdmin::checkScope($this->permissions,'ujalan.modify',true)){
         $model_query->xto               = $request->xto;
-        $model_query->km_range          = $request->km_range ?? 0;
+        // $model_query->km_range          = $request->km_range ?? 0;
         // $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
         // $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
         // $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
@@ -1363,6 +1363,9 @@ class UjalanController extends Controller
       if($model_query->val && $model_query->val1 && $model_query->val2 && $model_query->val3){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
+      if($model_query->km_range == 0){
+        throw new \Exception("Jarak KM harus diisi terlebih dahulu",1);
+      }
 
       // if(MyAdmin::checkScope($this->permissions, 'ujalan.val',true) && $model_query->val){
       //   throw new \Exception("Data Sudah Tervalidasi",1);
@@ -1611,13 +1614,91 @@ class UjalanController extends Controller
     return $result;
   }
 
-  public function batasPersenSusut(Request $request)
-  {
-    MyAdmin::checkMultiScope($this->permissions, ['ujalan.batas_persen_susut.full_act']);
+  // public function batasPersenSusut(Request $request)
+  // {
+  //   MyAdmin::checkMultiScope($this->permissions, ['ujalan.batas_persen_susut.full_act']);
     
+  //   $rules = [
+  //     'id' => "required|exists:\App\Models\MySql\Ujalan,id",
+  //     'destination_location_id' => "nullable|exists:\App\Models\MySql\DestinationLocation,id",
+  //   ];
+
+  //   $messages = [
+  //     'id.required' => 'ID tidak boleh kosong',
+  //     'id.exists' => 'ID tidak terdaftar',
+
+  //     'destination_location_id.required' => 'Destination Location ID tidak boleh kosong',
+  //     'destination_location_id.exists' => 'Destination Location ID tidak terdaftar',
+  //   ];
+
+  //   $validator = Validator::make($request->all(), $rules, $messages);
+
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
+
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   $transition_from = $request->transition_from;
+  //   if($transition_from==env("app_name") || !in_array($transition_from,MyLib::$list_pabrik)){
+  //     $transition_from="";
+  //   }
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_query = Ujalan::where("id",$request->id)->lockForUpdate()->first();
+  //     $SYSOLD      = clone($model_query);
+
+  //     if($model_query->deleted==1)
+  //     throw new \Exception("Data Sudah Dihapus",1);
+      
+  //     // $model_query->batas_persen_susut  = $request->batas_persen_susut;
+  //     $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
+  //     $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
+  //     $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+  //     $model_query->destination_location_id = $request->destination_location_id;
+
+  //     $model_query->updated_at          = $t_stamp;
+  //     $model_query->updated_user        = $this->admin_id;  
+
+  //     $model_query->save();
+
+  //     $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+  //     MyLog::sys("ujalan_mst",$request->id,"update",$SYSNOTE);
+
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses ubah data berhasil",
+  //       "updated_at"=>$t_stamp
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+      
+  //     return response()->json([
+  //       "message" => "Proses ubah data gagal",
+  //     ], 400);
+  //   }
+  // }
+
+  public function changeSome(Request $request)
+  {
+    MyAdmin::checkMultiScope($this->permissions, ['ujalan.modify']);
+   
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Ujalan,id",
-      'destination_location_id' => "nullable|exists:\App\Models\MySql\DestinationLocation,id",
+      'destination_location_id' => "nullable|required_if:jenis,TBS,TBSK|exists:\App\Models\MySql\DestinationLocation,id",
+      'km_range' => "required|numeric|min:10",
+      'bonus_trip_supir'=>"exclude_unless:jenis,CPO,PK|numeric|min:1000",
+      'bonus_trip_kernet'=>"exclude_unless:jenis,CPO,PK|numeric|min:1000",
     ];
 
     $messages = [
@@ -1626,6 +1707,15 @@ class UjalanController extends Controller
 
       'destination_location_id.required' => 'Destination Location ID tidak boleh kosong',
       'destination_location_id.exists' => 'Destination Location ID tidak terdaftar',
+
+      'bonus_trip_supir.required' => 'Bonus Trip Supir tidak boleh kosong',
+      'bonus_trip_supir.min' => 'Bonus Trip Supir Harap diisi yang sesuai',
+
+      'bonus_trip_kernet.required' => 'Bonus Trip Kernet tidak boleh kosong',
+      'bonus_trip_kernet.min' => 'Bonus Trip Kernet Harap diisi yang sesuai',
+
+      'km_range.required' => 'Jarak KM tidak boleh kosong',
+      'km_range.min' => 'Jarak KM Harap diisi yang sesuai',
     ];
 
     $validator = Validator::make($request->all(), $rules, $messages);
@@ -1648,13 +1738,18 @@ class UjalanController extends Controller
       throw new \Exception("Data Sudah Dihapus",1);
       
       // $model_query->batas_persen_susut  = $request->batas_persen_susut;
-      $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
-      $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
-      $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
+      if(MyAdmin::checkMultiScope($this->permissions, ['ujalan.batas_persen_susut.full_act'],true)){
+        if(in_array($model_query->jenis,['TBS','TBSK']) && $request->batas_persen_susut==''){
+          throw new \Exception("Batas Persen Susut Harus Diisi",1);
+        }
+        $model_query->batas_persen_susut    = MyLib::emptyStrToNull($request->batas_persen_susut);
+      }
+      $model_query->bonus_trip_supir        = $request->bonus_trip_supir ?? 0;
+      $model_query->bonus_trip_kernet       = $request->bonus_trip_kernet ?? 0;
       $model_query->destination_location_id = $request->destination_location_id;
-
-      $model_query->updated_at          = $t_stamp;
-      $model_query->updated_user        = $this->admin_id;  
+      $model_query->km_range                = $request->km_range ?? 0;
+      $model_query->updated_at              = $t_stamp;
+      $model_query->updated_user            = $this->admin_id;  
 
       $model_query->save();
 

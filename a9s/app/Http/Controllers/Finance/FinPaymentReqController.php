@@ -1059,7 +1059,7 @@ class FinPaymentReqController extends Controller
           $had_failed++;
         }else{
           if($result[$index]['status']=="SUCCESS"){
-            $st = "INQUIRY_SUCCESS";
+            $st = "READY";
             $stm = null;
           }else{
             $st = 'INQUIRY_FAILED';
@@ -1283,12 +1283,14 @@ class FinPaymentReqController extends Controller
         $q->where("status","OPEN");
       }])->where("trx_trp_id",$request->trx_trp_id)->lockForUpdate()->pluck("status")->toArray();
 
+
+      
       if(count($model_query)==0){
         throw new \Exception("Data Sudah Tidak Dapat Di Hapus",1);
       }
 
-      if(!in_array("READY",$model_query)){
-        throw new \Exception("Data Tidak Diizinkan untuk di Hapus",1);
+      if(!(in_array("READY",$model_query) || in_array("INQUIRY_FAILED",$model_query))){
+        throw new \Exception("Data Tidak Diizinkan untuk di Hapus".json_encode($model_query),1);
       }
 
       FinPaymentReqDtl::with(['trx_trp','employee','fin_payment_req'=>function ($q){
