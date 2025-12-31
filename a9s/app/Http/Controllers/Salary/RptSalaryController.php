@@ -1541,6 +1541,8 @@ class RptSalaryController extends Controller
     }
 
     foreach ($bonus_trip_new as $kbtn => $vbtn) {
+      if($kbtn=="") MyLog::logging($vbtn,'kbtn');
+
         foreach ($vbtn as $kkbtn => $vvbtn) {
 
             $min_trip = $vvbtn['destination_location_minimal_trip'];
