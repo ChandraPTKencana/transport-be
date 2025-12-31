@@ -995,10 +995,6 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
-
-          if($gd_s==''){
-            MyLog::logging(["id"=>$v->id],"rptsalary");
-          }
         }
 
         if($v1->xfor == 'Kernet'){
@@ -1007,15 +1003,14 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
-          if($gd_k==''){
-            MyLog::logging(["id"=>$v->id],"rptsalary");
-          }
         }
       }
 
 
       if($v->supir_id){
-
+        if($gd_s==''){
+          MyLog::logging(["id"=>$v->id,"n"=>1],"rptsalary");
+        }
         $map_s = array_map(function($x){
           return $x['employee_id'];
         },$data);
@@ -1045,6 +1040,10 @@ class RptSalaryController extends Controller
 
           array_push($data,$newData);
         }else{
+          if($gd_s==''){
+            MyLog::logging(["id"=>$v->id,"n"=>2],"rptsalary");
+          }
+  
           // if($is_gaji_s > 0 && $smd->jenis=='CPO')
           // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
 
@@ -1062,6 +1061,9 @@ class RptSalaryController extends Controller
       }
 
       if($v->kernet_id){
+        if($gd_k==''){
+          MyLog::logging(["id"=>$v->id,"n"=>3],"rptsalary");
+        }
 
         $map_k = array_map(function($x){
           return $x['employee_id'];
@@ -1089,6 +1091,10 @@ class RptSalaryController extends Controller
           $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]=$smd->bonus_trip_kernet;
           array_push($data,$newData);
         }else{
+          if($gd_k==''){
+            MyLog::logging(["id"=>$v->id,"n"=>4],"rptsalary");
+          }
+  
           // if($is_gaji_k > 0 && $smd->jenis=='CPO')
           // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
 
@@ -1166,10 +1172,6 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
-        
-          if($gd_s==''){
-            MyLog::logging(["id"=>$v->id],"rptsalary");
-          }
         }
 
         if($v1->xfor == 'Kernet'){
@@ -1178,14 +1180,14 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
-          if($gd_k==''){
-            MyLog::logging(["id"=>$v->id],"rptsalary");
-          }
         }
       }
 
 
       if($v->supir_id){
+        if($gd_s==''){
+          MyLog::logging(["id"=>$v->id,"n"=>5],"rptsalary");
+        }
 
         $map_s = array_map(function($x){
           return $x['employee_id'];
@@ -1216,6 +1218,10 @@ class RptSalaryController extends Controller
 
           array_push($data,$newData);
         }else{
+          if($gd_s==''){
+            MyLog::logging(["id"=>$v->id,"n"=>6],"rptsalary");
+          }
+  
           // if($is_gaji_s > 0 && $smd->jenis=='CPO')
           // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
 
@@ -1233,6 +1239,9 @@ class RptSalaryController extends Controller
       }
 
       if($v->kernet_id){
+        if($gd_k==''){
+          MyLog::logging(["id"=>$v->id,"n"=>7],"rptsalary");
+        }
 
         $map_k = array_map(function($x){
           return $x['employee_id'];
@@ -1260,6 +1269,10 @@ class RptSalaryController extends Controller
           $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]=$smd->bonus_trip_kernet;
           array_push($data,$newData);
         }else{
+          if($gd_k==''){
+            MyLog::logging(["id"=>$v->id,"n"=>8],"rptsalary");
+          }
+  
           // if($is_gaji_k > 0 && $smd->jenis=='CPO')
           // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
 
@@ -1383,16 +1396,10 @@ class RptSalaryController extends Controller
             if($v1->xfor == 'Supir'){
               if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
               if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
-              if($gd_s==''){
-                MyLog::logging(["id"=>$v->id],"rptsalary");
-              }
             }
             if($v1->xfor == 'Kernet'){
               if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
               if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
-              if($gd_k==''){
-                MyLog::logging(["id"=>$v->id],"rptsalary");
-              }
             }
         }
 
