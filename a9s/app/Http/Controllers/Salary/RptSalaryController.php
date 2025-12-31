@@ -995,6 +995,10 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
+
+          if($gd_s==''){
+            MyLog::logging(["id"=>$v->id],"rptsalary");
+          }
         }
 
         if($v1->xfor == 'Kernet'){
@@ -1003,6 +1007,9 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
+          if($gd_k==''){
+            MyLog::logging(["id"=>$v->id],"rptsalary");
+          }
         }
       }
 
@@ -1159,6 +1166,10 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
+        
+          if($gd_s==''){
+            MyLog::logging(["id"=>$v->id],"rptsalary");
+          }
         }
 
         if($v1->xfor == 'Kernet'){
@@ -1167,6 +1178,9 @@ class RptSalaryController extends Controller
 
           if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
           if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
+          if($gd_k==''){
+            MyLog::logging(["id"=>$v->id],"rptsalary");
+          }
         }
       }
 
@@ -1369,10 +1383,16 @@ class RptSalaryController extends Controller
             if($v1->xfor == 'Supir'){
               if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
               if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
+              if($gd_s==''){
+                MyLog::logging(["id"=>$v->id],"rptsalary");
+              }
             }
             if($v1->xfor == 'Kernet'){
               if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
               if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
+              if($gd_k==''){
+                MyLog::logging(["id"=>$v->id],"rptsalary");
+              }
             }
         }
 
