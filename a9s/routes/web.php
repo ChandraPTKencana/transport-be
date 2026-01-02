@@ -162,6 +162,7 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::put('/employee_validasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'validasi']);
     Route::put('/employee_unvalidasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'unvalidasi']);
     Route::put('/employee_generate_code', [\App\Http\Controllers\Employee\EmployeeController::class, 'generateCode']);
+    Route::get('/employee/attachment/{id}/{n}', [\App\Http\Controllers\Employee\EmployeeController::class, 'getAttachment']);
 
     Route::post('/m_employee/login', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'login']);
     Route::post('/m_employee/face_rec', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'faceRec']);

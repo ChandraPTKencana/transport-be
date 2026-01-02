@@ -288,16 +288,18 @@ class EmployeeController extends Controller
         $file = $request->file('attachment_1');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        $blobFile = base64_encode(file_get_contents($path));
-        $model_query->attachment_1 = $blobFile;
-        $model_query->attachment_1_type = $fileType;
         $ext = $file->extension();
 
         $file_name = "att1_".Str::uuid() . '.' . $ext;
         $doc_loc = "employees/$file_name";
-
-        Storage::disk('public')->put($doc_loc, file_get_contents($path));
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($doc_loc, file_get_contents($path));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
         $model_query->attachment_1_loc = $doc_loc;
+        $model_query->attachment_1_type = $fileType;
       }
 
       if($request->hasFile('face_loc_target')){
@@ -305,12 +307,10 @@ class EmployeeController extends Controller
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
         $ext = $file->extension();
+
         if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
         throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
-        // $image = Image::read($path)->scale(height: $this->height);
-        // $image = Image::read($path);
-        // $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
         $file_name = "face_".Str::uuid() . '.' . $ext;
         $face_loc = "employees/$file_name";
         
@@ -318,11 +318,9 @@ class EmployeeController extends Controller
           ini_set('memory_limit', '256M');
           Storage::disk('public')->put($face_loc, file_get_contents($path));
         } catch (\Exception $e) {
-          throw new \Exception("Simpan Foto Gagal");
+          throw new \Exception("Simpan File Wajah Gagal");
         }
 
-        // $blob_img_leave = base64_encode($compressedImageBinary); 
-        // $blobFile = base64_encode(file_get_contents($path));
         $model_query->face_loc_target = $face_loc;
         $model_query->face_loc_type = $fileType;
       }
@@ -376,15 +374,13 @@ class EmployeeController extends Controller
       // if ($face_loc && File::exists(files_path($face_loc))){
       //   unlink(files_path($face_loc)); 
       // }
-
-      if ($face_loc && Storage::disk('public')->exists($face_loc)) {
-        Storage::disk('public')->delete($face_loc);
-      }
-
       if ($doc_loc && Storage::disk('public')->exists($doc_loc)) {
         Storage::disk('public')->delete($doc_loc);
       }
 
+      if ($face_loc && Storage::disk('public')->exists($face_loc)) {
+        Storage::disk('public')->delete($face_loc);
+      }
 
       if ($e->getCode() == 1) {
         return response()->json([
@@ -415,7 +411,6 @@ class EmployeeController extends Controller
     $doc_loc             = null;
 
     $fileType = null;
-    $blobFile = null;
     $change = 0;
     DB::beginTransaction();
     try {
@@ -451,41 +446,51 @@ class EmployeeController extends Controller
       $SYSOLD                     = clone($model_query);
 
       $fileType = $model_query->attachment_1_type;
+      $doc_loc = $model_query->attachment_1_loc;
 
       if($request->hasFile('attachment_1')){
         $file = $request->file('attachment_1');
         $doc_path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        $blobFile = base64_encode(file_get_contents($doc_path));
         $ext = $file->extension();
 
         $file_name = $model_query->id."_att1_".Str::uuid() . '.' . $ext;
         $doc_loc = "employees/$file_name";
-        $change++;
+
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($doc_loc, file_get_contents($doc_path));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+        
+        if ($model_query->attachment_1_loc != null &&  Storage::disk('public')->exists($model_query->attachment_1_loc)) {
+          Storage::disk('public')->delete($model_query->attachment_1_loc);
+        }
       }
 
-      if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
-        $blobFile = null;
+      if (!$request->hasFile('attachment_1') && in_array($attachment_1_preview,[null,'null'])) {
         $fileType = null;
         $doc_loc = null;
-        $doc_path = null;
-        $change++;
+        
+        if ($model_query->attachment_1_loc != null &&  Storage::disk('public')->exists($model_query->attachment_1_loc)) {
+          Storage::disk('public')->delete($model_query->attachment_1_loc);
+        }
       }
 
       $model_query->attachment_1_type = $fileType;
+      $model_query->attachment_1_loc = $doc_loc;
+
+      $face_loc = $model_query->face_loc_target;
 
       if($request->hasFile('face_loc')){
         $file = $request->file('face_loc');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        // $blobFile = base64_encode(file_get_contents($path));
-        // $change++;
-
+        $ext = $file->extension();
 
         if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
         throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-
-        $ext = $file->extension();
 
         $file_name = $model_query->id."_face_".Str::uuid() . '.' . $ext;
         $face_loc = "employees/$file_name";
@@ -494,15 +499,9 @@ class EmployeeController extends Controller
           ini_set('memory_limit', '256M');
           Storage::disk('public')->put($face_loc, file_get_contents($path));
         } catch (\Exception $e) {
-          // throw new \Exception("Simpan Foto Gagal".$e->getMessage());
-
           throw new \Exception("Simpan Foto Gagal");
         }
 
-        // if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
-        //   if (!unlink(files_path($model_query->face_loc_target)))
-        //     throw new \Exception("Gagal Hapus Gambar", 1);
-        // }
         if ($model_query->face_loc_target != null &&  Storage::disk('public')->exists($model_query->face_loc_target)) {
           Storage::disk('public')->delete($model_query->face_loc_target);
         }
@@ -512,15 +511,13 @@ class EmployeeController extends Controller
       }
 
       if (!$request->hasFile('face_loc') && $face_loc_preview == null) {
-        // if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
-        //   if (!unlink(files_path($model_query->face_loc_target)))
-        //     throw new \Exception("Gagal Hapus Gambar", 1);
-        // }
+        $face_loc = null;
+        $fileType = null;
+        
         if ($model_query->face_loc_target != null && Storage::disk('public')->exists($model_query->face_loc_target)) {
           Storage::disk('public')->delete($model_query->face_loc_target);
         }
-        $face_loc = null;
-        $fileType = null;
+        
         $model_query->face_loc_type   = $fileType;
         $model_query->face_loc_target    = $face_loc;
       }
@@ -557,28 +554,6 @@ class EmployeeController extends Controller
       $model_query->m_face_login  = in_array($request->m_face_login,[1,'true']) ? 1 : 0;
 
       $model_query->save();
-      
-      if($change){
-        try {
-          if($doc_path!=null){
-            ini_set('memory_limit', '256M');
-            Storage::disk('public')->put($doc_loc, file_get_contents($doc_path));
-          }
-          if ($model_query->attachment_1_loc != null &&  Storage::disk('public')->exists($model_query->attachment_1_loc)) {
-            Storage::disk('public')->delete($model_query->attachment_1_loc);
-          }
-          Employee::where("id",$request->id)->update([
-            "attachment_1"      => $blobFile,
-            "attachment_1_loc"  => $doc_loc
-          ]);
-  
-        } catch (\Exception $e) {
-          // throw new \Exception("Simpan Foto Gagal".$e->getMessage());
-
-          throw new \Exception("Simpan Foto Gagal");
-        }
-        
-      }
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys($this->syslog_db,$request->id,"update",$SYSNOTE);
@@ -945,6 +920,43 @@ class EmployeeController extends Controller
 
   }
   
+
+  public function getAttachment($id,$n)
+  {
+    MyAdmin::checkScope($this->permissions, 'employee.view');
+
+    $trx = Employee::exclude(['attachment_1','attachment_2'])->findOrFail($id);
+
+    if($n=='face'){
+      $locField  = "face_loc_target";
+      $typeField = "face_loc_type";
+    }else{
+      $locField  = "attachment_{$n}_loc";
+      $typeField = "attachment_{$n}_type";
+    }
+
+    abort_unless($trx->$locField, 404);
+
+    abort_unless(Storage::disk('public')->exists($trx->$locField), 404);
+
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('public');  
+    return $disk->response(
+        $trx->$locField,
+        null,
+        [
+            'Cache-Control' => 'no-store, private',
+            'Content-Type'  => $trx->$typeField,
+            'X-Attachment'  => $n,
+        ]
+    );
+
+    // return response()->file($path, [
+    //   'Cache-Control'=> 'no-store, private',
+    //   'Content-Type'  => $trx->$typeField,
+    //   'X-Attachment' => $n,
+    // ]);
+  }
   // public function comTfDataSend(Request $request){
   //   MyAdmin::checkScope($this->permissions, 'employee.transfer_data');
   //   $model_query = Employee::where("id",$request->id)->lockForUpdate()->first();

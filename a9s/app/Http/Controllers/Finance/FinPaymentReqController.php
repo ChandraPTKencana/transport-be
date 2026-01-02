@@ -145,6 +145,10 @@ class FinPaymentReqController extends Controller
             $q->orWhere("id", "like", $like_lists["id"]);
           }
     
+
+          if (isset($like_lists["status"])) {
+            $q->orWhere("status", "like", $like_lists["status"]);
+          }
           // if (isset($like_lists["requested_name"])) {
           //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
           //     $q2->from('is_users')
@@ -305,6 +309,9 @@ class FinPaymentReqController extends Controller
     $rollback_id = -1;
     DB::beginTransaction();
     try {
+      if(FinPaymentReq::where('val',0)->first())
+      throw new \Exception("Ada Data Yang Belum Divalidasi",1);
+
       $t_stamp = date("Y-m-d H:i:s");
 
       $model_query                  = new FinPaymentReq();      
@@ -458,11 +465,11 @@ class FinPaymentReqController extends Controller
       //   "message" => $e->getMessage(),
       // ], 400);
 
-      // if ($e->getCode() == 1) {
-      //   return response()->json([
-      //     "message" => $e->getMessage(),
-      //   ], 400);
-      // }
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
 
       return response()->json([
         "message" => "Proses tambah data gagal",
@@ -490,7 +497,7 @@ class FinPaymentReqController extends Controller
 
       $checkDetails = FinPaymentReqDtl::where("fin_payment_req_id",$model_query->id)->pluck('status')->toArray();
 
-      if(!in_array('READY',$checkDetails)){
+      if(count($checkDetails)>0 && !in_array('READY',$checkDetails)){
         throw new \Exception("Data Sudah Tidak Dapat Ditambahkan",1);
       }
       // $t_stamp = date("Y-m-d H:i:s");
@@ -744,18 +751,22 @@ class FinPaymentReqController extends Controller
     DB::beginTransaction();
     try {
       $model_query = FinPaymentReq::with('details')->find($request->id);
-     
-      $fin_payment_req_details = $model_query->details->toArray();
-      
-      $trx_trp_ids = array_map(function($x){
-        return $x['trx_trp_id'];
-      },$fin_payment_req_details);
+      if($model_query->status != 'CLOSE'){
+        throw new \Exception("Selesaikan dulu Transaksi nya sebelum validasi",1);
 
-      $trx_trps = TrxTrp::where("fin_status","P")->whereIn("id",$trx_trp_ids)->lockForUpdate()->get();
-      foreach ($trx_trps as $key => $value) {
-        $value->fin_status = 'V';
-        $value->save();
       }
+     
+      // $fin_payment_req_details = $model_query->details->toArray();
+      
+      // $trx_trp_ids = array_map(function($x){
+      //   return $x['trx_trp_id'];
+      // },$fin_payment_req_details);
+
+      // $trx_trps = TrxTrp::where("fin_status","P")->whereIn("id",$trx_trp_ids)->lockForUpdate()->get();
+      // foreach ($trx_trps as $key => $value) {
+      //   $value->fin_status = 'V';
+      //   $value->save();
+      // }
 
       $model_query->val = 1;
       $model_query->val_user = $this->admin_id;
@@ -779,11 +790,11 @@ class FinPaymentReqController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal",
       ], 400);
@@ -805,7 +816,7 @@ class FinPaymentReqController extends Controller
           $q1->whereIn('jenis',['CPO','PK'])->where('val3',1);
         });
       })
-      ->where('received_payment',0)->where("payment_method_id",4)
+      ->where('received_payment',0)->whereIn("payment_method_id",[4,5])
       ->whereDoesntHave('fin_payment_req_dtl')
       ->with('uj')->get();
       return response()->json([
@@ -895,7 +906,7 @@ class FinPaymentReqController extends Controller
 
       foreach ($raw_data['details'] as $k => $v) {
         $jumlah = (int) $v['jumlah'];
-        $jenis_rek = $v['bank_code']=='Mandiri'?'IBU':'BAU';
+        $jenis_rek = $v['bank_code']=='Mandiri'?'IBU':'OBU';
         $dbank = Bank::where('code',$v['bank_code'])->first();
         $code_beda_bank = $dbank->code_duitku;
         $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};;;{$jenis_rek};{$code_beda_bank};;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
@@ -1422,10 +1433,12 @@ class FinPaymentReqController extends Controller
         throw new \Exception("Data Sudah Tidak Dapat Diset",1);
       }
 
-      $SYSOLD                 = clone($model_query);
-      
+      if($model_query->batch_no==0){
+        throw new \Exception("Sebelum validasi pastikan no batch sudah benar",1);
+      }
 
-      
+      $SYSOLD                 = clone($model_query);
+            
       $SYSNOTES1=[];
       $SYSNOTES2=[];
       foreach ($model_query->details as $k => $v) {

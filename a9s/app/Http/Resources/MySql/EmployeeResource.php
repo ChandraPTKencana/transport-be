@@ -4,6 +4,7 @@ namespace App\Http\Resources\MySql;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeResource extends JsonResource
 {
@@ -36,7 +37,8 @@ class EmployeeResource extends JsonResource
             'created_user'          => $this->created_user,
             'updated_user'          => $this->updated_user,
             'attachment_1'          => null,
-            'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+            // 'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+            'attachment_1_preview'  => $this->attachment_1_loc && Storage::disk('public')->exists($this->attachment_1_loc) ? "employee/attachment/".$this->id."/1" : "",
             'attachment_1_type'     => $this->attachment_1_type,
             'birth_date'            => $this->birth_date ?? "",
             'birth_place'           => $this->birth_place ?? "",
@@ -62,7 +64,8 @@ class EmployeeResource extends JsonResource
             // 'face_loc_type'         => $this->face_loc_type ?? "",
 
             'face_loc'          => null,
-            'face_loc_preview'  => $this->face_loc_target && File::exists(files_path($this->face_loc_target)) ? "data:".$this->face_loc_type.";base64,".base64_encode(File::get(files_path($this->face_loc_target))) :"",
+            // 'face_loc_preview'  => $this->face_loc_target && File::exists(files_path($this->face_loc_target)) ? "data:".$this->face_loc_type.";base64,".base64_encode(File::get(files_path($this->face_loc_target))) :"",
+            'face_loc_preview'  => $this->face_loc_target && Storage::disk('public')->exists($this->face_loc_target) ? "employee/attachment/".$this->id."/face" :"",
             'face_loc_type'     => $this->face_loc_type,
 
 

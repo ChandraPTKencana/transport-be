@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Str;
 use Illuminate\Database\Eloquent\Builder;
 use App\Traits\Excludable;
+use Illuminate\Support\Str;
 
 class Employee extends Authenticatable
 {

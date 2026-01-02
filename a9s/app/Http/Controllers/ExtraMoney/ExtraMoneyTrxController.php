@@ -9,6 +9,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
@@ -59,7 +61,7 @@ class ExtraMoneyTrxController extends Controller
     // $list_extra_money = \App\Models\MySql\ExtraMoney::where("deleted",0)->where('val',1)->where('val1',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
     $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->get();
-    $list_payment_methods = \App\Models\MySql\PaymentMethod::get();
+    $list_payment_methods = \App\Models\MySql\PaymentMethod::where('hidden',0)->get();
     
     return response()->json([
       "list_vehicle" => $list_vehicle,
@@ -343,7 +345,7 @@ class ExtraMoneyTrxController extends Controller
       if(!$employee)
       throw new \Exception("Pekerja tidak terdaftar",1);
 
-      if(in_array($request->payment_method_id,[2,3,4])){
+      if(in_array($request->payment_method_id,[2,3,4,5])){
         if(!$employee->rek_no && $employee->id != 1)
         throw new \Exception("Tidak ada no rekening pekerja",1);
       }
@@ -383,21 +385,30 @@ class ExtraMoneyTrxController extends Controller
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
         $ext = $file->extension();
+
         if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
         throw new MyException([ "attachment_1" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
         $image = Image::read($path)->scale(height: $this->height);
         $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
 
-        $date = new \DateTime();
-        $timestamp = $date->format("Y-m-d H:i:s.v");
-        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
-        $location = "/files/extra_money_trx/{$file_name}";
+        $file_name = "att1_".Str::uuid() . '.' . $ext;
+        $location = "extra_money_trx/$file_name";
+
+
+        // $date = new \DateTime();
+        // $timestamp = $date->format("Y-m-d H:i:s.v");
+        // $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+        // $location = "/files/extra_money_trx/{$file_name}";
         try {
           ini_set('memory_limit', '256M');
-          Image::read($compressedImageBinary)->save(files_path($location));
+          Storage::disk('public')->put(
+            $location,
+            $compressedImageBinary
+          );
+          // Image::read($compressedImageBinary)->save(files_path($location));
         } catch (\Exception $e) {
-          throw new \Exception("Simpan Foto Gagal");
+          throw new \Exception("Simpan Foto 1 Gagal");
         }
 
         // $blob_img_leave = base64_encode($compressedImageBinary); 
@@ -440,34 +451,42 @@ class ExtraMoneyTrxController extends Controller
         $fileType = $file->getClientMimeType();
         $ext = $file->extension();
 
-        $date = new \DateTime();
-        $timestamp = $date->format("Y-m-d H:i:s.v");
-        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '-2.' . $ext;
-        $location = "/files/extra_money_trx/{$file_name}";
+        $file_name = "att2_".Str::uuid() . '.' . $ext;
+        $location2 = "extra_money_trx/$file_name";
+
+        // $date = new \DateTime();
+        // $timestamp = $date->format("Y-m-d H:i:s.v");
+        // $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '-2.' . $ext;
+        // $location2 = "/files/extra_money_trx/{$file_name}";
 
         if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
           try {
             ini_set('memory_limit', '256M');
-            Image::read($compressedImageBinary)->save(files_path($location));
+            // Image::read($compressedImageBinary)->save(files_path($location2));
+            Storage::disk('public')->put(
+              $location2,
+              $compressedImageBinary
+            );
           } catch (\Exception $e) {
-            throw new \Exception("Simpan Gambar Gagal");
+            throw new \Exception("Simpan Gambar 2 Gagal");
           }  
         }else{
           try {
               // Set memory limit (optional)
               ini_set('memory_limit', '256M');      
               // Save the PDF file
-              file_put_contents(files_path($location), file_get_contents($path));
+              // file_put_contents(files_path($location2), file_get_contents($path));
+              Storage::disk('public')->put($location2, file_get_contents($path));
           } catch (\Exception $e) {
-              throw new \Exception("Simpan PDF Gagal");
+              throw new \Exception("Simpan PDF 2 Gagal");
           }
         }
 
         // $blob_img_leave = base64_encode($compressedImageBinary); 
         // $blobFile = base64_encode(file_get_contents($path));
-        $model_query->attachment_2_loc = $location;
+        $model_query->attachment_2_loc = $location2;
         $model_query->attachment_2_type = $fileType;
       }
 
@@ -490,8 +509,16 @@ class ExtraMoneyTrxController extends Controller
       if($rollback_id>-1)
       DB::statement("ALTER TABLE extra_money_trx AUTO_INCREMENT = $rollback_id");
 
-      if ($location && File::exists(files_path($location)))
-      unlink(files_path($location));
+      // if ($location && File::exists(files_path($location)))
+      // unlink(files_path($location));
+
+      if ($location && Storage::disk('public')->exists($location)) {
+        Storage::disk('public')->delete($location);
+      }
+
+      if ($location2 && Storage::disk('public')->exists($location2)) {
+        Storage::disk('public')->delete($location2);
+      }
 
       // return response()->json([
       //   "message" => $e->getMessage(),
@@ -545,7 +572,7 @@ class ExtraMoneyTrxController extends Controller
         if(!$employee)
         throw new \Exception("Pekerja tidak terdaftar",1);
   
-        if(in_array($request->payment_method_id,[2,3,4])){
+        if(in_array($request->payment_method_id,[2,3,4,5])){
           if(!$employee->rek_no && $employee->id != 1)
           throw new \Exception("Tidak ada no rekening pekerja",1);
         }
@@ -566,9 +593,6 @@ class ExtraMoneyTrxController extends Controller
           $file = $request->file('attachment_1');
           $path = $file->getRealPath();
           $fileType = $file->getClientMimeType();
-          // $blobFile = base64_encode(file_get_contents($path));
-          // $change++;
-  
   
           $ext = $file->extension();
           if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
@@ -577,20 +601,27 @@ class ExtraMoneyTrxController extends Controller
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
   
-          $date = new \DateTime();
-          $timestamp = $date->format("Y-m-d H:i:s.v");
-          $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
-          $location = "/files/extra_money_trx/{$file_name}";
+
+          $file_name = $model_query->id."_att1_".Str::uuid() . '.' . $ext;
+          $location = "extra_money_trx/$file_name";
+
+          // $date = new \DateTime();
+          // $timestamp = $date->format("Y-m-d H:i:s.v");
+          // $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+          // $location = "/files/extra_money_trx/{$file_name}";
           try {
             ini_set('memory_limit', '256M');
-            Image::read($compressedImageBinary)->save(files_path($location));
+            Storage::disk('public')->put(
+              $location,
+              $compressedImageBinary
+            );
+            // Image::read($compressedImageBinary)->save(files_path($location));
           } catch (\Exception $e) {
             throw new \Exception("Simpan Foto Gagal");
           }
   
-          if (File::exists(files_path($model_query->attachment_1_loc)) && $model_query->attachment_1_loc != null) {
-            if (!unlink(files_path($model_query->attachment_1_loc)))
-              throw new \Exception("Gagal Hapus Gambar", 1);
+          if ($model_query->attachment_1_loc != null && Storage::disk('public')->exists($model_query->attachment_1_loc)) {
+              Storage::disk('public')->delete($model_query->attachment_1_loc);
           }
           
           $model_query->attachment_1_type   = $fileType;
@@ -598,10 +629,9 @@ class ExtraMoneyTrxController extends Controller
   
         }
   
-        if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
-          if (File::exists(files_path($model_query->attachment_1_loc)) && $model_query->attachment_1_loc != null) {
-            if (!unlink(files_path($model_query->attachment_1_loc)))
-              throw new \Exception("Gagal Hapus Gambar", 1);
+        if (!$request->hasFile('attachment_1') && in_array($attachment_1_preview,[null,'null'])) {
+          if ($model_query->attachment_1_loc != null && Storage::disk('public')->exists(files_path($model_query->attachment_1_loc))) {
+            Storage::disk('public')->delete($model_query->attachment_1_loc);
           }
           $location = null;
           $fileType = null;
@@ -667,17 +697,25 @@ class ExtraMoneyTrxController extends Controller
 
         $ext = $file->extension();
 
-        $date = new \DateTime();
-        $timestamp = $date->format("Y-m-d H:i:s.v");
-        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
-        $location = "/files/extra_money_trx/{$file_name}";
+
+        $file_name = $model_query->id."_att2_".Str::uuid() . '.' . $ext;
+        $location2 = "extra_money_trx/$file_name";
+
+        // $date = new \DateTime();
+        // $timestamp = $date->format("Y-m-d H:i:s.v");
+        // $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
+        // $location2 = "/files/extra_money_trx/{$file_name}";
 
         if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
           try {
             ini_set('memory_limit', '256M');
-            Image::read($compressedImageBinary)->save(files_path($location));
+            Storage::disk('public')->put(
+              $location2,
+              $compressedImageBinary
+            );
+            // Image::read($compressedImageBinary)->save(files_path($location2));
           } catch (\Exception $e) {
             throw new \Exception("Simpan Foto Gagal");
           }
@@ -686,31 +724,30 @@ class ExtraMoneyTrxController extends Controller
             // Set memory limit (optional)
             ini_set('memory_limit', '256M');      
             // Save the PDF file
-            file_put_contents(files_path($location), file_get_contents($path));
+            Storage::disk('public')->put($location2, file_get_contents($path));
+            // file_put_contents(files_path($location2), file_get_contents($path));
           } catch (\Exception $e) {
             throw new \Exception("Simpan PDF Gagal");
           }
         }
 
-        if (File::exists(files_path($model_query->attachment_2_loc)) && $model_query->attachment_2_loc != null) {
-          if (!unlink(files_path($model_query->attachment_2_loc)))
-            throw new \Exception("Gagal Hapus Gambar", 1);
+        if ($model_query->attachment_2_loc != null && Storage::disk('public')->exists($model_query->attachment_2_loc)) {
+          Storage::disk('public')->delete($model_query->attachment_2_loc);
         }
         
         $model_query->attachment_2_type   = $fileType;
-        $model_query->attachment_2_loc    = $location;
+        $model_query->attachment_2_loc    = $location2;
 
       }
 
-      if (!$request->hasFile('attachment_2') && $attachment_2_preview == null) {
-        if (File::exists(files_path($model_query->attachment_2_loc)) && $model_query->attachment_2_loc != null) {
-          if (!unlink(files_path($model_query->attachment_2_loc)))
-            throw new \Exception("Gagal Hapus Gambar", 1);
+      if (!$request->hasFile('attachment_2') && in_array($attachment_2_preview,[null,'null'])) {
+        if ($model_query->attachment_2_loc != null && Storage::disk('public')->exists($model_query->attachment_2_loc)) {
+          Storage::disk('public')->delete($model_query->attachment_2_loc);
         }
-        $location = null;
+        $location2 = null;
         $fileType = null;
         $model_query->attachment_2_type   = $fileType;
-        $model_query->attachment_2_loc    = $location;
+        $model_query->attachment_2_loc    = $location2;
       }
 
       $model_query->updated_at      = $t_stamp;
@@ -1415,7 +1452,7 @@ class ExtraMoneyTrxController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->whereIn("payment_method_id",[2,3,4]);
+          $q1->whereIn("payment_method_id",[2,3,4,5]);
           $q1->where("received_payment",1);                 
         });
       })->get();
@@ -1783,7 +1820,7 @@ class ExtraMoneyTrxController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->whereIn("payment_method_id",[2,3,4]);
+          $q1->whereIn("payment_method_id",[2,3,4,5]);
           $q1->where("received_payment",1);                 
         });
       })->get();      
@@ -2085,14 +2122,28 @@ class ExtraMoneyTrxController extends Controller
 
     abort_unless($trx->$locField, 404);
 
-    $path = files_path($trx->$locField);
-    abort_unless(File::exists($path), 404);
+    abort_unless(Storage::disk('public')->exists($trx->$locField), 404);
 
-    return response()->file($path, [
-      'Cache-Control'=> 'no-store, private',
-      'Content-Type'  => $trx->$typeField,
-      'X-Attachment' => $n,
-    ]);
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('public');  
+    return $disk->response(
+        $trx->$locField,
+        null,
+        [
+            'Cache-Control' => 'no-store, private',
+            'Content-Type'  => $trx->$typeField,
+            'X-Attachment'  => $n,
+        ]
+    );
+
+    // $path = files_path($trx->$locField);
+    // abort_unless(File::exists($path), 404);
+
+    // return response()->file($path, [
+    //   'Cache-Control'=> 'no-store, private',
+    //   'Content-Type'  => $trx->$typeField,
+    //   'X-Attachment' => $n,
+    // ]);
 
       // MyAdmin::checkScope(['extra_money_trx.view']);
 

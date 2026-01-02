@@ -252,7 +252,7 @@ class TrxLoadDataController extends Controller
     $list_ujalan = \App\Models\MySql\Ujalan::where("deleted",0)->where('val',1)->where('val1',1)->where('val2',1)->where('val3',1)->get();
     $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
     $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet','BLANK'])->with('potongan')->get();
-    $list_payment_methods = \App\Models\MySql\PaymentMethod::get();
+    $list_payment_methods = \App\Models\MySql\PaymentMethod::where('hidden',0)->get();
       
     return response()->json([
       "list_ujalan"           => $list_ujalan,

@@ -597,7 +597,7 @@ class TrxTrpController extends Controller
       if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
-      if(in_array($request->payment_method_id , [2,3,4])){
+      if(in_array($request->payment_method_id , [2,3,4,5])){
         if(!$supir_dt->rek_no && $supir_dt->id != 1)
         throw new \Exception("Tidak ada no rekening supir",1);
 
@@ -725,7 +725,7 @@ class TrxTrpController extends Controller
       if($request->supir_id == $request->kernet_id && $request->supir_id != 1)
       throw new \Exception("Supir Dan Kernet Tidak Boleh Orang Yang Sama",1);
 
-      if(in_array($request->payment_method_id ,[2,3,4])){
+      if(in_array($request->payment_method_id ,[2,3,4,5])){
         if(!$supir_dt->rek_no && $supir_dt->id != 1)
         throw new \Exception("Tidak ada no rekening supir",1);
 
@@ -2261,7 +2261,7 @@ class TrxTrpController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->whereIn("payment_method_id",[2,3,4]);
+          $q1->whereIn("payment_method_id",[2,3,4,5]);
           $q1->where("received_payment",1);                 
         });
       })->get();      
@@ -2450,8 +2450,8 @@ class TrxTrpController extends Controller
     if($kernet && $kernet_money - $ttl_pk == 0) $no_adm_k++;
 
     // Admin Cost & Variable
-    if($trx_trp->payment_method->id==2){
-      $adm_cost = 2500;
+    if($trx_trp->payment_method->id==2 || $trx_trp->payment_method->id==3){
+      $adm_cost = $trx_trp->payment_method->id==2 ? 2500 : 5000;
       // $adm_cost = 5000;
       $adm_qty=0;
       if($supir){
@@ -2463,24 +2463,9 @@ class TrxTrpController extends Controller
       $amount_paid += ($adm_cost * $adm_qty);
     }
 
-    if($trx_trp->payment_method->id==3){
+    if($trx_trp->payment_method->id==4 || $trx_trp->payment_method->id==5){
       // $adm_cost = 2500;
-      $adm_cost = 5000;
-
-      $adm_qty=0;
-      if($supir){
-        $adm_qty += (1-$no_adm_s);
-      }
-      if($kernet){
-        $adm_qty += (1-$no_adm_k);
-      }
-
-      $amount_paid += ($adm_cost * $adm_qty);
-    }
-
-    if($trx_trp->payment_method->id==4){
-      // $adm_cost = 2500;
-      $adm_cost = 2500;
+      $adm_cost = $trx_trp->payment_method->id==4 ? 2500 : 6500;
 
       $supir_is_not_mandiri = 0;
       $kernet_is_not_mandiri = 0;
@@ -2609,7 +2594,7 @@ class TrxTrpController extends Controller
 
 
     // End Potongan! Jangan Sertakan Biaya Admin jika Adm Qty 0 
-    if($adm_qty > 0 && in_array($trx_trp->payment_method->id,[2,3,4])){
+    if($adm_qty > 0 && in_array($trx_trp->payment_method->id,[2,3,4,5])){
       $admin_cost_code=env("PVR_ADMIN_COST");
   
       $admin_cost_db = DB::connection('sqlsrv')->table('ac_accounts')
@@ -2729,7 +2714,7 @@ class TrxTrpController extends Controller
         });
 
         $q->orWhere(function ($q1){
-          $q1->whereIn("payment_method_id",[2,3,4]);
+          $q1->whereIn("payment_method_id",[2,3,4,5]);
           $q1->where("received_payment",1);                 
         });
       })->get();      
@@ -3172,14 +3157,14 @@ class TrxTrpController extends Controller
     try {
       $model_query = new TrxTrp();
       
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3,4])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3,4,5])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
         $q->where('val5',1)->orWhere('val6',1);
       })->where('received_payment',0)->get();
       $update=0;
       foreach ($model_query as $key => $mq) {
         if(ExtraMoneyTrx::where(function ($q)use($mq){
           $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
-        })->whereIn("payment_method_id",[2,3,4])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
+        })->whereIn("payment_method_id",[2,3,4,5])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
         ->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)->where('val6',1)
         ->whereNull("trx_trp_id")
         ->update([
