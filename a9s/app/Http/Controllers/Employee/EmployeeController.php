@@ -11,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
@@ -255,7 +257,8 @@ class EmployeeController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'employee.create');
     // set_time_limit(0);
-    $location = null;
+    $face_loc = null;
+    $doc_loc = null;
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
@@ -288,6 +291,13 @@ class EmployeeController extends Controller
         $blobFile = base64_encode(file_get_contents($path));
         $model_query->attachment_1 = $blobFile;
         $model_query->attachment_1_type = $fileType;
+        $ext = $file->extension();
+
+        $file_name = "att1_".Str::uuid() . '.' . $ext;
+        $doc_loc = "employees/$file_name";
+
+        Storage::disk('public')->put($doc_loc, file_get_contents($path));
+        $model_query->attachment_1_loc = $doc_loc;
       }
 
       if($request->hasFile('face_loc_target')){
@@ -301,23 +311,19 @@ class EmployeeController extends Controller
         // $image = Image::read($path)->scale(height: $this->height);
         // $image = Image::read($path);
         // $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-
-        $date = new \DateTime();
-        $timestamp = $date->format("Y-m-d H:i:s.v");
-        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
-        $location = "/files/employees";
-        File::ensureDirectoryExists(files_path($location));
-        $location .= "/{$file_name}";
+        $file_name = "face_".Str::uuid() . '.' . $ext;
+        $face_loc = "employees/$file_name";
+        
         try {
           ini_set('memory_limit', '256M');
-          Image::read($path)->save(files_path($location));
+          Storage::disk('public')->put($face_loc, file_get_contents($path));
         } catch (\Exception $e) {
           throw new \Exception("Simpan Foto Gagal");
         }
 
         // $blob_img_leave = base64_encode($compressedImageBinary); 
         // $blobFile = base64_encode(file_get_contents($path));
-        $model_query->face_loc_target = $location;
+        $model_query->face_loc_target = $face_loc;
         $model_query->face_loc_type = $fileType;
       }
 
@@ -367,8 +373,18 @@ class EmployeeController extends Controller
       DB::rollback();
 
 
-      if ($location && File::exists(files_path($location)))
-      unlink(files_path($location));
+      // if ($face_loc && File::exists(files_path($face_loc))){
+      //   unlink(files_path($face_loc)); 
+      // }
+
+      if ($face_loc && Storage::disk('public')->exists($face_loc)) {
+        Storage::disk('public')->delete($face_loc);
+      }
+
+      if ($doc_loc && Storage::disk('public')->exists($doc_loc)) {
+        Storage::disk('public')->delete($doc_loc);
+      }
+
 
       if ($e->getCode() == 1) {
         return response()->json([
@@ -393,8 +409,10 @@ class EmployeeController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     $attachment_1_preview = $request->attachment_1_preview;
 
-    $location             = null;
+    $face_loc             = null;
     $face_loc_preview     = $request->face_loc_preview;
+
+    $doc_loc             = null;
 
     $fileType = null;
     $blobFile = null;
@@ -436,15 +454,21 @@ class EmployeeController extends Controller
 
       if($request->hasFile('attachment_1')){
         $file = $request->file('attachment_1');
-        $path = $file->getRealPath();
+        $doc_path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        $blobFile = base64_encode(file_get_contents($path));
+        $blobFile = base64_encode(file_get_contents($doc_path));
+        $ext = $file->extension();
+
+        $file_name = $model_query->id."_att1_".Str::uuid() . '.' . $ext;
+        $doc_loc = "employees/$file_name";
         $change++;
       }
 
       if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
         $blobFile = null;
         $fileType = null;
+        $doc_loc = null;
+        $doc_path = null;
         $change++;
       }
 
@@ -457,71 +481,48 @@ class EmployeeController extends Controller
         // $blobFile = base64_encode(file_get_contents($path));
         // $change++;
 
-        $ext = $file->extension();
-
-        $date = new \DateTime();
-        $timestamp = $date->format("Y-m-d H:i:s.v");
-        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
-        $location = "/files/employees/{$file_name}";
 
         if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
         throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
-        // if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
-        //   // $image = Image::read($path)->scale(height: $this->height);
-        //   // $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-        //   try {
-        //     ini_set('memory_limit', '256M');
-        //     Image::read($path)->save(files_path($location));
-        //   } catch (\Exception $e) {
-        //     throw new \Exception("Simpan Foto Gagal");
-        //   }
-        // }else{
-        //   try {
-        //     // Set memory limit (optional)
-        //     ini_set('memory_limit', '256M');     
-        //     // Save the PDF file
-        //     file_put_contents(files_path($location), file_get_contents($path));
-        //   } catch (\Exception $e) {
-        //     throw new \Exception("Simpan PDF Gagal");
-        //   }
-        // }
+        $ext = $file->extension();
 
-        $date = new \DateTime();
-        $timestamp = $date->format("Y-m-d H:i:s.v");
-        $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
-        $location = "/files/employees";
-        File::ensureDirectoryExists(files_path($location));
-        $location .= "/{$file_name}";
+        $file_name = $model_query->id."_face_".Str::uuid() . '.' . $ext;
+        $face_loc = "employees/$file_name";
 
         try {
           ini_set('memory_limit', '256M');
-          Image::read($path)->save(files_path($location));
+          Storage::disk('public')->put($face_loc, file_get_contents($path));
         } catch (\Exception $e) {
-          throw new \Exception("Simpan Foto Gagal".$e->getMessage());
+          // throw new \Exception("Simpan Foto Gagal".$e->getMessage());
 
-          // throw new \Exception("Simpan Foto Gagal");
+          throw new \Exception("Simpan Foto Gagal");
         }
 
-        if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
-          if (!unlink(files_path($model_query->face_loc_target)))
-            throw new \Exception("Gagal Hapus Gambar", 1);
+        // if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
+        //   if (!unlink(files_path($model_query->face_loc_target)))
+        //     throw new \Exception("Gagal Hapus Gambar", 1);
+        // }
+        if ($model_query->face_loc_target != null &&  Storage::disk('public')->exists($model_query->face_loc_target)) {
+          Storage::disk('public')->delete($model_query->face_loc_target);
         }
-        
+
         $model_query->face_loc_type   = $fileType;
-        $model_query->face_loc_target    = $location;
-
+        $model_query->face_loc_target    = $face_loc;
       }
 
       if (!$request->hasFile('face_loc') && $face_loc_preview == null) {
-        if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
-          if (!unlink(files_path($model_query->face_loc_target)))
-            throw new \Exception("Gagal Hapus Gambar", 1);
+        // if (File::exists(files_path($model_query->face_loc_target)) && $model_query->face_loc_target != null) {
+        //   if (!unlink(files_path($model_query->face_loc_target)))
+        //     throw new \Exception("Gagal Hapus Gambar", 1);
+        // }
+        if ($model_query->face_loc_target != null && Storage::disk('public')->exists($model_query->face_loc_target)) {
+          Storage::disk('public')->delete($model_query->face_loc_target);
         }
-        $location = null;
+        $face_loc = null;
         $fileType = null;
         $model_query->face_loc_type   = $fileType;
-        $model_query->face_loc_target    = $location;
+        $model_query->face_loc_target    = $face_loc;
       }
 
       if(!$model_query->val_at){
@@ -558,9 +559,25 @@ class EmployeeController extends Controller
       $model_query->save();
       
       if($change){
-        Employee::where("id",$request->id)->update([
-          "attachment_1"      => $blobFile
-        ]);
+        try {
+          if($doc_path!=null){
+            ini_set('memory_limit', '256M');
+            Storage::disk('public')->put($doc_loc, file_get_contents($doc_path));
+          }
+          if ($model_query->attachment_1_loc != null &&  Storage::disk('public')->exists($model_query->attachment_1_loc)) {
+            Storage::disk('public')->delete($model_query->attachment_1_loc);
+          }
+          Employee::where("id",$request->id)->update([
+            "attachment_1"      => $blobFile,
+            "attachment_1_loc"  => $doc_loc
+          ]);
+  
+        } catch (\Exception $e) {
+          // throw new \Exception("Simpan Foto Gagal".$e->getMessage());
+
+          throw new \Exception("Simpan Foto Gagal");
+        }
+        
       }
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 

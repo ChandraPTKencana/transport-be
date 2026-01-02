@@ -320,6 +320,8 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::post('/extra_money_trx_do_gen_pvr', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doGenPVR']);
     Route::post('/extra_money_trx_do_gen_pv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doGenPV']);
     Route::post('/extra_money_trx_do_update_pv', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'doUpdatePV']);
+    Route::get('/extra_money_trx/attachment/{id}/{n}', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxController::class, 'getAttachment']);
+
 
     Route::get('/extra_money_trx/transfers', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'index']);
     Route::put('/extra_money_trx/transfer', [\App\Http\Controllers\ExtraMoney\ExtraMoneyTrxTransferController::class, 'validasiAndTransfer']);

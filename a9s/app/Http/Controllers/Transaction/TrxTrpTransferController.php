@@ -384,9 +384,9 @@ class TrxTrpTransferController extends Controller
     'uj_details','potongan','uj','extra_money_trxs'=>function ($q){
       $q->with(['employee','extra_money']);
     }
-    // ,'trx_absens'=>function($q) {
-    //   $q->select('*')->where("status","B");
-    // }
+    ,'trx_absens'=>function($q) {
+      $q->select('*')->where("status","B");
+    }
     ])->find($request->id);
     return response()->json([
       "data" => new TrxTrpResource($model_query),

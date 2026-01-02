@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Resources\MySql\TrxTrpAbsenResource;
 use App\Models\MySql\Bank;
+use App\Models\MySql\Employee;
 use App\Models\MySql\PaymentMethod;
 use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
@@ -17,6 +18,9 @@ use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 class RunData extends Command
 {
     /**
@@ -38,27 +42,51 @@ class RunData extends Command
      *
      * @return int
      */
+
     public function handle()
     {
-
-        $date = new \DateTime();
-        $timestamp = $date->format("Y-m-d H:i:s");
-        $id = 14;
-
 
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
 
-        $bankExists = Bank::where('code',"BCA")->first();
-        if(!$bankExists){
-            $banknew = new Bank();
-            $banknew->code='BCA';
-            $banknew->name = 'Bank Central Asia';
-            $banknew->code_duitku = '014';
-            $banknew->save();
-        }
+        Employee::where('deleted', 0)
+        ->whereNull('attachment_1_loc')
+        ->whereNotNull('attachment_1')
+        ->chunkById(10, function ($employees) {
 
-        DB::statement("create view v_maintenance as select v.no_pol AS no_pol,count(t.id) AS total_trip,ifnull(sum(u.km_range),0) AS total_km,s.reminder_service AS reminder_service,case when ifnull(sum(u.km_range),0) >= s.reminder_service then 'WARNING SERVICE' else 'AMAN' end AS status_service,ms.terakhir_service AS terakhir_service,ms.terakhir_service_id AS terakhir_service_id from ((((logistik.vehicle_mst v left join (select m1.no_pol AS no_pol,m1.id AS terakhir_service_id,m1.tanggal AS terakhir_service from (logistik.trx_maintenance m1 join (select logistik.trx_maintenance.no_pol AS no_pol,max(logistik.trx_maintenance.id) AS max_id from logistik.trx_maintenance where logistik.trx_maintenance.status = 'Y' group by logistik.trx_maintenance.no_pol) m2 on(m2.max_id = m1.id))) ms on(ms.no_pol = v.no_pol)) left join logistik.trx_trp t on(t.no_pol = v.no_pol and t.tanggal >= ifnull(ms.terakhir_service,'1970-01-01'))) left join logistik.is_uj u on(u.id = t.id_uj)) join logistik.setup s on(1 = 1)) where v.deleted = 0 group by v.no_pol,s.reminder_service,ms.terakhir_service,ms.terakhir_service_id order by v.no_pol");
+            foreach ($employees as $em) {
+                $binary = base64_decode($em->attachment_1);
+
+                $ext = str_starts_with($em->attachment_1_type, 'image/') ? 'png' : 'pdf';
+                $file_name = "{$em->id}_att1_" . Str::uuid() . '.' . $ext;
+                $path = "employees/{$file_name}";
+
+                Storage::disk('public')->put($path, $binary, 'private');
+
+                $em->update([
+                    'attachment_1_loc' => $path,
+                    'attachment_1' => null, // optional
+                ]);
+            }
+        });
+
+
+
+
+        // $date = new \DateTime();
+
+        // $timestamp = $date->format("Y-m-d H:i:s");
+        // $id = 14;
+        // $bankExists = Bank::where('code',"BCA")->first();
+        // if(!$bankExists){
+        //     $banknew = new Bank();
+        //     $banknew->code='BCA';
+        //     $banknew->name = 'Bank Central Asia';
+        //     $banknew->code_duitku = '014';
+        //     $banknew->save();
+        // }
+
+        // DB::statement("create view v_maintenance as select v.no_pol AS no_pol,count(t.id) AS total_trip,ifnull(sum(u.km_range),0) AS total_km,s.reminder_service AS reminder_service,case when ifnull(sum(u.km_range),0) >= s.reminder_service then 'WARNING SERVICE' else 'AMAN' end AS status_service,ms.terakhir_service AS terakhir_service,ms.terakhir_service_id AS terakhir_service_id from ((((logistik.vehicle_mst v left join (select m1.no_pol AS no_pol,m1.id AS terakhir_service_id,m1.tanggal AS terakhir_service from (logistik.trx_maintenance m1 join (select logistik.trx_maintenance.no_pol AS no_pol,max(logistik.trx_maintenance.id) AS max_id from logistik.trx_maintenance where logistik.trx_maintenance.status = 'Y' group by logistik.trx_maintenance.no_pol) m2 on(m2.max_id = m1.id))) ms on(ms.no_pol = v.no_pol)) left join logistik.trx_trp t on(t.no_pol = v.no_pol and t.tanggal >= ifnull(ms.terakhir_service,'1970-01-01'))) left join logistik.is_uj u on(u.id = t.id_uj)) join logistik.setup s on(1 = 1)) where v.deleted = 0 group by v.no_pol,s.reminder_service,ms.terakhir_service,ms.terakhir_service_id order by v.no_pol");
 
         // DB::statement("DROP VIEW v_maintenance");
 

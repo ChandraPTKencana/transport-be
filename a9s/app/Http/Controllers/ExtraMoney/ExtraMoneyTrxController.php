@@ -2071,4 +2071,50 @@ class ExtraMoneyTrxController extends Controller
     }
   }
 
+
+  public function getAttachment($id,$n)
+  {
+    MyAdmin::checkScope($this->permissions, 'extra_money_trx.view');
+
+
+
+    $trx = ExtraMoneyTrx::findOrFail($id);
+
+    $locField  = "attachment_{$n}_loc";
+    $typeField = "attachment_{$n}_type";
+
+    abort_unless($trx->$locField, 404);
+
+    $path = files_path($trx->$locField);
+    abort_unless(File::exists($path), 404);
+
+    return response()->file($path, [
+      'Cache-Control'=> 'no-store, private',
+      'Content-Type'  => $trx->$typeField,
+      'X-Attachment' => $n,
+    ]);
+
+      // MyAdmin::checkScope(['extra_money_trx.view']);
+
+      // $trx = ExtraMoneyTrx::findOrFail($id);
+
+      // if (!$trx->attachment_1_loc) {
+      //     abort(404);
+      // }
+
+      // $path = files_path($trx->attachment_1_loc);
+
+      // if (!File::exists($path)) {
+      //     abort(404);
+      // }
+
+      // return response()->file($path, [
+      //     'Content-Type' => $trx->attachment_1_type,
+      //     'Cache-Control' => 'no-store, private',
+      //     'X-Attachment-Id' => $trx->id,
+      //     'X-Attachment-Type' => 'attachment_1',
+      // ]);
+  }
+
+  
 }
