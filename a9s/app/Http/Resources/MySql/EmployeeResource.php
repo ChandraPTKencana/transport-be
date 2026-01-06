@@ -22,6 +22,11 @@ class EmployeeResource extends JsonResource
             'val_user'              => $this->val_user ?? "",
             'val_by'                => new IsUserResource($this->whenLoaded('val_by')),
             'val_at'                => $this->val_at ?? "",
+            'val1'                  => $this->val1,
+            'val1_user'             => $this->val1_user ?? "",
+            'val1_by'               => new IsUserResource($this->whenLoaded('val1_by')),
+            'val1_at'               => $this->val1_at ?? "",
+
             'id'                    => $this->id,
             'name'                  => $this->name,
             'role'                  => $this->role,
@@ -45,6 +50,7 @@ class EmployeeResource extends JsonResource
             'tmk'                   => $this->tmk ?? "",
             'address'               => $this->address ?? "",
             'status'                => $this->status ?? "",
+            'workers_from'              => $this->workers_from,
 
             'deleted'               => $this->deleted,
             'deleted_user'          => $this->deleted_user ?? "",

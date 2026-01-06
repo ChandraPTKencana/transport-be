@@ -39,21 +39,21 @@ class RunPermit extends Command
         Schema::disableForeignKeyConstraints();
 
         // 'SuperAdmin','ViewOnly','Logistic','Finance','Marketing','MIS','PabrikTransport','Accounting','PabrikMandor'
-        // $lists = [
-        //     'MANAGER_LOGISTIC'
-        // ];
+        $lists = [
+            'PRODUKSI'
+        ];
 
-        // foreach ($lists as $k => $v) {
-        //     if(!PermissionGroup::where('name',$v)->first()){
-        //         $this->info("insert permission group".$v."\n ");
+        foreach ($lists as $k => $v) {
+            if(!PermissionGroup::where('name',$v)->first()){
+                $this->info("insert permission group".$v."\n ");
     
-        //         PermissionGroup::insert([
-        //             'name'=>$v,
-        //             'created_user'=>1,
-        //             'updated_user'=>1,
-        //         ]);
-        //     }
-        // }
+                PermissionGroup::insert([
+                    'name'=>$v,
+                    'created_user'=>1,
+                    'updated_user'=>1,
+                ]);
+            }
+        }
         // $this->info("pass1\n ");
 
         // $lists = [
@@ -187,12 +187,17 @@ class RunPermit extends Command
             // ["permit"=>'ujalan.unval2', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
             // ["permit"=>'ujalan.unval3', "to"=>['SUPERADMIN']],
             
-            ["permit"=>'fin_payment_req.views', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'fin_payment_req.view', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'fin_payment_req.create', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'fin_payment_req.modify', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'fin_payment_req.delete', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'fin_payment_req.val', "to"=>['SUPERADMIN','LOGISTIC_STAFF']],
+            // ["permit"=>'fin_payment_req.views', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            // ["permit"=>'fin_payment_req.view', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            // ["permit"=>'fin_payment_req.create', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            // ["permit"=>'fin_payment_req.modify', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            // ["permit"=>'fin_payment_req.delete', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            // ["permit"=>'fin_payment_req.val', "to"=>['SUPERADMIN','LOGISTIC_STAFF']],
+
+            ["permit"=>'potongan_mst.remove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'potongan_mst.unremove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            ["permit"=>'employee.val1', "to"=>['SUPERADMIN','PRODUKSI']],
+            ["permit"=>'employee.unval1', "to"=>['SUPERADMIN','PRODUKSI']]
         ];
 
         foreach ($re_lists as $k => $v) {

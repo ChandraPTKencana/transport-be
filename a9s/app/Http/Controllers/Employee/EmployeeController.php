@@ -104,7 +104,7 @@ class EmployeeController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      $list_to_like = ["id","name","role","ktp_no","sim_no","phone_number","rek_no"];
+      $list_to_like = ["id","name","role","ktp_no","sim_no","sim_name","workers_from","phone_number","rek_no"];
 
       // $list_to_like_user = [
       //   ["val_name","val_user"],
@@ -329,6 +329,8 @@ class EmployeeController extends Controller
       $model_query->role          = $request->role;
       $model_query->ktp_no        = $ktp_no;
       $model_query->sim_no        = $sim_no;
+      $model_query->sim_name      = $request->sim_name;
+      $model_query->workers_from      = $request->workers_from;
       $model_query->bank_id       = $request->bank_id;
       $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
       $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
@@ -528,6 +530,11 @@ class EmployeeController extends Controller
       $model_query->role          = $request->role;
       $model_query->ktp_no        = $ktp_no;
       $model_query->sim_no        = $sim_no;
+
+      if($model_query->val1==0){
+        $model_query->sim_name    = $request->sim_name;
+      }
+      $model_query->workers_from  = $request->workers_from;
       $model_query->bank_id       = $request->bank_id;
       $model_query->rek_no        = MyLib::emptyStrToNull($request->rek_no);
       $model_query->rek_name      = MyLib::emptyStrToNull($request->rek_name);
@@ -647,7 +654,7 @@ class EmployeeController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkScope($this->permissions, 'employee.val');
+    MyAdmin::checkMultiScope($this->permissions, ['employee.val','employee.val1']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Employee,id",
@@ -679,6 +686,12 @@ class EmployeeController extends Controller
         $model_query->val_at = $t_stamp;
       }
 
+      if(!$model_query->val1){
+        $model_query->val1 = 1;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
+      }
+
       $model_query->save();
       
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
@@ -691,6 +704,10 @@ class EmployeeController extends Controller
         "val_user"=>$model_query->val_user,
         "val_at"=>$model_query->val_at,
         "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1"=>$model_query->val1,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -712,7 +729,7 @@ class EmployeeController extends Controller
   }
 
   public function unvalidasi(Request $request){
-    MyAdmin::checkScope($this->permissions, 'employee.unval');
+    MyAdmin::checkMultiScope($this->permissions, ['employee.unval','employee.unval1']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Employee,id",
@@ -744,6 +761,12 @@ class EmployeeController extends Controller
         // $model_query->val1_at = $t_stamp;
       }
       
+      if(MyAdmin::checkScope($this->permissions, 'employee.unval1',true) && $model_query->val1){
+        $model_query->val1 = 0;
+        // $model_query->val1_user = $this->admin_id;
+        // $model_query->val1_at = $t_stamp;
+      }
+
       // $model_query->val = 0;
       // if(!$model_query->val){
       //   $model_query->val = 1;
@@ -763,6 +786,9 @@ class EmployeeController extends Controller
         "val_user"=>$model_query->val_user,
         "val_at"=>$model_query->val_at,
         "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+        "val1_user"=>$model_query->val1_user,
+        "val1_at"=>$model_query->val1_at,
+        "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

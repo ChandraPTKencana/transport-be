@@ -1185,6 +1185,7 @@ class TrxTrpController extends Controller
       "payment_name"  => $trx_trp->payment_method->name,
       "supir"         => $trx_trp->supir,
       "supir_rek_no"  => $trx_trp->supir_rek_no,
+      "supir_sim_name"=> $trx_trp->employee_s->sim_name,
       "ttl_ps"        => $ttl_ps,
       "ptg_ps_ids"    => $ptg_ps_ids,
       "kernet"        => $trx_trp->kernet,

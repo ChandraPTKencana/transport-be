@@ -43,3 +43,22 @@ Pemberitahuan Informasi Update Program 25-09-2025 10:00
  - Staff Logistik harus approve/validasi dulu sebelum dilanjutkan oleh adm,spv,manager 
  - Isi Detail Standby Trx hanya boleh 1
  - Standby trx yang sudah di validasi oleh semua pihak dan dipilih untuk dibayarkan saja yang akan di generate ke salary paid
+
+
+Pemberitahuan Informasi Update Program 27-10-2025
+-Menu Destinasi Lokasi Telah ditambahkan dan hanya dapat diakses oleh Manager Logistik (migrate,run_permit,run_data) 
+-Di Menu Uang jalan yang dilinkkan ke Destinasi lokasi telah ditambahkan dan hanya dapat diakses oleh Manager Logistik
+-Di Menu Ticket Logistik , Val Tiket tidak mempengaruhi bonus trip untuk TBS dan TBSK
+-Di Menu Ticket Logistik , Clear tiket akan menghapus info tara , bruto, netto ticket
+-Di Menu Ticket Logistik dan Trx Absen apabila data sudah melalui proses generate di salary report, maka data tersebut
+tidak dapat di unvalidasi lagi.
+
+Info tambahan : Bonus TBS dan TBSK akan dihitung saat melakukan generate Salary Report
+
+
+
+-Di Menu Ticket Logistik , Val Tiket untuk CPO dan PK ditambahkan syarat akan di hanguskannya bonus trip apabila absen sampai ke
+pabrik melewati 72 jam sejak absen berangkat.
+
+
+perubahan dari perbulan jadi 1/2 bulan untuk bulan ini saja, tambahkan validasi uang jalan untuk spv dan mgr logistik, next trip hanya bisa di approve mandor apabila staff logistik sudah melakukan approve trx absen, gambar penuh sudah tidak berlaku lagi. aplikasi supir menampilkan absen yang belum diisi saja.

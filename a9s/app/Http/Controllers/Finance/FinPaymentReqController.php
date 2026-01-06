@@ -32,6 +32,7 @@ use App\Models\MySql\IsUser;
 use App\Models\MySql\TrxTrp;
 use App\Exports\MyReport;
 use App\Models\MySql\Bank;
+use App\Models\MySql\Setup;
 use Illuminate\Support\Facades\Storage;
 
 class FinPaymentReqController extends Controller
@@ -232,6 +233,7 @@ class FinPaymentReqController extends Controller
         "tujuan"=>$tujuan,
         "produk"=>$produk,
         "trx_trp_id"=>$trx_trp->id,
+        "payment_method_id"=>$trx_trp->payment_method_id,
         "no_pol"=>$no_pol,
         "employee_id"=>$v->employee_id,
         "jabatan"=>$v->employee_role,
@@ -906,7 +908,8 @@ class FinPaymentReqController extends Controller
 
       foreach ($raw_data['details'] as $k => $v) {
         $jumlah = (int) $v['jumlah'];
-        $jenis_rek = $v['bank_code']=='Mandiri'?'IBU':'OBU';
+        $payment_method_id = $v['payment_method_id'];
+        $jenis_rek = $v['bank_code']=='Mandiri'?'IBU':($payment_method_id==4?'BAU':'OBU');
         $dbank = Bank::where('code',$v['bank_code'])->first();
         $code_beda_bank = $dbank->code_duitku;
         $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};;;{$jenis_rek};{$code_beda_bank};;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
@@ -924,7 +927,8 @@ class FinPaymentReqController extends Controller
   
       $filePath = 'public/' .$filename . '.' . $mime["ext"];
   
-      $mandiri_bank_no =env('MANDIRI_BANK_NO');
+      // $mandiri_bank_no =env('MANDIRI_BANK_NO');
+      $mandiri_bank_no =Setup::first()->mandiri_no_rek;
       $csv = "P;{$date->format('Ymd')};{$mandiri_bank_no};{$records};{$total}\r\n";
   
       // foreach($data as $k=>$v) {

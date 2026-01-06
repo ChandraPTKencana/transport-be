@@ -40,3 +40,17 @@ active it for SEO
 
 composer require spatie/browsershot
 npm install --global puppeteer
+
+hal aneh catatan  !!!!!! PENTING
+
+setiap pindah env atau ganti env wajib config:clear
+
+kemudian check di php artisan tinker
+env('DB_Database')
+harus retrun bukan null
+
+
+Trx trp ticket saat ini masih bisa boleh unvalidasi tanpa batas
+tapi kedepan apabila sudah ada salay paid id tidak boleh di unval lagi
+
+unval extramoney

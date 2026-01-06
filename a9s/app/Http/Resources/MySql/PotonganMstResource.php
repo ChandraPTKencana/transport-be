@@ -50,6 +50,11 @@ class PotonganMstResource extends JsonResource
             'attachment_2'          => "",
             'attachment_2_preview'  => $this->attachment_2 ? "data:".$this->attachment_2_type.";base64,".$this->attachment_2 : "",
 
+            'deleted'               => $this->deleted,
+            'deleted_user'          => $this->deleted_user ?? "",
+            'deleted_at'            => $this->deleted_at ?? "",
+            'deleted_by'            => new IsUserResource($this->whenLoaded('deleted_by')),
+            'deleted_reason'        => $this->deleted_reason ?? "",
         ];
     }
 }

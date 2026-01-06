@@ -40,6 +40,7 @@ class EmployeeRequest extends FormRequest
             $rules['religion'] = 'required|in:ISLAM,KRISTEN PROTESTAN,KRISTEN KATOLIK,HINDU,BUDDHA,KONGHUCU';
             $rules['bank_id'] = 'nullable|exists:App\Models\MySql\Bank,id';
             $rules['username'] = 'nullable|min:3';
+            $rules['workers_from'] = 'required|max:10|in:KPN,KAS,KUS,ARP,KAP,SMP';
             // $rules['birth_date']  = 'required|date_format:Y-m-d';
             // $rules['birth_place']  = 'required|max:100';
             
@@ -71,6 +72,7 @@ class EmployeeRequest extends FormRequest
             'username.min' => 'Username minimal 3 karakter',
             // 'username.unique' => 'Username tidak boleh sama',
 
+            'workers_from.required' => 'Pekerja dari Tidak boleh kosong',
         ];
     }
 }

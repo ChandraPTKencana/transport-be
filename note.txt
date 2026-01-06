@@ -1,0 +1,35 @@
+composer require league/flysystem-sftp-v3 "^3.0"
+
+Sudah terkirim
+- Return transaction being process 
+- Duitku Server error 
+
+SUPIR DAN KERNET BEDA PT ( DINAS DAN NORMAL)
+
+TRX SUPIR/KERNET PENDING
+
+TICKET AUTO PERALIHAN (done 15-01)
+
+git reset --soft HEAD~1
+
+stat -c "%a %n" transport-be
+
+
+
+
+//   Validator::extend('custom_time_format', function ($attribute, $value, $parameters, $validator) {
+//     // Logika validasi waktu Anda di sini.
+//     // Anda bisa menggunakan fungsi date_parse_from_format atau memeriksa regex.
+//     $timestamp = date_parse_from_format('Y-m-d H:i:s', '2023-10-27 15:30:00');
+//     return !empty($timestamp['errors']); // Contoh sederhana: periksa apakah parsing gagal
+// });
+
+
+$request->validate([
+        'waktu' => 'required|custom_time_format:some_parameter', // Parameter bisa digunakan jika diperlukan
+    ]);
+
+
+
+    php artisan migrate
+    php artisan run_permit
