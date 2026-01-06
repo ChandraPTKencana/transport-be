@@ -32,6 +32,7 @@ class EmployeeResource extends JsonResource
             'role'                  => $this->role,
             'ktp_no'                => $this->ktp_no ?? '',
             'sim_no'                => $this->sim_no ?? '',
+            'sim_name'              => $this->sim_name ?? "",
             'bank'                  => new BankResource($this->whenLoaded('bank')),
             'bank_id'               => $this->bank_id ?? '',
             'rek_no'                => $this->rek_no ?? '',
@@ -50,7 +51,7 @@ class EmployeeResource extends JsonResource
             'tmk'                   => $this->tmk ?? "",
             'address'               => $this->address ?? "",
             'status'                => $this->status ?? "",
-            'workers_from'              => $this->workers_from,
+            'workers_from'          => $this->workers_from,
 
             'deleted'               => $this->deleted,
             'deleted_user'          => $this->deleted_user ?? "",
