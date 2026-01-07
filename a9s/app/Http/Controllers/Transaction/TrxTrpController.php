@@ -2466,31 +2466,32 @@ class TrxTrpController extends Controller
     }
 
     if($trx_trp->payment_method->id==4 || $trx_trp->payment_method->id==5){
-      // $adm_cost = 2500;
-      $adm_cost = $trx_trp->payment_method->id==4 ? 2500 : 6500;
-
-      $supir_is_not_mandiri = 0;
-      $kernet_is_not_mandiri = 0;
-      if($trx_trp->employee_s->bank->code != 'Mandiri'){
-        $supir_is_not_mandiri=1;
-      }
-
-      if($trx_trp->employee_k){
-        if($trx_trp->employee_k->bank->code != 'Mandiri'){
-          $kernet_is_not_mandiri=1;
-        }
-      }
-
       $adm_qty=0;
-      if($supir){
-        $remain = ($supir_is_not_mandiri - $no_adm_s)>=0?($supir_is_not_mandiri - $no_adm_s):0;
-        $adm_qty += $remain;
-      }
-      if($kernet){
-        $remain = ($kernet_is_not_mandiri - $no_adm_k)>=0?($kernet_is_not_mandiri - $no_adm_k):0;
-        $adm_qty += $remain;
-      }
-      $amount_paid += ($adm_cost * $adm_qty);
+      // // $adm_cost = 2500;
+      // $adm_cost = $trx_trp->payment_method->id==4 ? 2500 : 6500;
+
+      // $supir_is_not_mandiri = 0;
+      // $kernet_is_not_mandiri = 0;
+      // if($trx_trp->employee_s->bank->code != 'Mandiri'){
+      //   $supir_is_not_mandiri=1;
+      // }
+
+      // if($trx_trp->employee_k){
+      //   if($trx_trp->employee_k->bank->code != 'Mandiri'){
+      //     $kernet_is_not_mandiri=1;
+      //   }
+      // }
+
+      // $adm_qty=0;
+      // if($supir){
+      //   $remain = ($supir_is_not_mandiri - $no_adm_s)>=0?($supir_is_not_mandiri - $no_adm_s):0;
+      //   $adm_qty += $remain;
+      // }
+      // if($kernet){
+      //   $remain = ($kernet_is_not_mandiri - $no_adm_k)>=0?($kernet_is_not_mandiri - $no_adm_k):0;
+      //   $adm_qty += $remain;
+      // }
+      // $amount_paid += ($adm_cost * $adm_qty);
     }
 
     $exclude_in_ARAP = 0;
