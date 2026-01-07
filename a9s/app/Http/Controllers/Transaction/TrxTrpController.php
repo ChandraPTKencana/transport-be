@@ -2299,8 +2299,8 @@ class TrxTrpController extends Controller
         if($id!=""){
           $miniError.="Trx-".$id.".";
         }
-        $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
-        // $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal->".$e->getLine().$e->getCode().$e->getMessage();
+        // $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
+        $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal->".$e->getLine().$e->getCode().$e->getMessage();
       }
       return response()->json([
         "message" => $miniError,
