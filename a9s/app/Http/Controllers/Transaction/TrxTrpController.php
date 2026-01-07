@@ -2299,8 +2299,8 @@ class TrxTrpController extends Controller
         if($id!=""){
           $miniError.="Trx-".$id.".";
         }
-        // $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
-        $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal->".$e->getMessage();
+        $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
+        // $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal->".$e->getLine().$e->getCode().$e->getMessage();
       }
       return response()->json([
         "message" => $miniError,
@@ -2475,8 +2475,10 @@ class TrxTrpController extends Controller
         $supir_is_not_mandiri=1;
       }
 
-      if($trx_trp->employee_k->bank->code != 'Mandiri'){
-        $kernet_is_not_mandiri=1;
+      if($trx_trp->employee_k){
+        if($trx_trp->employee_k->bank->code != 'Mandiri'){
+          $kernet_is_not_mandiri=1;
+        }
       }
 
       $adm_qty=0;
