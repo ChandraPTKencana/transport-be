@@ -15,7 +15,7 @@ class PSTripSupirKernet
   public static function fn_supir_kernet_for_transfer($trx_trp){
     $result = [
       "supir_money"=>0,
-      "supir_money"=>0,
+      "kernet_money"=>0,
       // "kernet_money_ids"=>null,
       // "kernet_money_ids"=>null,
 
