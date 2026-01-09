@@ -33,6 +33,7 @@ use App\Models\MySql\TrxTrp;
 use App\Exports\MyReport;
 use App\Models\MySql\Bank;
 use App\Models\MySql\Setup;
+use App\PS\PSTripSupirKernet;
 use Illuminate\Support\Facades\Storage;
 
 class FinPaymentReqController extends Controller
@@ -338,50 +339,61 @@ class FinPaymentReqController extends Controller
       // $ordinal=0;
       foreach ($trx_trps as $key => $trx_trp) {
         // $trx_trp = TrxTrp::where("id",$value['id'])->first();
-        
-        $uj_details2= $trx_trp->uj->details2;
-        $supir_money=0;
-        $kernet_money=0;
-  
-        foreach ($uj_details2 as $k1 => $v1) {
-          if($v1->xfor=='Kernet'){
-            $kernet_money += $v1->qty * $v1->amount;
-          }else{
-            $supir_money += $v1->qty * $v1->amount;
-          }
-        }
-  
-        $supir_potongan_trx_money  = 0;
-        $supir_potongan_trx_ids    = "";
-        $kernet_potongan_trx_money = 0;
-        $kernet_potongan_trx_ids   = "";
-        foreach ($trx_trp->potongan as $kx => $v2) {
-          if($v2->potongan_mst->employee_id == $trx_trp->supir_id){
-            $supir_potongan_trx_money+=$v2->nominal_cut;
-            $supir_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
-          }
-    
-          if($v2->potongan_mst->employee_id == $trx_trp->kernet_id){
-            $kernet_potongan_trx_money+=$v2->nominal_cut;
-            $kernet_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
-          }
-        }
-        
-        $supir_extra_money_trx_money  = 0;
-        $supir_extra_money_trx_ids    = "";
-        $kernet_extra_money_trx_money = 0;
-        $kernet_extra_money_trx_ids   = "";
-        foreach ($trx_trp->extra_money_trxs as $k => $emt) {
-          if($emt->employee_id == $trx_trp->supir_id){
-            $supir_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
-            $supir_extra_money_trx_ids.="#".$emt->id." ";
-          }
+        $ps_result                    =PSTripSupirKernet::fn_supir_kernet_for_transfer($trx_trp);
+        $supir_money                  =$ps_result['supir_money'];
+        $kernet_money                 =$ps_result['kernet_money'];
+        $supir_potongan_trx_money     =$ps_result['supir_potongan_trx_money'];
+        $supir_potongan_trx_ids       =$ps_result['supir_potongan_trx_ids'];
+        $kernet_potongan_trx_money    =$ps_result['kernet_potongan_trx_money'];
+        $kernet_potongan_trx_ids      =$ps_result['kernet_potongan_trx_ids'];
+        $supir_extra_money_trx_money  =$ps_result['supir_extra_money_trx_money'];
+        $supir_extra_money_trx_ids    =$ps_result['supir_extra_money_trx_ids'];
+        $kernet_extra_money_trx_money =$ps_result['kernet_extra_money_trx_money'];
+        $kernet_extra_money_trx_ids   =$ps_result['kernet_extra_money_trx_ids'];
 
-          if($emt->employee_id == $trx_trp->kernet_id){
-            $kernet_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
-            $kernet_extra_money_trx_ids.="#".$emt->id." ";
-          }
-        }
+        // $uj_details2= $trx_trp->uj->details2;
+        // $supir_money=0;
+        // $kernet_money=0;
+  
+        // foreach ($uj_details2 as $k1 => $v1) {
+        //   if($v1->xfor=='Kernet'){
+        //     $kernet_money += $v1->qty * $v1->amount;
+        //   }else{
+        //     $supir_money += $v1->qty * $v1->amount;
+        //   }
+        // }
+  
+        // $supir_potongan_trx_money  = 0;
+        // $supir_potongan_trx_ids    = "";
+        // $kernet_potongan_trx_money = 0;
+        // $kernet_potongan_trx_ids   = "";
+        // foreach ($trx_trp->potongan as $kx => $v2) {
+        //   if($v2->potongan_mst->employee_id == $trx_trp->supir_id){
+        //     $supir_potongan_trx_money+=$v2->nominal_cut;
+        //     $supir_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
+        //   }
+    
+        //   if($v2->potongan_mst->employee_id == $trx_trp->kernet_id){
+        //     $kernet_potongan_trx_money+=$v2->nominal_cut;
+        //     $kernet_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
+        //   }
+        // }
+        
+        // $supir_extra_money_trx_money  = 0;
+        // $supir_extra_money_trx_ids    = "";
+        // $kernet_extra_money_trx_money = 0;
+        // $kernet_extra_money_trx_ids   = "";
+        // foreach ($trx_trp->extra_money_trxs as $k => $emt) {
+        //   if($emt->employee_id == $trx_trp->supir_id){
+        //     $supir_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+        //     $supir_extra_money_trx_ids.="#".$emt->id." ";
+        //   }
+
+        //   if($emt->employee_id == $trx_trp->kernet_id){
+        //     $kernet_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+        //     $kernet_extra_money_trx_ids.="#".$emt->id." ";
+        //   }
+        // }
 
 
         $detail                       = new FinPaymentReqDtl();
@@ -516,50 +528,61 @@ class FinPaymentReqController extends Controller
       // $ordinal=0;
       foreach ($trx_trps as $key => $trx_trp) {
         // $trx_trp = TrxTrp::where("id",$value['id'])->first();
-        
-        $uj_details2= $trx_trp->uj->details2;
-        $supir_money=0;
-        $kernet_money=0;
-  
-        foreach ($uj_details2 as $k1 => $v1) {
-          if($v1->xfor=='Kernet'){
-            $kernet_money += $v1->qty * $v1->amount;
-          }else{
-            $supir_money += $v1->qty * $v1->amount;
-          }
-        }
-  
-        $supir_potongan_trx_money  = 0;
-        $supir_potongan_trx_ids    = "";
-        $kernet_potongan_trx_money = 0;
-        $kernet_potongan_trx_ids   = "";
-        foreach ($trx_trp->potongan as $kx => $v2) {
-          if($v2->potongan_mst->employee_id == $trx_trp->supir_id){
-            $supir_potongan_trx_money+=$v2->nominal_cut;
-            $supir_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
-          }
-    
-          if($v2->potongan_mst->employee_id == $trx_trp->kernet_id){
-            $kernet_potongan_trx_money+=$v2->nominal_cut;
-            $kernet_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
-          }
-        }
-        
-        $supir_extra_money_trx_money  = 0;
-        $supir_extra_money_trx_ids    = "";
-        $kernet_extra_money_trx_money = 0;
-        $kernet_extra_money_trx_ids   = "";
-        foreach ($trx_trp->extra_money_trxs as $k => $emt) {
-          if($emt->employee_id == $trx_trp->supir_id){
-            $supir_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
-            $supir_extra_money_trx_ids.="#".$emt->id." ";
-          }
+        $ps_result                    =PSTripSupirKernet::fn_supir_kernet_for_transfer($trx_trp);
+        $supir_money                  =$ps_result['supir_money'];
+        $kernet_money                 =$ps_result['kernet_money'];
+        $supir_potongan_trx_money     =$ps_result['supir_potongan_trx_money'];
+        $supir_potongan_trx_ids       =$ps_result['supir_potongan_trx_ids'];
+        $kernet_potongan_trx_money    =$ps_result['kernet_potongan_trx_money'];
+        $kernet_potongan_trx_ids      =$ps_result['kernet_potongan_trx_ids'];
+        $supir_extra_money_trx_money  =$ps_result['supir_extra_money_trx_money'];
+        $supir_extra_money_trx_ids    =$ps_result['supir_extra_money_trx_ids'];
+        $kernet_extra_money_trx_money =$ps_result['kernet_extra_money_trx_money'];
+        $kernet_extra_money_trx_ids   =$ps_result['kernet_extra_money_trx_ids'];
 
-          if($emt->employee_id == $trx_trp->kernet_id){
-            $kernet_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
-            $kernet_extra_money_trx_ids.="#".$emt->id." ";
-          }
-        }
+        // $uj_details2= $trx_trp->uj->details2;
+        // $supir_money=0;
+        // $kernet_money=0;
+  
+        // foreach ($uj_details2 as $k1 => $v1) {
+        //   if($v1->xfor=='Kernet'){
+        //     $kernet_money += $v1->qty * $v1->amount;
+        //   }else{
+        //     $supir_money += $v1->qty * $v1->amount;
+        //   }
+        // }
+  
+        // $supir_potongan_trx_money  = 0;
+        // $supir_potongan_trx_ids    = "";
+        // $kernet_potongan_trx_money = 0;
+        // $kernet_potongan_trx_ids   = "";
+        // foreach ($trx_trp->potongan as $kx => $v2) {
+        //   if($v2->potongan_mst->employee_id == $trx_trp->supir_id){
+        //     $supir_potongan_trx_money+=$v2->nominal_cut;
+        //     $supir_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
+        //   }
+    
+        //   if($v2->potongan_mst->employee_id == $trx_trp->kernet_id){
+        //     $kernet_potongan_trx_money+=$v2->nominal_cut;
+        //     $kernet_potongan_trx_ids.="#".$v2->potongan_mst->id." ";
+        //   }
+        // }
+        
+        // $supir_extra_money_trx_money  = 0;
+        // $supir_extra_money_trx_ids    = "";
+        // $kernet_extra_money_trx_money = 0;
+        // $kernet_extra_money_trx_ids   = "";
+        // foreach ($trx_trp->extra_money_trxs as $k => $emt) {
+        //   if($emt->employee_id == $trx_trp->supir_id){
+        //     $supir_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+        //     $supir_extra_money_trx_ids.="#".$emt->id." ";
+        //   }
+
+        //   if($emt->employee_id == $trx_trp->kernet_id){
+        //     $kernet_extra_money_trx_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+        //     $kernet_extra_money_trx_ids.="#".$emt->id." ";
+        //   }
+        // }
 
 
         $detail                       = new FinPaymentReqDtl();
@@ -1470,6 +1493,39 @@ class FinPaymentReqController extends Controller
         $v->trx_trp->save();
         $SYSNOTE2 = MyLib::compareChange($SYSOLD_trx_trp,$v->trx_trp);
         array_unshift( $SYSNOTES2 , $SYSNOTE2 ); 
+
+        foreach ($v->trx_trp->extra_money_trxs as $key => $emt) {
+          $SYSOLD2                     = clone($emt);
+          $emt->received_payment=1;
+          if($emt->employee_id == $v->trx_trp->supir_id){
+            $emt->employee_rek_no = $v->trx_trp->supir_rek_no;
+          }
+          if($v->trx_trp->kernet && $emt->employee_id == $v->trx_trp->kernet_id){
+            $emt->employee_rek_no = $v->trx_trp->kernet_rek_no;
+          }
+          
+          if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.val4',true)  && !$emt->val4){
+            $emt->val4 = 1;
+            $emt->val4_user = $this->admin_id;
+            $emt->val4_at = $t_stamp;
+          }
+  
+          if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.val5',true)  && !$emt->val5){
+            $emt->val5 = 1;
+            $emt->val5_user = $this->admin_id;
+            $emt->val5_at = $t_stamp;
+          }
+  
+          if(MyAdmin::checkScope($this->permissions, 'extra_money_trx.val6',true)  && !$emt->val6){
+            $emt->val6 = 1;
+            $emt->val6_user = $this->admin_id;
+            $emt->val6_at = $t_stamp;
+          }
+          
+          $emt->save();
+          $SYSNOTE2 = MyLib::compareChange($SYSOLD2,$emt);
+          MyLog::sys("extra_money_trx",$emt->id,"transfer",$SYSNOTE2);
+        }
       }
 
       $model_query->status        = "CLOSE";
