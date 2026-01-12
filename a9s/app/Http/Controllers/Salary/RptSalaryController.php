@@ -1639,7 +1639,7 @@ class RptSalaryController extends Controller
       // }
 
       if($empx->deleted==0)
-      $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
+      $v['kerajinan'] +=  $empx->workers_from!= env('APP_NAME') ? 0 : ($empx->role=='Supir' ? $kerajinan_s : $kerajinan_k);
 
       if(
         !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 

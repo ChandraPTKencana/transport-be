@@ -274,7 +274,6 @@ class FinPaymentReqController extends Controller
   }
 
   public function validateItems($details_in){
-    MyAdmin::checkScope($this->permissions, 'fin_payment_req.val');
     $rules = [
       'details'                          => 'required|array',
       'details.*.id'             => 'required|exists:\App\Models\MySql\TrxTrp',
@@ -1234,6 +1233,11 @@ class FinPaymentReqController extends Controller
 
       $model_query            = FinPaymentReq::with(['details'=>function ($q){ $q->with('trx_trp');}])
       ->where("id",$request->id)->lockForUpdate()->first();
+
+      $datediff = MyLib::dateDiff($model_query->updated_at,$t_stamp);
+      if($datediff['minutes'] < 20){
+        throw new \Exception("Tunggu ".(20 - $datediff['minutes'])." menit lagi untuk set ke READY",1);
+      }
 
       if($model_query->status!=='OPEN'){
         throw new \Exception("Data Tidak Dapat Diset ke READY",1);
