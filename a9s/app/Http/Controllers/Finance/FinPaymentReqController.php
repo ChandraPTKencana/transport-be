@@ -274,6 +274,7 @@ class FinPaymentReqController extends Controller
   }
 
   public function validateItems($details_in){
+    MyAdmin::checkScope($this->permissions, 'fin_payment_req.val');
     $rules = [
       'details'                          => 'required|array',
       'details.*.id'             => 'required|exists:\App\Models\MySql\TrxTrp',
@@ -829,6 +830,7 @@ class FinPaymentReqController extends Controller
 
 
   public function get_trx_trp_unprocessed(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
     // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
     try {
       $model_query = TrxTrp::where("deleted",0)->where("req_deleted",0)
@@ -867,7 +869,7 @@ class FinPaymentReqController extends Controller
 
 
   public function excelDownload(Request $request){
-    MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkScope($this->permissions, 'fin_payment_req.download');
     
     set_time_limit(0);
     $callGet = $this->show( new FinPaymentReqRequest($request->toArray()));
@@ -899,7 +901,7 @@ class FinPaymentReqController extends Controller
   
 
   public function generateCSVMandiriAndSend(Request $request){
-
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
     set_time_limit(0);
     $date = new \DateTime();
     // $filename=$date->format("YmdHis").'-'.env('APP_NAME');
@@ -966,8 +968,11 @@ class FinPaymentReqController extends Controller
       // // $remotePath = 'csvf/'.$filePath . '.' . $mime["ext"];
       // // $remotePath = $filePath . '.' . $mime["ext"];
       // // $remotePath = "Upload/Users/MCM_BatchUpload/".$data['filename'] . '.' . $mime["ext"];
+
       $remotePath = "Upload/Users/MCM_BatchUpload/".$filename. '.' . $mime["ext"];
       Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
+      
+      
       // try {
       //     // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
       //     // MyLog::logging("kirim berhasil","kirim");
@@ -999,11 +1004,11 @@ class FinPaymentReqController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses Generate gagal",
       ], 400);
@@ -1014,7 +1019,7 @@ class FinPaymentReqController extends Controller
   
   public function getUpdate(Request $request){
     // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
-
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
     $rules = [
       'id' => "required|exists:\App\Models\MySql\FinPaymentReq,id",
     ];
@@ -1205,9 +1210,75 @@ class FinPaymentReqController extends Controller
 
   }
 
+  public function setToReady(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\FinPaymentReq,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+
+      $model_query            = FinPaymentReq::with(['details'=>function ($q){ $q->with('trx_trp');}])
+      ->where("id",$request->id)->lockForUpdate()->first();
+
+      if($model_query->status!=='OPEN'){
+        throw new \Exception("Data Tidak Dapat Diset ke READY",1);
+      }
+            
+      $SYSNOTES1=[];
+
+      foreach ($model_query->details as $k => $v) {
+        $SYSOLD_dtl            = clone($v);
+        $v->status             = 'READY';
+        $v->created_at         = $t_stamp;
+        $v->created_user       = $this->admin_id;
+        $v->save();
+        $SYSNOTE1 = MyLib::compareChange($SYSOLD_dtl,$v);
+        array_unshift( $SYSNOTES1 , $SYSNOTE1 ); 
+      }
+
+      MyLog::sys("fin_payment_req",$request->id,"update detail",implode("\n",$SYSNOTES1));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses SET TO READY berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
   public function renewData(Request $request){
     // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
-
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
     $rules = [
       'detail_id' => "required|exists:\App\Models\MySql\FinPaymentReqDtl,id",
     ];
@@ -1296,7 +1367,7 @@ class FinPaymentReqController extends Controller
 
   public function deleteData(Request $request){
     // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
-
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
     $rules = [
       'trx_trp_id' => "required|exists:\App\Models\MySql\FinPaymentReqDtl,trx_trp_id",
     ];
@@ -1370,7 +1441,7 @@ class FinPaymentReqController extends Controller
 
   public function setBatchNo(Request $request){
     // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
-
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
     $rules = [
       'id' => "required|exists:\App\Models\MySql\FinPaymentReq,id",
       'batch_no' => "required",
@@ -1433,7 +1504,7 @@ class FinPaymentReqController extends Controller
 
   public function setPaidDone(Request $request){
     // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
-
+    MyAdmin::checkMultiScope($this->permissions, ['fin_payment_req.create','fin_payment_req.modify']);
     $rules = [
       'id' => "required|exists:\App\Models\MySql\FinPaymentReq,id",
     ];
