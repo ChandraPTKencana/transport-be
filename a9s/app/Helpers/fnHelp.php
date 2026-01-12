@@ -14,6 +14,23 @@
 //   }
 // }
 
+if(!function_exists('excelFormulaFromField')){
+    function excelFormulaFromField(
+        string $expression,
+        array $fieldToCol,
+        int $row
+    ): string {
+        foreach ($fieldToCol as $field => $col) {
+            $expression = preg_replace(
+                '/\b' . preg_quote($field, '/') . '\b/',
+                $col . $row,
+                $expression
+            );
+        }
+        return '=' . $expression;
+    }
+}
+
 if (!function_exists('files_path')) {
     function files_path($x = "")
     {

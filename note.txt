@@ -29,7 +29,11 @@ $request->validate([
         'waktu' => 'required|custom_time_format:some_parameter', // Parameter bisa digunakan jika diperlukan
     ]);
 
-
+aplikasi logistik => upload gambar di temporary dl
 
     php artisan migrate
     php artisan run_permit
+    composer require league/flysystem-sftp-v3:^3.0
+
+    copy .env 
+    ganti bank account code pada payment_method

@@ -524,6 +524,7 @@ class RptSalaryController extends Controller
       "trip_tunggu"             => 0,
       "trip_tunggu_gaji"        => 0,
       "trip_tunggu_dinas"       => 0,
+      "potongan_manual"         => 0,
     ];
     $smp_bulan = substr($model_query->period_end,0,7);
     $salary_paid = SalaryPaid::where("period_end","like",$smp_bulan.'%')->where('val1',1)->orderBy("id","asc")->get();
@@ -680,47 +681,19 @@ class RptSalaryController extends Controller
           $newData["trip_lain_makan"]=$trip_lain_makan_s;
           $newData["trip_lain_dinas"]=$trip_lain_dinas_s;
 
-          // if(($uj_gaji_s + $trip_tunggu_gaji_s +  $trip_lain_gaji_s) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='PK')
-          //   $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='TBS')
-          //   $newData["trip_tbs_bonus_gaji"]=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='TBSK')
-          //   $newData["trip_tbsk_bonus_gaji"]=$smd->bonus_trip_supir;
+          $newData["trip_".strtolower($smd->jenis)]=1;
+          // if($smd->jenis=='CPO'){
+          // }elseif ($smd->jenis=='PK') {
+          //   $newData["trip_pk"]=1;
+          // }elseif ($smd->jenis=='TBS') {
+          //   $newData["trip_tbs"]=1;
+          // }elseif ($smd->jenis=='TBSK') {
+          //   $newData["trip_tbsk"]=1;
+          // }elseif ($smd->jenis=='LAIN') {
+          //   $newData["trip_lain"]=1;
+          // }elseif ($smd->jenis=='TUNGGU') {
+          //   $newData["trip_tunggu"]=1;
           // }
-
-          // if(($uj_dinas_s + $trip_tunggu_dinas_s +  $trip_lain_dinas_s) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='PK')
-          //   $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='TBS')
-          //   $newData["trip_tbs_bonus_dinas"]=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='TBSK')
-          //   $newData["trip_tbsk_bonus_dinas"]=$smd->bonus_trip_supir;
-          // }
-
-          if($smd->jenis=='CPO'){
-            $newData["trip_cpo"]=1;
-          }elseif ($smd->jenis=='PK') {
-            $newData["trip_pk"]=1;
-          }elseif ($smd->jenis=='TBS') {
-            $newData["trip_tbs"]=1;
-          }elseif ($smd->jenis=='TBSK') {
-            $newData["trip_tbsk"]=1;
-          }elseif ($smd->jenis=='LAIN') {
-            $newData["trip_lain"]=1;
-          }elseif ($smd->jenis=='TUNGGU') {
-            $newData["trip_tunggu"]=1;
-          }
 
           array_push($data,$newData);
         }else{
@@ -736,47 +709,22 @@ class RptSalaryController extends Controller
           $data[$search]["trip_lain_makan"]+=$trip_lain_makan_s;
           $data[$search]["trip_lain_dinas"]+=$trip_lain_dinas_s;
 
-          // if(($uj_gaji_s + $trip_tunggu_gaji_s +  $trip_lain_gaji_s) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
+          $data[$search]["trip_".strtolower($smd->jenis)]+=1;
 
-          //   if($smd->jenis=='PK')
-          //   $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_supir;
 
-          //   if($smd->jenis=='TBS')
-          //   $data[$search]["trip_tbs_bonus_gaji"]+=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='TBSK')
-          //   $data[$search]["trip_tbsk_bonus_gaji"]+=$smd->bonus_trip_supir;
+          // if($smd->jenis=='CPO'){
+          //   $data[$search]["trip_cpo"]+=1;
+          // }elseif ($smd->jenis=='PK') {
+          //   $data[$search]["trip_pk"]+=1;
+          // }elseif ($smd->jenis=='TBS') {
+          //   $data[$search]["trip_tbs"]+=1;
+          // }elseif ($smd->jenis=='TBSK') {
+          //   $data[$search]["trip_tbsk"]+=1;
+          // }elseif ($smd->jenis=='LAIN') {
+          //   $data[$search]["trip_lain"]+=1;
+          // }elseif ($smd->jenis=='TUNGGU') {
+          //   $data[$search]["trip_tunggu"]+=1;
           // }
-
-          // if(($uj_dinas_s + $trip_tunggu_dinas_s +  $trip_lain_dinas_s) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='PK')
-          //   $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='TBS')
-          //   $data[$search]["trip_tbs_bonus_dinas"]+=$smd->bonus_trip_supir;
-
-          //   if($smd->jenis=='TBSK')
-          //   $data[$search]["trip_tbsk_bonus_dinas"]+=$smd->bonus_trip_supir;
-          // }
-
-          if($smd->jenis=='CPO'){
-            $data[$search]["trip_cpo"]+=1;
-          }elseif ($smd->jenis=='PK') {
-            $data[$search]["trip_pk"]+=1;
-          }elseif ($smd->jenis=='TBS') {
-            $data[$search]["trip_tbs"]+=1;
-          }elseif ($smd->jenis=='TBSK') {
-            $data[$search]["trip_tbsk"]+=1;
-          }elseif ($smd->jenis=='LAIN') {
-            $data[$search]["trip_lain"]+=1;
-          }elseif ($smd->jenis=='TUNGGU') {
-            $data[$search]["trip_tunggu"]+=1;
-          }
         }
       }
 
@@ -814,47 +762,21 @@ class RptSalaryController extends Controller
           $newData["trip_lain_dinas"]=$trip_lain_dinas_k;
 
 
-          // if(($uj_gaji_k + $trip_tunggu_gaji_k +  $trip_lain_gaji_k) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_kernet;
+          $newData["trip_".strtolower($smd->jenis)]=1;
 
-          //   if($smd->jenis=='PK')
-          //   $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBS')
-          //   $newData["trip_tbs_bonus_gaji"]=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBSK')
-          //   $newData["trip_tbsk_bonus_gaji"]=$smd->bonus_trip_kernet;
+          // if($smd->jenis=='CPO'){
+          //   $newData["trip_cpo"]=1;
+          // }elseif ($smd->jenis=='PK') {
+          //   $newData["trip_pk"]=1;
+          // }elseif ($smd->jenis=='TBS') {
+          //   $newData["trip_tbs"]=1;
+          // }elseif ($smd->jenis=='TBSK') {
+          //   $newData["trip_tbsk"]=1;
+          // }elseif ($smd->jenis=='LAIN') {
+          //   $newData["trip_lain"]=1;
+          // }elseif ($smd->jenis=='TUNGGU') {
+          //   $newData["trip_tunggu"]=1;
           // }
-
-          // if(($uj_dinas_k + $trip_tunggu_dinas_k +  $trip_lain_dinas_k) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='PK')
-          //   $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBS')
-          //   $newData["trip_tbs_bonus_dinas"]=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBSK')
-          //   $newData["trip_tbsk_bonus_dinas"]=$smd->bonus_trip_kernet;
-          // }
-
-          if($smd->jenis=='CPO'){
-            $newData["trip_cpo"]=1;
-          }elseif ($smd->jenis=='PK') {
-            $newData["trip_pk"]=1;
-          }elseif ($smd->jenis=='TBS') {
-            $newData["trip_tbs"]=1;
-          }elseif ($smd->jenis=='TBSK') {
-            $newData["trip_tbsk"]=1;
-          }elseif ($smd->jenis=='LAIN') {
-            $newData["trip_lain"]=1;
-          }elseif ($smd->jenis=='TUNGGU') {
-            $newData["trip_tunggu"]=1;
-          }
 
           array_push($data,$newData);
 
@@ -880,47 +802,21 @@ class RptSalaryController extends Controller
           $data[$search]["trip_lain_makan"]+=$trip_lain_makan_k;
           $data[$search]["trip_lain_dinas"]+=$trip_lain_dinas_k;
 
-          // if(($uj_gaji_k + $trip_tunggu_gaji_k +  $trip_lain_gaji_k) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
+          $data[$search]["trip_".strtolower($smd->jenis)]+=1;
 
-          //   if($smd->jenis=='PK')
-          //   $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBS')
-          //   $data[$search]["trip_tbs_bonus_gaji"]+=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBSK')
-          //   $data[$search]["trip_tbsk_bonus_gaji"]+=$smd->bonus_trip_kernet;
+          // if($smd->jenis=='CPO'){
+          //   $data[$search]["trip_cpo"]+=1;
+          // }elseif ($smd->jenis=='PK') {
+          //   $data[$search]["trip_pk"]+=1;
+          // }elseif ($smd->jenis=='TBS') {
+          //   $data[$search]["trip_tbs"]+=1;
+          // }elseif ($smd->jenis=='TBSK') {
+          //   $data[$search]["trip_tbsk"]+=1;
+          // }elseif ($smd->jenis=='LAIN') {
+          //   $data[$search]["trip_lain"]+=1;
+          // }elseif ($smd->jenis=='TUNGGU') {
+          //   $data[$search]["trip_tunggu"]+=1;
           // }
-
-          // if(($uj_dinas_k + $trip_tunggu_dinas_k +  $trip_lain_dinas_k) > 0){
-          //   if($smd->jenis=='CPO')
-          //   $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='PK')
-          //   $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBS')
-          //   $data[$search]["trip_tbs_bonus_dinas"]+=$smd->bonus_trip_kernet;
-
-          //   if($smd->jenis=='TBSK')
-          //   $data[$search]["trip_tbsk_bonus_dinas"]+=$smd->bonus_trip_kernet;
-          // }
-
-          if($smd->jenis=='CPO'){
-            $data[$search]["trip_cpo"]+=1;
-          }elseif ($smd->jenis=='PK') {
-            $data[$search]["trip_pk"]+=1;
-          }elseif ($smd->jenis=='TBS') {
-            $data[$search]["trip_tbs"]+=1;
-          }elseif ($smd->jenis=='TBSK') {
-            $data[$search]["trip_tbsk"]+=1;
-          }elseif ($smd->jenis=='LAIN') {
-            $data[$search]["trip_lain"]+=1;
-          }elseif ($smd->jenis=='TUNGGU') {
-            $data[$search]["trip_tunggu"]+=1;
-          }
 
           // if($v->kernet_id==1120){
           //   MyLog::logging([
@@ -1617,8 +1513,15 @@ class RptSalaryController extends Controller
         }
     }
 
-    $pt = PotonganTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
-    ->where('created_at',">=",$smp_bulan."-01 00:00:00")
+    // $pt = PotonganTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
+    // ->where('created_at',">=",$smp_bulan."-01 00:00:00")
+    // ->where('val',1)
+    // ->where('deleted',0)
+    // ->whereNotNull("trx_trp_id")
+    // ->get();
+
+    $pt = PotonganTrx::where('tanggal',"<=",$model_query->period_end)
+    ->where('tanggal',">=",$smp_bulan."-01")
     ->where('val',1)
     ->where('deleted',0)
     ->whereNotNull("trx_trp_id")
@@ -1641,6 +1544,34 @@ class RptSalaryController extends Controller
         $newData["nominal_cut"]=$v->nominal_cut;
       }else{
         $data[$search]['nominal_cut']+=$v->nominal_cut;
+      }
+    }
+
+
+    $pt_manual = PotonganTrx::where('tanggal',"<=",$model_query->period_end)
+    ->where('tanggal',">=",$smp_bulan."-01")
+    ->where('val',1)
+    ->where('deleted',0)
+    ->whereNull("trx_trp_id")
+    ->get();
+    
+    foreach($pt_manual as $v){
+
+      $map_e = array_map(function($x){
+        return $x['employee_id'];
+      },$data);
+
+      $search = array_search($v->potongan_mst->employee_id,$map_e);
+
+      if(count($data)==0 || $search===false){
+
+        $emp = $v->potongan_mst->employee;
+        $newData = $temp;
+        $newData["rpt_salary_id"]=$model_query->id;
+        $newData["employee_id"]=$emp->id;
+        $newData["potongan_manual"]=$v->nominal_cut;
+      }else{
+        $data[$search]['potongan_manual']+=$v->nominal_cut;
       }
     }
 
@@ -1721,7 +1652,7 @@ class RptSalaryController extends Controller
         $v["trip_tbsk"]==0 && $v["trip_tbsk_bonus_gaji"]==0 && $v["trip_tbsk_bonus_dinas"]==0 &&
         $v["trip_lain"]==0 && $v["trip_lain_gaji"]==0 && $v["trip_lain_makan"]==0 && $v["trip_lain_dinas"]==0 &&
         $v["trip_tunggu"]==0 && $v["trip_tunggu_gaji"]==0 && $v["trip_tunggu_dinas"]==0 &&
-        $v["kerajinan"]==0 && $v["salary_bonus_bonus_trip"]==0) 
+        $v["kerajinan"]==0 && $v["salary_bonus_bonus_trip"]==0 && $v["potongan_manual"]==0) 
         ) RptSalaryDtl::insert($v);
     }
 
@@ -1767,7 +1698,61 @@ class RptSalaryController extends Controller
       // 'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
     ];
 
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
+    $excelMap = [
+      'sb_gaji' => 'O',
+      'sb_makan' => 'P',
+      'sb_dinas' => 'Q',
+      'salary_bonus_nominal' => 'R',
+      'ttl_periode_1' => 'S',
+      'sb_gaji_2' => 'T',
+      'sb_makan_2' => 'U',
+      'sb_dinas_2' => 'V',
+      'salary_bonus_nominal_2' => 'W',
+      'kerajinan' => 'X',
+      'bonus_gaji' => 'Y',
+      'bonus_dinas' => 'Z',
+      'salary_bonus_bonus_trip' => 'AA',
+      'ttl_periode_2' => 'AB',
+      'potongan_manual' => 'AC',
+      'ttl_periode_2_stlh_pot' => 'AD',
+      'ttl_periode_1_2' => 'AE',
+      'trip_jumlah' => 'AF',
+      'uj_gaji' => 'AG',
+      'uj_makan' => 'AH',
+      'uj_dinas' => 'AI',
+      'trip_lain' => 'AJ',
+      'trip_lain_gaji' => 'AK',
+      'trip_lain_makan' => 'AL',
+      'trip_lain_dinas' => 'AM',
+      'trip_tunggu' => 'AN',
+      'trip_tunggu_gaji' => 'AO',
+      'trip_tunggu_dinas' => 'AP',
+      'nominal_cut' => 'AQ',
+      'total' => 'AR',
+      'employee_bpjs_kesehatan' => 'AS',
+      'employee_bpjs_jamsos' => 'AT',
+      'grand_total' => 'AU',
+      // 'barang_c' => 'C',
+      // 'barang_d' => 'D',
+    ];
+
+    $formulas = [
+      'ttl_periode_1'   => 'sb_gaji + sb_makan + sb_dinas + salary_bonus_nominal',
+      'ttl_periode_2'   => 'sb_gaji_2 + sb_makan_2 + sb_dinas_2 + salary_bonus_nominal_2 + kerajinan + bonus_gaji + bonus_dinas + salary_bonus_bonus_trip',
+      
+      'ttl_periode_2_stlh_pot' => 'ttl_periode_2 - potongan_manual',
+      'ttl_periode_1_2' => 'ttl_periode_1 + ttl_periode_2_stlh_pot',
+      
+      'total' => 'uj_gaji + uj_makan + uj_dinas + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
+      'grand_total' => 'ttl_periode_1_2 + total - employee_bpjs_kesehatan - employee_bpjs_jamsos',
+      // 'sisa'         => 'barang_a - barang_c',
+      // 'rata_rata'    => '(barang_a + barang_b + barang_c) / 3',
+      // 'kompleks'     => '(barang_a + barang_b) - barang_d / 2',
+    ];
+
+
+
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"excelMap"=>$excelMap,"formulas"=>$formulas,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
 
     $result = [
       "contentType" => $mime["contentType"],
@@ -1876,7 +1861,54 @@ class RptSalaryController extends Controller
       // 'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
     ];
 
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
+
+    $excelMap = [
+      'sb_gaji' => 'O',
+      'sb_makan' => 'P',
+      'sb_dinas' => 'Q',
+      'ttl_periode_1' => 'R',
+      'sb_gaji_2' => 'S',
+      'sb_makan_2' => 'T',
+      'sb_dinas_2' => 'U',
+      'kerajinan' => 'V',
+      'bonus_gaji' => 'W',
+      'bonus_dinas' => 'X',
+      'ttl_periode_2' => 'Y',
+      'potongan_manual' => 'Z',
+      'ttl_periode_2_stlh_pot' => 'AA',
+      'ttl_periode_1_2' => 'AB',
+      'trip_jumlah' => 'AC',
+      'uj_gaji' => 'AD',
+      'uj_makan' => 'AE',
+      'uj_dinas' => 'AF',
+      'trip_lain' => 'AG',
+      'trip_lain_gaji' => 'AH',
+      'trip_lain_makan' => 'AI',
+      'trip_lain_dinas' => 'AJ',
+      'trip_tunggu' => 'AK',
+      'trip_tunggu_gaji' => 'AL',
+      'trip_tunggu_dinas' => 'AM',
+      'nominal_cut' => 'AN',
+      'total' => 'AO',
+      'employee_bpjs_kesehatan' => 'AP',
+      'employee_bpjs_jamsos' => 'AQ',
+      'grand_total' => 'AR',
+    ];
+
+    $formulas = [
+      'ttl_periode_1'   => 'sb_gaji + sb_makan + sb_dinas',
+      'ttl_periode_2'   => 'sb_gaji_2 + sb_makan_2 + sb_dinas_2 + kerajinan + bonus_gaji + bonus_dinas',
+      
+      'ttl_periode_2_stlh_pot' => 'ttl_periode_2 - potongan_manual',
+      'ttl_periode_1_2' => 'ttl_periode_1 + ttl_periode_2_stlh_pot',
+      
+      'total' => 'uj_gaji + uj_makan + uj_dinas + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
+      'grand_total' => 'ttl_periode_1_2 + total - employee_bpjs_kesehatan - employee_bpjs_jamsos',
+      // 'sisa'         => 'barang_a - barang_c',
+      // 'rata_rata'    => '(barang_a + barang_b + barang_c) / 3',
+      // 'kompleks'     => '(barang_a + barang_b) - barang_d / 2',
+    ];
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"excelMap"=>$excelMap,"formulas"=>$formulas,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
 
     $result = [
       "contentType" => $mime["contentType"],

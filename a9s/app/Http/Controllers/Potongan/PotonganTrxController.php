@@ -156,6 +156,11 @@ class PotonganTrxController extends Controller
           if (isset($like_lists["id_uj"])) {
             $q->orWhere("id_uj", "like", $like_lists["id_uj"]);
           }
+
+          if (isset($like_lists["tanggal"])) {
+            $q->orWhere("tanggal", "like", $like_lists["tanggal"]);
+          }
+          
         });        
       }
 
@@ -173,6 +178,9 @@ class PotonganTrxController extends Controller
       $model_query = $model_query->where("id_uj", 'like', '%' . $request->id_uj . '%');
     }
 
+    if (isset($request->tanggal)) {
+      $model_query = $model_query->where("tanggal", 'like', '%' . $request->tanggal . '%');
+    }
 
     $model_query = $model_query->where("potongan_mst_id",$potongan_mst_id)->with('deleted_by')->get();
 
@@ -209,6 +217,7 @@ class PotonganTrxController extends Controller
       $model_query->potongan_mst_id = $request->potongan_mst_id;
       $model_query->note            = $request->note;
       $model_query->nominal_cut     = $request->nominal_cut;
+      $model_query->tanggal         = $request->tanggal;
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
       $model_query->updated_at      = $t_stamp;
@@ -276,6 +285,7 @@ class PotonganTrxController extends Controller
       
         $model_query1->remaining_cut = $model_query1->remaining_cut + $model_query->nominal_cut - $request->nominal_cut;
         $model_query->nominal_cut   = $request->nominal_cut;
+        $model_query->tanggal       = $request->tanggal;
       }
       
       $model_query->note          = $request->note;

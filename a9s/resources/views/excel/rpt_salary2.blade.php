@@ -26,6 +26,8 @@
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">U.Kerajinan</th>
           <th colspan="2" style="border: 1px solid black; font-weight:bold;">Bonus Trip</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 2</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Potongan Manual</th>
+          <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 2 Setelah Potongan</th>
           <th rowspan="2" style="border: 1px solid black; font-weight:bold;">Ttl Periode 1+2</th>
           <th colspan="4" style="border: 1px solid black; font-weight:bold;">Trip</th>
           <th colspan="4" style="border: 1px solid black; font-weight:bold;">Trip Lain</th>
@@ -85,15 +87,25 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" >=O{{$loop->iteration+$row_jump}}+P{{$loop->iteration+$row_jump}}+Q{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" >
+            {{ excelFormulaFromField( $formulas['ttl_periode_1'], $excelMap, $loop->iteration + $row_jump) }}
+          </td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_gaji_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_makan_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["sb_dinas_2"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["kerajinan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["bonus_gaji"] }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["bonus_dinas"] }}</td> 
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =S{{$loop->iteration+$row_jump}}+T{{$loop->iteration+$row_jump}}+U{{$loop->iteration+$row_jump}}+V{{$loop->iteration+$row_jump}}+W{{$loop->iteration+$row_jump}}+X{{$loop->iteration+$row_jump}}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =R{{$loop->iteration+$row_jump}}+Y{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 
+            {{ excelFormulaFromField( $formulas['ttl_periode_2'], $excelMap, $loop->iteration + $row_jump) }}
+          </td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["potongan_manual"] }}</td> 
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 
+            {{ excelFormulaFromField( $formulas['ttl_periode_2_stlh_pot'], $excelMap, $loop->iteration + $row_jump) }}
+          </td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > 
+            {{ excelFormulaFromField( $formulas['ttl_periode_1_2'], $excelMap, $loop->iteration + $row_jump) }}
+          </td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $trip_jumlah }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
@@ -106,12 +118,14 @@
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu_gaji"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_tunggu_dinas"] }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["nominal_cut"] }}</td> 
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=AB{{$loop->iteration+$row_jump}}+AC{{$loop->iteration+$row_jump}}+AD{{$loop->iteration+$row_jump}}+AF{{$loop->iteration+$row_jump}}
-          +AG{{$loop->iteration+$row_jump}}+AH{{$loop->iteration+$row_jump}}+AJ{{$loop->iteration+$row_jump}}+AK{{$loop->iteration+$row_jump}}-AL{{$loop->iteration+$row_jump}}
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">
+            {{ excelFormulaFromField( $formulas['total'], $excelMap, $loop->iteration + $row_jump) }}
           </td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_kesehatan"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee_bpjs_jamsos"] }}</td>
-          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">=Z{{$loop->iteration+$row_jump}} + AM{{$loop->iteration+$row_jump}}-AN{{$loop->iteration+$row_jump}}-AO{{$loop->iteration+$row_jump}}</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="text-right p-1">
+          {{ excelFormulaFromField( $formulas['grand_total'], $excelMap, $loop->iteration + $row_jump) }}
+          </td>
         </tr>
         @endforeach
         <tr>
@@ -144,6 +158,8 @@
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AN{{ $row_jump + 1 }}:AN{{ count($data) + $row_jump }})</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AO{{ $row_jump + 1 }}:AO{{ count($data) + $row_jump }})</td>
           <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AP{{ $row_jump + 1 }}:AP{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AQ{{ $row_jump + 1 }}:AQ{{ count($data) + $row_jump }})</td>
+          <td style="border: 1px solid black; font-weight:bold;" class="p-1" > =SUM(AR{{ $row_jump + 1 }}:AR{{ count($data) + $row_jump }})</td>
         </tr>
       </tbody>
     </table>

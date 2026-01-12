@@ -22,6 +22,7 @@ class PotonganTrxResource extends JsonResource
             'trx_trp_id'    => $this->trx_trp_id ?? '',
             'nominal_cut'   => $this->nominal_cut,
             'note'          => $this->note ?? '',
+            'tanggal'       => $this->tanggal,
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at,
 
