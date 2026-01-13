@@ -91,7 +91,7 @@ class RunData extends Command
 
                 $std->update([
                     'attachment_1_loc' => $path,
-                    // 'attachment_1' => null, // optional
+                    'attachment_1' => null, // optional
                 ]);
             }
         });
