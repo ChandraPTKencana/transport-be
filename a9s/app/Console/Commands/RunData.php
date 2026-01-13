@@ -10,6 +10,7 @@ use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
 use App\Models\MySql\PermissionList;
 use App\Models\MySql\PermissionUserDetail;
+use App\Models\MySql\StandbyTrxDtl;
 use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\TrxTrp;
 use App\Models\MySql\Ujalan;
@@ -49,8 +50,7 @@ class RunData extends Command
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
 
-        Employee::where('deleted', 0)
-        ->whereNull('attachment_1_loc')
+        Employee::whereNull('attachment_1_loc')
         ->whereNotNull('attachment_1')
         ->chunkById(10, function ($employees) {
 
@@ -66,6 +66,32 @@ class RunData extends Command
                 $em->update([
                     'attachment_1_loc' => $path,
                     'attachment_1' => null, // optional
+                ]);
+            }
+        });
+
+        StandbyTrxDtl::whereNull('attachment_1_loc')
+        ->whereNotNull('attachment_1')
+        ->chunkById(10, function ($stds) {
+
+            foreach ($stds as $std) {
+                $binary = base64_decode($std->attachment_1);
+
+                $att_type = $std->attachment_1_type;
+                if(str_starts_with($att_type, 'image/')){
+                    $ext = explode("/",$att_type)[1];
+                }else{
+                    $ext = 'pdf';
+                }
+            
+                $file_name = "{$std->standby_trx_id}_att1_" . Str::uuid() . '.' . $ext;
+                $path = "standby_trxs/{$file_name}";
+
+                Storage::disk('public')->put($path, $binary, 'private');
+
+                $std->update([
+                    'attachment_1_loc' => $path,
+                    // 'attachment_1' => null, // optional
                 ]);
             }
         });

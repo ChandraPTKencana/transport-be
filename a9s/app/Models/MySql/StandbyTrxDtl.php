@@ -12,6 +12,10 @@ class StandbyTrxDtl extends Model
     use Excludable;
 
     protected $table = 'standby_trx_dtl';
+    protected $fillable = [
+        'attachment_1_loc',
+    ];
+
     // public $timestamps = false;
 
     // public function warehouse()

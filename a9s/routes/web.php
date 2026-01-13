@@ -205,6 +205,7 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::post('/standby_trx_do_gen_pvr', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doGenPVR']);
     Route::post('/standby_trx_do_update_pv', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'doUpdatePV']);
     Route::get('/standby_trx/download_excel', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'downloadExcel']);
+    Route::get('/standby_trx_dtl/attachment/{id}/{n}', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'getAttachment']);
 
 
     Route::get('/report/ramp/get_locations', [\App\Http\Controllers\Report\RampController::class, 'getLocations']);

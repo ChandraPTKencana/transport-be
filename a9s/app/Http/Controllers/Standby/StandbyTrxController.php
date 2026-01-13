@@ -34,6 +34,8 @@ use App\Models\MySql\TrxTrp;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MyReport;
 use App\Http\Resources\MySql\TrxTrpResource;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class StandbyTrxController extends Controller
 {
@@ -507,18 +509,20 @@ class StandbyTrxController extends Controller
 
       $ordinal=0;
       
-      $blobFiles = [];
+      // $blobFiles = [];
       $fileTypes = [];
+      $doc_locs = [];
       $attachments =$request->all()['attachments'];
       foreach ($attachments as $key => $attachment) {
-        $blobFile=null;
+        // $blobFile=null;
         $fileType=null;
-        
+        $doc_loc = null;
         if($attachment instanceof \Illuminate\Http\UploadedFile){
           
           $path     = $attachment->getRealPath();
           $fileType = $attachment->getClientMimeType();
           $fileSize = $attachment->getSize();
+          $ext      = $attachment->extension();
 
           if($fileSize > 2048000)
           throw new Exception("Baris #" . ($key + 1) . ".Size File max 2048 kb", 1);
@@ -526,16 +530,28 @@ class StandbyTrxController extends Controller
           if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
           throw new Exception("Baris #" . ($key + 1) . ".Tipe File Harus berupa jpg,jpeg, atau png", 1);
 
-          // $blobFile = base64_encode(file_get_contents($path));
+
+
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));    
-          $blobFile = base64_encode($compressedImageBinary);      
-
+          // $blobFile = base64_encode($compressedImageBinary);
+          
+          $file_name = "att1_".Str::uuid() . '.' . $ext;
+          $doc_loc = "standby_trxs/$file_name";
+          try {
+            ini_set('memory_limit', '256M');
+            Storage::disk('public')->put(
+              $doc_loc,
+              $compressedImageBinary
+            );
+          } catch (\Exception $e) {
+            throw new \Exception("Simpan Foto Gagal");
+          }
         }
 
-        $blobFiles[$key]=$blobFile;
+        // $blobFiles[$key]=$blobFile;
         $fileTypes[$key]=$fileType;
-
+        $doc_locs[$key] =$doc_loc;
         // $filename = $attachment->getClientOriginalName();
         // $attachment->storeAs('attachments', $filename);
       }
@@ -545,8 +561,9 @@ class StandbyTrxController extends Controller
         $detail                     = new StandbyTrxDtl();
         $detail->standby_trx_id     = $model_query->id;
         $detail->ordinal            = $ordinal;
-        $detail->attachment_1       = $blobFiles[$key];
+        // $detail->attachment_1       = $blobFiles[$key];
         $detail->attachment_1_type  = $fileTypes[$key];
+        $detail->attachment_1_loc   = $doc_locs[$key];
 
         $detail->tanggal            = $value['tanggal'];
         $detail->waktu              = $value['waktu']=='' ? null : $value['waktu'];
@@ -579,6 +596,14 @@ class StandbyTrxController extends Controller
       if($rollback_id>-1)
       DB::statement("ALTER TABLE standby_trx AUTO_INCREMENT = $rollback_id");
 
+
+      if(isset($doc_locs)& count($doc_locs)>0){
+        foreach ($doc_locs as $key => $value) {
+          if ($value && Storage::disk('public')->exists($value)) {
+            Storage::disk('public')->delete($value);
+          }
+        }
+      }
       // return response()->json([
       //   "message" => $e->getMessage(),
       //   "code" => $e->getCode(),
@@ -747,18 +772,20 @@ class StandbyTrxController extends Controller
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
       
-      $blobFiles = [];
+      // $blobFiles = [];
       $fileTypes = [];
+      $doc_locs = [];
       $attachments =$request->all()['attachments'];
       foreach ($attachments as $key => $attachment) {
-        $blobFile=null;
+        // $blobFile=null;
         $fileType=null;
-        
+        $doc_loc =null;
         if($attachment instanceof \Illuminate\Http\UploadedFile){
           
           $path     = $attachment->getRealPath();
           $fileType = $attachment->getClientMimeType();
           $fileSize = $attachment->getSize();
+          $ext      = $attachment->extension();
 
           if($fileSize > 2048000)
           throw new Exception("Baris #" . ($key + 1) . ".Size File max 2048 kb", 1);
@@ -769,13 +796,25 @@ class StandbyTrxController extends Controller
           // $blobFile = base64_encode(file_get_contents($path));
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-          $blobFile = base64_encode($compressedImageBinary);      
-    
+          // $blobFile = base64_encode($compressedImageBinary);      
+          
+          $file_name = $model_query->id."_att1_".Str::uuid() . '.' . $ext;
+          $doc_loc = "standby_trxs/$file_name";
+
+          try {
+            ini_set('memory_limit', '256M');
+            Storage::disk('public')->put(
+              $doc_loc,
+              $compressedImageBinary
+            );
+          } catch (\Exception $e) {
+            throw new \Exception("Simpan Foto Gagal");
+          }
         }
 
-        $blobFiles[$key]=$blobFile;
+        // $blobFiles[$key]=$blobFile;
         $fileTypes[$key]=$fileType;
-
+        $doc_locs[$key] =$doc_loc;
         // $filename = $attachment->getClientOriginalName();
         // $attachment->storeAs('attachments', $filename);
       }
@@ -888,7 +927,7 @@ class StandbyTrxController extends Controller
               $mqToCom = clone($mq);
               
               $change=0;
-              if($blobFiles[$v["ordinal"]-1]){
+              if($doc_locs[$v["ordinal"]-1]){
                 $change++;
               }else if($v["attachment_1_preview"]== null){
                 $change++;
@@ -905,19 +944,21 @@ class StandbyTrxController extends Controller
                 $mq->be_paid          = $v['be_paid'];
               }
 
-              if($change)
-              $mq->attachment_1_type  = $fileTypes[$v["ordinal"]-1];
+              if($change){
+                $mq->attachment_1_type  = $fileTypes[$v["ordinal"]-1];
+                $mq->attachment_1_loc   = $doc_locs[$v["ordinal"]-1];
+              }
 
               $mq->p_change           = true;
               $mq->updated_at         = $t_stamp;
               $mq->updated_user       = $this->admin_id;
               $mq->save();
 
-              if($change){
-                StandbyTrxDtl::where("id",$mq->id)->update([
-                  "attachment_1"      => $blobFiles[$v["ordinal"]-1]
-                ]);
-              }
+              // if($change){
+              //   StandbyTrxDtl::where("id",$mq->id)->update([
+              //     "attachment_1"      => $blobFiles[$v["ordinal"]-1]
+              //   ]);
+              // }
 
               $SYSNOTE = MyLib::compareChange($mqToCom,$mq); 
               array_push( $SYSNOTES ,"Ordinal ".$v["key"]."\n".$SYSNOTE);
@@ -953,7 +994,8 @@ class StandbyTrxController extends Controller
               "tanggal"           => $v["tanggal"],
               "waktu"             => $v["waktu"]=='' ? null : $v['waktu'],
               "note"              => $v["note"],
-              "attachment_1"      => $blobFiles[$v["ordinal"]-1],
+              // "attachment_1"      => $blobFiles[$v["ordinal"]-1],
+              "attachment_1_loc"  => $doc_locs[$v["ordinal"]-1],
               "attachment_1_type" => $fileTypes[$v["ordinal"]-1],
               "p_change"          => true,
               'created_at'        => $t_stamp,
@@ -1710,7 +1752,31 @@ class StandbyTrxController extends Controller
     ], 200);
   }
 
+  public function getAttachment($id,$n)
+  {
+    MyAdmin::checkMultiScope($this->permissions, ['standby_trx.view']);
 
+    $trx = StandbyTrxDtl::findOrFail($id);
+
+    $locField  = "attachment_{$n}_loc";
+    $typeField = "attachment_{$n}_type";
+
+    abort_unless($trx->$locField, 404);
+
+    abort_unless(Storage::disk('public')->exists($trx->$locField), 404);
+
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('public');  
+    return $disk->response(
+        $trx->$locField,
+        null,
+        [
+            'Cache-Control' => 'no-store, private',
+            'Content-Type'  => $trx->$typeField,
+            'X-Attachment'  => $n,
+        ]
+    );
+  }
 
   // public function doGenPVR(Request $request){
   //   MyAdmin::checkScope($this->permissions, 'standby_trx.generate_pvr');
