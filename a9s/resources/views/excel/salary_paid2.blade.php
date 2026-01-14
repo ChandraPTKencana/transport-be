@@ -24,11 +24,14 @@
       <tbody>
 
         @foreach($data as $k=>$v)
+        @php
+          $ktp_no=mb_strtoupper("'".$v["employee"]["ktp_no"],'UTF-8');
+        @endphp
         <tr>
           <td style="border: 1px solid black;">{{$loop->iteration}}</td>
           <td style="border: 1px solid black;">{{ $v["employee"]["role"] }}</td>
           <td style="border: 1px solid black;">{{ $v["employee"]["name"] }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee"]["ktp_no"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $ktp_no }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee"]["rek_no"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee"]["rek_name"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["employee"]["bank"] ? $v["employee"]["bank"]["code"] : "" }}</td>
