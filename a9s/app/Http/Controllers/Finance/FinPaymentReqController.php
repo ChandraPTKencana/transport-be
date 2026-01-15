@@ -932,6 +932,7 @@ class FinPaymentReqController extends Controller
 
       foreach ($raw_data['details'] as $k => $v) {
         $jumlah = (int) $v['jumlah'];
+        if($jumlah == 0) continue;
         $payment_method_id = $v['payment_method_id'];
         $jenis_rek = $v['bank_code']=='Mandiri'?'IBU':($payment_method_id==4?'BAU':'OBU');
         $dbank = Bank::where('code',$v['bank_code'])->first();
@@ -1096,9 +1097,11 @@ class FinPaymentReqController extends Controller
 
         $index = array_search($v->employee_rek_no,$nos);
         if($index===false){
-          $st="INQUIRY_FAILED";
-          $stm = "NOT REGISTERED";
-          $had_failed++;
+          // $st="INQUIRY_FAILED";
+          // $stm = "NOT REGISTERED";
+          // $had_failed++;
+          $st = "READY";
+          $stm = null;
         }else{
           if($result[$index]['status']=="SUCCESS"){
             $st = "READY";
