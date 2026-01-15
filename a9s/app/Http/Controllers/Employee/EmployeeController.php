@@ -308,8 +308,9 @@ class EmployeeController extends Controller
         $fileType = $file->getClientMimeType();
         $ext = $file->extension();
 
-        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-        throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+        if(!preg_match("/^image\/(jpeg|jpg|png)$/",$fileType))
+        throw new \Exception("File Photo : Tipe Data Harus berupa jpg,jpeg, atau png", 1);
+        // throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
         $file_name = "face_".Str::uuid() . '.' . $ext;
         $face_loc = "employees/$file_name";
@@ -405,15 +406,27 @@ class EmployeeController extends Controller
     MyAdmin::checkScope($this->permissions, 'employee.modify');
     // set_time_limit(0);
     $t_stamp = date("Y-m-d H:i:s");
-    $attachment_1_preview = $request->attachment_1_preview;
-
-    $face_loc             = null;
+    
     $face_loc_preview     = $request->face_loc_preview;
+    
+    $doc_loc_preview      = $request->attachment_1_preview;
 
-    $doc_loc             = null;
-
-    $fileType = null;
-    $change = 0;
+    $att_temp = [
+      "doc"=>[
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "newType"=>null,
+        "oldType"=>null,
+        "useNew"=>false
+      ],
+      "face"=>[
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "newType"=>null,
+        "oldType"=>null,
+        "useNew"=>false
+      ],
+    ];
     DB::beginTransaction();
     try {
       $ktp_no = MyLib::emptyStrToNull($request->ktp_no);
@@ -446,14 +459,14 @@ class EmployeeController extends Controller
       throw new \Exception("Data sudah tervalidasi",1);
 
       $SYSOLD                     = clone($model_query);
-
-      $fileType = $model_query->attachment_1_type;
-      $doc_loc = $model_query->attachment_1_loc;
+      
+      $att_temp['doc']['oldLoc']=$model_query->attachment_1_loc;
+      $att_temp['doc']['oldType']=$model_query->attachment_1_type;
 
       if($request->hasFile('attachment_1')){
         $file = $request->file('attachment_1');
         $doc_path = $file->getRealPath();
-        $fileType = $file->getClientMimeType();
+        $doc_type = $file->getClientMimeType();
         $ext = $file->extension();
 
         $file_name = $model_query->id."_att1_".Str::uuid() . '.' . $ext;
@@ -465,34 +478,33 @@ class EmployeeController extends Controller
         } catch (\Exception $e) {
           throw new \Exception("Simpan File Dokumen Gagal");
         }
-        
-        if ($model_query->attachment_1_loc != null &&  Storage::disk('public')->exists($model_query->attachment_1_loc)) {
-          Storage::disk('public')->delete($model_query->attachment_1_loc);
-        }
+
+        $att_temp['doc']['newLoc']=$doc_loc;
+        $att_temp['doc']['newType']=$doc_type;
+        $att_temp['doc']['useNew']=true;
       }
 
-      if (!$request->hasFile('attachment_1') && in_array($attachment_1_preview,[null,'null'])) {
-        $fileType = null;
-        $doc_loc = null;
-        
-        if ($model_query->attachment_1_loc != null &&  Storage::disk('public')->exists($model_query->attachment_1_loc)) {
-          Storage::disk('public')->delete($model_query->attachment_1_loc);
-        }
+      if (!$request->hasFile('attachment_1') && in_array($doc_loc_preview,[null,'null'])) {
+        $att_temp['doc']['newLoc']=null;
+        $att_temp['doc']['newType']=null;
+        $att_temp['doc']['useNew']=true;
       }
 
-      $model_query->attachment_1_type = $fileType;
-      $model_query->attachment_1_loc = $doc_loc;
+      $model_query->attachment_1_type = $att_temp['doc']['useNew']?$att_temp['doc']['newType']:$att_temp['doc']['oldType'];
+      $model_query->attachment_1_loc = $att_temp['doc']['useNew']?$att_temp['doc']['newLoc']:$att_temp['doc']['oldLoc'];
 
-      $face_loc = $model_query->face_loc_target;
+      $att_temp['face']['oldLoc']=$model_query->face_loc_target;
+      $att_temp['face']['oldType']=$model_query->face_loc_type;
 
       if($request->hasFile('face_loc')){
         $file = $request->file('face_loc');
         $path = $file->getRealPath();
-        $fileType = $file->getClientMimeType();
+        $face_type = $file->getClientMimeType();
         $ext = $file->extension();
 
-        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-        throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+        if(!preg_match("/^image\/(jpeg|jpg|png)$/",$face_type))
+        throw new \Exception("File Photo : Tipe Data Harus berupa jpg,jpeg, atau png", 1);
+        // throw new MyException([ "face_loc_target" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
         $file_name = $model_query->id."_face_".Str::uuid() . '.' . $ext;
         $face_loc = "employees/$file_name";
@@ -504,25 +516,18 @@ class EmployeeController extends Controller
           throw new \Exception("Simpan Foto Gagal");
         }
 
-        if ($model_query->face_loc_target != null &&  Storage::disk('public')->exists($model_query->face_loc_target)) {
-          Storage::disk('public')->delete($model_query->face_loc_target);
-        }
-
-        $model_query->face_loc_type   = $fileType;
-        $model_query->face_loc_target    = $face_loc;
+        $att_temp['face']['newLoc']=$face_loc;
+        $att_temp['face']['newType']=$face_type;
+        $att_temp['face']['useNew']=true;
       }
 
-      if (!$request->hasFile('face_loc') && $face_loc_preview == null) {
-        $face_loc = null;
-        $fileType = null;
-        
-        if ($model_query->face_loc_target != null && Storage::disk('public')->exists($model_query->face_loc_target)) {
-          Storage::disk('public')->delete($model_query->face_loc_target);
-        }
-        
-        $model_query->face_loc_type   = $fileType;
-        $model_query->face_loc_target    = $face_loc;
+      if (!$request->hasFile('face_loc') && in_array($face_loc_preview,[null,'null'])) {
+        $att_temp['face']['newLoc']=null;
+        $att_temp['face']['newType']=null;
+        $att_temp['face']['useNew']=true;
       }
+      $model_query->face_loc_type   = $att_temp['face']['useNew']?$att_temp['face']['newType']:$att_temp['face']['oldType'];
+      $model_query->face_loc_target = $att_temp['face']['useNew']?$att_temp['face']['newLoc']:$att_temp['face']['oldLoc'];
 
       if(!$model_query->val_at){
         $model_query->name          = $request->name;
@@ -566,20 +571,46 @@ class EmployeeController extends Controller
       MyLog::sys($this->syslog_db,$request->id,"update",$SYSNOTE);
 
       DB::commit();
+
+      try {
+        ini_set('memory_limit', '256M');
+        if ($att_temp['doc']['useNew'] &&  $att_temp['doc']['oldLoc']!= null && Storage::disk('public')->exists($att_temp['doc']['oldLoc'])) {
+          Storage::disk('public')->delete($att_temp['doc']['oldLoc']);
+        }
+
+        if ($att_temp['face']['useNew'] &&  $att_temp['face']['oldLoc']!= null && Storage::disk('public')->exists($att_temp['face']['oldLoc'])) {
+          Storage::disk('public')->delete($att_temp['face']['oldLoc']);
+        }
+      } catch (\Exception $e) {
+        
+      }
+
       return response()->json([
         "message" => "Proses ubah data berhasil",
         "updated_at" => $t_stamp,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
+      try {
+        ini_set('memory_limit', '256M');
+        if ($att_temp['doc']['useNew'] &&  $att_temp['doc']['newLoc']!= null && Storage::disk('public')->exists($att_temp['doc']['newLoc'])) {
+          Storage::disk('public')->delete($att_temp['doc']['newLoc']);
+        }
+
+        if ($att_temp['face']['useNew'] &&  $att_temp['face']['newLoc']!= null && Storage::disk('public')->exists($att_temp['face']['newLoc'])) {
+          Storage::disk('public')->delete($att_temp['face']['newLoc']);
+        }
+      } catch (\Exception $e) {
+        
+      }
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses ubah data gagal"
       ], 400);

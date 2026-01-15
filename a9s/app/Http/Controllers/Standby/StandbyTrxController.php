@@ -527,7 +527,7 @@ class StandbyTrxController extends Controller
           if($fileSize > 2048000)
           throw new Exception("Baris #" . ($key + 1) . ".Size File max 2048 kb", 1);
 
-          if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+          if(!preg_match("/^image\/(jpeg|jpg|png)$/",$fileType))
           throw new Exception("Baris #" . ($key + 1) . ".Tipe File Harus berupa jpg,jpeg, atau png", 1);
 
 
@@ -775,6 +775,7 @@ class StandbyTrxController extends Controller
       // $blobFiles = [];
       $fileTypes = [];
       $doc_locs = [];
+      $att_loop =[];
       $attachments =$request->all()['attachments'];
       foreach ($attachments as $key => $attachment) {
         // $blobFile=null;
@@ -790,7 +791,7 @@ class StandbyTrxController extends Controller
           if($fileSize > 2048000)
           throw new Exception("Baris #" . ($key + 1) . ".Size File max 2048 kb", 1);
 
-          if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+          if(!preg_match("/^image\/(jpeg|jpg|png)$/",$fileType))
           throw new Exception("Baris #" . ($key + 1) . ".Tipe File Harus berupa jpg,jpeg, atau png", 1);
 
           // $blobFile = base64_encode(file_get_contents($path));
@@ -878,6 +879,7 @@ class StandbyTrxController extends Controller
   
         if(count($for_deletes) > 0){
           MyAdmin::checkScope($this->permissions, 'standby_trx.detail.remove');
+          usort($for_deletes, fn($a, $b) => $b['ordinal'] <=> $a['ordinal']);
         }
 
         $data_to_processes = array_merge($for_deletes, $for_edits, $for_adds);
@@ -903,7 +905,24 @@ class StandbyTrxController extends Controller
             } else {
               $dt = $data_from_db[$index];
               array_push( $SYSNOTES ,"Ordinal ".$dt["ordinal"]." [Deleted]");
-              StandbyTrxDtl::where("standby_trx_id",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
+              $stdAtt = StandbyTrxDtl::where("standby_trx_id",$model_query->id)->where("ordinal",$dt["ordinal"])->first();
+              if($stdAtt){
+                // array_push($att_loop,[
+                //   "oldLoc"=>$stdAtt->attachment_1_loc,
+                //   "newLoc"=>null,
+                //   "key"=>$v,
+                //   "_"=>"DELETED",
+                // ]);
+
+                unset($doc_locs[$v["ordinal"]-1]);
+                $doc_locs = array_values($doc_locs);
+
+                unset($fileTypes[$v["ordinal"]-1]);
+                $fileTypes = array_values($fileTypes);
+
+                $stdAtt->delete();
+              }
+              // StandbyTrxDtl::where("standby_trx_id",$model_query->id)->where("ordinal",$dt["ordinal"])->delete();
             }
           } else if ($v["p_status"] == "Edit") {
             if ($index === false) {
@@ -945,6 +964,13 @@ class StandbyTrxController extends Controller
               }
 
               if($change){
+                // array_push($att_loop,[
+                //   "oldLoc"=>$mq->attachment_1_loc,
+                //   "newLoc"=>$doc_locs[$v["ordinal"]-1],
+                //   "key"=>$v,
+                //   "_"=>"EDIT",
+                // ]);
+
                 $mq->attachment_1_type  = $fileTypes[$v["ordinal"]-1];
                 $mq->attachment_1_loc   = $doc_locs[$v["ordinal"]-1];
               }
@@ -987,6 +1013,12 @@ class StandbyTrxController extends Controller
             if(count($checks)>0)
             throw new \Exception("Data telah ada di:".($checks->pluck('standby_trx_id')), 1);
 
+            // array_push($att_loop,[
+            //   "oldLoc"=>null,
+            //   "newLoc"=>$doc_locs[$v["ordinal"]-1],
+            //   "key"=>$v,
+            //   "_"=>"ADD",
+            // ]);
 
             $mq_data = [
               'standby_trx_id'    => $model_query->id,
@@ -1021,12 +1053,28 @@ class StandbyTrxController extends Controller
       MyLog::sys("standby_trx",$request->id,"update",implode("\n",$SYSNOTES));
 
       DB::commit();
+
+      foreach ($att_loop as $key => $value) {
+        if ($value['oldLoc'] &&  Storage::disk('public')->exists($value['oldLoc'])) {
+          Storage::disk('public')->delete($value['oldLoc']);
+        }
+      }
       return response()->json([
         "message" => "Proses ubah data berhasil",
         "updated_at" => $t_stamp,
+        // "att_loop" =>$att_loop,
+        // "for_deletes"=>$for_deletes,
+        // "for_edits"=>$for_edits,
+        // "for_adds"=>$for_adds,
+        // "doc_locs"=>$doc_locs,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
+      foreach ($att_loop as $key => $value) {
+        if ($value['newLoc'] &&  Storage::disk('public')->exists($value['newLoc'])) {
+          Storage::disk('public')->delete($value['newLoc']);
+        }
+      }
       // return response()->json([
       //   "getCode" => $e->getCode(),
       //   "line" => $e->getLine(),

@@ -386,8 +386,9 @@ class ExtraMoneyTrxController extends Controller
         $fileType = $file->getClientMimeType();
         $ext = $file->extension();
 
-        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-        throw new MyException([ "attachment_1" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+        if(!preg_match("/^image\/(jpeg|jpg|png)$/",$fileType))
+        throw new \Exception("File Attachment 1 : Tipe Data Harus berupa jpg,jpeg, atau png", 1);
+        // throw new MyException([ "attachment_1" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
 
         $image = Image::read($path)->scale(height: $this->height);
         $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
@@ -459,7 +460,7 @@ class ExtraMoneyTrxController extends Controller
         // $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '-2.' . $ext;
         // $location2 = "/files/extra_money_trx/{$file_name}";
 
-        if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
+        if(preg_match("/^image\/(jpeg|jpg|png)$/",$fileType)){
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
           try {
@@ -549,6 +550,24 @@ class ExtraMoneyTrxController extends Controller
     $attachment_2_preview = $request->attachment_2_preview;
     $fileType             = null;
 
+
+    $att_temp = [
+      "att_1"=>[
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "newType"=>null,
+        "oldType"=>null,
+        "useNew"=>false
+      ],
+      "att_2"=>[
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "newType"=>null,
+        "oldType"=>null,
+        "useNew"=>false
+      ],
+    ];
+
     DB::beginTransaction();
     try {
       $SYSNOTES=[];
@@ -589,14 +608,19 @@ class ExtraMoneyTrxController extends Controller
         if(!$trx_trp) 
         throw new \Exception("Trx Trp Pekerja Tidak Sesuai",1);
   
+        $att_temp['att_1']['oldLoc']=$model_query->attachment_1_loc;
+        $att_temp['att_1']['oldType']=$model_query->attachment_1_type;
+  
+
         if($request->hasFile('attachment_1')){
           $file = $request->file('attachment_1');
           $path = $file->getRealPath();
           $fileType = $file->getClientMimeType();
   
           $ext = $file->extension();
-          if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-          throw new MyException([ "attachment_1" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+          if(!preg_match("/^image\/(jpeg|jpg|png)$/",$fileType))
+          throw new \Exception("File Attachment 1 : Tipe Data Harus berupa jpg,jpeg, atau png", 1);
+          // throw new MyException([ "attachment_1" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
   
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
@@ -620,25 +644,32 @@ class ExtraMoneyTrxController extends Controller
             throw new \Exception("Simpan Foto Gagal");
           }
   
-          if ($model_query->attachment_1_loc != null && Storage::disk('public')->exists($model_query->attachment_1_loc)) {
-              Storage::disk('public')->delete($model_query->attachment_1_loc);
-          }
+          // if ($model_query->attachment_1_loc != null && Storage::disk('public')->exists($model_query->attachment_1_loc)) {
+          //     Storage::disk('public')->delete($model_query->attachment_1_loc);
+          // }
           
-          $model_query->attachment_1_type   = $fileType;
-          $model_query->attachment_1_loc    = $location;
-  
+          $att_temp['att_1']['newLoc']=$location;
+          $att_temp['att_1']['newType']=$fileType;
+          $att_temp['att_1']['useNew']=true;
         }
   
         if (!$request->hasFile('attachment_1') && in_array($attachment_1_preview,[null,'null'])) {
-          if ($model_query->attachment_1_loc != null && Storage::disk('public')->exists(files_path($model_query->attachment_1_loc))) {
-            Storage::disk('public')->delete($model_query->attachment_1_loc);
-          }
-          $location = null;
-          $fileType = null;
-          $model_query->attachment_1_type   = $fileType;
-          $model_query->attachment_1_loc    = $location;
+          // if ($model_query->attachment_1_loc != null && Storage::disk('public')->exists(files_path($model_query->attachment_1_loc))) {
+          //   Storage::disk('public')->delete($model_query->attachment_1_loc);
+          // }
+          // $location = null;
+          // $fileType = null;
+
+          $att_temp['att_1']['newLoc']=null;
+          $att_temp['att_1']['newType']=null;
+          $att_temp['att_1']['useNew']=true;
+
+          // $model_query->attachment_1_type   = $fileType;
+          // $model_query->attachment_1_loc    = $location;
         }
   
+        $model_query->attachment_1_type = $att_temp['att_1']['useNew']?$att_temp['att_1']['newType']:$att_temp['att_1']['oldType'];
+        $model_query->attachment_1_loc = $att_temp['att_1']['useNew']?$att_temp['att_1']['newLoc']:$att_temp['att_1']['oldLoc'];
 
         $model_query->extra_money_id      = $request->extra_money_id;
         $model_query->tanggal             = $request->tanggal;
@@ -687,6 +718,8 @@ class ExtraMoneyTrxController extends Controller
       //   $model_query->attachment_2_loc    = $location;
 
       // }
+      $att_temp['att_2']['oldLoc']=$model_query->attachment_2_loc;
+      $att_temp['att_2']['oldType']=$model_query->attachment_2_type;
 
       if($request->hasFile('attachment_2')){
         $file = $request->file('attachment_2');
@@ -706,7 +739,7 @@ class ExtraMoneyTrxController extends Controller
         // $file_name = md5(preg_replace('/( |-|:)/', '', $timestamp)) . '.' . $ext;
         // $location2 = "/files/extra_money_trx/{$file_name}";
 
-        if(preg_match("/image\/[jpeg|jpg|png]/",$fileType)){
+        if(preg_match("/^image\/(jpeg|jpg|png)$/",$fileType)){
           $image = Image::read($path)->scale(height: $this->height);
           $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
           try {
@@ -731,24 +764,35 @@ class ExtraMoneyTrxController extends Controller
           }
         }
 
-        if ($model_query->attachment_2_loc != null && Storage::disk('public')->exists($model_query->attachment_2_loc)) {
-          Storage::disk('public')->delete($model_query->attachment_2_loc);
-        }
         
-        $model_query->attachment_2_type   = $fileType;
-        $model_query->attachment_2_loc    = $location2;
+        $att_temp['att_2']['newLoc']=$location2;
+        $att_temp['att_2']['newType']=$fileType;
+        $att_temp['att_2']['useNew']=true;
+
+        // if ($model_query->attachment_2_loc != null && Storage::disk('public')->exists($model_query->attachment_2_loc)) {
+        //   Storage::disk('public')->delete($model_query->attachment_2_loc);
+        // }
+        
+        // $model_query->attachment_2_type   = $fileType;
+        // $model_query->attachment_2_loc    = $location2;
 
       }
 
       if (!$request->hasFile('attachment_2') && in_array($attachment_2_preview,[null,'null'])) {
-        if ($model_query->attachment_2_loc != null && Storage::disk('public')->exists($model_query->attachment_2_loc)) {
-          Storage::disk('public')->delete($model_query->attachment_2_loc);
-        }
-        $location2 = null;
-        $fileType = null;
-        $model_query->attachment_2_type   = $fileType;
-        $model_query->attachment_2_loc    = $location2;
+        $att_temp['att_2']['newLoc']=null;
+        $att_temp['att_2']['newType']=null;
+        $att_temp['att_2']['useNew']=true;
+
+        // if ($model_query->attachment_2_loc != null && Storage::disk('public')->exists($model_query->attachment_2_loc)) {
+        //   Storage::disk('public')->delete($model_query->attachment_2_loc);
+        // }
+        // $location2 = null;
+        // $fileType = null;
+        // $model_query->attachment_2_type   = $fileType;
+        // $model_query->attachment_2_loc    = $location2;
       }
+      $model_query->attachment_2_type = $att_temp['att_2']['useNew']?$att_temp['att_2']['newType']:$att_temp['att_2']['oldType'];
+      $model_query->attachment_2_loc = $att_temp['att_2']['useNew']?$att_temp['att_2']['newLoc']:$att_temp['att_2']['oldLoc'];
 
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
@@ -760,6 +804,20 @@ class ExtraMoneyTrxController extends Controller
       MyLog::sys("extra_money_trx",$request->id,"update",implode("\n",$SYSNOTES));
 
       DB::commit();
+
+      try {
+        ini_set('memory_limit', '256M');
+        if ($att_temp['att_1']['useNew'] &&  $att_temp['att_1']['oldLoc']!= null && Storage::disk('public')->exists($att_temp['att_1']['oldLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_1']['oldLoc']);
+        }
+
+        if ($att_temp['att_2']['useNew'] &&  $att_temp['att_2']['oldLoc']!= null && Storage::disk('public')->exists($att_temp['att_2']['oldLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_2']['oldLoc']);
+        }
+      } catch (\Exception $e) {
+        
+      }
+
       return response()->json([
         "message" => "Proses ubah data berhasil",
         "updated_at" => $t_stamp,
@@ -767,8 +825,21 @@ class ExtraMoneyTrxController extends Controller
     } catch (\Exception $e) {
       DB::rollback();
 
-      if ($location && File::exists(files_path($location)))
-      unlink(files_path($location));
+      try {
+        ini_set('memory_limit', '256M');
+        if ($att_temp['att_1']['useNew'] &&  $att_temp['att_1']['newLoc']!= null && Storage::disk('public')->exists($att_temp['att_1']['newLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_1']['newLoc']);
+        }
+
+        if ($att_temp['att_2']['useNew'] &&  $att_temp['att_2']['newLoc']!= null && Storage::disk('public')->exists($att_temp['att_2']['newLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_2']['newLoc']);
+        }
+      } catch (\Exception $e) {
+        
+      }
+
+      // if ($location && File::exists(files_path($location)))
+      // unlink(files_path($location));
       
       // return response()->json([
       //   "getCode" => $e->getCode(),
