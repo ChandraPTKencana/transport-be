@@ -36,6 +36,11 @@ class PotonganTrx extends Model
     {
         return $this->belongsTo(IsUser::class, 'deleted_user', "id");
     }
+    
+    public function trx_trp()
+    {
+        return $this->belongsTo(TrxTrp::class, 'trx_trp_id', "id");
+    }
 
     // public function confirmer()
     // {

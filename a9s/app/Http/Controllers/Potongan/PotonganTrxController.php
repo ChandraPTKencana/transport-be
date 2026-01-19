@@ -182,7 +182,7 @@ class PotonganTrxController extends Controller
       $model_query = $model_query->where("tanggal", 'like', '%' . $request->tanggal . '%');
     }
 
-    $model_query = $model_query->where("potongan_mst_id",$potongan_mst_id)->with('deleted_by')->get();
+    $model_query = $model_query->where("potongan_mst_id",$potongan_mst_id)->with(['deleted_by','trx_trp'])->get();
 
     return response()->json([
       // "data"=>PotonganTrxResource::collection($potongan_trxs->keyBy->id),

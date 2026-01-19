@@ -20,6 +20,7 @@ class PotonganTrxResource extends JsonResource
         return [
             'id'            => $this->id,
             'trx_trp_id'    => $this->trx_trp_id ?? '',
+            'trx_trp'       => new TrxTrpResource($this->whenLoaded('trx_trp')),
             'nominal_cut'   => $this->nominal_cut,
             'note'          => $this->note ?? '',
             'tanggal'       => $this->tanggal,
