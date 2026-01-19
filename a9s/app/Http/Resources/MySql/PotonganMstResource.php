@@ -7,6 +7,7 @@ use App\Http\Resources\IsUserResource;
 use App\Models\MySql\Employee;
 use App\Models\MySql\PotonganTrx;
 use App\Models\MySql\StandbyDtl;
+use Illuminate\Support\Facades\Storage;
 
 class PotonganMstResource extends JsonResource
 {
@@ -45,11 +46,15 @@ class PotonganMstResource extends JsonResource
             'trxs'          => PotonganTrxResource::collection($this->whenLoaded('trxs')),
 
             'attachment_1'          => "",
-            'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+            // 'attachment_1_preview'  => $this->attachment_1 ? "data:".$this->attachment_1_type.";base64,".$this->attachment_1 : "",
+            'attachment_1_preview'  => $this->attachment_1_loc && Storage::disk('public')->exists($this->attachment_1_loc) ? "potongan_mst/attachment/".$this->id."/1":"",
+            'attachment_1_type'     => $this->attachment_1_type,
 
             'attachment_2'          => "",
-            'attachment_2_preview'  => $this->attachment_2 ? "data:".$this->attachment_2_type.";base64,".$this->attachment_2 : "",
-
+            // 'attachment_2_preview'  => $this->attachment_2 ? "data:".$this->attachment_2_type.";base64,".$this->attachment_2 : "",
+            'attachment_2_preview'  => $this->attachment_2_loc && Storage::disk('public')->exists($this->attachment_2_loc) ? "potongan_mst/attachment/".$this->id."/2":"",
+            'attachment_2_type'     => $this->attachment_2_type,
+            
             'deleted'               => $this->deleted,
             'deleted_user'          => $this->deleted_user ?? "",
             'deleted_at'            => $this->deleted_at ?? "",

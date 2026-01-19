@@ -32,6 +32,7 @@ use App\Http\Resources\MySql\IsUserResource;
 use App\Exports\MyReport;
 use App\Models\MySql\ExtraMoneyTrx;
 use App\PS\PSPotonganTrx;
+use App\PS\PSTripSupirKernet;
 
 class TrxTrpController extends Controller
 {
@@ -611,6 +612,9 @@ class TrxTrpController extends Controller
       $ujalan = \App\Models\MySql\Ujalan::where("id",$request->id_uj)
       ->where("jenis",$request->jenis)
       ->where("deleted",0)
+      ->with(['details2'=>function ($q){
+        $q->whereIn('xfor',['Supir','Kernet']);
+      }])
       ->lockForUpdate()
       ->first();
 
@@ -619,6 +623,37 @@ class TrxTrpController extends Controller
 
       if($ujalan->asst_opt=="DENGAN KERNET" && !isset($kernet_dt))
       throw new \Exception("KERNET HARUS DIPILIH",1);
+
+      $is_uj_dinas_supir =  false;
+      $is_uj_dinas_kernet =  false;
+
+      foreach ($ujalan->details2 as $kd => $vd) {
+        if($vd->xfor=='Supir' && str_contains(strtolower($vd->ac_account_name), 'dinas') ){
+          $is_uj_dinas_supir = true;
+        }
+
+        if($vd->xfor=='Kernet' && str_contains(strtolower($vd->ac_account_name), 'dinas') ){
+          $is_uj_dinas_kernet = true;
+        }
+      }
+
+      if($is_uj_dinas_supir && $supir_dt->workers_from == env('APP_NAME') ){
+        throw new \Exception("Supir bukan dari pabrik lain",1);
+      }
+
+      if(!$is_uj_dinas_supir && $supir_dt->workers_from != env('APP_NAME') ){
+        throw new \Exception("Supir berasal dari pabrik lain",1);
+      }
+
+      if(isset($kernet_dt)){
+        if($is_uj_dinas_kernet && $kernet_dt->workers_from == env('APP_NAME')){
+          throw new \Exception("Kernet bukan dari pabrik lain",1);
+        }
+
+        if(!$is_uj_dinas_kernet && $kernet_dt->workers_from != env('APP_NAME') ){
+          throw new \Exception("Kernet berasal dari pabrik lain",1);
+        }
+      }
 
       $model_query->id_uj               = $ujalan->id;
       $model_query->jenis               = $request->jenis;
@@ -1246,53 +1281,65 @@ class TrxTrpController extends Controller
     $supir_remarks  = "UJ#".$trx_trp->id;
     $kernet_remarks = "UJ#".$trx_trp->id;
 
-    $supir_money = 0;
-    $kernet_money = 0;
-    foreach ($trx_trp->uj_details2 as $key => $val) {
-      if($val->xfor=='Kernet'){
-        $kernet_money+=$val->amount*$val->qty;
-      }else{
-        $supir_money+=$val->amount*$val->qty;
-      }
-    }
+    $ps_trip_supir_kernet = PSTripSupirKernet::fn_supir_kernet_for_transfer($trx_trp);
 
-    $ptg_ps_ids = "";
-    $ptg_pk_ids = "";
-    foreach ($trx_trp->potongan as $k => $v) {
-      if($v->potongan_mst->employee_id == $supir_id){
-        $ttl_ps+=$v->nominal_cut;
-        $ptg_ps_ids.="#".$v->potongan_mst->id." ";
-      }
+    $supir_money = $ps_trip_supir_kernet['supir_money']+$ps_trip_supir_kernet['supir_extra_money_trx_money']-$ps_trip_supir_kernet['supir_potongan_trx_money'];
+    $kernet_money = $ps_trip_supir_kernet['kernet_money']+$ps_trip_supir_kernet['kernet_extra_money_trx_money']-$ps_trip_supir_kernet['kernet_potongan_trx_money'];
 
-      if($v->potongan_mst->employee_id == $kernet_id){
-        $ttl_pk+=$v->nominal_cut;
-        $ptg_pk_ids.="#".$v->potongan_mst->id." ";
-      }
-    }
+    $xfor_supir_exists = $ps_trip_supir_kernet['supir_money'] > 0;
+    $xfor_kernet_exists = $ps_trip_supir_kernet['kernet_money'] > 0;
+
+    $sem_remarks = $ps_trip_supir_kernet['supir_extra_money_trx_ids']; 
+    $kem_remarks = $ps_trip_supir_kernet['kernet_extra_money_trx_ids']; 
 
 
-    $supir_money -= $ttl_ps;
-    $kernet_money -= $ttl_pk;
+    // $supir_money = 0;
+    // $kernet_money = 0;
+    // foreach ($trx_trp->uj_details2 as $key => $val) {
+    //   if($val->xfor=='Kernet'){
+    //     $kernet_money+=$val->amount*$val->qty;
+    //   }else{
+    //     $supir_money+=$val->amount*$val->qty;
+    //   }
+    // }
 
-    $sem_remarks="";
-    $kem_remarks="";
-    foreach ($trx_trp->extra_money_trxs as $k => $emt) {
-      if($emt->employee_id == $supir_id){
-        $supir_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
-        if($sem_remarks=="")
-          $sem_remarks="EM#".$emt->id;
-        else
-          $sem_remarks.=",".$emt->id;
-      }
+    // $ptg_ps_ids = "";
+    // $ptg_pk_ids = "";
+    // foreach ($trx_trp->potongan as $k => $v) {
+    //   if($v->potongan_mst->employee_id == $supir_id){
+    //     $ttl_ps+=$v->nominal_cut;
+    //     $ptg_ps_ids.="#".$v->potongan_mst->id." ";
+    //   }
 
-      if($emt->employee_id == $kernet_id){
-        $kernet_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
-        if($kem_remarks=="")
-          $kem_remarks="EM#".$emt->id;
-        else
-          $kem_remarks.=",".$emt->id;
-      }
-    }
+    //   if($v->potongan_mst->employee_id == $kernet_id){
+    //     $ttl_pk+=$v->nominal_cut;
+    //     $ptg_pk_ids.="#".$v->potongan_mst->id." ";
+    //   }
+    // }
+
+
+    // $supir_money -= $ttl_ps;
+    // $kernet_money -= $ttl_pk;
+
+    // $sem_remarks="";
+    // $kem_remarks="";
+    // foreach ($trx_trp->extra_money_trxs as $k => $emt) {
+    //   if($emt->employee_id == $supir_id){
+    //     $supir_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+    //     if($sem_remarks=="")
+    //       $sem_remarks="EM#".$emt->id;
+    //     else
+    //       $sem_remarks.=",".$emt->id;
+    //   }
+
+    //   if($emt->employee_id == $kernet_id){
+    //     $kernet_money+=($emt->extra_money->nominal * $emt->extra_money->qty) ;
+    //     if($kem_remarks=="")
+    //       $kem_remarks="EM#".$emt->id;
+    //     else
+    //       $kem_remarks.=",".$emt->id;
+    //   }
+    // }
 
     if($sem_remarks!="") $supir_remarks.=",".$sem_remarks;
     if($kem_remarks!="") $kernet_remarks.=",".$kem_remarks;
@@ -2299,8 +2346,8 @@ class TrxTrpController extends Controller
         if($id!=""){
           $miniError.="Trx-".$id.".";
         }
-        // $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
-        $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal->".$e->getLine().$e->getCode().$e->getMessage();
+        $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal";
+        // $miniError.="PVR Batal Dibuat. Akses Jaringan Gagal->".$e->getLine().$e->getCode().$e->getMessage();
       }
       return response()->json([
         "message" => $miniError,
@@ -2412,32 +2459,39 @@ class TrxTrpController extends Controller
     $sql = \App\Models\MySql\UjalanDetail2::selectRaw('SUM(qty*amount) as total')->where("id_uj",$trx_trp->id_uj)->first();
     $amount_paid = $sql->total; // call from child
 
+    $ps_trip_supir_kernet = PSTripSupirKernet::fn_supir_kernet_for_transfer($trx_trp);
+    $supir_money  = $ps_trip_supir_kernet['supir_money'];
+    $kernet_money = $ps_trip_supir_kernet['kernet_money'];
+    $ttl_ps       = $ps_trip_supir_kernet['supir_potongan_trx_money'];
+    $ttl_pk       = $ps_trip_supir_kernet['kernet_potongan_trx_money'];
+
+
     // Start Potongan! CHECK Potongan
-    $supir_money = 0;
-    $kernet_money = 0;
-    $ttl_ps     = 0;
-    $ttl_pk     = 0;
+    // $supir_money = 0;
+    // $kernet_money = 0;
+    // $ttl_ps     = 0;
+    // $ttl_pk     = 0;
 
-    foreach ($trx_trp->potongan as $k => $v) {
-      if($v->potongan_mst->employee_id == $trx_trp->supir_id){
-        $ttl_ps+=$v->nominal_cut;
-      }
+    // foreach ($trx_trp->potongan as $k => $v) {
+    //   if($v->potongan_mst->employee_id == $trx_trp->supir_id){
+    //     $ttl_ps+=$v->nominal_cut;
+    //   }
 
-      if($v->potongan_mst->employee_id == $trx_trp->kernet_id){
-        $ttl_pk+=$v->nominal_cut;
-      }
-    }
+    //   if($v->potongan_mst->employee_id == $trx_trp->kernet_id){
+    //     $ttl_pk+=$v->nominal_cut;
+    //   }
+    // }
 
-    // Done Potongan! GET Total Potongan Supir Kernet
-    foreach ($ujalan_details2 as $key => $v) {
-      // Start Potongan! SET Total Uang Yang diterima Supir Kernet
-      if($v->xfor=='Kernet'){
-        $kernet_money+=$v->amount*$v->qty;
-      }else{
-        $supir_money+=$v->amount*$v->qty;
-      }
-      // Done Potongan! GET Total Uang Yang diterima Supir Kernet
-    }
+    // // Done Potongan! GET Total Potongan Supir Kernet
+    // foreach ($ujalan_details2 as $key => $v) {
+    //   // Start Potongan! SET Total Uang Yang diterima Supir Kernet
+    //   if($v->xfor=='Kernet'){
+    //     $kernet_money+=$v->amount*$v->qty;
+    //   }else{
+    //     $supir_money+=$v->amount*$v->qty;
+    //   }
+    //   // Done Potongan! GET Total Uang Yang diterima Supir Kernet
+    // }
 
     // Start Potongan! KURANGI Adm Qty Apabila Uang Tf 0 
     $no_adm_s = 0;
@@ -3157,27 +3211,35 @@ class TrxTrpController extends Controller
 
   public function LinkToExtraMoneyTrx(Request $request)
   {
-
     DB::beginTransaction();
     try {
       $model_query = new TrxTrp();
-      
+
       $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3,4,5])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
         $q->where('val5',1)->orWhere('val6',1);
-      })->where('received_payment',0)->get();
+      })->where('received_payment',0)->whereDoesntHave('fin_payment_req_dtl')->get();
       $update=0;
+      $syslogs=[];
       foreach ($model_query as $key => $mq) {
-        if(ExtraMoneyTrx::where(function ($q)use($mq){
+        $all_id=[];
+        $emts =ExtraMoneyTrx::where(function ($q)use($mq){
           $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
         })->whereIn("payment_method_id",[2,3,4,5])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
         ->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)->where('val6',1)
-        ->whereNull("trx_trp_id")
-        ->update([
-          'trx_trp_id'=>$mq->id
-        ])){
+        ->whereNull("trx_trp_id")->get();
+
+        foreach ($emts as $kemt => $emt) {
+          $emt->trx_trp_id = $mq->id;
+          $emt->update();
           $update++;
-        };
+          array_push($all_id,$emt->id);
+        }
+
+        if(count($all_id)>0){
+          array_push($syslogs,"trx_trp_id:".$mq->id."->".implode(",",$all_id));
+        }
       }
+      MyLog::sys("extra_money",null,"linktotrxtrp",implode("|",$syslogs));
       DB::commit();
       if($update==0){
         return response()->json([

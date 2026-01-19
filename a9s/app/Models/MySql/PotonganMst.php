@@ -11,8 +11,12 @@ class PotonganMst extends Model
 
     protected $table = 'potongan_mst';  
 
+    protected $fillable = [
+        'attachment_1_loc',
+        'attachment_2_loc',
+    ];
     // protected $hidden = [
-    //     'attachment_1',
+    //     'attachment_1_loc',
     // ];
     // public $timestamps = false;
 

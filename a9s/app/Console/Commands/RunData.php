@@ -10,6 +10,7 @@ use App\Models\MySql\PermissionGroupDetail;
 use App\Models\MySql\PermissionGroupUser;
 use App\Models\MySql\PermissionList;
 use App\Models\MySql\PermissionUserDetail;
+use App\Models\MySql\PotonganMst;
 use App\Models\MySql\StandbyTrxDtl;
 use App\Models\MySql\TrxAbsen;
 use App\Models\MySql\TrxTrp;
@@ -50,48 +51,100 @@ class RunData extends Command
         $this->info("------------------------------------------------------------------------------------------\n ");
         $this->info("Start\n ");
 
-        Employee::whereNull('attachment_1_loc')
+        // Employee::whereNull('attachment_1_loc')
+        // ->whereNotNull('attachment_1')
+        // ->chunkById(10, function ($employees) {
+
+        //     foreach ($employees as $em) {
+        //         $binary = base64_decode($em->attachment_1);
+
+        //         $ext = str_starts_with($em->attachment_1_type, 'image/') ? 'png' : 'pdf';
+        //         $file_name = "{$em->id}_att1_" . Str::uuid() . '.' . $ext;
+        //         $path = "employees/{$file_name}";
+
+        //         Storage::disk('public')->put($path, $binary, 'private');
+
+        //         $em->update([
+        //             'attachment_1_loc' => $path,
+        //             'attachment_1' => null, // optional
+        //         ]);
+        //     }
+        // });
+
+        // StandbyTrxDtl::whereNull('attachment_1_loc')
+        // ->whereNotNull('attachment_1')
+        // ->chunkById(10, function ($stds) {
+
+        //     foreach ($stds as $std) {
+        //         $binary = base64_decode($std->attachment_1);
+
+        //         $att_type = $std->attachment_1_type;
+        //         if(str_starts_with($att_type, 'image/')){
+        //             $ext = explode("/",$att_type)[1];
+        //         }else{
+        //             $ext = 'pdf';
+        //         }
+            
+        //         $file_name = "{$std->standby_trx_id}_att1_" . Str::uuid() . '.' . $ext;
+        //         $path = "standby_trxs/{$file_name}";
+
+        //         Storage::disk('public')->put($path, $binary, 'private');
+
+        //         $std->update([
+        //             'attachment_1_loc' => $path,
+        //             'attachment_1' => null, // optional
+        //         ]);
+        //     }
+        // });
+
+        PotonganMst::whereNull('attachment_1_loc')
         ->whereNotNull('attachment_1')
-        ->chunkById(10, function ($employees) {
+        ->chunkById(10, function ($ptgs) {
 
-            foreach ($employees as $em) {
-                $binary = base64_decode($em->attachment_1);
+            foreach ($ptgs as $ptg) {
+                $binary = base64_decode($ptg->attachment_1);
 
-                $ext = str_starts_with($em->attachment_1_type, 'image/') ? 'png' : 'pdf';
-                $file_name = "{$em->id}_att1_" . Str::uuid() . '.' . $ext;
-                $path = "employees/{$file_name}";
-
-                Storage::disk('public')->put($path, $binary, 'private');
-
-                $em->update([
-                    'attachment_1_loc' => $path,
-                    'attachment_1' => null, // optional
-                ]);
-            }
-        });
-
-        StandbyTrxDtl::whereNull('attachment_1_loc')
-        ->whereNotNull('attachment_1')
-        ->chunkById(10, function ($stds) {
-
-            foreach ($stds as $std) {
-                $binary = base64_decode($std->attachment_1);
-
-                $att_type = $std->attachment_1_type;
+                $att_type = $ptg->attachment_1_type;
                 if(str_starts_with($att_type, 'image/')){
                     $ext = explode("/",$att_type)[1];
                 }else{
                     $ext = 'pdf';
                 }
             
-                $file_name = "{$std->standby_trx_id}_att1_" . Str::uuid() . '.' . $ext;
-                $path = "standby_trxs/{$file_name}";
+                $file_name = "{$ptg->standby_trx_id}_att1_" . Str::uuid() . '.' . $ext;
+                $path = "potongan_msts/{$file_name}";
 
                 Storage::disk('public')->put($path, $binary, 'private');
 
-                $std->update([
+                $ptg->update([
                     'attachment_1_loc' => $path,
                     'attachment_1' => null, // optional
+                ]);
+            }
+        });
+
+        PotonganMst::whereNull('attachment_2_loc')
+        ->whereNotNull('attachment_2')
+        ->chunkById(10, function ($ptgs) {
+
+            foreach ($ptgs as $ptg) {
+                $binary = base64_decode($ptg->attachment_2);
+
+                $att_type = $ptg->attachment_2_type;
+                if(str_starts_with($att_type, 'image/')){
+                    $ext = explode("/",$att_type)[1];
+                }else{
+                    $ext = 'pdf';
+                }
+            
+                $file_name = "{$ptg->standby_trx_id}_att2_" . Str::uuid() . '.' . $ext;
+                $path = "potongan_msts/{$file_name}";
+
+                Storage::disk('public')->put($path, $binary, 'private');
+
+                $ptg->update([
+                    'attachment_2_loc' => $path,
+                    'attachment_2' => null, // optional
                 ]);
             }
         });

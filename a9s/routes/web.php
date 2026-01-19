@@ -256,6 +256,7 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::put('/potongan_mst_unremove', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'undelete']);
     Route::get('/potongan_mst_load_local', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'loadLocal']);
     Route::put('/potongan_mst_validasi', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'validasi']);
+    Route::get('/potongan_mst/attachment/{id}/{n}', [\App\Http\Controllers\Potongan\PotonganMstController::class, 'getAttachment']);
 
     Route::get('/potongan_trxs', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'index']);
     Route::get('/potongan_trx', [\App\Http\Controllers\Potongan\PotonganTrxController::class, 'show']);

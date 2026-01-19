@@ -24,6 +24,8 @@ use App\Http\Resources\MySql\PotonganMstResource;
 use App\Http\Resources\MySql\IsUserResource;
 use App\Models\MySql\Employee;
 use App\Models\MySql\PotonganTrx;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PotonganMstController extends Controller
 {
@@ -41,10 +43,12 @@ class PotonganMstController extends Controller
 
   public function loadLocal()
   {
-    MyAdmin::checkMultiScope($this->permissions, ['potongan_mst.create','potongan_mst.modify']);
-
-    $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
-    $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet'])->get();
+    $list_vehicle=[];
+    $list_employee=[];
+    if(MyAdmin::checkMultiScope($this->permissions, ['potongan_mst.create','potongan_mst.modify'],true)){
+      $list_vehicle = \App\Models\MySql\Vehicle::where("deleted",0)->get();
+      $list_employee = \App\Models\MySql\Employee::exclude(['attachment_1','attachment_2'])->available()->verified()->whereIn("role",['Supir','Kernet'])->get();  
+    }
     
     return response()->json([
       "list_vehicle" => $list_vehicle,
@@ -227,7 +231,7 @@ class PotonganMstController extends Controller
 
   public function show(PotonganMstRequest $request)
   {
-    MyAdmin::checkScope($this->permissions, 'potongan_mst.view');
+    MyAdmin::checkMultiScope($this->permissions, ['potongan_mst.view']);
     
     $model_query = PotonganMst::with(['val_by','val1_by','employee'])
     ->find($request->id);
@@ -240,6 +244,8 @@ class PotonganMstController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'potongan_mst.create');
 
+    $att_1_loc = null;
+    $att_2_loc = null;
     DB::beginTransaction();
     $t_stamp = date("Y-m-d H:i:s");
     try {
@@ -249,8 +255,17 @@ class PotonganMstController extends Controller
         $file = $request->file('attachment_1');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        $blobFile = base64_encode(file_get_contents($path));
-        $model_query->attachment_1 = $blobFile;
+        $ext = $file->extension();
+
+        $file_name = "att1_".Str::uuid() . '.' . $ext;
+        $att_1_loc = "potongan_msts/$file_name";
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($att_1_loc, file_get_contents($path));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+        $model_query->attachment_1_loc = $att_1_loc;
         $model_query->attachment_1_type = $fileType;
       }
 
@@ -258,8 +273,17 @@ class PotonganMstController extends Controller
         $file = $request->file('attachment_2');
         $path = $file->getRealPath();
         $fileType = $file->getClientMimeType();
-        $blobFile = base64_encode(file_get_contents($path));
-        $model_query->attachment_2 = $blobFile;
+        $ext = $file->extension();
+
+        $file_name = "att2_".Str::uuid() . '.' . $ext;
+        $att_2_loc = "potongan_msts/$file_name";
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($att_2_loc, file_get_contents($path));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+        $model_query->attachment_2_loc = $att_2_loc;
         $model_query->attachment_2_type = $fileType;
       }
 
@@ -290,6 +314,14 @@ class PotonganMstController extends Controller
     } catch (\Exception $e) {
       DB::rollback();
 
+      if ($att_1_loc && Storage::disk('public')->exists($att_1_loc)) {
+        Storage::disk('public')->delete($att_1_loc);
+      }
+
+      if ($att_2_loc && Storage::disk('public')->exists($att_2_loc)) {
+        Storage::disk('public')->delete($att_2_loc);
+      }
+
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
@@ -313,12 +345,22 @@ class PotonganMstController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     $attachment_1_preview = $request->attachment_1_preview;
     $attachment_2_preview = $request->attachment_2_preview;
-    $fileType_1 = null;
-    $fileType_2 = null;
-    $blobFile_1 = null;
-    $blobFile_2 = null;
-    $change_1 = 0;
-    $change_2 = 0;
+    // $fileType_1 = null;
+    // $fileType_2 = null;
+    // $blobFile_1 = null;
+    // $blobFile_2 = null;
+    // $change_1 = 0;
+    // $change_2 = 0;
+
+    $att_temp = [
+      "att_1"=>[
+        "newLoc"=>null,"oldLoc"=>null,"newType"=>null,"oldType"=>null,"useNew"=>false
+      ],
+      "att_2"=>[
+        "newLoc"=>null,"oldLoc"=>null,"newType"=>null,"oldType"=>null,"useNew"=>false
+      ],
+    ];
+
     DB::beginTransaction();
     try {
       
@@ -332,9 +374,11 @@ class PotonganMstController extends Controller
       throw new \Exception("Data sudah tervalidasi",1);
 
       $SYSOLD                     = clone($model_query);
-
-      $fileType_1     = $model_query->attachment_1_type;
-      $fileType_2     = $model_query->attachment_2_type;
+      
+      $att_temp["att_1"]["oldLoc"]     = $model_query->attachment_1_loc;
+      $att_temp["att_1"]["oldType"]    = $model_query->attachment_1_type;
+      $att_temp["att_2"]["oldLoc"]     = $model_query->attachment_2_loc;
+      $att_temp["att_2"]["oldType"]    = $model_query->attachment_2_type;
       
       $model_query->kejadian      = $request->kejadian;
       $model_query->employee_id   = $request->employee_id;
@@ -358,54 +402,98 @@ class PotonganMstController extends Controller
       if($request->hasFile('attachment_1')){
         $file = $request->file('attachment_1');
         $path = $file->getRealPath();
-        $fileType_1 = $file->getClientMimeType();
-        $blobFile_1 = base64_encode(file_get_contents($path));
-        $change_1++;
+        $att_1_type = $file->getClientMimeType();
+        $ext = $file->extension();
+
+        $file_name = $model_query->id."_att1_".Str::uuid() . '.' . $ext;
+        $att_1_loc = "potongan_msts/$file_name";
+
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($att_1_loc, file_get_contents($path));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+
+        $att_temp['att_1']['newLoc']=$att_1_loc;
+        $att_temp['att_1']['newType']=$att_1_type;
+        $att_temp['att_1']['useNew']=true;
       }
 
-      if (!$request->hasFile('attachment_1') && $attachment_1_preview == null) {
-        $fileType_1 = null;
-        $blobFile_1 = null;
-        $change_1++;
+      if (!$request->hasFile('attachment_1') && in_array($attachment_1_preview,[null,'null'])) {
+        $att_temp['att_1']['newLoc']=null;
+        $att_temp['att_1']['newType']=null;
+        $att_temp['att_1']['useNew']=true;
       }
 
       if($request->hasFile('attachment_2')){
         $file = $request->file('attachment_2');
         $path = $file->getRealPath();
-        $fileType_2 = $file->getClientMimeType();
-        $blobFile_2 = base64_encode(file_get_contents($path));
-        $change_2++;
+        $att_2_type = $file->getClientMimeType();
+        $ext = $file->extension();
+
+        $file_name = $model_query->id."_att2_".Str::uuid() . '.' . $ext;
+        $att_2_loc = "potongan_msts/$file_name";
+
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($att_2_loc, file_get_contents($path));
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+
+        $att_temp['att_2']['newLoc']=$att_2_loc;
+        $att_temp['att_2']['newType']=$att_2_type;
+        $att_temp['att_2']['useNew']=true;
       }
 
-      if (!$request->hasFile('attachment_2') && $attachment_2_preview == null) {
-        $fileType_2 = null;
-        $blobFile_2 = null;
-        $change_2++;
+      if (!$request->hasFile('attachment_2') && in_array($attachment_2_preview,[null,'null'])) {
+        $att_temp['att_2']['newLoc']=null;
+        $att_temp['att_2']['newType']=null;
+        $att_temp['att_2']['useNew']=true;
       }
 
-      $model_query->attachment_1_type = $fileType_1;
-      $model_query->attachment_2_type = $fileType_2;
+      $model_query->attachment_1_type = $att_temp['att_1']['useNew']?$att_temp['att_1']['newType']:$att_temp['att_1']['oldType'];
+      $model_query->attachment_1_loc = $att_temp['att_1']['useNew']?$att_temp['att_1']['newLoc']:$att_temp['att_1']['oldLoc'];
+
+      $model_query->attachment_2_type = $att_temp['att_2']['useNew']?$att_temp['att_2']['newType']:$att_temp['att_2']['oldType'];
+      $model_query->attachment_2_loc = $att_temp['att_2']['useNew']?$att_temp['att_2']['newLoc']:$att_temp['att_2']['oldLoc'];
+      // $model_query->attachment_1_type = $fileType_1;
+      // $model_query->attachment_2_type = $fileType_2;
 
       $model_query->save();
 
-      $update=[];
+      // $update=[];
 
-      if($change_1){
-        $update["attachment_1"] = $blobFile_1;
-      }
+      // if($change_1){
+      //   $update["attachment_1"] = $blobFile_1;
+      // }
 
-      if($change_2){
-        $update["attachment_2"] = $blobFile_2;
-      }
+      // if($change_2){
+      //   $update["attachment_2"] = $blobFile_2;
+      // }
 
-      if($change_1 || $change_2){
-        PotonganMst::where("id",$request->id)->update($update);
-      }
+      // if($change_1 || $change_2){
+      //   PotonganMst::where("id",$request->id)->update($update);
+      // }
       
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
       MyLog::sys($this->syslog_db,$request->id,"update",$SYSNOTE);
 
       DB::commit();
+
+      try {
+        ini_set('memory_limit', '256M');
+        if ($att_temp['att_1']['useNew'] &&  $att_temp['att_1']['oldLoc']!= null && Storage::disk('public')->exists($att_temp['att_1']['oldLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_1']['oldLoc']);
+        }
+
+        if ($att_temp['att_2']['useNew'] &&  $att_temp['att_2']['oldLoc']!= null && Storage::disk('public')->exists($att_temp['att_2']['oldLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_2']['oldLoc']);
+        }
+      } catch (\Exception $e) {
+        
+      }
       return response()->json([
         "message" => "Proses ubah data berhasil",
         "updated_at" => $t_stamp,
@@ -413,6 +501,20 @@ class PotonganMstController extends Controller
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
+
+      try {
+        ini_set('memory_limit', '256M');
+        if ($att_temp['att_1']['useNew'] &&  $att_temp['att_1']['newLoc']!= null && Storage::disk('public')->exists($att_temp['att_1']['newLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_1']['newLoc']);
+        }
+
+        if ($att_temp['att_2']['useNew'] &&  $att_temp['att_2']['newLoc']!= null && Storage::disk('public')->exists($att_temp['att_2']['newLoc'])) {
+          Storage::disk('public')->delete($att_temp['att_2']['newLoc']);
+        }
+      } catch (\Exception $e) {
+        
+      }
+
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
@@ -426,7 +528,6 @@ class PotonganMstController extends Controller
       ], 400);
     }
   }
-
 
   public function delete(PotonganMstRequest $request)
   {
@@ -637,4 +738,31 @@ class PotonganMstController extends Controller
     }
 
   }
+
+  public function getAttachment($id,$n)
+  {
+    MyAdmin::checkScope($this->permissions, 'potongan_mst.view');
+
+    $trx = PotonganMst::findOrFail($id);
+
+    $locField  = "attachment_{$n}_loc";
+    $typeField = "attachment_{$n}_type";
+
+    abort_unless($trx->$locField, 404);
+
+    abort_unless(Storage::disk('public')->exists($trx->$locField), 404);
+
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('public');  
+    return $disk->response(
+        $trx->$locField,
+        null,
+        [
+            'Cache-Control' => 'no-store, private',
+            'Content-Type'  => $trx->$typeField,
+            'X-Attachment'  => $n,
+        ]
+    );
+  }
+
 }
