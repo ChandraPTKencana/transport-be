@@ -1260,6 +1260,47 @@ class TrxTrpController extends Controller
     return $result;
   }
 
+  public function previewQRCode(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.preview_file');
+
+    set_time_limit(0);
+
+    $trx_trp = TrxTrp::with('uj')->find($request->id);
+
+    if($trx_trp->val==0)
+    return response()->json([
+      "message" => "Mandor harus Validasi Terlebih Dahulu",
+    ], 400);
+
+    $sendData = [
+      "id"            => $trx_trp->id,
+      "id_uj"         => $trx_trp->id_uj,
+      "no_pol"        => $trx_trp->no_pol,
+      "payment"       => $trx_trp->payment_method_id,
+      "payment_name"  => $trx_trp->payment_method->name,
+      "supir"         => $trx_trp->supir,
+      "supir_rek_no"  => $trx_trp->supir_rek_no,
+      "supir_sim_name"=> $trx_trp->employee_s->sim_name,
+      "kernet"        => $trx_trp->kernet,
+      "kernet_rek_no" => $trx_trp->kernet_rek_no,
+      "tanggal"       => $trx_trp->tanggal,
+      "created_at"    => $trx_trp->created_at,
+      "asal"          => env("app_name"),
+      "xto"           => $trx_trp->xto,
+      "jenis"         => $trx_trp->jenis,
+      "tipe"          => $trx_trp->tipe,
+      "info"          => $trx_trp->uj->asst_opt,
+      "is_transition" => $trx_trp->transition_type=='From',
+    ];   
+    
+    $html = view("html.trx_trp_ujalan_qr",$sendData);
+  
+    $result = [
+      "html"=>$html->render()
+    ];
+    return $result;
+  }
+
   public function previewFileBT(Request $request){
     MyAdmin::checkScope($this->permissions, 'trp_trx.preview_file');
 

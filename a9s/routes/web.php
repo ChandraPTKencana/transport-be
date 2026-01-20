@@ -121,6 +121,7 @@ Route::middleware('no-prefix-api')->group(function () {
 
     // Route::get('/trx_trps_download_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'downloadExcel']);
     Route::get('/trx_trp_preview_file', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewFile']);
+    Route::get('/trx_trp_preview_file_qr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'previewQRCode']);
     Route::put('/trx_trp_validasi', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'validasi']);
     Route::put('/trx_trp_unvalidasi', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'unvalidasi']);
     Route::post('/trx_trp_do_gen_pvr', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'doGenPVR']);

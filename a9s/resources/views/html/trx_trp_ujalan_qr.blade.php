@@ -37,11 +37,6 @@
       </div>
       <table style="font-size: 12px; ">
         <tr>
-          <td > Metode Bayar </td>
-          <td> : </td>
-          <td> {{$payment_name}} </td>
-        </tr>
-        <tr>
           <td > Ujalan Per </td>
           <td> : </td>
           <td> {{date('d-m-Y',strtotime($tanggal))}} </td>
@@ -71,14 +66,6 @@
           <td> : </td>
           <td> {{$supir_sim_name}} </td>
         </tr>
-        @if($payment==2)
-        <tr>
-          <td> No Rek Supir </td>
-          <td> : </td>
-          <td> {{$supir_rek_no}} </td>
-        </tr>
-        @endif
-
         @if($kernet)
         <tr>
           <td> Nama Kernet </td>
@@ -86,114 +73,15 @@
           <td> {{$kernet}} </td>
         </tr>
         @endif
-
-        @if($payment==2)
+        
         <tr>
-          <td> No Rek Kernet </td>
+          <td> Dibuat tanggal </td>
           <td> : </td>
-          <td> {{$kernet_rek_no}} </td>
-        </tr>
-        @endif
-      </table>
-
-      <table style="font-size: 12px; width:100%;">
-        <tbody>
-          @foreach($details as $k=>$v)
-          <tr>
-            <td style="text-align: left;">{{ $v["xdesc"] }} 
-              @if($v["qty"]>1) 
-              (                  
-                {{ number_format($v["qty"], 0,',','.') }}
-                x
-                Rp. {{ number_format($v["harga"], 0,',','.') }}
-              )
-              @endif
-            </td>
-            <td>:</td>
-            <td>Rp. </td>
-            <td style="width:50px; text-align: right;">{{ number_format(($v["qty"] * $v["harga"]), 0,',','.') }}</td>
-          </tr>
-          @endforeach
-          @if($ttl_ps > 0 || $ttl_pk > 0)
-          <tr>
-            <td colspan="2" style="font-weight: bold;">
-                Total
-            </td>
-            <td style="font-weight: bold;">Rp. </td>
-            <td style="font-weight: bold; text-align: right;">
-              {{ number_format($total, 0,',','.') }}
-            </td>
-          </tr>
-          @endif
-          @if($ttl_ps>0)
-          <tr style="color:red;">
-            <td colspan="2" style="font-weight: bold;">
-                Potongan Supir <br> {{$ptg_ps_ids}}
-            </td>
-            <td style="font-weight: bold;">Rp. </td>
-            <td style="font-weight: bold; text-align: right;">
-              -{{ number_format($ttl_ps, 0,',','.') }}
-            </td>
-          </tr>
-          @endif
-
-          @if($ttl_pk>0)
-          <tr style="color:red;">
-            <td colspan="2" style="font-weight: bold;">
-                Potongan Kernet <br> {{$ptg_pk_ids}}
-            </td>
-            <td style="font-weight: bold;">Rp. </td>
-            <td style="font-weight: bold; text-align: right;">
-              -{{ number_format($ttl_pk, 0,',','.') }}
-            </td>
-          </tr>
-          @endif
-
-          @if($ttl_ps > 0 || $ttl_pk > 0)
-          <tr style="color:red;">
-            <td colspan="2" style="font-weight: bold;">
-                Total Potongan
-            </td>
-            <td style="font-weight: bold;">Rp. </td>
-            <td style="font-weight: bold; text-align: right;">
-              -{{ number_format( $ttl_ps + $ttl_pk, 0,',','.') }}
-            </td>
-          </tr>
-          @endif
-
-
-          <tr>
-            <td colspan="2" style="font-weight: bold;">
-                Total Diterima
-            </td>
-            <td style="font-weight: bold;">Rp. </td>
-            <td style="font-weight: bold; text-align: right;">
-              {{ number_format( ($total - ( $ttl_ps + $ttl_pk) ), 0,',','.') }}
-            </td>
-          </tr>
-
-          <tr>
-            <td colspan="4" style="text-align: right;">
-                Dibuat tanggal:{{ date('d-m-Y H:i:s',strtotime($created_at)) }} (#{{$id_uj}})
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table style="width:100%; font-size: 12px; ">
-        <tr>
-          <td style="text-align: center; width:50%;"> Diserahkan Oleh :</td>
-          <td style="text-align: center; width:50%;"> Diterima Oleh :</td>
-        </tr>
-        <tr>
-          <td style="height:50px;"><td>
-        </tr>
-        <tr>
-          <td style="text-align: center;"> ({{$user_1}}) </td>
-          <td style="text-align: center;"> (____________________) </td>
+          <td>{{ date('d-m-Y H:i:s',strtotime($created_at)) }} </td>
         </tr>
       </table>
-      <div style="display: flex; align-items:center; justify-content:center;  margin:30px 0px; flex-direction:column;">
+
+      <div style="display: flex; align-items:center; justify-content:center;  margin:10px 0px; flex-direction:column;">
         <div id="qrcode"></div>
 
         <div style="margin-top: 10px;">
@@ -210,8 +98,8 @@
     let id = '<?php echo $asal."^".$id."^".$jenis."^".$no_pol."^".$supir ?>';
     var qrcode = new QRCode(document.getElementById("qrcode"), {
       text: id,
-      width: 128,
-      height: 128,
+      width: 220,
+      height: 220,
       colorDark : "#000000",
       colorLight : "#ffffff",
       correctLevel : QRCode.CorrectLevel.H
