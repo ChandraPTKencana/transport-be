@@ -98,8 +98,8 @@
     let id = '<?php echo $asal."^".$id."^".$jenis."^".$no_pol."^".$supir ?>';
     var qrcode = new QRCode(document.getElementById("qrcode"), {
       text: id,
-      width: 220,
-      height: 220,
+      width: 180,
+      height: 180,
       colorDark : "#000000",
       colorLight : "#ffffff",
       correctLevel : QRCode.CorrectLevel.H
