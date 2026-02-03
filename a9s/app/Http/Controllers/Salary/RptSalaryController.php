@@ -1443,7 +1443,7 @@ class RptSalaryController extends Controller
 
     }
 
-    MyLog::logging($bonus_trip_new,"checkanomaly");
+    // MyLog::logging($bonus_trip_new,"checkanomaly");
 
     foreach ($bonus_trip_new as $kbtn => $vbtn) {
       if($kbtn=="") MyLog::logging($vbtn,'kbtn');
@@ -1512,7 +1512,7 @@ class RptSalaryController extends Controller
                     }
                 }
 
-    MyLog::logging($data[$search_e],"checkanomalyx");
+    // MyLog::logging($data[$search_e],"checkanomalyx");
 
             }
         }
