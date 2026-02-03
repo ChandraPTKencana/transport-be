@@ -1443,6 +1443,8 @@ class RptSalaryController extends Controller
 
     }
 
+    MyLog::logging($bonus_trip_new,"checkanomaly");
+
     foreach ($bonus_trip_new as $kbtn => $vbtn) {
       if($kbtn=="") MyLog::logging($vbtn,'kbtn');
 
@@ -1509,6 +1511,9 @@ class RptSalaryController extends Controller
                         $data[$search_e]["trip_".strtolower($vtd['jenis'])."_bonus_".$kbtn]+=$nominal;       
                     }
                 }
+
+    MyLog::logging($data[$search_e],"checkanomalyx");
+
             }
         }
     }
@@ -1630,7 +1635,7 @@ class RptSalaryController extends Controller
         $vsb->salary_paid_id = $salary_paid[1]->id;
         $vsb->save();
         $SYSNOTE = MyLib::compareChange($SYSOLD,$vsb); 
-        array_push($SYSNOTES,$SYSNOTE);
+        array_push($SYSNOTES,"ID#".$vsb->id."=>".$SYSNOTE);
       }
 
       // if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
