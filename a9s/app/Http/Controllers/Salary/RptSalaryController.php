@@ -1635,7 +1635,7 @@ class RptSalaryController extends Controller
         $vsb->salary_paid_id = $salary_paid[1]->id;
         $vsb->save();
         $SYSNOTE = MyLib::compareChange($SYSOLD,$vsb); 
-        array_push($SYSNOTES,"ID#".$vsb->id."=>".$SYSNOTE);
+        array_push($SYSNOTES,$SYSNOTE);
       }
 
       // if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
