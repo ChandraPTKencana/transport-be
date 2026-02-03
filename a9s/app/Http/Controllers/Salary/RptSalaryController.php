@@ -1463,7 +1463,7 @@ class RptSalaryController extends Controller
                 },$data);
 
                 $search_e = array_search($ve['employee_id'],$map_e);
-                if(count($data)==0 || $search===false){
+                if(count($data)==0 || $search_e===false){
                     $newData = $temp;
                     $newData["rpt_salary_id"]=$model_query->id;
                     $newData["employee_id"]=$ve['employee_id'];
@@ -1635,7 +1635,7 @@ class RptSalaryController extends Controller
         $vsb->salary_paid_id = $salary_paid[1]->id;
         $vsb->save();
         $SYSNOTE = MyLib::compareChange($SYSOLD,$vsb); 
-        array_push($SYSNOTES,$SYSNOTE);
+        array_push($SYSNOTES,"ID#".$vsb->id."=>".$SYSNOTE);
       }
 
       // if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
