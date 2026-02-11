@@ -332,6 +332,7 @@ class ExtraMoneyTrxController extends Controller
 
     $t_stamp = date("Y-m-d H:i:s");
     $location = null;
+    $location2 = null;
     $rollback_id = -1;
     DB::beginTransaction();
     try {
