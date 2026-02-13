@@ -1529,9 +1529,11 @@ class RptSalaryController extends Controller
     ->where('tanggal',">=",$smp_bulan."-01")
     ->where('val',1)
     ->where('deleted',0)
-    ->where(function ($q){
-      $q->whereNotNull("trx_trp_id")->orWhere('sumber',"PENERIMAAN");
-    })    
+    ->whereNotNull("trx_trp_id")
+    // ->where(function ($q){
+    //   $q->whereNotNull("trx_trp_id");
+    //   // ->orWhere('sumber',"PENERIMAAN"); mungkin tidak perlu
+    // })    
     ->get();
     
     foreach($pt as $v){
