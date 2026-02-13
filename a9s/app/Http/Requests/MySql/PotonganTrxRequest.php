@@ -33,7 +33,7 @@ class PotonganTrxRequest extends FormRequest
         if (request()->isMethod('post') || request()->isMethod('put')) {
             $rules['nominal_cut'] = 'required|numeric';
             $rules['potongan_mst_id'] = 'required|exists:App\Models\MySql\PotonganMst,id';
-
+            $rules['sumber'] = 'required|in:TRIP,MANUAL,PENERIMAAN';
         }
         return $rules;
     }
@@ -50,6 +50,10 @@ class PotonganTrxRequest extends FormRequest
 
             'status.required' => 'Status tidak boleh kosong',
             'status.in' => 'Status harus dipilih',
+
+            
+            'sumber.required' => 'Sumber tidak boleh kosong',
+            'sumber.in' => 'Sumber harus dipilih',
 
         ];
     }

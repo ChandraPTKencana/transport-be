@@ -114,6 +114,13 @@ class PotonganTrxController extends Controller
         }
       }
 
+      if (isset($sort_lists["created_at"])) {
+        $model_query = $model_query->orderBy("created_at", $sort_lists["created_at"]);
+        if (count($first_row) > 0) {
+          $model_query = $model_query->where("created_at",$sort_symbol,$first_row["created_at"]);
+        }
+      }
+
       // if (isset($sort_lists["role"])) {
       //   $model_query = $model_query->orderBy(function($q){
       //     $q->from("internal.roles")
@@ -218,6 +225,7 @@ class PotonganTrxController extends Controller
       $model_query->note            = $request->note;
       $model_query->nominal_cut     = $request->nominal_cut;
       $model_query->tanggal         = $request->tanggal;
+      $model_query->sumber          = $request->sumber;
       $model_query->created_at      = $t_stamp;
       $model_query->created_user    = $this->admin_id;
       $model_query->updated_at      = $t_stamp;
@@ -286,6 +294,7 @@ class PotonganTrxController extends Controller
         $model_query1->remaining_cut = $model_query1->remaining_cut + $model_query->nominal_cut - $request->nominal_cut;
         $model_query->nominal_cut   = $request->nominal_cut;
         $model_query->tanggal       = $request->tanggal;
+        $model_query->sumber        = $request->sumber;
       }
       
       $model_query->note          = $request->note;
@@ -331,56 +340,56 @@ class PotonganTrxController extends Controller
 
   public function delete(PotonganTrxRequest $request)
   {
-    MyAdmin::checkScope($this->permissions, 'potongan_trx.remove');
+    // MyAdmin::checkScope($this->permissions, 'potongan_trx.remove');
 
-    DB::beginTransaction();
-    try {
-      $deleted_reason = $request->deleted_reason;
-      if(!$deleted_reason)
-      throw new \Exception("Sertakan Alasan Penghapusan",1);
+    // DB::beginTransaction();
+    // try {
+    //   $deleted_reason = $request->deleted_reason;
+    //   if(!$deleted_reason)
+    //   throw new \Exception("Sertakan Alasan Penghapusan",1);
 
-      $model_query = PotonganTrx::where("id",$request->id)->lockForUpdate()->first();
+    //   $model_query = PotonganTrx::where("id",$request->id)->lockForUpdate()->first();
 
-      if (!$model_query) {
-        throw new \Exception("Data tidak terdaftar", 1);
-      }
+    //   if (!$model_query) {
+    //     throw new \Exception("Data tidak terdaftar", 1);
+    //   }
 
-      if ($model_query->id_uj) {
-        throw new \Exception("Izin Hapus Ditolak", 1);
-      }
-      $SYSOLD                     = clone($model_query);
+    //   if ($model_query->id_uj) {
+    //     throw new \Exception("Izin Hapus Ditolak", 1);
+    //   }
+    //   $SYSOLD                     = clone($model_query);
   
-      $model_query->deleted         = 1;
-      $model_query->deleted_user    = $this->admin_id;
-      $model_query->deleted_at      = date("Y-m-d H:i:s");
-      $model_query->deleted_reason  = $deleted_reason;
-      $model_query->save();
+    //   $model_query->deleted         = 1;
+    //   $model_query->deleted_user    = $this->admin_id;
+    //   $model_query->deleted_at      = date("Y-m-d H:i:s");
+    //   $model_query->deleted_reason  = $deleted_reason;
+    //   $model_query->save();
 
-      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
-      MyLog::sys($this->syslog_db,$request->id,"delete",$SYSNOTE);
+    //   $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+    //   MyLog::sys($this->syslog_db,$request->id,"delete",$SYSNOTE);
 
-      DB::commit();
-      return response()->json([
-        "message" => "Proses ubah data berhasil",
-      ], 200);
-    } catch (\Exception  $e) {
-      DB::rollback();
-      if ($e->getCode() == "23000")
-        return response()->json([
-          "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
-        ], 400);
+    //   DB::commit();
+    //   return response()->json([
+    //     "message" => "Proses ubah data berhasil",
+    //   ], 200);
+    // } catch (\Exception  $e) {
+    //   DB::rollback();
+    //   if ($e->getCode() == "23000")
+    //     return response()->json([
+    //       "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
+    //     ], 400);
 
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
+    //   if ($e->getCode() == 1) {
+    //     return response()->json([
+    //       "message" => $e->getMessage(),
+    //     ], 400);
+    //   }
 
-      return response()->json([
-        "message" => "Proses hapus data gagal",
-      ], 400);
-      //throw $th;
-    }
+    //   return response()->json([
+    //     "message" => "Proses hapus data gagal",
+    //   ], 400);
+    //   //throw $th;
+    // }
     // if ($model_query->delete()) {
     //     return response()->json([
     //         "message"=>"Proses ubah data berhasil",

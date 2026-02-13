@@ -194,10 +194,12 @@ class RunPermit extends Command
             // ["permit"=>'fin_payment_req.delete', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
             // ["permit"=>'fin_payment_req.val', "to"=>['SUPERADMIN','LOGISTIC_STAFF']],
 
-            ["permit"=>'potongan_mst.remove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'potongan_mst.unremove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            ["permit"=>'employee.val1', "to"=>['SUPERADMIN','PRODUKSI']],
-            ["permit"=>'employee.unval1', "to"=>['SUPERADMIN','PRODUKSI']]
+            // ["permit"=>'potongan_mst.remove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'potongan_mst.unremove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
+            // ["permit"=>'employee.val1', "to"=>['SUPERADMIN','PRODUKSI']],
+            // ["permit"=>'employee.unval1', "to"=>['SUPERADMIN','PRODUKSI']]
+
+            
         ];
 
         foreach ($re_lists as $k => $v) {

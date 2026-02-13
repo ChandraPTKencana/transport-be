@@ -524,7 +524,6 @@ class RptSalaryController extends Controller
       "trip_tunggu"             => 0,
       "trip_tunggu_gaji"        => 0,
       "trip_tunggu_dinas"       => 0,
-      "potongan_manual"         => 0,
     ];
     $smp_bulan = substr($model_query->period_end,0,7);
     $salary_paid = SalaryPaid::where("period_end","like",$smp_bulan.'%')->where('val1',1)->orderBy("id","asc")->get();
@@ -580,7 +579,7 @@ class RptSalaryController extends Controller
       });
 
       $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-        $q1->whereIn("payment_method_id",[2,3,4,5]);
+        $q1->whereIn("payment_method_id",[2,3]);
         $q1->where(function ($q2)use($model_query,$smp_bulan){
           // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
           $q2->where(function ($q3) use($model_query,$smp_bulan) {            
@@ -656,6 +655,7 @@ class RptSalaryController extends Controller
         }
       }
 
+
       if($v->supir_id){
 
         $map_s = array_map(function($x){
@@ -681,19 +681,47 @@ class RptSalaryController extends Controller
           $newData["trip_lain_makan"]=$trip_lain_makan_s;
           $newData["trip_lain_dinas"]=$trip_lain_dinas_s;
 
-          $newData["trip_".strtolower($smd->jenis)]=1;
-          // if($smd->jenis=='CPO'){
-          // }elseif ($smd->jenis=='PK') {
-          //   $newData["trip_pk"]=1;
-          // }elseif ($smd->jenis=='TBS') {
-          //   $newData["trip_tbs"]=1;
-          // }elseif ($smd->jenis=='TBSK') {
-          //   $newData["trip_tbsk"]=1;
-          // }elseif ($smd->jenis=='LAIN') {
-          //   $newData["trip_lain"]=1;
-          // }elseif ($smd->jenis=='TUNGGU') {
-          //   $newData["trip_tunggu"]=1;
+          // if(($uj_gaji_s + $trip_tunggu_gaji_s +  $trip_lain_gaji_s) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='PK')
+          //   $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='TBS')
+          //   $newData["trip_tbs_bonus_gaji"]=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='TBSK')
+          //   $newData["trip_tbsk_bonus_gaji"]=$smd->bonus_trip_supir;
           // }
+
+          // if(($uj_dinas_s + $trip_tunggu_dinas_s +  $trip_lain_dinas_s) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='PK')
+          //   $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='TBS')
+          //   $newData["trip_tbs_bonus_dinas"]=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='TBSK')
+          //   $newData["trip_tbsk_bonus_dinas"]=$smd->bonus_trip_supir;
+          // }
+
+          if($smd->jenis=='CPO'){
+            $newData["trip_cpo"]=1;
+          }elseif ($smd->jenis=='PK') {
+            $newData["trip_pk"]=1;
+          }elseif ($smd->jenis=='TBS') {
+            $newData["trip_tbs"]=1;
+          }elseif ($smd->jenis=='TBSK') {
+            $newData["trip_tbsk"]=1;
+          }elseif ($smd->jenis=='LAIN') {
+            $newData["trip_lain"]=1;
+          }elseif ($smd->jenis=='TUNGGU') {
+            $newData["trip_tunggu"]=1;
+          }
 
           array_push($data,$newData);
         }else{
@@ -709,22 +737,47 @@ class RptSalaryController extends Controller
           $data[$search]["trip_lain_makan"]+=$trip_lain_makan_s;
           $data[$search]["trip_lain_dinas"]+=$trip_lain_dinas_s;
 
-          $data[$search]["trip_".strtolower($smd->jenis)]+=1;
+          // if(($uj_gaji_s + $trip_tunggu_gaji_s +  $trip_lain_gaji_s) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
 
+          //   if($smd->jenis=='PK')
+          //   $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_supir;
 
-          // if($smd->jenis=='CPO'){
-          //   $data[$search]["trip_cpo"]+=1;
-          // }elseif ($smd->jenis=='PK') {
-          //   $data[$search]["trip_pk"]+=1;
-          // }elseif ($smd->jenis=='TBS') {
-          //   $data[$search]["trip_tbs"]+=1;
-          // }elseif ($smd->jenis=='TBSK') {
-          //   $data[$search]["trip_tbsk"]+=1;
-          // }elseif ($smd->jenis=='LAIN') {
-          //   $data[$search]["trip_lain"]+=1;
-          // }elseif ($smd->jenis=='TUNGGU') {
-          //   $data[$search]["trip_tunggu"]+=1;
+          //   if($smd->jenis=='TBS')
+          //   $data[$search]["trip_tbs_bonus_gaji"]+=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='TBSK')
+          //   $data[$search]["trip_tbsk_bonus_gaji"]+=$smd->bonus_trip_supir;
           // }
+
+          // if(($uj_dinas_s + $trip_tunggu_dinas_s +  $trip_lain_dinas_s) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='PK')
+          //   $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='TBS')
+          //   $data[$search]["trip_tbs_bonus_dinas"]+=$smd->bonus_trip_supir;
+
+          //   if($smd->jenis=='TBSK')
+          //   $data[$search]["trip_tbsk_bonus_dinas"]+=$smd->bonus_trip_supir;
+          // }
+
+          if($smd->jenis=='CPO'){
+            $data[$search]["trip_cpo"]+=1;
+          }elseif ($smd->jenis=='PK') {
+            $data[$search]["trip_pk"]+=1;
+          }elseif ($smd->jenis=='TBS') {
+            $data[$search]["trip_tbs"]+=1;
+          }elseif ($smd->jenis=='TBSK') {
+            $data[$search]["trip_tbsk"]+=1;
+          }elseif ($smd->jenis=='LAIN') {
+            $data[$search]["trip_lain"]+=1;
+          }elseif ($smd->jenis=='TUNGGU') {
+            $data[$search]["trip_tunggu"]+=1;
+          }
         }
       }
 
@@ -762,21 +815,47 @@ class RptSalaryController extends Controller
           $newData["trip_lain_dinas"]=$trip_lain_dinas_k;
 
 
-          $newData["trip_".strtolower($smd->jenis)]=1;
+          // if(($uj_gaji_k + $trip_tunggu_gaji_k +  $trip_lain_gaji_k) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_kernet;
 
-          // if($smd->jenis=='CPO'){
-          //   $newData["trip_cpo"]=1;
-          // }elseif ($smd->jenis=='PK') {
-          //   $newData["trip_pk"]=1;
-          // }elseif ($smd->jenis=='TBS') {
-          //   $newData["trip_tbs"]=1;
-          // }elseif ($smd->jenis=='TBSK') {
-          //   $newData["trip_tbsk"]=1;
-          // }elseif ($smd->jenis=='LAIN') {
-          //   $newData["trip_lain"]=1;
-          // }elseif ($smd->jenis=='TUNGGU') {
-          //   $newData["trip_tunggu"]=1;
+          //   if($smd->jenis=='PK')
+          //   $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBS')
+          //   $newData["trip_tbs_bonus_gaji"]=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBSK')
+          //   $newData["trip_tbsk_bonus_gaji"]=$smd->bonus_trip_kernet;
           // }
+
+          // if(($uj_dinas_k + $trip_tunggu_dinas_k +  $trip_lain_dinas_k) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='PK')
+          //   $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBS')
+          //   $newData["trip_tbs_bonus_dinas"]=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBSK')
+          //   $newData["trip_tbsk_bonus_dinas"]=$smd->bonus_trip_kernet;
+          // }
+
+          if($smd->jenis=='CPO'){
+            $newData["trip_cpo"]=1;
+          }elseif ($smd->jenis=='PK') {
+            $newData["trip_pk"]=1;
+          }elseif ($smd->jenis=='TBS') {
+            $newData["trip_tbs"]=1;
+          }elseif ($smd->jenis=='TBSK') {
+            $newData["trip_tbsk"]=1;
+          }elseif ($smd->jenis=='LAIN') {
+            $newData["trip_lain"]=1;
+          }elseif ($smd->jenis=='TUNGGU') {
+            $newData["trip_tunggu"]=1;
+          }
 
           array_push($data,$newData);
 
@@ -802,21 +881,47 @@ class RptSalaryController extends Controller
           $data[$search]["trip_lain_makan"]+=$trip_lain_makan_k;
           $data[$search]["trip_lain_dinas"]+=$trip_lain_dinas_k;
 
-          $data[$search]["trip_".strtolower($smd->jenis)]+=1;
+          // if(($uj_gaji_k + $trip_tunggu_gaji_k +  $trip_lain_gaji_k) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
 
-          // if($smd->jenis=='CPO'){
-          //   $data[$search]["trip_cpo"]+=1;
-          // }elseif ($smd->jenis=='PK') {
-          //   $data[$search]["trip_pk"]+=1;
-          // }elseif ($smd->jenis=='TBS') {
-          //   $data[$search]["trip_tbs"]+=1;
-          // }elseif ($smd->jenis=='TBSK') {
-          //   $data[$search]["trip_tbsk"]+=1;
-          // }elseif ($smd->jenis=='LAIN') {
-          //   $data[$search]["trip_lain"]+=1;
-          // }elseif ($smd->jenis=='TUNGGU') {
-          //   $data[$search]["trip_tunggu"]+=1;
+          //   if($smd->jenis=='PK')
+          //   $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBS')
+          //   $data[$search]["trip_tbs_bonus_gaji"]+=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBSK')
+          //   $data[$search]["trip_tbsk_bonus_gaji"]+=$smd->bonus_trip_kernet;
           // }
+
+          // if(($uj_dinas_k + $trip_tunggu_dinas_k +  $trip_lain_dinas_k) > 0){
+          //   if($smd->jenis=='CPO')
+          //   $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='PK')
+          //   $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBS')
+          //   $data[$search]["trip_tbs_bonus_dinas"]+=$smd->bonus_trip_kernet;
+
+          //   if($smd->jenis=='TBSK')
+          //   $data[$search]["trip_tbsk_bonus_dinas"]+=$smd->bonus_trip_kernet;
+          // }
+
+          if($smd->jenis=='CPO'){
+            $data[$search]["trip_cpo"]+=1;
+          }elseif ($smd->jenis=='PK') {
+            $data[$search]["trip_pk"]+=1;
+          }elseif ($smd->jenis=='TBS') {
+            $data[$search]["trip_tbs"]+=1;
+          }elseif ($smd->jenis=='TBSK') {
+            $data[$search]["trip_tbsk"]+=1;
+          }elseif ($smd->jenis=='LAIN') {
+            $data[$search]["trip_lain"]+=1;
+          }elseif ($smd->jenis=='TUNGGU') {
+            $data[$search]["trip_tunggu"]+=1;
+          }
 
           // if($v->kernet_id==1120){
           //   MyLog::logging([
@@ -828,11 +933,6 @@ class RptSalaryController extends Controller
           //   ],"reportcheck");
           // }
         }
-      }
-
-      if(!in_array($v->jenis,["CPO","PK","TBS","TBSK"])){
-        $v->salary_paid_id    = $salary_paid[1]->id;
-        $v->save();
       }
     }
 
@@ -852,8 +952,9 @@ class RptSalaryController extends Controller
         // $q1->where("tanggal",">=",$smp_bulan."-01");                  
         $q1->where("tanggal","<=",$model_query->period_end);                  
       });
+
       $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-        $q1->whereIn("payment_method_id",[2,3,4,5]);
+        $q1->whereIn("payment_method_id",[2,3]);
         $q1->where(function ($q2)use($model_query,$smp_bulan){
           // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
           $q2->where(function ($q3) use($model_query,$smp_bulan) {            
@@ -873,217 +974,65 @@ class RptSalaryController extends Controller
       $smd = $v->uj;
       $smd2 = $v->uj_details2;
 
-      // $is_gaji_s = 0;
-      // $is_dinas_s = 0;
+      $nominal_s = 0;
+      $uj_gaji_s = 0;
+      $uj_makan_s = 0;
+      $uj_dinas_s = 0;
 
-      // $is_gaji_k = 0;
-      // $is_dinas_k = 0;
+      $nominal_k = 0;
+      $uj_gaji_k = 0;
+      $uj_makan_k = 0;
+      $uj_dinas_k = 0;
+
+      $trip_tunggu_gaji_s = 0;
+      $trip_tunggu_dinas_s = 0;
+
+      $trip_tunggu_gaji_k = 0;
+      $trip_tunggu_dinas_k = 0;
       
-      $gd_s="";
-      $gd_k="";
+      $trip_lain_gaji_s = 0;
+      $trip_lain_makan_s = 0;
+      $trip_lain_dinas_s = 0;
+
+      $trip_lain_gaji_k = 0;
+      $trip_lain_makan_k = 0;
+      $trip_lain_dinas_k = 0;
 
       // $v1->ac_account_code=='01.510.001'Gaji-'01.510.005'Makan-'01.575.002'Dinas
       foreach ($smd2 as $k1 => $v1) {
         $amount = $v1->amount * $v1->qty;
         if($v1->xfor == 'Supir'){
-          // if($v1->ac_account_code=='01.510.001') $is_gaji_s++;
-          // if($v1->ac_account_code=='01.575.002') $is_dinas_s++;
-
-          if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
-          if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
-        }
-
-        if($v1->xfor == 'Kernet'){
-          // if($v1->ac_account_code=='01.510.001') $is_gaji_k++;
-          // if($v1->ac_account_code=='01.575.002') $is_dinas_k++;
-
-          if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
-          if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
-        }
-      }
-
-
-      if($v->supir_id){
-        if($gd_s==''){
-          MyLog::logging(["id"=>$v->id,"n"=>1],"rptsalary");
-        }
-        $map_s = array_map(function($x){
-          return $x['employee_id'];
-        },$data);
-
-        $search = array_search($v->supir_id,$map_s);
-
-        if(count($data)==0 || $search===false){
-
-          $emp = $v->employee_s;
-          $newData = $temp;
-          $newData["rpt_salary_id"]=$model_query->id;
-          $newData["employee_id"]=$emp->id;
-
-          // if($is_gaji_s > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_supir;
-
-          // if($is_gaji_s > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_supir;
-
-          $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_s]=$smd->bonus_trip_supir;
-
-          array_push($data,$newData);
-        }else{
-          if($gd_s==''){
-            MyLog::logging(["id"=>$v->id,"n"=>2],"rptsalary");
-          }
-  
-          // if($is_gaji_s > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
-
-          // if($is_gaji_s > 0 &&$smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_supir;
-
-          // if($is_dinas_s > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_supir;
+          $nominal_s += $amount;
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_gaji_s += $amount;
+          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_makan_s += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_dinas_s += $amount;
           
-          $data[$search]["trip_".strtolower($smd->jenis)."_bonus_".$gd_s]+=$smd->bonus_trip_supir;
-        }
-      }
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_gaji_s += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_dinas_s += $amount;
 
-      if($v->kernet_id){
-        if($gd_k==''){
-          MyLog::logging(["id"=>$v->id,"n"=>3],"rptsalary");
-        }
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["LAIN"])) $trip_lain_gaji_s += $amount;
+          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["LAIN"])) $trip_lain_makan_s += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["LAIN"])) $trip_lain_dinas_s += $amount;
 
-        $map_k = array_map(function($x){
-          return $x['employee_id'];
-        },$data);
-
-        $search = array_search($v->kernet_id,$map_k);
-
-        if(count($data)==0 || $search===false){
-          $emp = $v->employee_k;
-          $newData = $temp;
-          $newData["rpt_salary_id"]=$model_query->id;
-          $newData["employee_id"]=$emp->id;
-
-          // if($is_gaji_k > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_kernet;
-
-          // if($is_gaji_k > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_kernet;
-          $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]=$smd->bonus_trip_kernet;
-          array_push($data,$newData);
-        }else{
-          if($gd_k==''){
-            MyLog::logging(["id"=>$v->id,"n"=>4],"rptsalary");
-          }
-  
-          // if($is_gaji_k > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
-
-          // if($is_gaji_k > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_kernet;
-
-          // if($is_dinas_k > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_kernet;
-          $data[$search]["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]+=$smd->bonus_trip_kernet;
-        }
-      }
-
-      $v->bonus_trip_supir  = $smd->bonus_trip_supir;
-      $v->bonus_trip_kernet = $smd->bonus_trip_kernet;
-      $v->salary_paid_id    = $salary_paid[1]->id;
-      $v->save();
-    }
-
-    $tt = TrxTrp::whereNotNull("pv_id")
-    ->whereNull("salary_paid_id")
-    ->where("req_deleted",0)
-    ->where("deleted",0)
-    ->where('val',1)
-    ->where('val1',1)
-    ->where('val2',1)
-    ->where('val_ticket',1)
-    ->whereIn('jenis',['TBS','TBSK'])
-    ->where('tanggal',"<","2025-10-15")
-    ->where(function ($q) use($model_query,$smp_bulan) {
-      $q->where(function ($q1)use($model_query,$smp_bulan){
-        $q1->where("payment_method_id",1);       
-        $q1->where("received_payment",0);                  
-        // $q1->where("tanggal",">=",$smp_bulan."-01");                  
-        $q1->where("tanggal","<=",$model_query->period_end);                  
-      });
-      $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-        $q1->whereIn("payment_method_id",[2,3,4,5]);
-        $q1->where(function ($q2)use($model_query,$smp_bulan){
-          // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
-          $q2->where(function ($q3) use($model_query,$smp_bulan) {            
-            // $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
-            $q3->where("rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
-          });
-          $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
-            // $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
-            $q3->where("rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
-          });
-        });                         
-      });
-    })->get();
-
-
-    foreach ($tt as $k => $v) {
-      $smd = $v->uj;
-      $smd2 = $v->uj_details2;
-
-      // $is_gaji_s = 0;
-      // $is_dinas_s = 0;
-
-      // $is_gaji_k = 0;
-      // $is_dinas_k = 0;
-      
-      $gd_s="";
-      $gd_k="";
-
-      // $v1->ac_account_code=='01.510.001'Gaji-'01.510.005'Makan-'01.575.002'Dinas
-      foreach ($smd2 as $k1 => $v1) {
-        $amount = $v1->amount * $v1->qty;
-        if($v1->xfor == 'Supir'){
-          // if($v1->ac_account_code=='01.510.001') $is_gaji_s++;
-          // if($v1->ac_account_code=='01.575.002') $is_dinas_s++;
-
-          if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
-          if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
         }
 
         if($v1->xfor == 'Kernet'){
-          // if($v1->ac_account_code=='01.510.001') $is_gaji_k++;
-          // if($v1->ac_account_code=='01.575.002') $is_dinas_k++;
+          $nominal_k += $amount;
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_gaji_k += $amount;
+          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_makan_k += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_dinas_k += $amount;
+          
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_gaji_k += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_dinas_k += $amount;
 
-          if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
-          if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["LAIN"])) $trip_lain_gaji_k += $amount;
+          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["LAIN"])) $trip_lain_makan_k += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["LAIN"])) $trip_lain_dinas_k += $amount;
         }
       }
 
 
       if($v->supir_id){
-        if($gd_s==''){
-          MyLog::logging(["id"=>$v->id,"n"=>5],"rptsalary");
-        }
 
         $map_s = array_map(function($x){
           return $x['employee_id'];
@@ -1098,46 +1047,66 @@ class RptSalaryController extends Controller
           $newData["rpt_salary_id"]=$model_query->id;
           $newData["employee_id"]=$emp->id;
 
-          // if($is_gaji_s > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_supir;
+          if(($uj_gaji_s + $trip_tunggu_gaji_s +  $trip_lain_gaji_s) > 0){
+            if($smd->jenis=='CPO')
+            $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_supir;
 
-          // if($is_gaji_s > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_supir;
+            if($smd->jenis=='PK')
+            $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_supir;
 
-          // if($is_dinas_s > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_supir;
+            if($smd->jenis=='TBS')
+            $newData["trip_tbs_bonus_gaji"]=$smd->bonus_trip_supir;
 
-          // if($is_dinas_s > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_supir;
+            if($smd->jenis=='TBSK')
+            $newData["trip_tbsk_bonus_gaji"]=$smd->bonus_trip_supir;
+          }
 
-          $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_s]=$smd->bonus_trip_supir;
+          if(($uj_dinas_s + $trip_tunggu_dinas_s +  $trip_lain_dinas_s) > 0){
+            if($smd->jenis=='CPO')
+            $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_supir;
 
+            if($smd->jenis=='PK')
+            $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_supir;
+
+            if($smd->jenis=='TBS')
+            $newData["trip_tbs_bonus_dinas"]=$smd->bonus_trip_supir;
+
+            if($smd->jenis=='TBSK')
+            $newData["trip_tbsk_bonus_dinas"]=$smd->bonus_trip_supir;
+          }
           array_push($data,$newData);
         }else{
-          if($gd_s==''){
-            MyLog::logging(["id"=>$v->id,"n"=>6],"rptsalary");
+          if(($uj_gaji_s + $trip_tunggu_gaji_s +  $trip_lain_gaji_s) > 0){
+            if($smd->jenis=='CPO')
+            $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
+
+            if($smd->jenis=='PK')
+            $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_supir;
+
+            if($smd->jenis=='TBS')
+            $data[$search]["trip_tbs_bonus_gaji"]+=$smd->bonus_trip_supir;
+
+            if($smd->jenis=='TBSK')
+            $data[$search]["trip_tbsk_bonus_gaji"]+=$smd->bonus_trip_supir;
           }
-  
-          // if($is_gaji_s > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_supir;
 
-          // if($is_gaji_s > 0 &&$smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_supir;
+          if(($uj_dinas_s + $trip_tunggu_dinas_s +  $trip_lain_dinas_s) > 0){
+            if($smd->jenis=='CPO')
+            $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_supir;
 
-          // if($is_dinas_s > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_supir;
+            if($smd->jenis=='PK')
+            $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_supir;
 
-          // if($is_dinas_s > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_supir;
-          
-          $data[$search]["trip_".strtolower($smd->jenis)."_bonus_".$gd_s]+=$smd->bonus_trip_supir;
+            if($smd->jenis=='TBS')
+            $data[$search]["trip_tbs_bonus_dinas"]+=$smd->bonus_trip_supir;
+
+            if($smd->jenis=='TBSK')
+            $data[$search]["trip_tbsk_bonus_dinas"]+=$smd->bonus_trip_supir;
+          }
         }
       }
 
       if($v->kernet_id){
-        if($gd_k==''){
-          MyLog::logging(["id"=>$v->id,"n"=>7],"rptsalary");
-        }
 
         $map_k = array_map(function($x){
           return $x['employee_id'];
@@ -1151,36 +1120,63 @@ class RptSalaryController extends Controller
           $newData["rpt_salary_id"]=$model_query->id;
           $newData["employee_id"]=$emp->id;
 
-          // if($is_gaji_k > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_kernet;
+          if(($uj_gaji_k + $trip_tunggu_gaji_k +  $trip_lain_gaji_k) > 0){
+            if($smd->jenis=='CPO')
+            $newData["trip_cpo_bonus_gaji"]=$smd->bonus_trip_kernet;
 
-          // if($is_gaji_k > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_kernet;
+            if($smd->jenis=='PK')
+            $newData["trip_pk_bonus_gaji"]=$smd->bonus_trip_kernet;
 
-          // if($is_dinas_k > 0 && $smd->jenis=='CPO')
-          // $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_kernet;
+            if($smd->jenis=='TBS')
+            $newData["trip_tbs_bonus_gaji"]=$smd->bonus_trip_kernet;
 
-          // if($is_dinas_k > 0 && $smd->jenis=='PK')
-          // $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_kernet;
-          $newData["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]=$smd->bonus_trip_kernet;
+            if($smd->jenis=='TBSK')
+            $newData["trip_tbsk_bonus_gaji"]=$smd->bonus_trip_kernet;
+          }
+
+          if(($uj_dinas_k + $trip_tunggu_dinas_k +  $trip_lain_dinas_k) > 0){
+            if($smd->jenis=='CPO')
+            $newData["trip_cpo_bonus_dinas"]=$smd->bonus_trip_kernet;
+
+            if($smd->jenis=='PK')
+            $newData["trip_pk_bonus_dinas"]=$smd->bonus_trip_kernet;
+
+            if($smd->jenis=='TBS')
+            $newData["trip_tbs_bonus_dinas"]=$smd->bonus_trip_kernet;
+
+            if($smd->jenis=='TBSK')
+            $newData["trip_tbsk_bonus_dinas"]=$smd->bonus_trip_kernet;
+          }
           array_push($data,$newData);
         }else{
-          if($gd_k==''){
-            MyLog::logging(["id"=>$v->id,"n"=>8],"rptsalary");
+
+          if(($uj_gaji_k + $trip_tunggu_gaji_k +  $trip_lain_gaji_k) > 0){
+            if($smd->jenis=='CPO')
+            $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
+
+            if($smd->jenis=='PK')
+            $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_kernet;
+
+            if($smd->jenis=='TBS')
+            $data[$search]["trip_tbs_bonus_gaji"]+=$smd->bonus_trip_kernet;
+
+            if($smd->jenis=='TBSK')
+            $data[$search]["trip_tbsk_bonus_gaji"]+=$smd->bonus_trip_kernet;
           }
-  
-          // if($is_gaji_k > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_gaji"]+=$smd->bonus_trip_kernet;
 
-          // if($is_gaji_k > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_gaji"]+=$smd->bonus_trip_kernet;
+          if(($uj_dinas_k + $trip_tunggu_dinas_k +  $trip_lain_dinas_k) > 0){
+            if($smd->jenis=='CPO')
+            $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_kernet;
 
-          // if($is_dinas_k > 0 && $smd->jenis=='CPO')
-          // $data[$search]["trip_cpo_bonus_dinas"]+=$smd->bonus_trip_kernet;
+            if($smd->jenis=='PK')
+            $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_kernet;
 
-          // if($is_dinas_k > 0 && $smd->jenis=='PK')
-          // $data[$search]["trip_pk_bonus_dinas"]+=$smd->bonus_trip_kernet;
-          $data[$search]["trip_".strtolower($smd->jenis)."_bonus_".$gd_k]+=$smd->bonus_trip_kernet;
+            if($smd->jenis=='TBS')
+            $data[$search]["trip_tbs_bonus_dinas"]+=$smd->bonus_trip_kernet;
+
+            if($smd->jenis=='TBSK')
+            $data[$search]["trip_tbsk_bonus_dinas"]+=$smd->bonus_trip_kernet;
+          }
         }
       }
 
@@ -1190,348 +1186,11 @@ class RptSalaryController extends Controller
       $v->save();
     }
 
-
-    $tt = TrxTrp::selectRaw("
-      trx_trp.id,
-      trx_trp.id_uj,
-      trx_trp.supir_id,
-      trx_trp.kernet_id,
-      trx_trp.jenis,
-      trx_trp.payment_method_id,
-      trx_trp.received_payment,
-      trx_trp.tanggal,
-      trx_trp.rp_supir_at,
-      trx_trp.rp_kernet_at,
-      trx_trp.id_uj,
-      trx_trp.ticket_a_id,
-      DATE_FORMAT(trx_trp.ticket_a_in_at,'%Y-%m-%d') as ticket_a_in_at,
-      DATE_FORMAT(trx_trp.ticket_a_out_at,'%Y-%m-%d') as ticket_a_out_at,
-      trx_trp.ticket_b_id,
-      DATE_FORMAT(trx_trp.ticket_b_in_at,'%Y-%m-%d') as ticket_b_in_at,
-      DATE_FORMAT(trx_trp.ticket_b_out_at,'%Y-%m-%d') as ticket_b_out_at,
-      destination_location.id as destination_location_id,
-      destination_location.xto as destination_location_xto,
-      destination_location.minimal_trip as destination_location_minimal_trip,
-      destination_location.bonus_trip_supir as destination_location_bonus_trip_supir,
-      destination_location.bonus_next_trip_supir as destination_location_bonus_next_trip_supir,
-      destination_location.bonus_trip_kernet as destination_location_bonus_trip_kernet,
-      destination_location.bonus_next_trip_kernet as destination_location_bonus_next_trip_kernet
-    ")
-    ->whereNotNull("trx_trp.pv_id")
-    ->whereNull("trx_trp.salary_paid_id")
-    ->where("trx_trp.req_deleted",0)
-    ->where("trx_trp.deleted",0)
-    ->where('trx_trp.val',1)
-    ->where('trx_trp.val1',1)
-    ->where('trx_trp.val2',1)
-    ->where('trx_trp.val_ticket',1)
-    ->whereIn('trx_trp.jenis',['TBS','TBSK'])
-    // ->where('trx_trp.tanggal',">=","2025-10-15")
-    ->where(function ($q) use($model_query,$smp_bulan) {
-        $q->where(function ($q1)use($model_query,$smp_bulan){
-            $q1->where("trx_trp.payment_method_id",1);       
-            $q1->where("trx_trp.received_payment",0);                  
-            // $q1->where("tanggal",">=",$smp_bulan."-01");                  
-            $q1->where("trx_trp.tanggal","<=",$model_query->period_end);                  
-        });
-
-        $q->orWhere(function ($q1)use($model_query,$smp_bulan){
-            $q1->whereIn("trx_trp.payment_method_id",[2,3,4,5]);
-            $q1->where(function ($q2)use($model_query,$smp_bulan){
-                // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
-                $q2->where(function ($q3) use($model_query,$smp_bulan) {            
-                    // $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
-                    // $q3->where("trx_trp.rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
-                    $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
-                    $q3->where("trx_trp.ticket_b_out_at",">=","2025-10-15 00:00:00");                  
-                });
-                // $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
-                //     // $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
-                //     // $q3->where("trx_trp.rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
-                //     $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
-                // });
-            });                         
-        });
-    })
-    ->leftJoin('is_uj',function ($join){
-        $join->on("is_uj.id","trx_trp.id_uj");   
-    })
-    ->leftJoin('destination_location',function ($join){
-        $join->on("is_uj.destination_location_id","destination_location.id");   
-    })
-    ->get();
-
-    $bonus_trip_new = [
-        "gaji"=>[],
-        "dinas"=>[],
-    ];
-    
-    foreach ($tt as $k => $v) {
-        $smd = $v->uj;
-        $smd2 = $v->uj_details2;
-  
-        $gd_s = "";
-        $gd_k = "";
-        
-        //agar yang memang tidak valid langsung di kelompokkan ke salary paid terakhir
-        $v->salary_paid_id    = $salary_paid[1]->id;
-        $v->save();
-
-        // Exclude Trip
-        if($v->jenis=="TBS" && ($v->ticket_a_id == null || $v->ticket_b_id == null)){
-            continue;
-        }
-        if($v->jenis=="TBSK" && ( $v->ticket_b_id == null)){
-            continue;
-        }
-        if($v->destination_location_id== null){
-            continue;
-        }
-  
-        foreach ($smd2 as $k1 => $v1) {
-            if($v1->xfor == 'Supir'){
-              if($v1->ac_account_code=='01.510.001') $gd_s='gaji';
-              if($v1->ac_account_code=='01.575.002') $gd_s='dinas';
-            }
-            if($v1->xfor == 'Kernet'){
-              if($v1->ac_account_code=='01.510.001') $gd_k='gaji';
-              if($v1->ac_account_code=='01.575.002') $gd_k='dinas';
-            }
-        }
-
-        $btn = array_map(function($x){
-          return $x['destination_location_id'];
-        },$bonus_trip_new[$gd_s]);
-        
-        $search = array_search($v->destination_location_id,$btn);
-        if(count($data)==0 || count($bonus_trip_new[$gd_s])==0 || $search===false){
-          $arr=[
-            "destination_location_id"                       =>$v->destination_location_id,
-            "destination_location_xto"                      =>$v->destination_location_xto,
-            "destination_location_minimal_trip"             =>$v->destination_location_minimal_trip,
-            "destination_location_bonus_trip_supir"         =>$v->destination_location_bonus_trip_supir,
-            "destination_location_bonus_next_trip_supir"    =>$v->destination_location_bonus_next_trip_supir,
-            "destination_location_bonus_trip_kernet"        =>$v->destination_location_bonus_trip_kernet,
-            "destination_location_bonus_next_trip_kernet"   =>$v->destination_location_bonus_next_trip_kernet,
-            "employees"                                     =>[
-              [
-                "employee_id"   => $v->supir_id,
-                "employee_role"   => "Supir",
-                "trip_date"     => [
-                  [
-                      "jenis"     => $v->jenis,
-                      "ddate"     => $v->ticket_b_out_at,
-                      "jlh"       => 1
-                  ]
-                ],
-              ]
-            ]
-          ];
-
-          array_push($bonus_trip_new[$gd_s],$arr);
-        }else{
-
-            $emp = array_map(function($x){
-                return $x['employee_id'].$x['employee_role'];
-            },$bonus_trip_new[$gd_s][$search]['employees']);
-            
-            $src_emp = array_search($v->supir_id."Supir",$emp);
-
-            if($src_emp===false){
-              array_push($bonus_trip_new[$gd_s][$search]['employees'],[
-                "employee_id"   => $v->supir_id,
-                "employee_role" => "Supir",
-                "trip_date"     => [
-                  [
-                    "jenis"     => $v->jenis,
-                    "ddate"     => $v->ticket_b_out_at,
-                    "jlh"       => 1
-                  ]
-                ],
-              ]);
-            }else{
-
-              $trip_d = array_map(function($x){
-                return $x['ddate'].$x['jenis'];
-              },$bonus_trip_new[$gd_s][$search]['employees'][$src_emp]['trip_date']);
-                
-              $src_trip_d = array_search($v->ticket_b_out_at.$v->jenis,$trip_d);
-              if($src_trip_d===false){
-                array_push($bonus_trip_new[$gd_s][$search]['employees'][$src_emp]['trip_date'],[
-                  "jenis"     => $v->jenis,
-                  "ddate"     => $v->ticket_b_out_at,
-                  "jlh"       => 1,
-                ]);
-              }else{
-                $bonus_trip_new[$gd_s][$search]['employees'][$src_emp]['trip_date'][$src_trip_d]["jlh"]+=1;
-              }                    
-            }
-        }
-
-
-        if($v->kernet_id){
-          $btn = array_map(function($x){
-              return $x['destination_location_id'];
-          },$bonus_trip_new[$gd_k]);
-            
-          $search = array_search($v->destination_location_id,$btn);
-          if(count($data)==0 || count($bonus_trip_new[$gd_k])==0 || $search===false){
-              $arr=[
-                  "destination_location_id"                       =>$v->destination_location_id,
-                  "destination_location_xto"                      =>$v->destination_location_xto,
-                  "destination_location_minimal_trip"             =>$v->destination_location_minimal_trip,
-                  "destination_location_bonus_trip_supir"         =>$v->destination_location_bonus_trip_supir,
-                  "destination_location_bonus_next_trip_supir"    =>$v->destination_location_bonus_next_trip_supir,
-                  "destination_location_bonus_trip_kernet"        =>$v->destination_location_bonus_trip_kernet,
-                  "destination_location_bonus_next_trip_kernet"   =>$v->destination_location_bonus_next_trip_kernet,
-                  "employees"                                     =>[
-                      [
-                          "employee_id"   => $v->kernet_id,
-                          "employee_role"   => "Kernet",
-                          "trip_date"     => [
-                              [
-                                  "jenis"     => $v->jenis,
-                                  "ddate"     => $v->ticket_b_out_at,
-                                  "jlh"       => 1
-                              ]
-                          ],
-                      ]
-                  ]
-              ];
-
-              array_push($bonus_trip_new[$gd_k],$arr);
-          }else{
-
-              $emp = array_map(function($x){
-                  return $x['employee_id'].$x['employee_role'];
-              },$bonus_trip_new[$gd_k][$search]['employees']);
-              
-              $src_emp = array_search($v->kernet_id."Kernet",$emp);
-
-              if($src_emp===false){
-                  array_push($bonus_trip_new[$gd_k][$search]['employees'],[
-                      "employee_id"   => $v->kernet_id,
-                      "employee_role"   => "Kernet",
-                      "trip_date"     => [
-                          [
-                              "jenis"     => $v->jenis,
-                              "ddate"     => $v->ticket_b_out_at,
-                              "jlh"       => 1
-                          ]
-                      ],
-                  ]);
-              }else{
-
-                  $trip_d = array_map(function($x){
-                      return $x['ddate'].$x['jenis'];
-                  },$bonus_trip_new[$gd_k][$search]['employees'][$src_emp]['trip_date']);
-                  
-                  $src_trip_d = array_search($v->ticket_b_out_at.$v->jenis,$trip_d);
-                  if($src_trip_d===false){
-                      array_push($bonus_trip_new[$gd_k][$search]['employees'][$src_emp]['trip_date'],[
-                          "jenis"     => $v->jenis,
-                          "ddate"     => $v->ticket_b_out_at,
-                          "jlh"       => 1,
-                      ]);
-                  }else{
-                      $bonus_trip_new[$gd_k][$search]['employees'][$src_emp]['trip_date'][$src_trip_d]["jlh"]+=1;
-                  }                    
-              }
-          }
-        }
-
-
-    }
-
-    // MyLog::logging($bonus_trip_new,"checkanomaly");
-
-    foreach ($bonus_trip_new as $kbtn => $vbtn) {
-      if($kbtn=="") MyLog::logging($vbtn,'kbtn');
-
-        foreach ($vbtn as $kkbtn => $vvbtn) {
-
-            $min_trip = $vvbtn['destination_location_minimal_trip'];
-            $bonus_trip_supir = $vvbtn['destination_location_bonus_trip_supir'];
-            $bonus_next_trip_supir = $vvbtn['destination_location_bonus_next_trip_supir'];
-            $bonus_trip_kernet = $vvbtn['destination_location_bonus_trip_kernet'];
-            $bonus_next_trip_kernet = $vvbtn['destination_location_bonus_next_trip_kernet'];
-
-            foreach ($vvbtn['employees'] as $ke => $ve) {
-
-                $map_e = array_map(function($x){
-                    return $x['employee_id'];
-                },$data);
-
-                $search_e = array_search($ve['employee_id'],$map_e);
-                if(count($data)==0 || $search_e===false){
-                    $newData = $temp;
-                    $newData["rpt_salary_id"]=$model_query->id;
-                    $newData["employee_id"]=$ve['employee_id'];
-                    
-                    foreach ($ve['trip_date'] as $ktd => $vtd) {
-                        $nominal = 0;
-                        if($vtd['jlh']>=$min_trip && $ve['employee_role']=='Supir'){
-                            $nominal+=$bonus_trip_supir;
-                        }
-
-                        if($vtd['jlh']>$min_trip && $ve['employee_role']=='Supir'){
-                            $nominal+=$bonus_next_trip_supir;
-                        }
-
-                        if($vtd['jlh']>=$min_trip && $ve['employee_role']=='Kernet'){
-                            $nominal+=$bonus_trip_kernet;
-                        }
-
-                        if($vtd['jlh']>$min_trip && $ve['employee_role']=='Kernet'){
-                            $nominal+=$bonus_next_trip_kernet;
-                        }
-
-                        $newData["trip_".strtolower($vtd['jenis'])."_bonus_".$kbtn]+=$nominal;
-                    }
-                    array_push($data,$newData);
-                }else{
-                    foreach ($ve['trip_date'] as $ktd => $vtd) {
-                        $nominal = 0;
-                        if($vtd['jlh']>=$min_trip && $ve['employee_role']=='Supir'){
-                            $nominal+=$bonus_trip_supir;
-                        }
-
-                        if($vtd['jlh']>$min_trip && $ve['employee_role']=='Supir'){
-                            $nominal+=$bonus_next_trip_supir;
-                        }
-
-                        if($vtd['jlh']>=$min_trip && $ve['employee_role']=='Kernet'){
-                            $nominal+=$bonus_trip_kernet;
-                        }
-
-                        if($vtd['jlh']>$min_trip && $ve['employee_role']=='Kernet'){
-                            $nominal+=$bonus_next_trip_kernet;
-                        }
-
-                        $data[$search_e]["trip_".strtolower($vtd['jenis'])."_bonus_".$kbtn]+=$nominal;       
-                    }
-                }
-
-    // MyLog::logging($data[$search_e],"checkanomalyx");
-
-            }
-        }
-    }
-
-    // $pt = PotonganTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
-    // ->where('created_at',">=",$smp_bulan."-01 00:00:00")
-    // ->where('val',1)
-    // ->where('deleted',0)
-    // ->whereNotNull("trx_trp_id")
-    // ->get();
-
-    $pt = PotonganTrx::where('tanggal',"<=",$model_query->period_end)
-    ->where('tanggal',">=",$smp_bulan."-01")
+    $pt = PotonganTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
+    ->where('created_at',">=",$smp_bulan."-01 00:00:00")
     ->where('val',1)
     ->where('deleted',0)
-    ->where(function ($q){
-      $q->whereNotNull("trx_trp_id")->orWhere('sumber',"PENERIMAAN");
-    })    
+    ->whereNotNull("trx_trp_id")
     ->get();
     
     foreach($pt as $v){
@@ -1551,35 +1210,6 @@ class RptSalaryController extends Controller
         $newData["nominal_cut"]=$v->nominal_cut;
       }else{
         $data[$search]['nominal_cut']+=$v->nominal_cut;
-      }
-    }
-
-
-    $pt_manual = PotonganTrx::where('tanggal',"<=",$model_query->period_end)
-    ->where('tanggal',">=",$smp_bulan."-01")
-    ->where('val',1)
-    ->where('deleted',0)
-    ->whereNull("trx_trp_id")
-    ->where('sumber','MANUAL')
-    ->get();
-    
-    foreach($pt_manual as $v){
-
-      $map_e = array_map(function($x){
-        return $x['employee_id'];
-      },$data);
-
-      $search = array_search($v->potongan_mst->employee_id,$map_e);
-
-      if(count($data)==0 || $search===false){
-
-        $emp = $v->potongan_mst->employee;
-        $newData = $temp;
-        $newData["rpt_salary_id"]=$model_query->id;
-        $newData["employee_id"]=$emp->id;
-        $newData["potongan_manual"]=$v->nominal_cut;
-      }else{
-        $data[$search]['potongan_manual']+=$v->nominal_cut;
       }
     }
 
@@ -1638,7 +1268,7 @@ class RptSalaryController extends Controller
         $vsb->salary_paid_id = $salary_paid[1]->id;
         $vsb->save();
         $SYSNOTE = MyLib::compareChange($SYSOLD,$vsb); 
-        array_push($SYSNOTES,"ID#".$vsb->id."=>".$SYSNOTE);
+        array_push($SYSNOTES,$SYSNOTE);
       }
 
       // if($v["sb_gaji_2"]!=0 || $v["sb_makan_2"]!=0  || $v["sb_gaji"]!=0 || $v["sb_makan"]!=0 || $v["uj_gaji"]!=0 || $v["uj_makan"]!=0){
@@ -1647,7 +1277,7 @@ class RptSalaryController extends Controller
       // }
 
       if($empx->deleted==0)
-      $v['kerajinan'] +=  $empx->workers_from!= env('APP_NAME') ? 0 : ($empx->role=='Supir' ? $kerajinan_s : $kerajinan_k);
+      $v['kerajinan'] += $empx->role=='Supir' ? $kerajinan_s : $kerajinan_k;
 
       if(
         !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 
@@ -1660,7 +1290,7 @@ class RptSalaryController extends Controller
         $v["trip_tbsk"]==0 && $v["trip_tbsk_bonus_gaji"]==0 && $v["trip_tbsk_bonus_dinas"]==0 &&
         $v["trip_lain"]==0 && $v["trip_lain_gaji"]==0 && $v["trip_lain_makan"]==0 && $v["trip_lain_dinas"]==0 &&
         $v["trip_tunggu"]==0 && $v["trip_tunggu_gaji"]==0 && $v["trip_tunggu_dinas"]==0 &&
-        $v["kerajinan"]==0 && $v["salary_bonus_bonus_trip"]==0 && $v["potongan_manual"]==0) 
+        $v["kerajinan"]==0 && $v["salary_bonus_bonus_trip"]==0) 
         ) RptSalaryDtl::insert($v);
     }
 
@@ -1706,61 +1336,7 @@ class RptSalaryController extends Controller
       // 'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
     ];
 
-    $excelMap = [
-      'sb_gaji' => 'O',
-      'sb_makan' => 'P',
-      'sb_dinas' => 'Q',
-      'salary_bonus_nominal' => 'R',
-      'ttl_periode_1' => 'S',
-      'sb_gaji_2' => 'T',
-      'sb_makan_2' => 'U',
-      'sb_dinas_2' => 'V',
-      'salary_bonus_nominal_2' => 'W',
-      'kerajinan' => 'X',
-      'bonus_gaji' => 'Y',
-      'bonus_dinas' => 'Z',
-      'salary_bonus_bonus_trip' => 'AA',
-      'ttl_periode_2' => 'AB',
-      'potongan_manual' => 'AC',
-      'ttl_periode_2_stlh_pot' => 'AD',
-      'ttl_periode_1_2' => 'AE',
-      'trip_jumlah' => 'AF',
-      'uj_gaji' => 'AG',
-      'uj_makan' => 'AH',
-      'uj_dinas' => 'AI',
-      'trip_lain' => 'AJ',
-      'trip_lain_gaji' => 'AK',
-      'trip_lain_makan' => 'AL',
-      'trip_lain_dinas' => 'AM',
-      'trip_tunggu' => 'AN',
-      'trip_tunggu_gaji' => 'AO',
-      'trip_tunggu_dinas' => 'AP',
-      'nominal_cut' => 'AQ',
-      'total' => 'AR',
-      'employee_bpjs_kesehatan' => 'AS',
-      'employee_bpjs_jamsos' => 'AT',
-      'grand_total' => 'AU',
-      // 'barang_c' => 'C',
-      // 'barang_d' => 'D',
-    ];
-
-    $formulas = [
-      'ttl_periode_1'   => 'sb_gaji + sb_makan + sb_dinas + salary_bonus_nominal',
-      'ttl_periode_2'   => 'sb_gaji_2 + sb_makan_2 + sb_dinas_2 + salary_bonus_nominal_2 + kerajinan + bonus_gaji + bonus_dinas + salary_bonus_bonus_trip',
-      
-      'ttl_periode_2_stlh_pot' => 'ttl_periode_2 - potongan_manual',
-      'ttl_periode_1_2' => 'ttl_periode_1 + ttl_periode_2_stlh_pot',
-      
-      'total' => 'uj_gaji + uj_makan + uj_dinas + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
-      'grand_total' => 'ttl_periode_1_2 + total - employee_bpjs_kesehatan - employee_bpjs_jamsos',
-      // 'sisa'         => 'barang_a - barang_c',
-      // 'rata_rata'    => '(barang_a + barang_b + barang_c) / 3',
-      // 'kompleks'     => '(barang_a + barang_b) - barang_d / 2',
-    ];
-
-
-
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"excelMap"=>$excelMap,"formulas"=>$formulas,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
 
     $result = [
       "contentType" => $mime["contentType"],
@@ -1869,54 +1445,7 @@ class RptSalaryController extends Controller
       // 'J' => \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT,
     ];
 
-
-    $excelMap = [
-      'sb_gaji' => 'O',
-      'sb_makan' => 'P',
-      'sb_dinas' => 'Q',
-      'ttl_periode_1' => 'R',
-      'sb_gaji_2' => 'S',
-      'sb_makan_2' => 'T',
-      'sb_dinas_2' => 'U',
-      'kerajinan' => 'V',
-      'bonus_gaji' => 'W',
-      'bonus_dinas' => 'X',
-      'ttl_periode_2' => 'Y',
-      'potongan_manual' => 'Z',
-      'ttl_periode_2_stlh_pot' => 'AA',
-      'ttl_periode_1_2' => 'AB',
-      'trip_jumlah' => 'AC',
-      'uj_gaji' => 'AD',
-      'uj_makan' => 'AE',
-      'uj_dinas' => 'AF',
-      'trip_lain' => 'AG',
-      'trip_lain_gaji' => 'AH',
-      'trip_lain_makan' => 'AI',
-      'trip_lain_dinas' => 'AJ',
-      'trip_tunggu' => 'AK',
-      'trip_tunggu_gaji' => 'AL',
-      'trip_tunggu_dinas' => 'AM',
-      'nominal_cut' => 'AN',
-      'total' => 'AO',
-      'employee_bpjs_kesehatan' => 'AP',
-      'employee_bpjs_jamsos' => 'AQ',
-      'grand_total' => 'AR',
-    ];
-
-    $formulas = [
-      'ttl_periode_1'   => 'sb_gaji + sb_makan + sb_dinas',
-      'ttl_periode_2'   => 'sb_gaji_2 + sb_makan_2 + sb_dinas_2 + kerajinan + bonus_gaji + bonus_dinas',
-      
-      'ttl_periode_2_stlh_pot' => 'ttl_periode_2 - potongan_manual',
-      'ttl_periode_1_2' => 'ttl_periode_1 + ttl_periode_2_stlh_pot',
-      
-      'total' => 'uj_gaji + uj_makan + uj_dinas + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
-      'grand_total' => 'ttl_periode_1_2 + total - employee_bpjs_kesehatan - employee_bpjs_jamsos',
-      // 'sisa'         => 'barang_a - barang_c',
-      // 'rata_rata'    => '(barang_a + barang_b + barang_c) / 3',
-      // 'kompleks'     => '(barang_a + barang_b) - barang_d / 2',
-    ];
-    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"excelMap"=>$excelMap,"formulas"=>$formulas,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$data,"info"=>$info],$blade, $columnFormats), $mime["exportType"]));
 
     $result = [
       "contentType" => $mime["contentType"],
@@ -2026,7 +1555,7 @@ class RptSalaryController extends Controller
         (SELECT * FROM trx_trp WHERE pv_id is NOT NULL AND req_deleted = '0' AND deleted ='0' AND val='1' AND val1='1' 
         AND val2='1' 
         and ( (payment_method_id = '1' AND received_payment = '0' AND tanggal >='".$period_start."' AND tanggal <= '".$period_end."') 
-        OR ((payment_method_id='2' or payment_method_id='3' or payment_method_id='4' or payment_method_id='5') AND ((rp_supir_at>= '".$period_start." 00:00:00' AND rp_supir_at<='".$period_end." 23:59:59') OR 
+        OR ((payment_method_id='2' or payment_method_id='3') AND ((rp_supir_at>= '".$period_start." 00:00:00' AND rp_supir_at<='".$period_end." 23:59:59') OR 
         (rp_kernet_at>='".$period_start." 00:00:00' AND rp_kernet_at<='".$period_end." 23:59:59')) )  ))  a
         join
         is_ujdetails2 b on a.id_uj = b.id_uj where (b.xfor ='Kernet' or b.xfor='Supir') and b.ac_account_code ='".$value."'");
