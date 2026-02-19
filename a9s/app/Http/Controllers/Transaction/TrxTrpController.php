@@ -3191,12 +3191,24 @@ class TrxTrpController extends Controller
       $q->where("supir_id",$trx_trp->supir_id);
       $q->orWhere("kernet_id",$trx_trp->supir_id);
     })
-    ->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN'])
+    // ->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN'])
+    ->where(
+      function ($q) {
+        $q->where(function ($q1) {
+          $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN']);
+          $q1->where("tanggal",">=","2025-10-01");
+        });
+        $q->orWhere(function ($q1) {
+          $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN','TUNGGU']);
+          $q1->where("tanggal",">=","2026-02-20");
+        });
+      }
+    )
     ->where("deleted",0)
     ->where("req_deleted",0)
     ->orderBy("tanggal","desc")
     ->orderBy("id","desc")
-    ->where("tanggal",">=","2025-10-01")
+    // ->where("tanggal",">=","2025-10-01")
     ->where(
       function ($q){
         $q->whereNull('ritase_leave_at');
@@ -3223,12 +3235,23 @@ class TrxTrpController extends Controller
           $q->where("supir_id",$trx_trp->kernet_id);
           $q->orWhere("kernet_id",$trx_trp->kernet_id);
       })
-      ->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN'])
+      ->where(
+        function ($q) {
+          $q->where(function ($q1) {
+            $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN']);
+            $q1->where("tanggal",">=","2025-10-01");
+          });
+          $q->orWhere(function ($q1) {
+            $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN','TUNGGU']);
+            $q1->where("tanggal",">=","2026-02-20");
+          });
+        }
+      )
       ->where("deleted",0)
       ->where("req_deleted",0)
       ->orderBy("tanggal","desc")
       ->orderBy("id","desc")
-      ->where("tanggal",">=","2025-10-01")
+      // ->where("tanggal",">=","2025-10-01")
       ->where(
         function ($q){
           $q->whereNull('ritase_leave_at');
