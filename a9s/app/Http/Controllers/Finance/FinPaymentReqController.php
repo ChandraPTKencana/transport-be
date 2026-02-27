@@ -970,17 +970,19 @@ class FinPaymentReqController extends Controller
       // // $remotePath = "Upload/Users/MCM_BatchUpload/".$data['filename'] . '.' . $mime["ext"];
 
       $remotePath = "Upload/Users/MCM_BatchUpload/".$filename. '.' . $mime["ext"];
-      Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
+      // Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
       
       
-      // try {
-      //     // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
-      //     // MyLog::logging("kirim berhasil","kirim");
-      // } catch (\Exception $e) {
-      //     // Handle the exception
-      //     // MyLog::logging($e->getMessage(),"kirim");
-      //   throw new \Exception("Data Gagal Dikirim",1);
-      // }
+      try {
+        Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
+
+          // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
+          // MyLog::logging("kirim berhasil","kirim");
+      } catch (\Exception $e) {
+          // Handle the exception
+        MyLog::logging($e->getMessage(),"kirim gagal");
+        throw new \Exception("Data Gagal Dikirim",1);
+      }
 
       FinPaymentReq::where('id',$data['id'])->update([
         "filename"=>$filename
