@@ -980,7 +980,7 @@ class FinPaymentReqController extends Controller
           // MyLog::logging("kirim berhasil","kirim");
       } catch (\Exception $e) {
           // Handle the exception
-        MyLog::logging($e->getMessage(),"kirim gagal");
+        MyLog::logging($e->getMessage(),"kirimgagal");
         throw new \Exception("Data Gagal Dikirim",1);
       }
 
