@@ -107,6 +107,7 @@ class PSPotonganTrx
   
       $potongan_trx                   = new PotonganTrx();
       $potongan_trx->potongan_mst_id  = $potongan_mst->id;
+      $potongan_trx->tanggal          = date("Y-m-d");
       $potongan_trx->nominal_cut      = $nominal_cut;
       $potongan_trx->created_at       = $t_stamp;
       $potongan_trx->created_user     = $v['user_id'];
