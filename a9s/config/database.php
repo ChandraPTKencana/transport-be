@@ -106,7 +106,7 @@ return [
         'ms_kas' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => "169.254.46.74",
+            'host' => "169.254.207.217",
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
