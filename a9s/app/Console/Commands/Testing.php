@@ -30,10 +30,11 @@ class Testing extends Command
      */
     public function handle()
     {
+        $date = new \DateTime();
         
-
-        $this->info("APP_NAME".env("APP_NAME"). "\n ");
-        $this->info("PVR_BANK_ACCOUNT_CODE".env("PVR_BANK_ACCOUNT_CODE"). "\n ");
+        $this->info("File".$date->format("ymd"). "\n ");
+        // $this->info("APP_NAME".env("APP_NAME"). "\n ");
+        // $this->info("PVR_BANK_ACCOUNT_CODE".env("PVR_BANK_ACCOUNT_CODE"). "\n ");
        
 
         $this->info("------------------------------------------------------------------------------------------\n ");

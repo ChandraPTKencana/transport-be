@@ -38,55 +38,30 @@ class RunPermit extends Command
         $this->info("Start\n ");
         Schema::disableForeignKeyConstraints();
 
-        // 'SuperAdmin','ViewOnly','Logistic','Finance','Marketing','MIS','PabrikTransport','Accounting','PabrikMandor'
-        $lists = [
-            'PRODUKSI'
-        ];
+        // 'SUPERADMIN','ViewOnly','LOGISTIC_STAFF','Finance','Marketing','MIS','PabrikTransport','Accounting','PabrikMandor'
+        // $lists = [
+        //     'PRODUKSI'
+        // ];
 
-        foreach ($lists as $k => $v) {
-            if(!PermissionGroup::where('name',$v)->first()){
-                $this->info("insert permission group".$v."\n ");
+        // foreach ($lists as $k => $v) {
+        //     if(!PermissionGroup::where('name',$v)->first()){
+        //         $this->info("insert permission group".$v."\n ");
     
-                PermissionGroup::insert([
-                    'name'=>$v,
-                    'created_user'=>1,
-                    'updated_user'=>1,
-                ]);
-            }
-        }
+        //         PermissionGroup::insert([
+        //             'name'=>$v,
+        //             'created_user'=>1,
+        //             'updated_user'=>1,
+        //         ]);
+        //     }
+        // }
         // $this->info("pass1\n ");
 
         // $lists = [
-        //     ["permit"=>'rpt_salary.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'rpt_salary.view',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'rpt_salary.create',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'rpt_salary.modify',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'rpt_salary.val1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'rpt_salary.generate_detail',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'rpt_salary.detail.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'rpt_salary.preview_file',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-
-        //     ["permit"=>'salary_paid.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_paid.view',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_paid.create',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_paid.modify',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     // ["permit"=>'salary_paid.remove',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_paid.val1',"to"=>['SuperAdmin','Logistic']],
-        //     ["permit"=>'salary_paid.val2',"to"=>['SuperAdmin','SPVlogistik']],
-        //     ["permit"=>'salary_paid.val3',"to"=>['SuperAdmin','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_paid.generate_detail',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_paid.preview_file',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_paid.detail.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-
-        //     ["permit"=>'salary_bonus.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_bonus.view',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_bonus.create',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_bonus.modify',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_bonus.remove',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-        //     ["permit"=>'salary_bonus.val1',"to"=>['SuperAdmin','Logistic']],
-        //     ["permit"=>'salary_bonus.val2',"to"=>['SuperAdmin','SPVlogistik','MANAGER_LOGISTIC']],
-
-        //     ["permit"=>'salary_bonus.detail.views',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
+        //     ["permit"=>'rpt_salary.views',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+        //     ["permit"=>'rpt_salary.view',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+        //     ["permit"=>'rpt_salary.create',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+        //     ["permit"=>'rpt_salary.modify',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+        //     ["permit"=>'rpt_salary.val1',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
         // ];
 
         // foreach ($lists as $k => $v) {
@@ -122,84 +97,12 @@ class RunPermit extends Command
 
 
         $re_lists = [
-            // ["permit"=>'trp_trx.absen.clear_valval1',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            // ["permit"=>'standby_trx.detail.decide_paid',"to"=>['SuperAdmin','Logistic','SPVlogistik','MANAGER_LOGISTIC']],
-            // ["permit"=>'user.remove',"to"=>['SUPERADMIN']],
-            // ["permit"=>'extra_money_trx.generate_pv',"to"=>['SuperAdmin','PabrikTransport','PabrikMandor']],
-
-            // ["permit"=>'ujalan.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'ujalan.unval1',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'standby_mst.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'standby_mst.unval1',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'standby_trx.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'standby_trx.unval1',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'standby_trx.unval2',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'employee.unval',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'trp_trx.ticket.unval_ticket',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            
-            // ["permit"=>'trp_trx.unval1',"to"=>['SUPERADMIN','TRANSPORT_MANDOR']],
-            // ["permit"=>'trp_trx.unval2',"to"=>['SUPERADMIN','KTU','WAKIL_KTU']],
-            // ["permit"=>'trp_trx.unval3',"to"=>['SUPERADMIN','MARKETING']],
-            // ["permit"=>'trp_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_STAFF']],
-            // ["permit"=>'trp_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_SPV']],
-            // ["permit"=>'trp_trx.unval6',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'employee.unremove',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'report.distance.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF']],            
-            // ["permit"=>'report.distance.views',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF']],
-            // ["permit"=>'ujalan.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],            
-            // ["permit"=>'standby_trx.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],            
-            // ["permit"=>'trp_trx_ticket.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],            
-
-            // ["permit"=>'salary_bonus.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],
-            // ["permit"=>'ujalan.batas_persen_susut.full_act',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'trp_trx.absen.download_file',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_STAFF','VIEW_ONLY']],
-
             // tidak jadi ["permit"=>'employee.transfer_data',"to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-
-            // ["permit"=>'standby_trx.val3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM']],
-            // ["permit"=>'standby_trx.val4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER','LOGISTIC_SPV']],
-            // ["permit"=>'standby_trx.val5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-
-            // ["permit"=>'standby_trx.unval3',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'standby_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'standby_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-
-            // ["permit"=>'trp_trx.ticket.show_weight',"to"=>[
-            //     'SUPERADMIN','VIEW_ONLY','MARKETING','MIS','WAKIL_KTU','KTU',
-            //     'LOGISTIC_MANAGER','LOGISTIC_SPV','LOGISTIC_ADM','LOGISTIC_STAFF'
-            // ]],
-
-
-            // ["permit"=>'extra_money_trx.unval1',"to"=>['SUPERADMIN','TRANSPORT_KASIR']],
-            // ["permit"=>'extra_money_trx.unval2',"to"=>['SUPERADMIN','TRANSPORT_MANDOR']],
-            // ["permit"=>'extra_money_trx.unval3',"to"=>['SUPERADMIN','WAKIL_KTU','KTU']],
-            // ["permit"=>'extra_money_trx.unval4',"to"=>['SUPERADMIN','LOGISTIC_STAFF']],
-            // ["permit"=>'extra_money_trx.unval5',"to"=>['SUPERADMIN','LOGISTIC_SPV']],
-            // ["permit"=>'extra_money_trx.unval6',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-        
-            // ["permit"=>'destination_location.views', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'destination_location.view',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'destination_location.create',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'destination_location.modify',"to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-
-            // ["permit"=>'ujalan.val2', "to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            // ["permit"=>'ujalan.val3', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'ujalan.unval2', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'ujalan.unval3', "to"=>['SUPERADMIN']],
-            
-            // ["permit"=>'fin_payment_req.views', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            // ["permit"=>'fin_payment_req.view', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            // ["permit"=>'fin_payment_req.create', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            // ["permit"=>'fin_payment_req.modify', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            // ["permit"=>'fin_payment_req.delete', "to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            // ["permit"=>'fin_payment_req.val', "to"=>['SUPERADMIN','LOGISTIC_STAFF']],
-
-            // ["permit"=>'potongan_mst.remove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'potongan_mst.unremove', "to"=>['SUPERADMIN','LOGISTIC_MANAGER']],
-            // ["permit"=>'employee.val1', "to"=>['SUPERADMIN','PRODUKSI']],
-            // ["permit"=>'employee.unval1', "to"=>['SUPERADMIN','PRODUKSI']]
-
-            
+            ["permit"=>'trp_trx.timbang_info.views',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_info.view',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_info.create',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_info.modify',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_info.val1',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
         ];
 
         foreach ($re_lists as $k => $v) {

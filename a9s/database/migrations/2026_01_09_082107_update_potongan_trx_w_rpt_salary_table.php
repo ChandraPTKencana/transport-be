@@ -16,7 +16,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('potongan_trx', function (Blueprint $table) {
-            $table->date('tanggal')->default(DB::raw('(CURRENT_DATE)'));
+            // $table->date('tanggal')->default(DB::raw('(CURRENT_DATE)'));
+            $table->date('tanggal')->nullable();
         });
 
         PotonganTrx::query()->update([

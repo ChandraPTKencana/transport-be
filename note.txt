@@ -14,7 +14,17 @@ git reset --soft HEAD~1
 
 stat -c "%a %n" transport-be
 
-
+composer.json
+{
+    "config": {
+        "audit": {
+            "ignore": [
+                "PKSA-8qx3-n5y5-vvnd",
+                "PKSA-w7xr-vk7n-rstm"
+            ]
+        }
+    }
+}
 
 
 //   Validator::extend('custom_time_format', function ($attribute, $value, $parameters, $validator) {
