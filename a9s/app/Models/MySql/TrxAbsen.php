@@ -12,6 +12,9 @@ class TrxAbsen extends Model
     use Excludable;
 
     protected $table = 'trx_absen';
+    protected $fillable = [
+        'gambar_loc',
+    ];
     // public $timestamps = false;
 
     // public function warehouse()

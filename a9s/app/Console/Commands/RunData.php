@@ -97,57 +97,82 @@ class RunData extends Command
         //     }
         // });
 
-        PotonganMst::whereNull('attachment_1_loc')
-        ->whereNotNull('attachment_1')
-        ->chunkById(10, function ($ptgs) {
+        TrxAbsen::whereNull('gambar_loc')
+        ->whereNotNull('gambar')
+        ->chunkById(10, function ($trxabsens) {
 
-            foreach ($ptgs as $ptg) {
-                $binary = base64_decode($ptg->attachment_1);
-
-                $att_type = $ptg->attachment_1_type;
-                if(str_starts_with($att_type, 'image/')){
-                    $ext = explode("/",$att_type)[1];
+            foreach ($trxabsens as $trxabsen) {
+                $binary = "";
+                if(mb_detect_encoding($trxabsen->gambar)===false){
+                  $binary=$trxabsen->gambar;
                 }else{
-                    $ext = 'pdf';
+                  $binary=base64_decode($trxabsen->gambar);        
                 }
-            
-                $file_name = "{$ptg->standby_trx_id}_att1_" . Str::uuid() . '.' . $ext;
-                $path = "potongan_msts/{$file_name}";
+                $ext = "png";
+           
+                $file_name = "{$trxabsen->trx_trp_id}_att".$trxabsen->status."_" . Str::uuid() . '.' . $ext;
+                $path = "trx_trp/absen/{$file_name}";
 
                 Storage::disk('public')->put($path, $binary, 'private');
 
-                $ptg->update([
-                    'attachment_1_loc' => $path,
-                    'attachment_1' => null, // optional
+                $trxabsen->update([
+                    'gambar_loc' => $path,
+                    // 'gambar' => null, 
                 ]);
             }
         });
 
-        PotonganMst::whereNull('attachment_2_loc')
-        ->whereNotNull('attachment_2')
-        ->chunkById(10, function ($ptgs) {
+        // PotonganMst::whereNull('attachment_1_loc')
+        // ->whereNotNull('attachment_1')
+        // ->chunkById(10, function ($ptgs) {
 
-            foreach ($ptgs as $ptg) {
-                $binary = base64_decode($ptg->attachment_2);
+        //     foreach ($ptgs as $ptg) {
+        //         $binary = base64_decode($ptg->attachment_1);
 
-                $att_type = $ptg->attachment_2_type;
-                if(str_starts_with($att_type, 'image/')){
-                    $ext = explode("/",$att_type)[1];
-                }else{
-                    $ext = 'pdf';
-                }
+        //         $att_type = $ptg->attachment_1_type;
+        //         if(str_starts_with($att_type, 'image/')){
+        //             $ext = explode("/",$att_type)[1];
+        //         }else{
+        //             $ext = 'pdf';
+        //         }
             
-                $file_name = "{$ptg->standby_trx_id}_att2_" . Str::uuid() . '.' . $ext;
-                $path = "potongan_msts/{$file_name}";
+        //         $file_name = "{$ptg->standby_trx_id}_att1_" . Str::uuid() . '.' . $ext;
+        //         $path = "potongan_msts/{$file_name}";
 
-                Storage::disk('public')->put($path, $binary, 'private');
+        //         Storage::disk('public')->put($path, $binary, 'private');
 
-                $ptg->update([
-                    'attachment_2_loc' => $path,
-                    'attachment_2' => null, // optional
-                ]);
-            }
-        });
+        //         $ptg->update([
+        //             'attachment_1_loc' => $path,
+        //             'attachment_1' => null, // optional
+        //         ]);
+        //     }
+        // });
+
+        // PotonganMst::whereNull('attachment_2_loc')
+        // ->whereNotNull('attachment_2')
+        // ->chunkById(10, function ($ptgs) {
+
+        //     foreach ($ptgs as $ptg) {
+        //         $binary = base64_decode($ptg->attachment_2);
+
+        //         $att_type = $ptg->attachment_2_type;
+        //         if(str_starts_with($att_type, 'image/')){
+        //             $ext = explode("/",$att_type)[1];
+        //         }else{
+        //             $ext = 'pdf';
+        //         }
+            
+        //         $file_name = "{$ptg->standby_trx_id}_att2_" . Str::uuid() . '.' . $ext;
+        //         $path = "potongan_msts/{$file_name}";
+
+        //         Storage::disk('public')->put($path, $binary, 'private');
+
+        //         $ptg->update([
+        //             'attachment_2_loc' => $path,
+        //             'attachment_2' => null, // optional
+        //         ]);
+        //     }
+        // });
 
 
 
