@@ -26,7 +26,7 @@ use App\Models\MySql\UjalanDetail;
 use App\Http\Requests\MySql\TrxTrpRequest;
 use App\Http\Requests\MySql\TrxTrpTicketRequest;
 
-use App\Http\Resources\MySql\TrxTrpResource;
+use App\Http\Resources\MySql\TrxTrpSusutResource;
 use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
@@ -380,7 +380,7 @@ class TrxTrpSusutController extends Controller
     $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj'])->get();
 
     return response()->json([
-      "data" => TrxTrpResource::collection($model_query),
+      "data" => TrxTrpSusutResource::collection($model_query),
     ], 200);
   }
 
