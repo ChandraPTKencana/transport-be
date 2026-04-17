@@ -287,7 +287,7 @@ class TrxTrpAbsenController extends Controller
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.view']);
 
     $model_query = TrxTrp::with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','uj','trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc");
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc","latitude","longitude");
     }])->find($request->id);
 
     $data = new TrxTrpAbsenResource($model_query);
@@ -337,7 +337,7 @@ class TrxTrpAbsenController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::where("id",$request->id)->with(['trx_absens'=>function($q) {
-        $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc");
+        $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc","latitude","longitude");
       }])->lockForUpdate()->first();
 
       if($model_query->ritase_val==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 

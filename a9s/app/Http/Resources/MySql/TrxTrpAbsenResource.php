@@ -21,29 +21,44 @@ class TrxTrpAbsenResource extends JsonResource
 
         $img_leave = null;
         $img_leave_preview = null;
+        $img_leave_latitude = null;
+        $img_leave_longitude = null;
+        $img_leave_is_manual = null;
     
         $img_arrive = null;
         $img_arrive_preview = null;
         $img_arrive_is_manual = null;
+        $img_arrive_latitude = null;
+        $img_arrive_longitude= null;
     
         $img_return = null;
         $img_return_preview = null;
         $img_return_is_manual = null;
+        $img_return_latitude = null;
+        $img_return_longitude = null;
     
         $img_till = null;
         $img_till_preview = null;
         $img_till_is_manual = null;
+        $img_till_latitude = null;
+        $img_till_longitude = null;
 
         foreach ($absens as $v) {
             if ($v->status == "B") {
                 $img_leave = $v->gambar;
                 $img_leave_preview = $v->gambar_preview;
+                $img_leave_preview = $v->gambar_preview;
+                $img_leave_is_manual = $v->is_manual;
+                $img_leave_latitude = $v->latitude;
+                $img_leave_longitude = $v->longitude;
     
                 $img_leaves[] = [
                     "id" => $v->id,
                     "gambar" => $v->gambar,
                     "gambar_preview" => $v->gambar_preview,
                     "is_manual" => $v->is_manual,
+                    "latitude" => $v->latitude,
+                    "longitude" => $v->longitude,
                 ];
             }
     
@@ -51,18 +66,24 @@ class TrxTrpAbsenResource extends JsonResource
                 $img_arrive = $v->gambar;
                 $img_arrive_preview = $v->gambar_preview;
                 $img_arrive_is_manual = $v->is_manual;
+                $img_arrive_latitude = $v->latitude;
+                $img_arrive_longitude = $v->longitude;
             }
     
             if ($v->status == "K") {
                 $img_return = $v->gambar;
                 $img_return_preview = $v->gambar_preview;
                 $img_return_is_manual = $v->is_manual;
+                $img_return_latitude = $v->latitude;
+                $img_return_longitude = $v->longitude;
             }
     
             if ($v->status == "S") {
                 $img_till = $v->gambar;
                 $img_till_preview = $v->gambar_preview;
                 $img_till_is_manual = $v->is_manual;
+                $img_till_latitude = $v->latitude;
+                $img_till_longitude = $v->longitude;
             }
         }
 
@@ -116,18 +137,27 @@ class TrxTrpAbsenResource extends JsonResource
             // hasil mapping
             'img_leave' => $img_leave,
             'img_leave_preview' => $img_leave_preview,
-    
+            'img_leave_is_manual' => $img_leave_is_manual,
+            'img_leave_latitude' => $img_leave_latitude ?? "",
+            'img_leave_longitude' => $img_leave_longitude ?? "",
+
             'img_arrive' => $img_arrive,
             'img_arrive_preview' => $img_arrive_preview,
             'img_arrive_is_manual' => $img_arrive_is_manual,
+            'img_arrive_latitude' => $img_arrive_latitude ?? "",
+            'img_arrive_longitude' => $img_arrive_longitude ?? "",
     
             'img_return' => $img_return,
             'img_return_preview' => $img_return_preview,
             'img_return_is_manual' => $img_return_is_manual,
+            'img_return_latitude' => $img_return_latitude ?? "",
+            'img_return_longitude' => $img_return_longitude ?? "",
     
             'img_till' => $img_till,
             'img_till_preview' => $img_till_preview,
             'img_till_is_manual' => $img_till_is_manual,
+            'img_till_latitude' => $img_till_latitude ?? "",
+            'img_till_longitude' => $img_till_longitude ?? "",
     
             'img_leaves' => $img_leaves,
 

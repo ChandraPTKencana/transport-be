@@ -23,6 +23,7 @@ class MapController extends Controller
 
     // Google Maps URL
     $url = "https://www.google.com/maps/@{$latitude},{$longitude},{$zoom}z";
+    // https://www.google.com/maps?q=loc:{$latitude},{$longitude}&z={$zoom}
 
     // Set Chrome executable path (for Windows)
     $chromePath = 'C:\Program Files\Google\Chrome\Application\chrome.exe';
