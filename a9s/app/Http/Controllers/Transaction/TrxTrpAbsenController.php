@@ -357,9 +357,9 @@ class TrxTrpAbsenController extends Controller
   
       if($img_leave_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_leave_ts))
         throw new MyException([ "img_leave_ts" => ["Format Tanggal Salah"] ], 422);
-      if($img_leave_ts && (!$img_leave_has_file && !$att_temp['B']['oldLoc']))
+      if($img_leave_ts && (!$img_leave_has_file && in_array($request->img_leave_preview,[null,'null'])))
         throw new MyException([ "img_leave" => ["Sertakan Bukti Foto"] ], 422);
-      if(!$img_leave_ts && ($img_leave_has_file || $att_temp['B']['oldLoc']))
+      if(!$img_leave_ts && ($img_leave_has_file || !in_array($request->img_leave_preview,[null,'null'])))
         throw new MyException([ "img_leave_ts" => ["Sertakan Waktu Foto"] ], 422);
       
       if($img_leave_has_file){
@@ -421,9 +421,9 @@ class TrxTrpAbsenController extends Controller
   
       if($img_arrive_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_arrive_ts))
         throw new MyException([ "img_arrive_ts" => ["Format Tanggal Salah"] ], 422);
-      if($img_arrive_ts && (!$img_arrive_has_file && !$att_temp['T']['oldLoc']))
+      if($img_arrive_ts && (!$img_arrive_has_file && in_array($request->img_arrive_preview,[null,'null'])))
         throw new MyException([ "img_arrive" => ["Sertakan Bukti Foto"] ], 422);
-      if(!$img_arrive_ts && ($img_arrive_has_file || $att_temp['T']['oldLoc']))
+      if(!$img_arrive_ts && ($img_arrive_has_file || !in_array($request->img_arrive_preview,[null,'null'])))
         throw new MyException([ "img_arrive_ts" => ["Sertakan Waktu Foto"] ], 422);
       
       if($img_arrive_has_file){
@@ -463,9 +463,9 @@ class TrxTrpAbsenController extends Controller
   
       if($img_return_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_return_ts))
         throw new MyException([ "img_return_ts" => ["Format Tanggal Salah"] ], 422);
-      if($img_return_ts && (!$img_return_has_file && !$att_temp['K']['oldLoc']))
+      if($img_return_ts && (!$img_return_has_file && in_array($request->img_return_preview,[null,'null'])))
         throw new MyException([ "img_return" => ["Sertakan Bukti Foto"] ], 422);
-      if(!$img_return_ts && ($img_return_has_file || $att_temp['K']['oldLoc']))
+      if(!$img_return_ts && ($img_return_has_file || !in_array($request->img_return_preview,[null,'null'])))
         throw new MyException([ "img_return_ts" => ["Sertakan Waktu Foto"] ], 422);
       
       if($img_return_has_file){
@@ -505,9 +505,9 @@ class TrxTrpAbsenController extends Controller
   
       if($img_till_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_till_ts))
         throw new MyException([ "img_till_ts" => ["Format Tanggal Salah"] ], 422);
-      if($img_till_ts && (!$img_till_has_file && !$att_temp['S']['oldLoc']))
+      if($img_till_ts && (!$img_till_has_file && in_array($request->img_till_preview,[null,'null'])))
         throw new MyException([ "img_till" => ["Sertakan Bukti Foto"] ], 422);
-      if(!$img_till_ts && ($img_till_has_file || $att_temp['S']['oldLoc']))
+      if(!$img_till_ts && ($img_till_has_file || !in_array($request->img_till_preview,[null,'null'])))
         throw new MyException([ "img_till_ts" => ["Sertakan Waktu Foto"] ], 422);
       
       if($img_till_has_file){
@@ -565,6 +565,8 @@ class TrxTrpAbsenController extends Controller
             $OSYSNOTE = clone($trx_absen);
 
             $trx_absen->gambar_loc = $att_temp[$k]['newLoc'];
+            $trx_absen->latitude = null;
+            $trx_absen->longitude = null;
             $trx_absen->save();
 
             $SYSNOTE = MyLib::compareChange($OSYSNOTE,$trx_absen); 
