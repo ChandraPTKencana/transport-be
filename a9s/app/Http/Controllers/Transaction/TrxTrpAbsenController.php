@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 use Barryvdh\DomPDF\Facade\PDF;
 use Maatwebsite\Excel\Facades\Excel;
@@ -35,6 +36,8 @@ use App\Http\Resources\MySql\TrxTrpResource;
 use InvalidArgumentException;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
+use Illuminate\Support\Facades\Storage;
+
 class TrxTrpAbsenController extends Controller
 {
   private $admin;
@@ -284,59 +287,11 @@ class TrxTrpAbsenController extends Controller
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.view']);
 
     $model_query = TrxTrp::with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','uj','trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar");
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc");
     }])->find($request->id);
 
-
     $data = new TrxTrpAbsenResource($model_query);
-    $data = collect($data);
-
-    $data["img_leave_ts"]      = $model_query->ritase_leave_at;
-    $data["img_arrive_ts"]     = $model_query->ritase_arrive_at;
-    $data["img_return_ts"]     = $model_query->ritase_return_at;
-    $data["img_till_ts"]       = $model_query->ritase_till_at;
-
-    $img_leaves = [];
-    $data['img_leave']="";
-    foreach ($model_query->trx_absens as $k => $v) {
-      // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
-      $img = "data:image/png;base64,";
-      if(mb_detect_encoding($v->gambar)===false){
-        $img.=base64_encode($v->gambar);
-      }else{
-        $img.=$v->gambar;        
-      }
-      
-      if($v['status']=="B") {
-        $data["img_leave"]   = $img;
-        array_push($img_leaves,[
-          "id"=>$v["id"],
-          "gambar"=>$img,
-          "is_manual"=>$v["is_manual"],
-        ]);
-      }
-
-      if($v['status']=="T") {
-        $data["img_arrive"]   = $img;
-        $data["img_arrive_is_manual"]   = $v["is_manual"];
-      }
-
-      if($v['status']=="K") {
-        $data["img_return"]   = $img;
-        $data["img_return_is_manual"]   = $v["is_manual"];
-      }
-
-      if($v['status']=="S") {
-        $data["img_till"]   = $img;
-        $data["img_till_is_manual"]   = $v["is_manual"];
-      }
-
-    }
-    $data['img_leaves']=$img_leaves;
-
-    // $data['trx_absens']= array_filter($data['trx_absens']->toArray(),function($x){
-    //   $x['status']=="B";
-    // });
+   
 
     return response()->json([
       "data" => $data,
@@ -351,122 +306,281 @@ class TrxTrpAbsenController extends Controller
     MyAdmin::checkScope($this->permissions, 'trp_trx.absen.modify');
     $t_stamp = date("Y-m-d H:i:s");
 
-    $img_leave = $request->img_leave;
-    $img_leave_ts = $request->img_leave_ts;
+    $att_temp = [
+      "B"=>[
+        "id"=>0,
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "useNew"=>false
+      ],
+      "T"=>[
+        "id"=>0,
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "useNew"=>false
+      ],
+      "K"=>[
+        "id"=>0,
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "useNew"=>false
+      ],
+      "S"=>[
+        "id"=>0,
+        "newLoc"=>null,
+        "oldLoc"=>null,
+        "useNew"=>false
+      ],
+    ];
 
-    if($img_leave_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_leave_ts))
-      throw new MyException([ "img_leave_ts" => ["Format Tanggal Salah"] ], 422);
-    if($img_leave_ts && !$img_leave)
-      throw new MyException([ "img_leave" => ["Sertakan Bukti Foto"] ], 422);
-    if(!$img_leave_ts && $img_leave)
-      throw new MyException([ "img_leave_ts" => ["Sertakan Waktu Foto"] ], 422);
-
-    if($request->hasFile('img_leave_file')){
-      $file = $request->file('img_leave_file');
-      $path = $file->getRealPath();
-      $fileType = $file->getClientMimeType();
-      if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-      throw new MyException([ "img_leave" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-
-      // $blob_img_leave = base64_encode(file_get_contents($path));
-      $image = Image::read($path)->scale(height: $this->height);
-      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-      $blob_img_leave = base64_encode($compressedImageBinary);      
-    }
-
-    if (!$request->hasFile('img_leave_file') && $img_leave == null) {
-      $blob_img_leave = null;
-    }
-
-    $img_arrive = $request->img_arrive;
-    $img_arrive_ts = $request->img_arrive_ts;    
-
-    if($img_arrive_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_arrive_ts))
-      throw new MyException([ "img_arrive_ts" => ["Format Tanggal Salah"] ], 422);
-    if($img_arrive_ts && !$img_arrive)
-      throw new MyException([ "img_arrive" => ["Sertakan Bukti Foto"] ], 422);
-    if(!$img_arrive_ts && $img_arrive)
-      throw new MyException([ "img_arrive_ts" => ["Sertakan Waktu Foto"] ], 422);
-
-    if($request->hasFile('img_arrive_file')){
-      $file = $request->file('img_arrive_file');
-      $path = $file->getRealPath();
-      $fileType = $file->getClientMimeType();
-      if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-      throw new MyException([ "img_arrive" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-      // $blob_img_arrive = base64_encode(file_get_contents($path));
     
-      $image = Image::read($path)->scale(height: $this->height);
-      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-      $blob_img_arrive = base64_encode($compressedImageBinary);
-    }
-
-    if (!$request->hasFile('img_arrive_file') && $img_arrive == null) {
-      $blob_img_arrive = null;
-    }
-
-    $img_return = $request->img_return;
-    $img_return_ts = $request->img_return_ts;
-
-    if($img_return_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_return_ts))
-      throw new MyException([ "img_return_ts" => ["Format Tanggal Salah"] ], 422);
-    if($img_return_ts && !$img_return)
-      throw new MyException([ "img_return" => ["Sertakan Bukti Foto"] ], 422);
-    if(!$img_return_ts && $img_return)
-      throw new MyException([ "img_return_ts" => ["Sertakan Waktu Foto"] ], 422);  
-
-    if($request->hasFile('img_return_file')){
-      $file = $request->file('img_return_file');
-      $path = $file->getRealPath();
-      $fileType = $file->getClientMimeType();
-      if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-      throw new MyException([ "img_return" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-      // $blob_img_return = base64_encode(file_get_contents($path));
-    
-      $image = Image::read($path)->scale(height: $this->height);
-      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-      $blob_img_return = base64_encode($compressedImageBinary);
-    }
-
-    if (!$request->hasFile('img_return_file') && $img_return == null) {
-      $blob_img_return = null;
-    }
-
-
-    $img_till = $request->img_till;
-    $img_till_ts = $request->img_till_ts;    
-
-    if($img_till_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_till_ts))
-      throw new MyException([ "img_till_ts" => ["Format Tanggal Salah"] ], 422);
-    if($img_till_ts && !$img_till)
-      throw new MyException([ "img_till" => ["Sertakan Bukti Foto"] ], 422);
-    if(!$img_till_ts && $img_till)
-      throw new MyException([ "img_till_ts" => ["Sertakan Waktu Foto"] ], 422);
-
-    if($request->hasFile('img_till_file')){
-      $file = $request->file('img_till_file');
-      $path = $file->getRealPath();
-      $fileType = $file->getClientMimeType();
-      if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
-      throw new MyException([ "img_till" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
-      // $blob_img_till = base64_encode(file_get_contents($path));
-    
-      $image = Image::read($path)->scale(height: $this->height);
-      $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-      $blob_img_till = base64_encode($compressedImageBinary);
-
-    }
-
-    if (!$request->hasFile('img_till_file') && $img_till == null) {
-      $blob_img_till = null;
-    }
-
     DB::beginTransaction();
     try {
-      $model_query = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
-      $SYSOLD      = clone($model_query);
+      $model_query = TrxTrp::where("id",$request->id)->with(['trx_absens'=>function($q) {
+        $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc");
+      }])->lockForUpdate()->first();
+
       if($model_query->ritase_val==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
+
+      $SYSOLD      = clone($model_query);
+      $SYSNOTES = [];
+
+      foreach ($model_query->trx_absens as $k => $v) {
+        $att_temp[$v->status]['id']=$v->id;        
+        $att_temp[$v->status]['oldLoc']=$v->gambar_loc;        
+      }
+
+
+      $img_leave_has_file = $request->hasFile('img_leave');
+      $img_leave_ts = $request->img_leave_ts;
+  
+      if($img_leave_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_leave_ts))
+        throw new MyException([ "img_leave_ts" => ["Format Tanggal Salah"] ], 422);
+      if($img_leave_ts && (!$img_leave_has_file && !$att_temp['B']['oldLoc']))
+        throw new MyException([ "img_leave" => ["Sertakan Bukti Foto"] ], 422);
+      if(!$img_leave_ts && ($img_leave_has_file || $att_temp['B']['oldLoc']))
+        throw new MyException([ "img_leave_ts" => ["Sertakan Waktu Foto"] ], 422);
+      
+      if($img_leave_has_file){
+        $file = $request->file('img_leave');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $ext = $file->extension();
+
+        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+        throw new MyException([ "img_leave" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+          
+        $file_name = "{$model_query->id}_attB_" . Str::uuid() . '.' . $ext;
+        $loc = "trx_trp/absen/{$file_name}";
+
+        // $blob_img_leave = base64_encode(file_get_contents($path));
+        $image = Image::read($path)->scale(height: $this->height);
+        $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+        
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($loc, $compressedImageBinary);
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+
+        $att_temp['B']['newLoc']=$loc;
+        $att_temp['B']['useNew']=true;
+      }
+  
+      if (!$img_leave_has_file && in_array($request->img_leave_preview,[null,'null'])) {
+        $att_temp['B']['newLoc']=null;
+        $att_temp['B']['useNew']=true;
+      }
+
+      //special case roker gambar_loc dan ganti sedikit link ny
+      if (!$img_leave_has_file && !in_array($request->img_leave_preview,[null,'null']) ) {
+        $img_leave_preview = $request->img_leave_preview;
+        $ilp_id = explode("/",$img_leave_preview)[4];
+
+        $trx_absen_new = TrxAbsen::where("id",$ilp_id)->first();
+        if($ilp_id != $att_temp['B']['id']){
+          $file_name = "{$model_query->id}_attB_" . Str::uuid() . '.png';
+          $loc = "trx_trp/absen/{$file_name}";
+
+          Storage::disk('public')->put($loc, Storage::disk('public')->get($trx_absen_new->gambar_loc));
+          $att_temp['B']['newLoc']=$loc;
+          $att_temp['B']['useNew']=true;
+        }else{
+          $att_temp['B']['newLoc']=$trx_absen_new->gambar_loc;
+          $att_temp['B']['useNew']=true;
+        }
+        
+      }
+
+
+
+      $img_arrive_has_file = $request->hasFile('img_arrive');
+      $img_arrive_ts = $request->img_arrive_ts;
+  
+      if($img_arrive_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_arrive_ts))
+        throw new MyException([ "img_arrive_ts" => ["Format Tanggal Salah"] ], 422);
+      if($img_arrive_ts && (!$img_arrive_has_file && !$att_temp['T']['oldLoc']))
+        throw new MyException([ "img_arrive" => ["Sertakan Bukti Foto"] ], 422);
+      if(!$img_arrive_ts && ($img_arrive_has_file || $att_temp['T']['oldLoc']))
+        throw new MyException([ "img_arrive_ts" => ["Sertakan Waktu Foto"] ], 422);
+      
+      if($img_arrive_has_file){
+        $file = $request->file('img_arrive');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $ext = $file->extension();
+
+        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+        throw new MyException([ "img_arrive" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+          
+        $file_name = "{$model_query->id}_attT_" . Str::uuid() . '.' . $ext;
+        $loc = "trx_trp/absen/{$file_name}";
+
+        // $blob_img_arrive = base64_encode(file_get_contents($path));
+        $image = Image::read($path)->scale(height: $this->height);
+        $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+        
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($loc, $compressedImageBinary);
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+
+        $att_temp['T']['newLoc']=$loc;
+        $att_temp['T']['useNew']=true;
+      }
+  
+      if (!$img_arrive_has_file && in_array($request->img_arrive_preview,[null,'null'])) {
+        $att_temp['T']['newLoc']=null;
+        $att_temp['T']['useNew']=true;
+      }
+
+      $img_return_has_file = $request->hasFile('img_return');
+      $img_return_ts = $request->img_return_ts;
+  
+      if($img_return_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_return_ts))
+        throw new MyException([ "img_return_ts" => ["Format Tanggal Salah"] ], 422);
+      if($img_return_ts && (!$img_return_has_file && !$att_temp['K']['oldLoc']))
+        throw new MyException([ "img_return" => ["Sertakan Bukti Foto"] ], 422);
+      if(!$img_return_ts && ($img_return_has_file || $att_temp['K']['oldLoc']))
+        throw new MyException([ "img_return_ts" => ["Sertakan Waktu Foto"] ], 422);
+      
+      if($img_return_has_file){
+        $file = $request->file('img_return');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $ext = $file->extension();
+
+        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+        throw new MyException([ "img_return" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+          
+        $file_name = "{$model_query->id}_attK_" . Str::uuid() . '.' . $ext;
+        $loc = "trx_trp/absen/{$file_name}";
+
+        // $blob_img_return = base64_encode(file_get_contents($path));
+        $image = Image::read($path)->scale(height: $this->height);
+        $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+        
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($loc, $compressedImageBinary);
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+
+        $att_temp['K']['newLoc']=$loc;
+        $att_temp['K']['useNew']=true;
+      }
+  
+      if (!$img_return_has_file && in_array($request->img_return_preview,[null,'null'])) {
+        $att_temp['K']['newLoc']=null;
+        $att_temp['K']['useNew']=true;
+      }
+
+      $img_till_has_file = $request->hasFile('img_till');
+      $img_till_ts = $request->img_till_ts;
+  
+      if($img_till_ts && !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/",$img_till_ts))
+        throw new MyException([ "img_till_ts" => ["Format Tanggal Salah"] ], 422);
+      if($img_till_ts && (!$img_till_has_file && !$att_temp['S']['oldLoc']))
+        throw new MyException([ "img_till" => ["Sertakan Bukti Foto"] ], 422);
+      if(!$img_till_ts && ($img_till_has_file || $att_temp['S']['oldLoc']))
+        throw new MyException([ "img_till_ts" => ["Sertakan Waktu Foto"] ], 422);
+      
+      if($img_till_has_file){
+        $file = $request->file('img_till');
+        $path = $file->getRealPath();
+        $fileType = $file->getClientMimeType();
+        $ext = $file->extension();
+
+        if(!preg_match("/image\/[jpeg|jpg|png]/",$fileType))
+        throw new MyException([ "img_till" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);
+          
+        $file_name = "{$model_query->id}_attS_" . Str::uuid() . '.' . $ext;
+        $loc = "trx_trp/absen/{$file_name}";
+
+        // $blob_img_till = base64_encode(file_get_contents($path));
+        $image = Image::read($path)->scale(height: $this->height);
+        $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
+        
+        try {
+          ini_set('memory_limit', '256M');
+          Storage::disk('public')->put($loc, $compressedImageBinary);
+        } catch (\Exception $e) {
+          throw new \Exception("Simpan File Dokumen Gagal");
+        }
+
+        $att_temp['S']['newLoc']=$loc;
+        $att_temp['S']['useNew']=true;
+      }
+  
+      if (!$img_till_has_file && in_array($request->img_till_preview,[null,'null'])) {
+        $att_temp['S']['newLoc']=null;
+        $att_temp['S']['useNew']=true;
+      }
+      
+      $b_img_to_delete=[];
+      foreach ($att_temp as $k => $v) {
+        if($att_temp[$k]['useNew']){
+          if($att_temp[$k]['id']==0){
+            $insertV=[
+              "status" => $k,
+              "trx_trp_id" => $model_query->id,
+              "gambar"=>null,
+              "gambar_loc"=>$att_temp[$k]['newLoc'],
+              "created_at"=>$t_stamp,
+              "updated_at"=>$t_stamp,
+              "created_user"=>$this->admin_id,
+              "is_manual"=>1,
+            ];
+            TrxAbsen::insert($insertV);
+            $SYSNOTE = MyLib::logNew($insertV);
+            array_push( $SYSNOTES ,"Insert Absen=>\n".$SYSNOTE);            
+
+          }else{
+            $trx_absen = TrxAbsen::where("trx_trp_id",$model_query->id)->where('status',$k)->where('id',$att_temp[$k]['id'])->first();
+            $OSYSNOTE = clone($trx_absen);
+
+            $trx_absen->gambar_loc = $att_temp[$k]['newLoc'];
+            $trx_absen->save();
+
+            $SYSNOTE = MyLib::compareChange($OSYSNOTE,$trx_absen); 
+            array_push( $SYSNOTES ,"Update Absen=> ID:".$trx_absen->id."\n".$SYSNOTE);
+            // array_push($SYSNOTES,"for checking".$model_query->id."x".$k."x".$att_temp[$k]['id']);            
+            if($k=="B"){
+              $b_id_to_delete = TrxAbsen::where("trx_trp_id",$model_query->id)->where('status',$k)->where('id',"!=",$att_temp[$k]['id'])->pluck('id')->toArray();
+              $b_img_to_delete = TrxAbsen::where("trx_trp_id",$model_query->id)->where('status',$k)->where('id',"!=",$att_temp[$k]['id'])->pluck('gambar_loc')->toArray();
+              array_push( $SYSNOTES ,"Hapus Absen=> ID:(".implode(",",$b_id_to_delete).") [Deleted]");
+              // array_push( $SYSNOTES ,"check => ID:(".implode(",",$b_img_to_delete).") [Deleted]");
+              TrxAbsen::where("trx_trp_id",$model_query->id)->where('status',$k)->where('id',"!=",$att_temp[$k]['id'])->delete();
+            }
+          }
+        }
+      }
+
 
       $model_query->updated_at        = $t_stamp;
       $model_query->updated_user      = $this->admin_id;
@@ -477,81 +591,28 @@ class TrxTrpAbsenController extends Controller
       $model_query->ritase_note       = $request->ritase_note;
       $model_query->save();
 
-
-      $OSYSNOTE="";
-      if((int)$img_leave!=0){
-        $OSYSNOTE.="Gambar yang tidak dipilih untuk gambar berangkat dihapuskan \n";
-        TrxAbsen::where("status","B")->where("trx_trp_id",$model_query->id)->where("id","!=",$img_leave)->delete();
-      }elseif ($img_leave=="ada" && isset($blob_img_leave)) {
-        $OSYSNOTE.="Tambah Gambar Berangkat \n";
-
-        TrxAbsen::insert([
-          "status" => "B",
-          "trx_trp_id" => $model_query->id,
-          "gambar"=>$blob_img_leave,
-          "created_at"=>$t_stamp,
-          "updated_at"=>$t_stamp,
-          "created_user"=>$this->admin_id,
-          "is_manual"=>1,
-        ]);
-      }
-      // elseif(!$img_leave){
-      //   $OSYSNOTE.="Hapus Gambar Berangkat \n";
-      //   TrxAbsen::where("status","B")->where('trx_trp_id',$model_query->id)->delete();
-      // }
-
-      if($img_arrive && isset($blob_img_arrive)){
-        $OSYSNOTE.="Tambah Gambar Tiba \n";
-        TrxAbsen::insert([
-          "status" => "T",
-          "trx_trp_id" => $model_query->id,
-          "gambar"=>$blob_img_arrive,
-          "created_at"=>$t_stamp,
-          "updated_at"=>$t_stamp,
-          "created_user"=>$this->admin_id,
-          "is_manual"=>1,
-        ]);
-      }elseif(!$img_arrive){
-        $OSYSNOTE.="Hapus Gambar Tiba \n";
-        TrxAbsen::where("status","T")->where('trx_trp_id',$model_query->id)->delete();
-      }
-
-      if($img_return && isset($blob_img_return)){
-        $OSYSNOTE.="Tambah Gambar Kembali \n";
-        TrxAbsen::insert([
-          "status" => "K",
-          "trx_trp_id" => $model_query->id,
-          "gambar"=>$blob_img_return,
-          "created_at"=>$t_stamp,
-          "updated_at"=>$t_stamp,
-          "created_user"=>$this->admin_id,
-          "is_manual"=>1,
-        ]);
-      }elseif(!$img_return){
-        $OSYSNOTE.="Hapus Gambar Kembali \n";
-        TrxAbsen::where("status","K")->where('trx_trp_id',$model_query->id)->delete();
-      }
-
-      if($img_till && isset($blob_img_till)){
-        $OSYSNOTE.="Tambah Gambar Sampai \n";
-        TrxAbsen::insert([
-          "status" => "S",
-          "trx_trp_id" => $model_query->id,
-          "gambar"=>$blob_img_till,
-          "created_at"=>$t_stamp,
-          "updated_at"=>$t_stamp,
-          "created_user"=>$this->admin_id,
-          "is_manual"=>1,
-        ]);
-      }elseif(!$img_till){
-        $OSYSNOTE.="Hapus Gambar Sampai \n";
-        TrxAbsen::where("status","S")->where('trx_trp_id',$model_query->id)->delete();
-      }
-
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
-      MyLog::sys("trx_trp",$request->id,"update absen",$SYSNOTE."\n".$OSYSNOTE);
+      MyLog::sys("trx_trp",$request->id,"update absen",$SYSNOTE."\n".implode("\n",$SYSNOTES));
 
       DB::commit();
+
+      try {
+        ini_set('memory_limit', '256M');
+        foreach ($att_temp as $k => $v) {
+          if ($att_temp[$k]['useNew'] &&  $att_temp[$k]['oldLoc']!= null && $att_temp[$k]['newLoc'] != $att_temp[$k]['oldLoc'] && Storage::disk('public')->exists($att_temp[$k]['oldLoc'])) {
+            Storage::disk('public')->delete($att_temp[$k]['oldLoc']);
+          }
+        }
+        foreach ($b_img_to_delete as $k => $v) {
+          if (Storage::disk('public')->exists($v)) {
+            Storage::disk('public')->delete($v);
+          }
+        }
+        
+      } catch (\Exception $e) {
+        
+      }
+
       return response()->json([
         "message" => "Proses ubah data berhasil",
         "updated_at" => $t_stamp,
@@ -806,5 +867,35 @@ class TrxTrpAbsenController extends Controller
       "filename" => $filename . "." . $mime["ext"],
     ];
     return $result;
+  }
+
+
+  public function getAttachment($id,$n)
+  {
+    MyAdmin::checkScope($this->permissions, 'trp_trx.absen.view');
+
+    $trx = TrxAbsen::where("trx_trp_id",$id)->where("id",$n)->first();
+
+    abort_unless($trx->gambar_loc, 404,$trx->gambar_loc);
+
+    abort_unless(Storage::disk('public')->exists($trx->gambar_loc), 404,"not exists");
+
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('public');  
+    return $disk->response(
+        $trx->gambar_loc,
+        null,
+        [
+            'Cache-Control' => 'no-store, private',
+            'Content-Type'  => "image/png",
+            'X-Attachment'  => $n,
+        ]
+    );
+
+    // return response()->file($path, [
+    //   'Cache-Control'=> 'no-store, private',
+    //   'Content-Type'  => $trx->$typeField,
+    //   'X-Attachment' => $n,
+    // ]);
   }
 }

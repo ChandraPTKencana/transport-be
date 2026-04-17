@@ -456,17 +456,28 @@ class TrxTrpTimbangInfoController extends Controller
       MyLog::sys("trx_trp",$request->id,"update absen",$SYSNOTE);
 
       DB::commit();
+
+      try {
+        ini_set('memory_limit', '256M');
+        foreach ($att_temp as $k => $v) {
+          if ($att_temp[$k]['useNew'] &&  $att_temp[$k]['oldLoc']!= null && Storage::disk('public')->exists($att_temp[$k]['oldLoc'])) {
+            Storage::disk('public')->delete($att_temp[$k]['oldLoc']);
+          }
+        }
+      } catch (\Exception $e) {
+        
+      }
       return response()->json([
         "message" => "Proses ubah data berhasil",
         "updated_at" => $t_stamp,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),

@@ -5,6 +5,7 @@ namespace App\Models\MySql;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\Excludable;
+use Illuminate\Support\Facades\Storage;
 
 class TrxAbsen extends Model
 {
@@ -15,6 +16,16 @@ class TrxAbsen extends Model
     protected $fillable = [
         'gambar_loc',
     ];
+
+    public function getGambarPreviewAttribute()
+    {
+        if ($this->gambar_loc && Storage::disk('public')->exists($this->gambar_loc)) {
+            return "trx_trp/absen/att/".$this->trx_trp_id."/".$this->id;
+        }
+
+        return null;
+    }
+
     // public $timestamps = false;
 
     // public function warehouse()

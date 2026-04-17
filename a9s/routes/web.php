@@ -140,6 +140,7 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::put('/trx_trp/absen/validasi', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'validasi']);
     Route::put('/trx_trp/absen/clear_valval1', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'clearValVal1']);
     Route::get('/trx_trp/absen/download_excel', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'downloadExcel']);
+    Route::get('/trx_trp/absen/att/{id}/{n}', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'getAttachment']);
 
 
     Route::get('/trx_trp/timbang_infos', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'index']);

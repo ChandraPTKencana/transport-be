@@ -76,6 +76,20 @@ class MyLib
     })->toArray();
   }
 
+  public static function logNew($new)
+  {
+    $note = "";
+    $n = is_array($new) ? $new : $new->toArray();
+
+    foreach ($n as $k => $v) {
+      if ($note == "") {
+        $note .= "Data yang baru: \n";
+      }
+      $note .= "[" . $k . "] " . $v . "\n";
+    }
+    return $note;
+  }
+
   public static function compareChange($old,$new){
     $note="";
     $o = is_array($old) ? $old : $old->toArray();

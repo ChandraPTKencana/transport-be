@@ -15,6 +15,58 @@ class TrxTrpAbsenResource extends JsonResource
      */
     public function toArray($request)
     {
+
+        $absens = $this->trx_absens ?? collect();
+        $img_leaves = [];
+
+        $img_leave = null;
+        $img_leave_preview = null;
+    
+        $img_arrive = null;
+        $img_arrive_preview = null;
+        $img_arrive_is_manual = null;
+    
+        $img_return = null;
+        $img_return_preview = null;
+        $img_return_is_manual = null;
+    
+        $img_till = null;
+        $img_till_preview = null;
+        $img_till_is_manual = null;
+
+        foreach ($absens as $v) {
+            if ($v->status == "B") {
+                $img_leave = $v->gambar;
+                $img_leave_preview = $v->gambar_preview;
+    
+                $img_leaves[] = [
+                    "id" => $v->id,
+                    "gambar" => $v->gambar,
+                    "gambar_preview" => $v->gambar_preview,
+                    "is_manual" => $v->is_manual,
+                ];
+            }
+    
+            if ($v->status == "T") {
+                $img_arrive = $v->gambar;
+                $img_arrive_preview = $v->gambar_preview;
+                $img_arrive_is_manual = $v->is_manual;
+            }
+    
+            if ($v->status == "K") {
+                $img_return = $v->gambar;
+                $img_return_preview = $v->gambar_preview;
+                $img_return_is_manual = $v->is_manual;
+            }
+    
+            if ($v->status == "S") {
+                $img_till = $v->gambar;
+                $img_till_preview = $v->gambar_preview;
+                $img_till_is_manual = $v->is_manual;
+            }
+        }
+
+
         // return parent::toArray($request);
         return [
             'id'                => $this->id,
@@ -55,6 +107,29 @@ class TrxTrpAbsenResource extends JsonResource
             'transition_target' => $this->transition_target ?? "",
             'transition_type'   => $this->transition_type ?? "",
             'trx_absens'        => TrxAbsenResource::collection($this->whenLoaded('trx_absens')),
+
+            'img_leave_ts' => $this->ritase_leave_at,
+            'img_arrive_ts' => $this->ritase_arrive_at,
+            'img_return_ts' => $this->ritase_return_at,
+            'img_till_ts' => $this->ritase_till_at,
+    
+            // hasil mapping
+            'img_leave' => $img_leave,
+            'img_leave_preview' => $img_leave_preview,
+    
+            'img_arrive' => $img_arrive,
+            'img_arrive_preview' => $img_arrive_preview,
+            'img_arrive_is_manual' => $img_arrive_is_manual,
+    
+            'img_return' => $img_return,
+            'img_return_preview' => $img_return_preview,
+            'img_return_is_manual' => $img_return_is_manual,
+    
+            'img_till' => $img_till,
+            'img_till_preview' => $img_till_preview,
+            'img_till_is_manual' => $img_till_is_manual,
+    
+            'img_leaves' => $img_leaves,
 
             'ritase_leave_at'   => $this->ritase_leave_at ?? "",
             'ritase_arrive_at'  => $this->ritase_arrive_at ?? "",
