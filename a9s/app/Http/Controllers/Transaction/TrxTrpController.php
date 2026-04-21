@@ -119,6 +119,7 @@ class TrxTrpController extends Controller
           }
 
           $list_to_like_uj = [
+            ["uj_id","id"],
             ["uj_asst_opt","asst_opt"],
             ["uj_xto","xto"],
           ];
@@ -170,7 +171,7 @@ class TrxTrpController extends Controller
       if(count($fm_sorts)>0){
         usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
         foreach ($fm_sorts as $key => $value) {
-          if(array_search($value['key'],['uj_asst_opt','uj_xto'])!==false){
+          if(array_search($value['key'],['uj_id','uj_asst_opt','uj_xto'])!==false){
             $model_query = MyLib::queryOrderP1($model_query,"uj","id_uj",$value['key'],$filter_model[$value['key']]["sort_type"],"is_uj");
           } else{
             $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
@@ -302,7 +303,7 @@ class TrxTrpController extends Controller
                 // }
               }
             }
-          }else if(array_search($key,['uj_asst_opt','uj_xto'])!==false){
+          }else if(array_search($key,['uj_id','uj_asst_opt','uj_xto'])!==false){
             MyLib::queryCheckP1Dif("uj",$value,$key,$q,'is_uj',"id_uj");
           }else{
             MyLib::queryCheck($value,$key,$q);
