@@ -262,7 +262,7 @@ class TrxTrpAbsenController extends Controller
     }
 
     $model_query = $model_query->with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','uj','trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual');
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar_loc","latitude","longitude");
     }])->get();
 
     return response()->json([
@@ -274,7 +274,8 @@ class TrxTrpAbsenController extends Controller
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
 
-    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function ($q){
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function($q) {
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar_loc","latitude","longitude");
       $q->where("status","B");
     },'potongan'])->find($request->id);
     return response()->json([
@@ -287,7 +288,7 @@ class TrxTrpAbsenController extends Controller
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.view']);
 
     $model_query = TrxTrp::with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','uj','trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc","latitude","longitude");
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar_loc","latitude","longitude");
     }])->find($request->id);
 
     $data = new TrxTrpAbsenResource($model_query);
@@ -337,7 +338,7 @@ class TrxTrpAbsenController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::where("id",$request->id)->with(['trx_absens'=>function($q) {
-        $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc","latitude","longitude");
+        $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar_loc","latitude","longitude");
       }])->lockForUpdate()->first();
 
       if($model_query->ritase_val==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 

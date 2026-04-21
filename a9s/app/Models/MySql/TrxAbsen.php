@@ -17,6 +17,11 @@ class TrxAbsen extends Model
         'gambar_loc',
     ];
 
+    public function getGambarAttribute()
+    {
+        return null;
+    }
+
     public function getGambarPreviewAttribute()
     {
         if ($this->gambar_loc && Storage::disk('public')->exists($this->gambar_loc)) {

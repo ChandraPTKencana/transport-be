@@ -1739,7 +1739,7 @@ class StandbyTrxController extends Controller
 
     $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','ritase_val_by','ritase_val1_by','ritase_val2_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','uj_details','uj_details2'
     ,'trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar","gambar_loc","latitude","longitude");
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar_loc","latitude","longitude");
     },'standby_trxs'=>function ($q){
       $q->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','deleted_by','req_deleted_by',
       'details'=>function($q){
