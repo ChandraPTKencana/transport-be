@@ -238,7 +238,7 @@ class EmployeeTrip extends Controller
         TrxAbsen::insert([
           "status" => $status,
           "trx_trp_id" => $model_query->id,
-          "gambar" => $blob_img,
+          "gambar" => null,
           "gambar_loc" => $path,
           "created_at" => $t_stamp,
           "updated_at" => $t_stamp,
