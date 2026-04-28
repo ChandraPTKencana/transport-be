@@ -57,29 +57,29 @@ class TrxTrpTimbangInfoResourceShow extends JsonResource
             'transition_type'   => $this->transition_type ?? "",
             'trx_absens'        => TrxAbsenResource::collection($this->whenLoaded('trx_absens')),
 
-            'timbang_a_img_in_exists'  => $this->timbang_a_img_in_loc ? true: false,
-            'timbang_a_img_out_exists' => $this->timbang_a_img_out_loc ? true: false,
-            'timbang_b_img_in_exists'  => $this->timbang_b_img_in_loc ? true: false,
-            'timbang_b_img_out_exists' => $this->timbang_b_img_out_loc ? true: false,
+            'timbang_a_1_img_in_exists'  => $this->timbang_a_1_img_in_loc ? true: false,
+            'timbang_a_1_img_out_exists' => $this->timbang_a_1_img_out_loc ? true: false,
+            'timbang_a_2_img_in_exists'  => $this->timbang_a_2_img_in_loc ? true: false,
+            'timbang_a_2_img_out_exists' => $this->timbang_a_2_img_out_loc ? true: false,
 
-            'timbang_a_img_in'          => null,
-            'timbang_a_img_in_preview'  => $this->timbang_a_img_in_loc && Storage::disk('public')->exists($this->timbang_a_img_in_loc) ? "trx_trp/timbang_info/".$this->id."/a_img_in" :"",
+            'timbang_a_1_img_in'          => null,
+            'timbang_a_1_img_in_preview'  => $this->timbang_a_1_img_in_loc && Storage::disk('public')->exists($this->timbang_a_1_img_in_loc) ? "trx_trp/timbang_a_info/".$this->id."/1_img_in" :"",
 
-            'timbang_a_img_out'          => null,
-            'timbang_a_img_out_preview'  => $this->timbang_a_img_out_loc && Storage::disk('public')->exists($this->timbang_a_img_out_loc) ? "trx_trp/timbang_info/".$this->id."/a_img_out" :"",
+            'timbang_a_1_img_out'          => null,
+            'timbang_a_1_img_out_preview'  => $this->timbang_a_1_img_out_loc && Storage::disk('public')->exists($this->timbang_a_1_img_out_loc) ? "trx_trp/timbang_a_info/".$this->id."/1_img_out" :"",
 
-            'timbang_b_img_in'          => null,
-            'timbang_b_img_in_preview'  => $this->timbang_b_img_in_loc && Storage::disk('public')->exists($this->timbang_b_img_in_loc) ? "trx_trp/timbang_info/".$this->id."/b_img_in" :"",
+            'timbang_a_2_img_in'          => null,
+            'timbang_a_2_img_in_preview'  => $this->timbang_a_2_img_in_loc && Storage::disk('public')->exists($this->timbang_a_2_img_in_loc) ? "trx_trp/timbang_a_info/".$this->id."/2_img_in" :"",
 
-            'timbang_b_img_out'          => null,
-            'timbang_b_img_out_preview'  => $this->timbang_b_img_out_loc && Storage::disk('public')->exists($this->timbang_b_img_out_loc) ? "trx_trp/timbang_info/".$this->id."/b_img_out" :"",
+            'timbang_a_2_img_out'          => null,
+            'timbang_a_2_img_out_preview'  => $this->timbang_a_2_img_out_loc && Storage::disk('public')->exists($this->timbang_a_2_img_out_loc) ? "trx_trp/timbang_a_info/".$this->id."/2_img_out" :"",
 
-            'timbang_note'       => $this->timbang_note,
+            'timbang_a_note'       => $this->timbang_a_note ?? '',
 
-            'timbang_val1'       => $this->timbang_val1,
-            'timbang_val1_user'  => $this->timbang_val1_user ?? "",
-            'timbang_val1_by'    => new IsUserResource($this->whenLoaded('timbang_val1_by')),
-            'timbang_val1_at'    => $this->timbang_val1_at ?? "",
+            'timbang_a_val1'       => $this->timbang_a_val1,
+            'timbang_a_val1_user'  => $this->timbang_a_val1_user ?? "",
+            'timbang_a_val1_by'    => new IsUserResource($this->whenLoaded('timbang_a_val1_by')),
+            'timbang_a_val1_at'    => $this->timbang_a_val1_at ?? "",
 
             'uj'                => new UjalanResource($this->whenLoaded('uj')),
         ];

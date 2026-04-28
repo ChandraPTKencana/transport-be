@@ -143,14 +143,14 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::get('/trx_trp/absen/att/{id}/{n}', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'getAttachment']);
 
 
-    Route::get('/trx_trp/timbang_infos', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'index']);
-    Route::get('/trx_trp/timbang_info', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'show']);
-    Route::put('/trx_trp/timbang_info', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'update']);
-    Route::get('/trx_trp/timbang_info/{id}/{n}', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'getAttachment']);
-    // Route::get('/trx_trp/timbang_info_b', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'showBAbsen']);
-    Route::put('/trx_trp/timbang_info/validasi', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'validasi']);
-    // Route::put('/trx_trp/timbang_info/clear_valval1', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'clearValVal1']);
-    // Route::get('/trx_trp/timbang_info/download_excel', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'downloadExcel']);
+    Route::get('/trx_trp/timbang_a_infos', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'index']);
+    Route::get('/trx_trp/timbang_a_info', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'show']);
+    Route::put('/trx_trp/timbang_a_info', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'update']);
+    Route::get('/trx_trp/timbang_a_info/{id}/{n}', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'getAttachment']);
+    // Route::get('/trx_trp/timbang_a_info_b', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'showBAbsen']);
+    Route::put('/trx_trp/timbang_a_info/validasi', [\App\Http\Controllers\Transaction\TrxTrpTimbangInfoController::class, 'validasi']);
+    // Route::put('/trx_trp/timbang_a_info/clear_valval1', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'clearValVal1']);
+    // Route::get('/trx_trp/timbang_a_info/download_excel', [\App\Http\Controllers\Transaction\TrxTrpAbsenController::class, 'downloadExcel']);
 
     Route::get('/users', [\App\Http\Controllers\User\UserController::class, 'index']);
     Route::get('/user', [\App\Http\Controllers\User\UserController::class, 'show']);

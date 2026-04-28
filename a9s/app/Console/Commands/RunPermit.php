@@ -98,11 +98,11 @@ class RunPermit extends Command
 
         $re_lists = [
             // tidak jadi ["permit"=>'employee.transfer_data',"to"=>['SUPERADMIN','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'trp_trx.timbang_info.views',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'trp_trx.timbang_info.view',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'trp_trx.timbang_info.create',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'trp_trx.timbang_info.modify',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
-            ["permit"=>'trp_trx.timbang_info.val1',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_a_info.views',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_a_info.view',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_a_info.create',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_a_info.modify',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
+            ["permit"=>'trp_trx.timbang_a_info.val1',"to"=>['SUPERADMIN','LOGISTIC_STAFF','LOGISTIC_SPV','LOGISTIC_MANAGER']],
         ];
 
         foreach ($re_lists as $k => $v) {

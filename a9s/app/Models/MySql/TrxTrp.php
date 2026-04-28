@@ -163,8 +163,8 @@ class TrxTrp extends Model
         return $this->hasMany(FinPaymentReqDtl::class, 'trx_trp_id');
     }
     
-    public function timbang_val1_by()
+    public function timbang_a_val1_by()
     {
-        return $this->hasOne(IsUser::class, 'id', "timbang_val1_user");
+        return $this->hasOne(IsUser::class, 'id', "timbang_a_val1_user");
     }
 }

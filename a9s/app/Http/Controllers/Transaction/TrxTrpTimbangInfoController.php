@@ -57,7 +57,7 @@ class TrxTrpTimbangInfoController extends Controller
   public function index(Request $request, $download = false)
   {
     if(!$download)
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_info.views']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_a_info.views']);
 
     //======================================================================================================
     // Pembatasan Data hanya memerlukan limit dan offset
@@ -204,10 +204,10 @@ class TrxTrpTimbangInfoController extends Controller
                 }
 
                 if($r_val=='Done'){
-                  $q->where("timbang_val1",1)->where("deleted",0)->where("req_deleted",0);
+                  $q->where("timbang_a_val1",1)->where("deleted",0)->where("req_deleted",0);
                   // $q->whereNotNull("ritase_leave_at")->whereNotNull("ritase_arrive_at")->whereNotNull("ritase_return_at")->whereNotNull("ritase_till_at");
                 }else{
-                  $q->where("timbang_val1",0)->where("deleted",0)->where("req_deleted",0);
+                  $q->where("timbang_a_val1",0)->where("deleted",0)->where("req_deleted",0);
                   // $q->whereNull("ritase_leave_at")->orWhereNull("ritase_arrive_at")->orWhereNull("ritase_return_at")->orWhereNull("ritase_till_at");
                 }
               }
@@ -242,13 +242,13 @@ class TrxTrpTimbangInfoController extends Controller
     $filter_status = $request->filter_status;
     
     if($filter_status=='Done'){
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where("timbang_val1",1);
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where("timbang_a_val1",1);
       // ->where(function ($q) {
       //   $q->whereNotNull("ritase_leave_at")->whereNotNull("ritase_arrive_at")->whereNotNull("ritase_return_at")->whereNotNull("ritase_till_at");
       // });
 
     }elseif ($filter_status=="Undone") {
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where("timbang_val1",0);
+      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->where("timbang_a_val1",0);
       // ->where(function ($q) {
       //   $q->whereNull("ritase_leave_at")->orWhereNull("ritase_arrive_at")->orWhereNull("ritase_return_at")->orWhereNull("ritase_till_at");
       // });
@@ -262,7 +262,7 @@ class TrxTrpTimbangInfoController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['timbang_val1_by','deleted_by','req_deleted_by','uj'])->get();
+    $model_query = $model_query->with(['timbang_a_val1_by','deleted_by','req_deleted_by','uj'])->get();
 
     return response()->json([
       "data" => TrxTrpTimbangInfoResource::collection($model_query),
@@ -283,9 +283,9 @@ class TrxTrpTimbangInfoController extends Controller
 
   public function show(TrxTrpTimbangInfoRequest $request)
   {
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_info.view']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_a_info.view']);
 
-    $model_query = TrxTrp::with(['timbang_val1_by','deleted_by','req_deleted_by','uj'])->find($request->id);
+    $model_query = TrxTrp::with(['timbang_a_val1_by','deleted_by','req_deleted_by','uj'])->find($request->id);
 
     return response()->json([
       "data" => new TrxTrpTimbangInfoResourceShow($model_query),
@@ -297,7 +297,7 @@ class TrxTrpTimbangInfoController extends Controller
 
   public function update(TrxTrpTimbangInfoRequest $request)
   {
-    MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_info.modify');
+    MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_a_info.modify');
     $t_stamp = date("Y-m-d H:i:s");
 
     $att_temp = [
@@ -327,21 +327,21 @@ class TrxTrpTimbangInfoController extends Controller
     try {
       $model_query = TrxTrp::where("id",$request->id)->lockForUpdate()->first();
       $SYSOLD      = clone($model_query);
-      if($model_query->timbang_val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
+      if($model_query->timbang_a_val1==1 || $model_query->req_deleted==1 || $model_query->deleted==1) 
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
-      $att_temp['a_in']['oldLoc']=$model_query->timbang_a_img_in_loc;
-      if($request->hasFile('timbang_a_img_in')){
-        $file = $request->file('timbang_a_img_in');
+      $att_temp['a_in']['oldLoc']=$model_query->timbang_a_1_img_in_loc;
+      if($request->hasFile('timbang_a_1_img_in')){
+        $file = $request->file('timbang_a_1_img_in');
         $doc_path = $file->getRealPath();
         $doc_type = $file->getClientMimeType();
         $ext = $file->extension();
 
         if(!preg_match("/image\/[jpeg|jpg|png]/",$doc_type))
-        throw new MyException([ "timbang_a_img_in" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
+        throw new MyException([ "timbang_a_1_img_in" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
 
-        $file_name = $model_query->id."_timbang_a_img_in_".Str::uuid() . '.' . $ext;
-        $doc_loc = "trx_trp/timbang_info/$file_name";
+        $file_name = $model_query->id."_timbang_a_1_img_in_".Str::uuid() . '.' . $ext;
+        $doc_loc = "trx_trp/timbang_a_info/$file_name";
 
         try {
           ini_set('memory_limit', '256M');
@@ -353,24 +353,24 @@ class TrxTrpTimbangInfoController extends Controller
         $att_temp['a_in']['newLoc']=$doc_loc;
         $att_temp['a_in']['useNew']=true;
       }
-      if (!$request->hasFile('timbang_a_img_in') && in_array($request->timbang_a_img_in_preview,[null,'null'])) {
+      if (!$request->hasFile('timbang_a_1_img_in') && in_array($request->timbang_a_1_img_in_preview,[null,'null'])) {
         $att_temp['a_in']['newLoc']=null;
         $att_temp['a_in']['useNew']=true;
       }
-      $model_query->timbang_a_img_in_loc = $att_temp['a_in']['useNew']?$att_temp['a_in']['newLoc']:$att_temp['a_in']['oldLoc'];
+      $model_query->timbang_a_1_img_in_loc = $att_temp['a_in']['useNew']?$att_temp['a_in']['newLoc']:$att_temp['a_in']['oldLoc'];
 
-      $att_temp['a_out']['oldLoc']=$model_query->timbang_a_img_out_loc;
-      if($request->hasFile('timbang_a_img_out')){
-        $file = $request->file('timbang_a_img_out');
+      $att_temp['a_out']['oldLoc']=$model_query->timbang_a_1_img_out_loc;
+      if($request->hasFile('timbang_a_1_img_out')){
+        $file = $request->file('timbang_a_1_img_out');
         $doc_path = $file->getRealPath();
         $doc_type = $file->getClientMimeType();
         $ext = $file->extension();
 
         if(!preg_match("/image\/[jpeg|jpg|png]/",$doc_type))
-        throw new MyException([ "timbang_a_img_out" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
+        throw new MyException([ "timbang_a_1_img_out" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
 
-        $file_name = $model_query->id."_timbang_a_img_out_".Str::uuid() . '.' . $ext;
-        $doc_loc = "trx_trp/timbang_info/$file_name";
+        $file_name = $model_query->id."_timbang_a_1_img_out_".Str::uuid() . '.' . $ext;
+        $doc_loc = "trx_trp/timbang_a_info/$file_name";
 
         try {
           ini_set('memory_limit', '256M');
@@ -382,24 +382,24 @@ class TrxTrpTimbangInfoController extends Controller
         $att_temp['a_out']['newLoc']=$doc_loc;
         $att_temp['a_out']['useNew']=true;
       }
-      if (!$request->hasFile('timbang_a_img_out') && in_array($request->timbang_a_img_out_preview,[null,'null'])) {
+      if (!$request->hasFile('timbang_a_1_img_out') && in_array($request->timbang_a_1_img_out_preview,[null,'null'])) {
         $att_temp['a_out']['newLoc']=null;
         $att_temp['a_out']['useNew']=true;
       }
-      $model_query->timbang_a_img_out_loc = $att_temp['a_out']['useNew']?$att_temp['a_out']['newLoc']:$att_temp['a_out']['oldLoc'];
+      $model_query->timbang_a_1_img_out_loc = $att_temp['a_out']['useNew']?$att_temp['a_out']['newLoc']:$att_temp['a_out']['oldLoc'];
 
-      $att_temp['b_in']['oldLoc']=$model_query->timbang_b_img_in_loc;
-      if($request->hasFile('timbang_b_img_in')){
-        $file = $request->file('timbang_b_img_in');
+      $att_temp['b_in']['oldLoc']=$model_query->timbang_a_2_img_in_loc;
+      if($request->hasFile('timbang_a_2_img_in')){
+        $file = $request->file('timbang_a_2_img_in');
         $doc_path = $file->getRealPath();
         $doc_type = $file->getClientMimeType();
         $ext = $file->extension();
 
         if(!preg_match("/image\/[jpeg|jpg|png]/",$doc_type))
-        throw new MyException([ "timbang_b_img_in" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
+        throw new MyException([ "timbang_a_2_img_in" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
 
-        $file_name = $model_query->id."_timbang_b_img_in_".Str::uuid() . '.' . $ext;
-        $doc_loc = "trx_trp/timbang_info/$file_name";
+        $file_name = $model_query->id."_timbang_a_2_img_in_".Str::uuid() . '.' . $ext;
+        $doc_loc = "trx_trp/timbang_a_info/$file_name";
 
         try {
           ini_set('memory_limit', '256M');
@@ -411,24 +411,24 @@ class TrxTrpTimbangInfoController extends Controller
         $att_temp['b_in']['newLoc']=$doc_loc;
         $att_temp['b_in']['useNew']=true;
       }
-      if (!$request->hasFile('timbang_b_img_in') && in_array($request->timbang_b_img_in_preview,[null,'null'])) {
+      if (!$request->hasFile('timbang_a_2_img_in') && in_array($request->timbang_a_2_img_in_preview,[null,'null'])) {
         $att_temp['b_in']['newLoc']=null;
         $att_temp['b_in']['useNew']=true;
       }
-      $model_query->timbang_b_img_in_loc = $att_temp['b_in']['useNew']?$att_temp['b_in']['newLoc']:$att_temp['b_in']['oldLoc'];
+      $model_query->timbang_a_2_img_in_loc = $att_temp['b_in']['useNew']?$att_temp['b_in']['newLoc']:$att_temp['b_in']['oldLoc'];
 
-      $att_temp['b_out']['oldLoc']=$model_query->timbang_b_img_out_loc;
-      if($request->hasFile('timbang_b_img_out')){
-        $file = $request->file('timbang_b_img_out');
+      $att_temp['b_out']['oldLoc']=$model_query->timbang_a_2_img_out_loc;
+      if($request->hasFile('timbang_a_2_img_out')){
+        $file = $request->file('timbang_a_2_img_out');
         $doc_path = $file->getRealPath();
         $doc_type = $file->getClientMimeType();
         $ext = $file->extension();
 
         if(!preg_match("/image\/[jpeg|jpg|png]/",$doc_type))
-        throw new MyException([ "timbang_b_img_out" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
+        throw new MyException([ "timbang_a_2_img_out" => ["Tipe Data Harus berupa jpg,jpeg, atau png"] ], 422);       
 
-        $file_name = $model_query->id."_timbang_b_img_out_".Str::uuid() . '.' . $ext;
-        $doc_loc = "trx_trp/timbang_info/$file_name";
+        $file_name = $model_query->id."_timbang_a_2_img_out_".Str::uuid() . '.' . $ext;
+        $doc_loc = "trx_trp/timbang_a_info/$file_name";
 
         try {
           ini_set('memory_limit', '256M');
@@ -440,16 +440,16 @@ class TrxTrpTimbangInfoController extends Controller
         $att_temp['b_out']['newLoc']=$doc_loc;
         $att_temp['b_out']['useNew']=true;
       }
-      if (!$request->hasFile('timbang_b_img_out') && in_array($request->timbang_b_img_out_preview,[null,'null'])) {
+      if (!$request->hasFile('timbang_a_2_img_out') && in_array($request->timbang_a_2_img_out_preview,[null,'null'])) {
         $att_temp['b_out']['newLoc']=null;
         $att_temp['b_out']['useNew']=true;
       }
-      $model_query->timbang_b_img_out_loc = $att_temp['b_out']['useNew']?$att_temp['b_out']['newLoc']:$att_temp['b_out']['oldLoc'];
+      $model_query->timbang_a_2_img_out_loc = $att_temp['b_out']['useNew']?$att_temp['b_out']['newLoc']:$att_temp['b_out']['oldLoc'];
 
 
       $model_query->updated_at        = $t_stamp;
       $model_query->updated_user      = $this->admin_id;
-      $model_query->timbang_note       = $request->timbang_note;
+      $model_query->timbang_a_note    = MyLib::emptyStrToNull($request->timbang_a_note);
       $model_query->save();
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
@@ -494,10 +494,10 @@ class TrxTrpTimbangInfoController extends Controller
 
   public function getAttachment($id,$n)
   {
-    MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_info.view');
+    MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_a_info.view');
 
     $trx = TrxTrp::findOrFail($id);
-    $locField = 'timbang_'.$n."_loc";
+    $locField = 'timbang_a_'.$n."_loc";
    
     abort_unless($trx->$locField, 404,$trx->$locField);
 
@@ -523,7 +523,7 @@ class TrxTrpTimbangInfoController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_info.val1']);
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_a_info.val1']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\TrxTrp,id",
@@ -544,19 +544,19 @@ class TrxTrpTimbangInfoController extends Controller
     DB::beginTransaction();
     try {
       $model_query = TrxTrp::find($request->id);
-      if($model_query->timbang_val1){
+      if($model_query->timbang_a_val1){
         throw new \Exception("Data Sudah Tervalidasi Sepenuhnya",1);
       }
 
-      if(!$model_query->timbang_note && (!$model_query->timbang_a_img_in_loc || !$model_query->timbang_a_img_out_loc || !$model_query->timbang_b_img_in_loc || !$model_query->timbang_b_img_out_loc) )
+      if(!$model_query->timbang_a_note && (!$model_query->timbang_a_1_img_in_loc || !$model_query->timbang_a_1_img_out_loc || !$model_query->timbang_a_2_img_in_loc || !$model_query->timbang_a_2_img_out_loc) )
       throw new \Exception("Gambar Belum Lengkap dan tidak disertai Catatan",1);
 
       $SYSOLD                     = clone($model_query);
 
-      if(MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_info.val1',true) && !$model_query->timbang_val1){
-        $model_query->timbang_val1 = 1;
-        $model_query->timbang_val1_user = $this->admin_id;
-        $model_query->timbang_val1_at = $t_stamp;
+      if(MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_a_info.val1',true) && !$model_query->timbang_a_val1){
+        $model_query->timbang_a_val1 = 1;
+        $model_query->timbang_a_val1_user = $this->admin_id;
+        $model_query->timbang_a_val1_at = $t_stamp;
       }
 
       $model_query->save();
@@ -567,10 +567,10 @@ class TrxTrpTimbangInfoController extends Controller
       DB::commit();
       return response()->json([
         "message"         => "Proses validasi data berhasil",
-        "timbang_val1"     => $model_query->timbang_val1,
-        "timbang_val1_user"=> $model_query->timbang_val1_user,
-        "timbang_val1_at"  => $model_query->timbang_val1_at,
-        "timbang_val1_by"  => $model_query->timbang_val1_user ? new IsUserResource(IsUser::find($model_query->timbang_val1_user)) : null,
+        "timbang_a_val1"     => $model_query->timbang_a_val1,
+        "timbang_a_val1_user"=> $model_query->timbang_a_val1_user,
+        "timbang_a_val1_at"  => $model_query->timbang_a_val1_at,
+        "timbang_a_val1_by"  => $model_query->timbang_a_val1_user ? new IsUserResource(IsUser::find($model_query->timbang_a_val1_user)) : null,
         ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -592,7 +592,7 @@ class TrxTrpTimbangInfoController extends Controller
   }
 
   // public function clearValVal1(Request $request){
-  //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_info.clear_valval1']);
+  //   MyAdmin::checkMultiScope($this->permissions, ['trp_trx.timbang_a_info.clear_valval1']);
 
   //   $ids = json_decode($request->ids, true);
   //   $t_stamp = date("Y-m-d H:i:s");
@@ -679,7 +679,7 @@ class TrxTrpTimbangInfoController extends Controller
 
 
   // public function downloadExcel(Request $request){
-  //   MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_info.download_file');
+  //   MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_a_info.download_file');
 
   //   set_time_limit(0);
   //   $callGet = $this->index($request, true);
