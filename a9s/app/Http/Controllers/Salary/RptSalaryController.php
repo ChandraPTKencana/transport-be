@@ -262,6 +262,16 @@ class RptSalaryController extends Controller
     $date->modify('last day of this month');
     $last_day_of_month=$date->format('Y-m-d');
 
+
+    $notval = TrxTrp::where('req_deleted',0)->where('deleted',0)
+    ->where('tanggal',"<=",substr($last_day_of_month,0,8)."-25")
+    ->where('val_ticket',"0")
+    ->first();
+
+    if($notval){
+      throw new MyException([ "message" => "Ada Tiket Yang Belum Diselesaikan" ], 400);
+    }
+
     $sp_before=RptSalary::orderBy("id","desc")->first();
     if($sp_before && $sp_before->val1==0)
     throw new MyException([ "message" => "Harap Validasi Periode Sebelumnya" ], 400);
@@ -339,6 +349,15 @@ class RptSalaryController extends Controller
       $SYSNOTES=[];
       $model_query = RptSalary::where("id",$request->id)->lockForUpdate()->first();
       $SYSOLD      = clone($model_query);
+
+      $notval = TrxTrp::where('req_deleted',0)->where('deleted',0)
+      ->where('tanggal',"<=",substr($model_query->period_end,0,8)."-25")
+      ->where('val_ticket',"0")
+      ->first();
+
+      if($notval){
+        throw new MyException([ "message" => "Ada Tiket Yang Belum Diselesaikan" ], 400);
+      }
       
       if( $model_query->val==1 )
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
@@ -1237,20 +1256,20 @@ class RptSalaryController extends Controller
 
         $q->orWhere(function ($q1)use($model_query,$smp_bulan){
             $q1->whereIn("trx_trp.payment_method_id",[2,3,4,5]);
-            $q1->where(function ($q2)use($model_query,$smp_bulan){
-                // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
-                $q2->where(function ($q3) use($model_query,$smp_bulan) {            
-                    // $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
-                    // $q3->where("trx_trp.rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
-                    $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
-                    $q3->where("trx_trp.ticket_b_out_at",">=","2025-10-15 00:00:00");                  
-                });
-                // $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
-                //     // $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
-                //     // $q3->where("trx_trp.rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
-                //     $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
-                // });
-            });                         
+            // $q1->where(function ($q2)use($model_query,$smp_bulan){
+            //     // supir dan kernet dipisah krn asumsi di tf di waktu atau bahkan hari yang berbeda
+            //     // $q2->where(function ($q3) use($model_query,$smp_bulan) {            
+            //     //     // $q3->where("rp_supir_at",">=",$smp_bulan."-01 00:00:00");                  
+            //     //     // $q3->where("trx_trp.rp_supir_at","<=",$model_query->period_end." 23:59:59");                  
+            //     //     $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
+            //     //     $q3->where("trx_trp.ticket_b_out_at",">=","2025-10-15 00:00:00");                  
+            //     // });
+            //     // $q2->orWhere(function ($q3) use($model_query,$smp_bulan) {
+            //     //     // $q3->where("rp_kernet_at",">=",$smp_bulan."-01 00:00:00");                  
+            //     //     // $q3->where("trx_trp.rp_kernet_at","<=",$model_query->period_end." 23:59:59");                  
+            //     //     $q3->where("trx_trp.ticket_b_out_at","<=",$model_query->period_end." 23:59:59");                  
+            //     // });
+            // });                         
         });
     })
     ->leftJoin('is_uj',function ($join){
