@@ -769,7 +769,7 @@ class TrxTrpTicketController extends Controller
           $pembanding = $model_query->ticket_a_netto;
           
           $model_query->batas_persen_susut = -0.3;
-          if(round(($nonorinet/$pembanding)*100,2) < $model_query->batas_persen_susut ){
+          if($pembanding==0 || round(($nonorinet/$pembanding)*100,2) < $model_query->batas_persen_susut ){
             $gen_salary_bonus = true;
             $reason_cut .= "Susut.";
           }
@@ -1022,7 +1022,7 @@ class TrxTrpTicketController extends Controller
             $pembanding = $v->ticket_a_netto;
             
             $v->batas_persen_susut = -0.3;
-            if(round(($nonorinet/$pembanding)*100,2) < $v->batas_persen_susut ){
+            if($pembanding==0 || round(($nonorinet/$pembanding)*100,2) < $v->batas_persen_susut ){
               $gen_salary_bonus = true;
               $reason_cut .= "Susut.";
             }
