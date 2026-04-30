@@ -264,12 +264,12 @@ class RptSalaryController extends Controller
 
 
     $notval = TrxTrp::where('req_deleted',0)->where('deleted',0)
-    ->where('tanggal',"<=",substr($last_day_of_month,0,8)."-25")
+    ->where('tanggal',"<=",substr($last_day_of_month,0,7)."-25")
     ->where('val_ticket',"0")
     ->first();
 
     if($notval){
-      throw new MyException([ "message" => "Ada Tiket Yang Belum Diselesaikan" ], 400);
+      throw new \Exception("Ada Tiket Yang Belum Diselesaikan",1);
     }
 
     $sp_before=RptSalary::orderBy("id","desc")->first();
@@ -351,12 +351,12 @@ class RptSalaryController extends Controller
       $SYSOLD      = clone($model_query);
 
       $notval = TrxTrp::where('req_deleted',0)->where('deleted',0)
-      ->where('tanggal',"<=",substr($model_query->period_end,0,8)."-25")
+      ->where('tanggal',"<=",substr($model_query->period_end,0,7)."-25")
       ->where('val_ticket',"0")
       ->first();
 
       if($notval){
-        throw new MyException([ "message" => "Ada Tiket Yang Belum Diselesaikan" ], 400);
+        throw new \Exception("Ada Tiket Yang Belum Diselesaikan",1);
       }
       
       if( $model_query->val==1 )
