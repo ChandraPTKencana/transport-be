@@ -6,7 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\IsUserResource;
 use Illuminate\Support\Facades\Storage;
 
-class TrxTrpTimbangInfoResourceShow extends JsonResource
+class TripInfoResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -107,61 +107,26 @@ class TrxTrpTimbangInfoResourceShow extends JsonResource
         // return parent::toArray($request);
         return [
             'id'                => $this->id,
-            'tanggal'           => $this->tanggal,
+            'trip_info_ordinal' => new TripInfoOrdinalResource($this->whenLoaded('trip_info_ordinal')),
 
-            'id_uj'             => $this->id_uj,
-            'jenis'             => $this->jenis,
-            'xto'               => $this->xto,
-            'tipe'              => $this->tipe,
+            'img'               => null,
+            'img_preview'       => $this->img_preview,
+            'img_exists'        => $this->img_preview ? true : false,
+            'img_at'            => $this->img_at,
 
-            'supir_id'          => $this->supir_id ?? "",
-            'supir'             => $this->supir,
-            'supir_rek_no'      => $this->supir_rek_no ?? "",
-            'supir_rek_name'    => $this->supir_rek_name ?? "",
-            'kernet_id'         => $this->kernet_id ?? "",
-            'kernet'            => $this->kernet ?? "",
-            'kernet_rek_no'     => $this->kernet_rek_no ?? "",
-            'kernet_rek_name'   => $this->kernet_rek_name ?? "",
-            'no_pol'            => $this->no_pol,
+            'img_latitude'      => $this->img_latitude,
+            'img_longitude'     => $this->img_longitude,
+            'img_note'          => $this->img_note,
+            'img_upload_at'     => $this->img_upload_at,
+            'img_upload_user'   => $this->img_upload_user,
+            'source_browser'    => $this->source_browser,
             
             'created_user'      => $this->created_user,
             'updated_user'      => $this->updated_user,
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
 
-            'deleted'           => $this->deleted,
-            'deleted_user'      => $this->deleted_user ?? "",
-            'deleted_at'        => $this->deleted_at ?? "",
-            'deleted_by'        => new IsUserResource($this->whenLoaded('deleted_by')),
-            'deleted_reason'    => $this->deleted_reason ?? "",
-
-            'req_deleted'       => $this->req_deleted,
-            'req_deleted_user'  => $this->req_deleted_user ?? "",
-            'req_deleted_at'    => $this->req_deleted_at ?? "",
-            'req_deleted_by'    => new IsUserResource($this->whenLoaded('req_deleted_by')),
-            'req_deleted_reason'=> $this->req_deleted_reason ?? "",
-
-            'transition_target' => $this->transition_target ?? "",
-            'transition_type'   => $this->transition_type ?? "",
-            'trx_absens'        => TrxAbsenResource::collection($this->whenLoaded('trx_absens')),
-
-            'timbang_a_1_img_in_exists'  => $this->timbang_a_1_img_in_loc ? true: false,
-            'timbang_a_1_img_out_exists' => $this->timbang_a_1_img_out_loc ? true: false,
-            'timbang_a_2_img_in_exists'  => $this->timbang_a_2_img_in_loc ? true: false,
-            'timbang_a_2_img_out_exists' => $this->timbang_a_2_img_out_loc ? true: false,
-
-            'timbang_a_1_img_in'          => null,
-            'timbang_a_1_img_in_preview'  => $this->timbang_a_1_img_in_loc && Storage::disk('public')->exists($this->timbang_a_1_img_in_loc) ? "trx_trp/timbang_info/".$this->id."/1_img_in" :"",
-
-            'timbang_a_1_img_out'          => null,
-            'timbang_a_1_img_out_preview'  => $this->timbang_a_1_img_out_loc && Storage::disk('public')->exists($this->timbang_a_1_img_out_loc) ? "trx_trp/timbang_info/".$this->id."/1_img_out" :"",
-
-            'timbang_a_2_img_in'          => null,
-            'timbang_a_2_img_in_preview'  => $this->timbang_a_2_img_in_loc && Storage::disk('public')->exists($this->timbang_a_2_img_in_loc) ? "trx_trp/timbang_info/".$this->id."/2_img_in" :"",
-
-            'timbang_a_2_img_out'          => null,
-            'timbang_a_2_img_out_preview'  => $this->timbang_a_2_img_out_loc && Storage::disk('public')->exists($this->timbang_a_2_img_out_loc) ? "trx_trp/timbang_info/".$this->id."/2_img_out" :"",
-
+            
             // 'timbang_a_in_mobil'                        => null,
             // 'timbang_a_in_mobil_preview'                => $a_in_mobil_preview,
             // 'timbang_a_in_mobil_permit_manual_input'    => $a_in_mobil_permit_manual_input,
@@ -202,16 +167,9 @@ class TrxTrpTimbangInfoResourceShow extends JsonResource
             // 'timbang_b_out_mobil_permit_manual_input'   => $b_out_mobil_permit_manual_input,
             // 'timbang_b_out_mobil_source_browser'        => $b_out_mobil_source_browser,
 
-            'trip_infos'         => TripInfoResource::collection($this->whenLoaded('trip_infos')),
+            
 
-            'timbang_note'       => $this->timbang_note ?? '',
-
-            'timbang_val1'       => $this->timbang_val1,
-            'timbang_val1_user'  => $this->timbang_val1_user ?? "",
-            'timbang_val1_by'    => new IsUserResource($this->whenLoaded('timbang_val1_by')),
-            'timbang_val1_at'    => $this->timbang_val1_at ?? "",
-
-            'uj'                => new UjalanResource($this->whenLoaded('uj')),
+            
         ];
     }
 }

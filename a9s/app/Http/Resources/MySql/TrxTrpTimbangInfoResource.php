@@ -16,6 +16,47 @@ class TrxTrpTimbangInfoResource extends JsonResource
      */
     public function toArray($request)
     {
+        $trip_infos = $this->trip_infos ?? collect();
+
+        $a_in_mobil_exists = false;
+        $a_in_gasoli_exists = false;
+        $a_in_cabin_exists = false;
+
+        $a_out_mobil_exists = false;
+        $a_out_gasoli_exists = false;
+        $a_out_cabin_exists = false;
+
+        $b_in_mobil_exists = false;
+        $b_out_mobil_exists = false;
+
+        foreach ($trip_infos as $v) {
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_a.masuk.mobil") {
+                $a_in_mobil_exists = $v->img_loc ? true : false;
+            }
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_a.masuk.gasoli") {
+                $a_in_gasoli_exists = $v->img_loc ? true : false;
+            }
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_a.masuk.cabin") {
+                $a_in_cabin_exists = $v->img_loc ? true : false;
+            }
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_a.keluar.mobil") {
+                $a_out_mobil_exists = $v->img_loc ? true : false;
+            }
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_a.keluar.gasoli") {
+                $a_out_gasoli_exists = $v->img_loc ? true : false;
+            }
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_a.keluar.cabin") {
+                $a_out_cabin_exists = $v->img_loc ? true : false;
+            }
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_b.masuk.mobil") {
+                $b_in_mobil_exists = $v->img_loc ? true : false;
+            }
+            if ($v->trip_info_ordinal->dkey == "aksi.saat_timbang_b.keluar.mobil") {
+                $b_out_mobil_exists = $v->img_loc ? true : false;
+            }
+        }
+
+
         // return parent::toArray($request);
         return [
             'id'                => $this->id,
@@ -57,17 +98,29 @@ class TrxTrpTimbangInfoResource extends JsonResource
             'transition_type'   => $this->transition_type ?? "",
             'trx_absens'        => TrxAbsenResource::collection($this->whenLoaded('trx_absens')),
 
-            'timbang_a_1_img_in_exists'  => $this->timbang_a_1_img_in_loc ? true: false,
-            'timbang_a_1_img_out_exists' => $this->timbang_a_1_img_out_loc ? true: false,
-            'timbang_a_2_img_in_exists'  => $this->timbang_a_2_img_in_loc ? true: false,
-            'timbang_a_2_img_out_exists' => $this->timbang_a_2_img_out_loc ? true: false,
+            // 'timbang_a_1_img_in_exists'  => false,
+            // 'timbang_a_1_img_out_exists' => false,
+            // 'timbang_a_2_img_in_exists'  => false,
+            // 'timbang_a_2_img_out_exists' => false,
 
-            'timbang_a_note'       => $this->timbang_a_note ?? '',
+            'timbang_a_in_mobil_exists'     => $a_in_mobil_exists,
+            'timbang_a_in_gasoli_exists'    => $a_in_gasoli_exists,
+            'timbang_a_in_cabin_exists'     => $a_in_cabin_exists,
+    
+            'timbang_a_out_mobil_exists'    => $a_out_mobil_exists,
+            'timbang_a_out_gasoli_exists'   => $a_out_gasoli_exists,
+            'timbang_a_out_cabin_exists'    => $a_out_cabin_exists,
+    
+            'timbang_b_in_mobil_exists'     => $b_in_mobil_exists,
+            'timbang_b_out_mobil_exists'    => $b_out_mobil_exists,
+
+
+            'timbang_note'       => $this->timbang_note ?? '',
            
-            'timbang_a_val1'       => $this->timbang_a_val1,
-            'timbang_a_val1_user'  => $this->timbang_a_val1_user ?? "",
-            'timbang_a_val1_by'    => new IsUserResource($this->whenLoaded('timbang_a_val1_by')),
-            'timbang_a_val1_at'    => $this->timbang_a_val1_at ?? "",
+            'timbang_val1'       => $this->timbang_val1,
+            'timbang_val1_user'  => $this->timbang_val1_user ?? "",
+            'timbang_val1_by'    => new IsUserResource($this->whenLoaded('timbang_val1_by')),
+            'timbang_val1_at'    => $this->timbang_val1_at ?? "",
 
             'uj'                => new UjalanResource($this->whenLoaded('uj')),
         ];

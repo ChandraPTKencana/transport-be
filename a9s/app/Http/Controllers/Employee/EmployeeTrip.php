@@ -81,7 +81,8 @@ class EmployeeTrip extends Controller
       $data['img_leave']="";
       foreach ($model_query->trx_absens as $k => $v) {
         // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
-        $img = "data:image/png;base64,".base64_encode(Storage::disk('public')->get($v->gambar_loc));
+        // $img = "data:image/png;base64,".base64_encode(Storage::disk('public')->get($v->gambar_loc));
+        $img = $v->gambar_loc ? "data:image/png;base64,".base64_encode(Storage::disk('public')->get($v->gambar_loc)):null;
         if($v['status']=="B") 
         $data["img_leave"]   = $img;
   

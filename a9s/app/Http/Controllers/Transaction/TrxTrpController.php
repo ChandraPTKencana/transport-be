@@ -31,6 +31,8 @@ use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
 use App\Models\MySql\ExtraMoneyTrx;
+use App\Models\MySql\TripInfo;
+use App\Models\MySql\TripInfoOrdinal;
 use App\PS\PSPotonganTrx;
 use App\PS\PSTripSupirKernet;
 
@@ -710,6 +712,22 @@ class TrxTrpController extends Controller
 
       if(count($ptg_trx_dt) > 0)
       PSPotonganTrx::trpTrxInsert($model_query->id,$ptg_trx_dt);
+
+      $tripInfoOrdinal=TripInfoOrdinal::get();
+      foreach ($tripInfoOrdinal as $key => $value) {
+        $insertTripInfo = [
+          "trx_trp_id"=>$model_query->id,
+          "trip_info_ordinal_id"=>$value->id,
+          "created_at"=>$t_stamp,
+          "updated_at"=>$t_stamp,
+          "created_user"=>$this->admin_id,
+          "updated_user"=>$this->admin_id,
+        ];
+        $SYSNOTE=Mylib::logNew($insertTripInfo);
+        MyLog::sys("trx_trp",$model_query->id,"insert trip info",$SYSNOTE);
+        TripInfo::insert($insertTripInfo);
+      }
+
     
       MyLog::sys("trx_trp",$model_query->id,"insert");
 
