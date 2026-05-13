@@ -1741,6 +1741,7 @@ class StandbyTrxController extends Controller
     ,'trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar_loc","latitude","longitude");
     },'standby_trxs'=>function ($q){
+      $q->where('deleted',0)->where('req_deleted',0);
       $q->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','deleted_by','req_deleted_by',
       'details'=>function($q){
         $q->orderby("ordinal","asc");      
