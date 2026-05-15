@@ -938,7 +938,7 @@ class FinPaymentReqController extends Controller
         $jenis_rek = $v['bank_code']=='Mandiri'?'IBU':($payment_method_id==4?'BAU':'OBU');
         $dbank = Bank::where('code',$v['bank_code'])->first();
         $code_beda_bank = $dbank->code_duitku;
-        $em_jumlah = count(explode(",",$v["extra_money_trx_ids"]));
+        $em_jumlah = $v["extra_money_trx_ids"]!="" ? count(explode(",",$v["extra_money_trx_ids"])):0;
         $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};#{$v['trx_trp_id']}({$em_jumlah});;{$jenis_rek};{$code_beda_bank};;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
         if($k<$records-1)
         $csv_data .= "\r\n";
