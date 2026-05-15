@@ -244,6 +244,7 @@ class FinPaymentReqController extends Controller
         "bank_code"=>$v->employee_bank_code,
         "nominal"=>$v->nominal,
         "potongan_trx_ttl"=>$v->potongan_trx_ttl,
+        "extra_money_trx_ids"=>$v->extra_money_trx_ids,
         "extra_money_trx_ttl"=>$v->extra_money_trx_ttl,
         "jumlah"=>$v->jumlah,
         "status"=>$v->status,
@@ -1007,11 +1008,11 @@ class FinPaymentReqController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       return response()->json([
         "message" => "Proses Generate gagal",
       ], 400);
