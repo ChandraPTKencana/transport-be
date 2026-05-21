@@ -79,6 +79,7 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::put('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'update']);
     Route::put('/trx_trp/mandor_verify_trx', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'mandorGetVerifySet']);
     Route::get('/trx_trp/report_raw_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportRawExcel']);
+    Route::get('/trx_trp/report_road_excel', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportRoadExcel']);
     Route::get('/trx_trp/report_excel_w_uj', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'reportExcelWUj']);
 
     Route::delete('/trx_trp', [\App\Http\Controllers\Transaction\TrxTrpController::class, 'delete']);

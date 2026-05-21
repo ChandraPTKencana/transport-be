@@ -1475,6 +1475,46 @@ class TrxTrpController extends Controller
     return $result;
   }
 
+  public function reportRoadExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      array_push($newDetails,$value);
+    }
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+
+    $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-trx_trp'."[".$date_from."*".$date_to."]";
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.trx_trp_road'), $mime["exportType"]));
+
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
+  }
+
   public function reportExcelWUj(Request $request){
     MyAdmin::checkScope($this->permissions, 'trp_trx.download_file');
 
