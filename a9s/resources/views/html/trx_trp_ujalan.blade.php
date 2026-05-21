@@ -190,7 +190,21 @@
         </tr>
         <tr>
           <td style="text-align: center;"> ({{$user_1}}) </td>
-          <td style="text-align: center;"> (____________________) </td>
+          <td style="text-align: center;"> (__________________) </td>
+        </tr>
+        <tr>
+          <td style="height:20px;"><td>
+        </tr>
+        <tr>
+          <td style="text-align: center; width:50%;"> Diketahui Oleh :</td>
+          <td style="text-align: center; width:50%;"> Disetujui Oleh :</td>
+        </tr>
+        <tr>
+          <td style="height:50px;"><td>
+        </tr>
+        <tr>
+          <td style="text-align: center;"> (__________________) </td>
+          <td style="text-align: center;"> (__________________) </td>
         </tr>
       </table>
       <div style="display: flex; align-items:center; justify-content:center;  margin:30px 0px; flex-direction:column;">
