@@ -2599,13 +2599,13 @@ class TrxTrpController extends Controller
     $no_adm_s = 0;
     $no_adm_k = 0;
 
-    // if($supir && $supir_money - $ttl_ps < 0)
-    // throw new \Exception("Supir. Potongan Melebih Uang Yang Akan Diterima",1);
-    // if($kernet && $kernet_money - $ttl_pk < 0)
-    // throw new \Exception("Kernet. Potongan Melebih Uang Yang Akan Diterima",1);
+    if($supir && $supir_money - $ttl_ps < 0)
+    throw new \Exception("Supir. Potongan Melebih Uang Yang Akan Diterima",1);
+    if($kernet && $kernet_money - $ttl_pk < 0)
+    throw new \Exception("Kernet. Potongan Melebih Uang Yang Akan Diterima",1);
 
-    // if($supir && $supir_money - $ttl_ps == 0) $no_adm_s++;
-    // if($kernet && $kernet_money - $ttl_pk == 0) $no_adm_k++;
+    if($supir && $supir_money - $ttl_ps == 0) $no_adm_s++;
+    if($kernet && $kernet_money - $ttl_pk == 0) $no_adm_k++;
 
     // Admin Cost & Variable
     if($trx_trp->payment_method->id==2 || $trx_trp->payment_method->id==3){
