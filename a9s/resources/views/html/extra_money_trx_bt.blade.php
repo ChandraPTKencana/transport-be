@@ -27,7 +27,7 @@
 </head>
 
 <body>
-  <main style="padding:0px 25px 0px 29px;">
+  <main style="padding:10px 10px 10px 10px; width:315px; margin:auto;">
     <div style="width:100%; font-size:14px;">
       <div style="width:100%; text-align:center; padding:5px; margin-top:10px;">
         <img src="{{$logo}}" width="100%">
