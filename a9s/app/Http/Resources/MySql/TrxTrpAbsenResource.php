@@ -46,7 +46,7 @@ class TrxTrpAbsenResource extends JsonResource
         foreach ($absens as $v) {
             if ($v->status == "B") {
                 $img_leave = $v->gambar;
-                $img_leave_preview = $v->gambar_preview;
+                // $img_leave_preview = $v->gambar_preview;
                 $img_leave_preview = $v->gambar_preview;
                 $img_leave_is_manual = $v->is_manual;
                 $img_leave_latitude = $v->latitude;
