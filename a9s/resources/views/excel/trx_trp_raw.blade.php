@@ -14,9 +14,9 @@
       <th colspan="2" style="border: 1px solid black;">Cost Center</th>
       <th colspan="3" style="border: 1px solid black;">PVR</th>
       <th colspan="4" style="border: 1px solid black;">PV</th>
-      <th colspan="3" style="border: 1px solid black;">Supir</th>
-      <th colspan="3" style="border: 1px solid black;">Kernet</th>
-      <th colspan="9" style="border: 1px solid black;">Payment</th>
+      <th colspan="6" style="border: 1px solid black;">Supir</th>
+      <th colspan="6" style="border: 1px solid black;">Kernet</th>
+      <th colspan="8" style="border: 1px solid black;">Payment</th>
       <th colspan="3" style="border: 1px solid black;">Req Delete</th>
       <th colspan="3" style="border: 1px solid black;">Delete</th>
     </tr>
@@ -35,9 +35,15 @@
       <th style="border: 1px solid black;">Supir</th>
       <th style="border: 1px solid black;">No Rek Supir</th>
       <th style="border: 1px solid black;">Nama Rek Supir</th>
+      <th style="border: 1px solid black;">Gaji</th>
+      <th style="border: 1px solid black;">Makan</th>
+      <th style="border: 1px solid black;">Dinas</th>
       <th style="border: 1px solid black;">Kernet</th>
       <th style="border: 1px solid black;">No Rek Kernet</th>
       <th style="border: 1px solid black;">Nama Rek Kernet</th>
+      <th style="border: 1px solid black;">Gaji</th>
+      <th style="border: 1px solid black;">Makan</th>
+      <th style="border: 1px solid black;">Dinas</th>
       <th style="border: 1px solid black;">Method Name</th>
       <th style="border: 1px solid black;">Paid?</th>
       <th style="border: 1px solid black;">ID Duitku Supir</th>
@@ -56,6 +62,27 @@
   </thead>
   <tbody>  
     @foreach($data as $k=>$v)
+      @php
+        $supir_gaji = 0;
+        $supir_makan = 0;
+        $supir_dinas = 0;
+        
+        $kernet_gaji = 0;
+        $kernet_makan = 0;
+        $kernet_dinas = 0;
+
+        foreach($v['uj']['details2'] as $k1=>$v2){
+          if($v2['xfor']=='Supir' && $v2['ac_account_code']=='01.510.001') $supir_gaji += $v2['amount'] * $v2['qty'];          
+          if($v2['xfor']=='Supir' && $v2['ac_account_code']=='01.510.005') $supir_makan += $v2['amount'] * $v2['qty'];          
+          if($v2['xfor']=='Supir' && $v2['ac_account_code']=='01.575.002') $supir_dinas += $v2['amount'] * $v2['qty'];          
+
+          if($v2['xfor']=='Kernet' && $v2['ac_account_code']=='01.510.001') $kernet_gaji += $v2['amount'] * $v2['qty'];          
+          if($v2['xfor']=='Kernet' && $v2['ac_account_code']=='01.510.005') $kernet_makan += $v2['amount'] * $v2['qty'];          
+          if($v2['xfor']=='Kernet' && $v2['ac_account_code']=='01.575.002') $kernet_dinas += $v2['amount'] * $v2['qty'];          
+
+        }
+      @endphp
+
     <tr>
       <td style="border: 1px solid black;">{{$loop->iteration}}</td>
       <td style="border: 1px solid black;">{{ $v["id"] }}</td>
@@ -80,9 +107,15 @@
       <td style="border: 1px solid black;">{{ $v["supir"] }}</td>
       <td style="border: 1px solid black;">{{ $v["supir_rek_no"] }}</td>
       <td style="border: 1px solid black;">{{ $v["supir_rek_name"] }}</td>
+      <td style="border: 1px solid black;">{{ $supir_gaji }}</td>
+      <td style="border: 1px solid black;">{{ $supir_makan }}</td>
+      <td style="border: 1px solid black;">{{ $supir_dinas }}</td>
       <td style="border: 1px solid black;">{{ $v["kernet"] }}</td>
       <td style="border: 1px solid black;">{{ $v["kernet_rek_no"] }}</td>
       <td style="border: 1px solid black;">{{ $v["kernet_rek_name"] }}</td>
+      <td style="border: 1px solid black;">{{ $kernet_gaji }}</td>
+      <td style="border: 1px solid black;">{{ $kernet_makan }}</td>
+      <td style="border: 1px solid black;">{{ $kernet_dinas }}</td>
       <td style="border: 1px solid black;">{{ $v["payment_method"]['name'] }}</td>
       <td style="border: 1px solid black;">{{ $v["received_payment"] ? 'Y' : 'N' }}</td>
       <td style="border: 1px solid black;">{{ $v["duitku_supir_disburseId"] }}</td>

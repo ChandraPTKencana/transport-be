@@ -177,6 +177,10 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::put('/employee_generate_code', [\App\Http\Controllers\Employee\EmployeeController::class, 'generateCode']);
     Route::get('/employee/attachment/{id}/{n}', [\App\Http\Controllers\Employee\EmployeeController::class, 'getAttachment']);
 
+    Route::get('/employees/info', [\App\Http\Controllers\Employee\EmployeeInfoController::class, 'index']);
+    Route::get('/employees/info_excel', [\App\Http\Controllers\Employee\EmployeeInfoController::class, 'reportExcel']);
+
+
     Route::post('/m_employee/login', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'login']);
     Route::post('/m_employee/face_rec', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'faceRec']);
     Route::post('/m_employee/change_password', [\App\Http\Controllers\Employee\EmployeeAccount::class, 'change_password']);
@@ -192,8 +196,6 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::put('/standby_mst_unvalidasi', [\App\Http\Controllers\Standby\StandbyMstController::class, 'unvalidasi']);
 
     Route::get('/ac_accounts', [\App\Http\Controllers\AcAccountController::class, 'index']);
-
-
 
     Route::get('/standby_trxs', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'index']);
     Route::get('/standby_trx_load_local', [\App\Http\Controllers\Standby\StandbyTrxController::class, 'loadLocal']);

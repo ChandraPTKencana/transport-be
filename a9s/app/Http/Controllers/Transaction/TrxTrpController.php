@@ -404,7 +404,9 @@ class TrxTrpController extends Controller
       $model_query = $model_query->with('uj_details');
     }
 
-    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','potongan','uj','salary_paid','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','potongan','uj'=>function ($q) {
+      $q->with('details2');     
+    },'salary_paid','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at')->where("status","B")->where(function ($q1) {
         $q1->whereNotNull('gambar')->orWhereNotNull('gambar_loc');
       });
