@@ -66,11 +66,11 @@ class PSPotonganTrx
         // if($trx_trp->kernet_id == $employee->id && $kernet_money_to_tf - $potongan_mst->nominal_cut < MyLib::$min_transfer)
         // throw new \Exception("Dana Untuk Transfer Kekernet Minimal 10.000",1);
 
-        if($trx_trp->supir_id == $employee->id && $supir_money_to_tf - $potongan_mst->nominal_cut < 0)
-        throw new \Exception("Potongan Supir lebih banyak dari Dana Untuk Transfer ",1);
+        if($trx_trp->supir_id == $employee->id && $supir_money_to_tf - $potongan_mst->nominal_cut < 1000)
+        throw new \Exception("Dana yang akan di Transfer ke supir Setelah Potongan Minimal Rp.1000,-",1);
 
-        if($trx_trp->kernet_id == $employee->id && $kernet_money_to_tf - $potongan_mst->nominal_cut < 0)
-        throw new \Exception("Potongan Kernet lebih banyak dari Dana Untuk Transfer ",1);
+        if($trx_trp->kernet_id == $employee->id && $kernet_money_to_tf - $potongan_mst->nominal_cut < 1000)
+        throw new \Exception("Dana yang akan di Transfer ke kernet Setelah Potongan Minimal Rp.1000,-",1);
       }
 
       foreach ($arrs as $k => $v) {
