@@ -83,12 +83,19 @@ class EmployeeInfoController extends Controller
         $dt = [
           "employee"=>$v->employee_s,
           "location" => [
-            $v->uj
+            [
+             "uj"=>$v->uj,
+             "jlh_trip" => 1,
+             "gaji"=>$psgrp['supir_gaji'],
+             "makan"=>$psgrp['supir_makan'],
+             "dinas"=>$psgrp['supir_dinas'],
+            ]
           ],
           "gaji"=>0,
           "makan"=>0,
           "dinas"=>0,
           "total"=>0,
+          "jlh_trip" => 1,
         ];
         $dt['gaji']   +=$psgrp['supir_gaji'];
         $dt['makan']  +=$psgrp['supir_makan'];
@@ -101,18 +108,27 @@ class EmployeeInfoController extends Controller
         $dt = $data[$search_supir];
 
         $map_loc = array_map(function($x){
-          return $x["id"];
+          return $x["uj"]["id"];
         },$dt["location"]);
 
         $search_loc = array_search($v->uj->id,$map_loc);
         if($search_loc===false){
-          array_push($dt["location"],$v->uj);
+          array_push($dt["location"],[
+             "uj"=>$v->uj,
+             "jlh_trip" => 1,
+             "gaji"=>$psgrp['supir_gaji'],
+             "makan"=>$psgrp['supir_makan'],
+             "dinas"=>$psgrp['supir_dinas'],
+          ]);
+        }else{
+          $dt["location"][$search_loc]['jlh_trip']+=1;
         }
 
         $dt['gaji']   +=$psgrp['supir_gaji'];
         $dt['makan']  +=$psgrp['supir_makan'];
         $dt['dinas']  +=$psgrp['supir_dinas'];
         $dt['total']  +=$psgrp['supir_gaji']+$psgrp['supir_makan']+$psgrp['supir_dinas'];
+        $dt['jlh_trip']  +=1;
 
         $data[$search_supir] = $dt;
       }
@@ -123,12 +139,19 @@ class EmployeeInfoController extends Controller
           $dt = [
             "employee"=>$v->employee_k,
             "location" => [
-              $v->uj
+              [
+                "uj"=>$v->uj,
+                "jlh_trip" => 1,
+                "gaji"=>$psgrp['kernet_gaji'],
+                "makan"=>$psgrp['kernet_makan'],
+                "dinas"=>$psgrp['kernet_dinas'],
+              ]
             ],
             "gaji"=>0,
             "makan"=>0,
             "dinas"=>0,
             "total"=>0,
+            "jlh_trip" => 1,
           ];
           $dt['gaji']   +=$psgrp['kernet_gaji'];
           $dt['makan']  +=$psgrp['kernet_makan'];
@@ -141,18 +164,27 @@ class EmployeeInfoController extends Controller
           $dt = $data[$search_kernet];
 
           $map_loc = array_map(function($x){
-            return $x["id"];
+            return $x["uj"]["id"];
           },$dt["location"]);
 
           $search_loc = array_search($v->uj->id,$map_loc);
           if($search_loc===false){
-            array_push($dt["location"],$v->uj);
+            array_push($dt["location"],[
+              "uj"=>$v->uj,
+              "jlh_trip" => 1,
+              "gaji"=>$psgrp['kernet_gaji'],
+              "makan"=>$psgrp['kernet_makan'],
+              "dinas"=>$psgrp['kernet_dinas'],
+            ]);
+          }else{
+            $dt["location"][$search_loc]['jlh_trip']+=1;
           }
 
           $dt['gaji']   +=$psgrp['kernet_gaji'];
           $dt['makan']  +=$psgrp['kernet_makan'];
           $dt['dinas']  +=$psgrp['kernet_dinas'];
           $dt['total']  +=$psgrp['kernet_gaji']+$psgrp['kernet_makan']+$psgrp['kernet_dinas'];
+          $dt['jlh_trip']  +=1;
 
           $data[$search_kernet] = $dt;
         }
@@ -167,7 +199,7 @@ class EmployeeInfoController extends Controller
     // array_multisort($total_column, SORT_ASC, $data);
 
     foreach ($data as &$dtloc) {
-        usort($dtloc['location'], fn($a, $b) => $a['xto'] <=> $b['xto']);
+        usort($dtloc['location'], fn($a, $b) => $a['uj']['xto'] <=> $b['uj']['xto']);
     }
     unset($dtloc);
 
