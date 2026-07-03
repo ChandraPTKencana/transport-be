@@ -6,7 +6,7 @@
       <th rowspan="2" style="border: 1px solid black;">Nama</th>
       <th rowspan="2" style="border: 1px solid black;">Role</th>
       <th rowspan="2" style="border: 1px solid black;">Jlh Trip</th>
-      <th colspan="7" style="border: 1px solid black;">Lokasi</th>
+      <th colspan="6" style="border: 1px solid black;">Lokasi</th>
       <th rowspan="2" style="border: 1px solid black;">Gaji</th>
       <th rowspan="2" style="border: 1px solid black;">Makan</th>
       <th rowspan="2" style="border: 1px solid black;">Dinas</th>
