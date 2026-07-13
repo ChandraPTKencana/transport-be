@@ -510,40 +510,43 @@ class RptSalaryController extends Controller
 
     $data = [];
     $temp = [
-      "rpt_salary_id"           => 0,
-      "employee_id"             => 0,
-      "sb_gaji"                 => 0,
-      "sb_makan"                => 0,
-      "sb_dinas"                => 0,
-      "sb_gaji_2"               => 0,
-      "sb_makan_2"              => 0,
-      "sb_dinas_2"              => 0,
-      "uj_gaji"                 => 0,
-      "uj_makan"                => 0,
-      "uj_dinas"                => 0,
-      "nominal_cut"             => 0,
-      "salary_bonus_nominal"    => 0,
-      "salary_bonus_nominal_2"  => 0,
-      "trip_cpo"                => 0,
-      "trip_cpo_bonus_gaji"     => 0,
-      "trip_cpo_bonus_dinas"    => 0,
-      "trip_pk"                 => 0,
-      "trip_pk_bonus_gaji"      => 0,
-      "trip_pk_bonus_dinas"     => 0,
-      "trip_tbs"                => 0,
-      "trip_tbs_bonus_gaji"     => 0,
-      "trip_tbs_bonus_dinas"    => 0,
-      "trip_tbsk"               => 0,
-      "trip_tbsk_bonus_gaji"    => 0,
-      "trip_tbsk_bonus_dinas"   => 0,
-      "trip_lain"               => 0,
-      "trip_lain_gaji"          => 0,
-      "trip_lain_makan"         => 0,
-      "trip_lain_dinas"         => 0,
-      "trip_tunggu"             => 0,
-      "trip_tunggu_gaji"        => 0,
-      "trip_tunggu_dinas"       => 0,
-      "potongan_manual"         => 0,
+      "rpt_salary_id"             => 0,
+      "employee_id"               => 0,
+      "sb_gaji"                   => 0,
+      "sb_makan"                  => 0,
+      "sb_dinas"                  => 0,
+      "sb_gaji_2"                 => 0,
+      "sb_makan_2"                => 0,
+      "sb_dinas_2"                => 0,
+      "uj_gaji"                   => 0,
+      "uj_makan"                  => 0,
+      "uj_dinas"                  => 0,
+      "nominal_cut"               => 0,
+      "salary_bonus_nominal"      => 0,
+      "salary_bonus_nominal_2"    => 0,
+      "trip_cpo"                  => 0,
+      "trip_cpo_bonus_gaji"       => 0,
+      "trip_cpo_bonus_dinas"      => 0,
+      "trip_pk"                   => 0,
+      "trip_pk_bonus_gaji"        => 0,
+      "trip_pk_bonus_dinas"       => 0,
+      "trip_cangkang"             => 0,
+      "trip_cangkang_bonus_gaji"  => 0,
+      "trip_cangkang_bonus_dinas" => 0,
+      "trip_tbs"                  => 0,
+      "trip_tbs_bonus_gaji"       => 0,
+      "trip_tbs_bonus_dinas"      => 0,
+      "trip_tbsk"                 => 0,
+      "trip_tbsk_bonus_gaji"      => 0,
+      "trip_tbsk_bonus_dinas"     => 0,
+      "trip_lain"                 => 0,
+      "trip_lain_gaji"            => 0,
+      "trip_lain_makan"           => 0,
+      "trip_lain_dinas"           => 0,
+      "trip_tunggu"               => 0,
+      "trip_tunggu_gaji"          => 0,
+      "trip_tunggu_dinas"         => 0,
+      "potongan_manual"           => 0,
     ];
     $smp_bulan = substr($model_query->period_end,0,7);
     $salary_paid = SalaryPaid::where("period_end","like",$smp_bulan.'%')->where('val1',1)->orderBy("id","asc")->get();
@@ -647,9 +650,9 @@ class RptSalaryController extends Controller
         $amount = $v1->amount * $v1->qty;
         if($v1->xfor == 'Supir'){
           $nominal_s += $amount;
-          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_gaji_s += $amount;
-          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_makan_s += $amount;
-          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_dinas_s += $amount;
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK","CANGKANG"])) $uj_gaji_s += $amount;
+          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK","CANGKANG"])) $uj_makan_s += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK","CANGKANG"])) $uj_dinas_s += $amount;
           
           if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_gaji_s += $amount;
           if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_dinas_s += $amount;
@@ -657,14 +660,13 @@ class RptSalaryController extends Controller
           if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["LAIN"])) $trip_lain_gaji_s += $amount;
           if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["LAIN"])) $trip_lain_makan_s += $amount;
           if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["LAIN"])) $trip_lain_dinas_s += $amount;
-
         }
 
         if($v1->xfor == 'Kernet'){
           $nominal_k += $amount;
-          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_gaji_k += $amount;
-          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_makan_k += $amount;
-          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK"])) $uj_dinas_k += $amount;
+          if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["CPO","PK","TBS","TBSK","CANGKANG"])) $uj_gaji_k += $amount;
+          if($v1->ac_account_code=='01.510.005' && in_array($smd->jenis,["CPO","PK","TBS","TBSK","CANGKANG"])) $uj_makan_k += $amount;
+          if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["CPO","PK","TBS","TBSK","CANGKANG"])) $uj_dinas_k += $amount;
           
           if($v1->ac_account_code=='01.510.001' && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_gaji_k += $amount;
           if($v1->ac_account_code=='01.575.002'  && in_array($smd->jenis,["TUNGGU"])) $trip_tunggu_dinas_k += $amount;
@@ -849,7 +851,7 @@ class RptSalaryController extends Controller
         }
       }
 
-      if(!in_array($v->jenis,["CPO","PK","TBS","TBSK"])){
+      if(!in_array($v->jenis,["CPO","PK","TBS","TBSK","CANGKANG"])){
         $v->salary_paid_id    = $salary_paid[1]->id;
         $v->save();
       }
@@ -863,7 +865,7 @@ class RptSalaryController extends Controller
     ->where('val1',1)
     ->where('val2',1)
     ->where('val_ticket',1)
-    ->whereIn('jenis',['CPO','PK'])
+    ->whereIn('jenis',['CPO','PK','CANGKANG'])
     ->where(function ($q) use($model_query,$smp_bulan) {
       $q->where(function ($q1)use($model_query,$smp_bulan){
         $q1->where("payment_method_id",1);       
@@ -1677,6 +1679,7 @@ class RptSalaryController extends Controller
         $v["nominal_cut"]==0 && $v["salary_bonus_nominal"]==0 && $v["salary_bonus_nominal_2"]==0 &&
         $v["trip_cpo"]==0 && $v["trip_cpo_bonus_gaji"]==0 && $v["trip_cpo_bonus_dinas"]==0 &&
         $v["trip_pk"]==0 && $v["trip_pk_bonus_gaji"]==0 && $v["trip_pk_bonus_dinas"]==0 &&
+        $v["trip_cangkang"]==0 && $v["trip_cangkang_bonus_gaji"]==0 && $v["trip_cangkang_bonus_dinas"]==0 &&
         $v["trip_tbs"]==0 && $v["trip_tbs_bonus_gaji"]==0 && $v["trip_tbs_bonus_dinas"]==0 &&
         $v["trip_tbsk"]==0 && $v["trip_tbsk_bonus_gaji"]==0 && $v["trip_tbsk_bonus_dinas"]==0 &&
         $v["trip_lain"]==0 && $v["trip_lain_gaji"]==0 && $v["trip_lain_makan"]==0 && $v["trip_lain_dinas"]==0 &&
@@ -1858,8 +1861,8 @@ class RptSalaryController extends Controller
       $data[$k]["sb_makan_2"] = $sm2;
       $data[$k]["sb_dinas_2"] = $sd2;
 
-      $data[$k]["bonus_gaji"]    = $data[$k]["trip_cpo_bonus_gaji"]+$data[$k]["trip_pk_bonus_gaji"]+$data[$k]["trip_tbs_bonus_gaji"]+$data[$k]["trip_tbsk_bonus_gaji"];
-      $data[$k]["bonus_dinas"]    = $data[$k]["trip_cpo_bonus_dinas"]+$data[$k]["trip_pk_bonus_dinas"]+$data[$k]["trip_tbs_bonus_dinas"]+$data[$k]["trip_tbsk_bonus_dinas"];
+      $data[$k]["bonus_gaji"]    = $data[$k]["trip_cpo_bonus_gaji"]+$data[$k]["trip_pk_bonus_gaji"]+$data[$k]["trip_cangkang_bonus_gaji"]+$data[$k]["trip_tbs_bonus_gaji"]+$data[$k]["trip_tbsk_bonus_gaji"];
+      $data[$k]["bonus_dinas"]    = $data[$k]["trip_cpo_bonus_dinas"]+$data[$k]["trip_pk_bonus_dinas"]+$data[$k]["trip_cangkang_bonus_dinas"]+$data[$k]["trip_tbs_bonus_dinas"]+$data[$k]["trip_tbsk_bonus_dinas"];
 
       $sbbt = $data[$k]["salary_bonus_bonus_trip"];
 

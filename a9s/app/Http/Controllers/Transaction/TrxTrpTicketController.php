@@ -688,6 +688,8 @@ class TrxTrpTicketController extends Controller
       $get_data_ticket =$get_data_ticket->where('ProductName',"CPO");
     }else if($request->jenis=="PK"){
       $get_data_ticket =$get_data_ticket->where('ProductName',"KERNEL");
+    }else if($request->jenis=="CANGKANG"){
+      $get_data_ticket =$get_data_ticket->where('ProductName',"CANGKANG");
     }else{ 
       $get_data_ticket =$get_data_ticket->where('ProductName',"MTBS");
     }
@@ -754,7 +756,7 @@ class TrxTrpTicketController extends Controller
         $reason_cut = "";
         $gen_salary_bonus = false;
 
-        if(in_array($model_query->jenis,['CPO','PK']) && $model_query->tanggal >= '2025-08-01'){
+        if(in_array($model_query->jenis,['CPO','PK','CANGKANG']) && $model_query->tanggal >= '2025-08-01'){
           
           if(!$model_query->ritase_leave_at || !$model_query->ritase_till_at){
             throw new \Exception("#".$model_query->id." Gambar Belum Lengkap",1);
@@ -1007,7 +1009,7 @@ class TrxTrpTicketController extends Controller
           $reason_cut = "";
           $gen_salary_bonus = false;
 
-          if(in_array($v->jenis,['CPO','PK']) && $v->tanggal >= '2025-08-01'){
+          if(in_array($v->jenis,['CPO','PK','CANGKANG']) && $v->tanggal >= '2025-08-01'){
 
             if(!$v->ritase_leave_at || !$v->ritase_till_at){
               throw new \Exception("#".$v->id." Gambar Belum Lengkap",1);
@@ -1425,7 +1427,7 @@ class TrxTrpTicketController extends Controller
             $q1->where("jenis","TBSK")->whereNull("ticket_b_no");
           });
           $q->orWhere(function ($q1){
-            $q1->whereIn("jenis",["CPO","PK"])->where(function($q2){
+            $q1->whereIn("jenis",["CPO","PK",'CANGKANG'])->where(function($q2){
               $q2->whereNull("ticket_a_no");
             });
           });
@@ -1451,7 +1453,7 @@ class TrxTrpTicketController extends Controller
           ->select('VehicleNo','DateTimeIn','TicketNo','Void',"TicketID","Bruto","Tara","OriginalBruto","OriginalTara","NamaSupir","DateTimeOut")
           ->whereRaw("REPLACE(VehicleNo, ' ', '')='".$no_pol."'")->where('DateTimeIn',">",$created_at);
 
-          if(in_array($empty_one['jenis'],['PK','CPO'])){
+          if(in_array($empty_one['jenis'],['PK','CPO','CANGKANG'])){
             $get_data_tickets = $get_data_tickets->where('TicketNo','not like','%-%');
           }else{
             $get_data_tickets = $get_data_tickets->where('Void',0);
@@ -1466,7 +1468,7 @@ class TrxTrpTicketController extends Controller
               ->select('VehicleNo','DateTimeIn','TicketNo','Void',"TicketID","Bruto","Tara","OriginalBruto","OriginalTara","NamaSupir","DateTimeOut")
               ->whereRaw("REPLACE(VehicleNo, ' ', '')='".$no_pol."'")->where('DateTimeIn',">",$created_at);
     
-              if(in_array($empty_one['jenis'],['PK','CPO'])){
+              if(in_array($empty_one['jenis'],['PK','CPO','CANGKANG'])){
                 $get_data_ticketsp = $get_data_ticketsp->where('TicketNo','not like','%-%');
               }else{
                 $get_data_ticketsp = $get_data_ticketsp->where('Void',0);
@@ -1850,7 +1852,7 @@ class TrxTrpTicketController extends Controller
                     }
                 }
               }
-            }elseif($af['jenis']=="CPO" || $af['jenis']=="PK") {
+            }elseif($af['jenis']=="CPO" || $af['jenis']=="PK" || $af['jenis']=="CANGKANG") {
               $gdt = $get_data_tickets[0];
               $tn = explode("/",$gdt['TicketNo']);
               if($tn[0]!==env("app_name")){

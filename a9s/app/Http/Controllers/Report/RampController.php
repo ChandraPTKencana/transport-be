@@ -115,6 +115,9 @@ class RampController extends Controller
         case 'PK':
           $tonase = $v->ticket_a_netto;
           break;
+        case 'CANGKANG':
+          $tonase = $v->ticket_a_netto;
+          break;
       }
  
       $ujalan_pvr_dtls = array_filter($all_uj,function($x)use($id_uj){

@@ -3267,6 +3267,10 @@ class TrxTrpController extends Controller
           $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN','TUNGGU']);
           $q1->where("tanggal",">=","2026-02-20");
         });
+        $q->orWhere(function ($q1) {
+          $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN','TUNGGU','CANGKANG']);
+          $q1->where("tanggal",">=","2026-07-14");
+        });
       }
     )
     ->where("deleted",0)
@@ -3309,6 +3313,10 @@ class TrxTrpController extends Controller
           $q->orWhere(function ($q1) {
             $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN','TUNGGU']);
             $q1->where("tanggal",">=","2026-02-20");
+          });
+          $q->orWhere(function ($q1) {
+            $q1->whereIn("jenis",['TBS','TBSK','CPO','PK','LAIN','TUNGGU','CANGKANG']);
+            $q1->where("tanggal",">=","2026-07-14");
           });
         }
       )

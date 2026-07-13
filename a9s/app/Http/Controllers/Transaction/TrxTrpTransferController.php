@@ -347,10 +347,10 @@ class TrxTrpTransferController extends Controller
     ->where('received_payment',0)
     ->where(function ($q){
       $q->where(function ($q1){
-        $q1->whereNotIn('jenis',['CPO','PK']);
+        $q1->whereNotIn('jenis',['CPO','PK','CANGKANG']);
       });
       $q->orWhere(function ($q1){
-        $q1->whereIn('jenis',['CPO','PK'])->where('val3',1);
+        $q1->whereIn('jenis',['CPO','PK','CANGKANG'])->where('val3',1);
       });
     });
 
@@ -434,7 +434,7 @@ class TrxTrpTransferController extends Controller
         throw new \Exception("Data Perlu Divalidasi oleh W/KTU terlebih dahulu",1);
       }
 
-      if(($model_query->jenis=='CPO' || $model_query->jenis=='PK') && $model_query->val3==0){
+      if(($model_query->jenis=='CPO' || $model_query->jenis=='PK' || $model_query->jenis=='CANGKANG') && $model_query->val3==0){
         throw new \Exception("Data Perlu Divalidasi oleh marketing terlebih dahulu",1);
       }
 
@@ -804,9 +804,9 @@ class TrxTrpTransferController extends Controller
       ->where('val',1)->where('val1',1)->where('val2',1)
       ->where('val4',1)->where('val5',1)->where('val6',1)
       ->where(function ($q) {
-        $q->whereNotIn('jenis', ['CPO', 'PK']) // Jika bukan CPO atau PK, abaikan kondisi val3
+        $q->whereNotIn('jenis', ['CPO', 'PK', 'CANGKANG']) // Jika bukan CPO atau PK, abaikan kondisi val3
           ->orWhere(function ($q) {
-              $q->whereIn('jenis', ['CPO', 'PK'])
+              $q->whereIn('jenis', ['CPO', 'PK', 'CANGKANG'])
               ->where('val3', 1); // Jika CPO atau PK, val3 harus 1
           });
       })

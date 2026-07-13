@@ -837,10 +837,10 @@ class FinPaymentReqController extends Controller
       ->where('val',1)->where('val1',1)->where('val2',1)->where('val4',1)->where('val5',1)->Where('val6',1)
       ->where(function ($q){
         $q->where(function ($q1){
-          $q1->whereNotIn('jenis',['CPO','PK']);
+          $q1->whereNotIn('jenis',['CPO','PK','CANGKANG']);
         });
         $q->orWhere(function ($q1){
-          $q1->whereIn('jenis',['CPO','PK'])->where('val3',1);
+          $q1->whereIn('jenis',['CPO','PK','CANGKANG'])->where('val3',1);
         });
       })
       ->where('received_payment',0)->whereIn("payment_method_id",[4,5])

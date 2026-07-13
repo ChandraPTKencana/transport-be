@@ -16,8 +16,8 @@
       <td style="border: 1px solid black;">{{ $v["no_pol"] }}</td>
       <td style="border: 1px solid black;">{{ $v["jenis"] }}</td>
       <td style="border: 1px solid black;">{{ $v["xto"] }}</td>
-      <td style="border: 1px solid black;">{{ ($v["jenis"]=='CPO' || $v["jenis"]=='PK') ? ($v['ritase_leave_at']??'') : ($v['ritase_return_at']??'')  }}</td>
-      <td style="border: 1px solid black;">{{ ($v["jenis"]=='CPO' || $v["jenis"]=='PK') ? ($v['ritase_arrive_at']??'') : ($v['ritase_till_at']??'') }}</td>
+      <td style="border: 1px solid black;">{{ ($v["jenis"]=='CPO' || $v["jenis"]=='PK' || $v["jenis"]=='CANGKANG') ? ($v['ritase_leave_at']??'') : ($v['ritase_return_at']??'')  }}</td>
+      <td style="border: 1px solid black;">{{ ($v["jenis"]=='CPO' || $v["jenis"]=='PK' || $v["jenis"]=='CANGKANG') ? ($v['ritase_arrive_at']??'') : ($v['ritase_till_at']??'') }}</td>
     </tr>
     @endforeach
   </tbody>

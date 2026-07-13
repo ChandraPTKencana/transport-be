@@ -67,7 +67,7 @@
           $ktp_no=mb_strtoupper("'".$v["employee_ktp_no"],'UTF-8');
           $row_jump = 3;
 
-          $trip_jumlah = $v["trip_cpo"]+$v["trip_pk"]+$v["trip_tbs"]+$v["trip_tbsk"];
+          $trip_jumlah = $v["trip_cpo"]+$v["trip_pk"]+$v["trip_cangkang"]+$v["trip_tbs"]+$v["trip_tbsk"];
         @endphp
         <tr>
           <td style="border: 1px solid black;">{{$loop->iteration}}</td>

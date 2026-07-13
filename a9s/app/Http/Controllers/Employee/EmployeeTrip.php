@@ -52,7 +52,7 @@ class EmployeeTrip extends Controller
         $q->orwhereNull("ritase_till_at");
       })
       // ->where("ritase_val2",0)
-      ->whereIn('jenis',['CPO','PK','TBS','TBSK'])
+      ->whereIn('jenis',['CPO','PK','TBS','TBSK','CANGKANG'])
       ->where("deleted",0)
       ->where("req_deleted",0)
       ->where("tanggal",">=","2025-09-17")

@@ -177,6 +177,9 @@ class TrxLoadDataController extends Controller
         case 'PK':
           $product_names = ["KERNEL"];
           break;
+        case 'CANGKANG':
+          $product_names = ["CANGKANG"];
+          break;
         default:
           # code...
           break;

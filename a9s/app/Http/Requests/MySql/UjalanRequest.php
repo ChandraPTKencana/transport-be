@@ -34,7 +34,7 @@ class UjalanRequest extends FormRequest
             // $rules['km_range'] = 'required|numeric|min:10';
             $rules['xto'] = 'required|max:100';
             $rules['tipe'] = 'required|max:50';
-            $rules['jenis'] = 'required|in:CPO,TBS,PK,TBSK,LAIN,TUNGGU';
+            $rules['jenis'] = 'required|in:CPO,TBS,PK,TBSK,LAIN,TUNGGU,CANGKANG';
         }
         return $rules;
     }

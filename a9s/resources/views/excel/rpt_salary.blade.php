@@ -72,9 +72,9 @@
           $ktp_no=mb_strtoupper("'".$v["employee_ktp_no"],'UTF-8');
           $row_jump = 3;
 
-          $trip_jumlah = $v["trip_cpo"]+$v["trip_pk"]+$v["trip_tbs"]+$v["trip_tbsk"];
-          $bonus_gaji = $v["trip_cpo_bonus_gaji"]+$v["trip_pk_bonus_gaji"]+$v["trip_tbs_bonus_gaji"]+$v["trip_tbsk_bonus_gaji"];
-          $bonus_dinas = $v["trip_cpo_bonus_dinas"]+$v["trip_pk_bonus_dinas"]+$v["trip_tbs_bonus_dinas"]+$v["trip_tbsk_bonus_dinas"];
+          $trip_jumlah = $v["trip_cpo"]+$v["trip_pk"]+$v["trip_cangkang"]+$v["trip_tbs"]+$v["trip_tbsk"];
+          $bonus_gaji = $v["trip_cpo_bonus_gaji"]+$v["trip_pk_bonus_gaji"]+$v["trip_cangkang_bonus_gaji"]+$v["trip_tbs_bonus_gaji"]+$v["trip_tbsk_bonus_gaji"];
+          $bonus_dinas = $v["trip_cpo_bonus_dinas"]+$v["trip_pk_bonus_dinas"]+$v["trip_cangkang_bonus_dinas"]+$v["trip_tbs_bonus_dinas"]+$v["trip_tbsk_bonus_dinas"];
         @endphp
         <tr>
           <td style="border: 1px solid black;">{{$loop->iteration}}</td>
