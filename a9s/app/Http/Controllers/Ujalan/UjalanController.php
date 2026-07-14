@@ -1697,8 +1697,8 @@ class UjalanController extends Controller
       'id' => "required|exists:\App\Models\MySql\Ujalan,id",
       'destination_location_id' => "nullable|required_if:jenis,TBS,TBSK|exists:\App\Models\MySql\DestinationLocation,id",
       'km_range' => "required|numeric|min:10",
-      'bonus_trip_supir'=>"exclude_unless:jenis,CPO,PK,CANGKANG|numeric|min:1000",
-      'bonus_trip_kernet'=>"exclude_unless:jenis,CPO,PK,CANGKANG|numeric|min:1000",
+      'bonus_trip_supir'=>"exclude_unless:jenis,CPO,PK,CANGKANG|numeric|min:0",
+      'bonus_trip_kernet'=>"exclude_unless:jenis,CPO,PK,CANGKANG|numeric|min:0",
     ];
 
     $messages = [
