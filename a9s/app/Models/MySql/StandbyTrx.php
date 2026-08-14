@@ -66,4 +66,15 @@ class StandbyTrx extends Model
     {
         return $this->belongsTo(SalaryPaid::class, "salary_paid_id", 'id');
     }
+
+        
+    public function employee_s()
+    {
+        return $this->belongsTo(Employee::class, "supir_id", 'id')->exclude(['attachment_1','attachment_2']);
+    }
+
+    public function employee_k()
+    {
+        return $this->belongsTo(Employee::class, "kernet_id", 'id')->exclude(['attachment_1','attachment_2']);
+    }
 }

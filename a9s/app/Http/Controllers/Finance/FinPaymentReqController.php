@@ -31,6 +31,7 @@ use App\Models\MySql\Employee;
 use App\Models\MySql\IsUser;
 use App\Models\MySql\TrxTrp;
 use App\Exports\MyReport;
+use App\Helpers\TrfMandiri;
 use App\Models\MySql\Bank;
 use App\Models\MySql\Setup;
 use App\PS\PSTripSupirKernet;
@@ -907,7 +908,8 @@ class FinPaymentReqController extends Controller
     // $filename=$date->format("YmdHis").'-'.env('APP_NAME');
 
     $date = new \DateTime();
-    $filename        = env('MCM_ID').'14'.env('MCM_LOCAL_ID').$date->format("ymd").$date->format("His");
+    $otherKey = '01'.substr($date->format("ymd"),2);
+    $filename = env('MCM_ID').'14'.env('MCM_LOCAL_ID').$otherKey.$date->format("His");
 
     $t_stamp = date("Y-m-d H:i:s");
 
@@ -928,8 +930,12 @@ class FinPaymentReqController extends Controller
         throw new \Exception("Data Tidak Dapat Dikirim",1);
       }  
       
-      $csv_data = "";
-      $records = count($data['details']);
+      // $csv_data = "";
+      // $records = count($data['details']);
+
+
+      $mandiri_bank_no =Setup::first()->mandiri_no_rek;
+      $trfMandiri = new TrfMandiri($mandiri_bank_no);
 
       foreach ($raw_data['details'] as $k => $v) {
         $jumlah = (int) $v['jumlah'];
@@ -939,31 +945,38 @@ class FinPaymentReqController extends Controller
         $dbank = Bank::where('code',$v['bank_code'])->first();
         $code_beda_bank = $dbank->code_duitku;
         $em_jumlah = $v["extra_money_trx_ids"]!="" ? count(explode(",",$v["extra_money_trx_ids"])):0;
-        $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};#{$v['trx_trp_id']}({$em_jumlah});;{$jenis_rek};{$code_beda_bank};;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
-        if($k<$records-1)
-        $csv_data .= "\r\n";
+        
+        
+        $trfMandiri->addRow($v['rek_no'],$v['rek_name'],$jumlah,$jenis_rek,$code_beda_bank,"#{$v['trx_trp_id']}({$em_jumlah})");
+        
+        // $csv_data .= "{$v['rek_no']};{$v['rek_name']};;;;IDR;{$jumlah};#{$v['trx_trp_id']}({$em_jumlah});;{$jenis_rek};{$code_beda_bank};;;;;;N;;;;;Y;;;;;;;;;;;;;;;;;BEN;1;E";
+        // if($k<$records-1)
+        // $csv_data .= "\r\n";
         // $csv_data .= "{$v['rek_no']},{$v['rek_name']},,,,IDR,{$v['jumlah']},,,IBU,,,,,,,N,,,,,Y,,,,,,,,,,,,,,,,,BEN,1,E,,,\n";
       }
+
+      $trfMandiri->generateBody();
+      $trfMandiri->generateHead();
   
-      $total = array_reduce($data['details'],function ($carry,$item) {
-        return $carry+=(int) $item['jumlah'];      
-      });
+      // $total = array_reduce($data['details'],function ($carry,$item) {
+      //   return $carry+=(int) $item['jumlah'];      
+      // });
   
       // $mime = MyLib::mime("csv");
       $mime = ["ext"=>'txt'];
   
       $filePath = 'public/' .$filename . '.' . $mime["ext"];
+      Storage::put($filePath, $trfMandiri->getCSV());
+      // // $mandiri_bank_no =env('MANDIRI_BANK_NO');
+      // $mandiri_bank_no =Setup::first()->mandiri_no_rek;
+      // $csv = "P;{$date->format('Ymd')};{$mandiri_bank_no};{$records};{$total}\r\n";
   
-      // $mandiri_bank_no =env('MANDIRI_BANK_NO');
-      $mandiri_bank_no =Setup::first()->mandiri_no_rek;
-      $csv = "P;{$date->format('Ymd')};{$mandiri_bank_no};{$records};{$total}\r\n";
-  
-      // foreach($data as $k=>$v) {
-      //   $csv .= str_replace('"', '', $v["supir"]) . "," . str_replace('"', '', $v["kernet"]) . "\n";
-      // }
+      // // foreach($data as $k=>$v) {
+      // //   $csv .= str_replace('"', '', $v["supir"]) . "," . str_replace('"', '', $v["kernet"]) . "\n";
+      // // }
       
   
-      Storage::put($filePath, $csv.$csv_data);
+      // Storage::put($filePath, $csv.$csv_data);
 
       
 
@@ -982,7 +995,7 @@ class FinPaymentReqController extends Controller
           // MyLog::logging("kirim berhasil","kirim");
       } catch (\Exception $e) {
           // Handle the exception
-        MyLog::logging($e->getMessage(),"kirimgagal");
+        MyLog::logging($e->getMessage(),"kirim gagal");
         throw new \Exception("Data Gagal Dikirim",1);
       }
 

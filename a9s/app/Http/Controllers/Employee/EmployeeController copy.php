@@ -23,7 +23,7 @@ use App\Http\Requests\MySql\EmployeeRequest;
 use App\Http\Resources\MySql\EmployeeResource;
 use App\Http\Resources\MySql\IsUserResource;
 
-class EmployeeController extends Controller
+class EmployeexController extends Controller
 {
   private $admin;
   private $admin_id;
