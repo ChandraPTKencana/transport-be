@@ -10,6 +10,9 @@ class TrxTrp extends Model
     use HasFactory;
 
     protected $table = 'trx_trp';
+    protected $fillable = [
+        'sync',
+    ];
     // public $timestamps = false;
 
     // public function warehouse()

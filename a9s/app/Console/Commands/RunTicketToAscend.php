@@ -58,8 +58,12 @@ class RunTicketToAscend extends Command
         ->whereNotNull('ticket_a_no')
         ->where('ticket_b_bruto',">",0)
         ->chunkById(10, function ($stds) use($connectionDB) {
-
             foreach ($stds as $std) {
+                $this->info("=========== Process :".date("Y-m-d H:i:s")."===========");
+                $this->info("Ticket no: {$std->ticket_a_no}\n ");
+                $this->info("Ticket BrutoTerima: {$std->ticket_b_bruto}\n ");
+                $this->info("Ticket TaraTerima: {$std->ticket_b_tara}\n ");
+
                 $temp_ac_accounts = $connectionDB->table("palm_tickets")
                 ->where('TicketNo',$std->ticket_a_no)
                 ->update([
@@ -70,6 +74,7 @@ class RunTicketToAscend extends Command
                 $std->update([
                     'sync' => 1,
                 ]);
+                $this->info("=========== Done :".date("Y-m-d H:i:s")."===========");
             }
         });
 
