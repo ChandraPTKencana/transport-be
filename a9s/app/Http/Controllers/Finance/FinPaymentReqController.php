@@ -908,8 +908,7 @@ class FinPaymentReqController extends Controller
     // $filename=$date->format("YmdHis").'-'.env('APP_NAME');
 
     $date = new \DateTime();
-    $otherKey = '01'.substr($date->format("ymd"),2);
-    $filename = env('MCM_ID').'14'.env('MCM_LOCAL_ID').$otherKey.$date->format("His");
+    $filename = env('MCM_ID').'14'.env('MCM_LOCAL_ID').'01'.$date->format("ymd").$date->format("Hi");
 
     $t_stamp = date("Y-m-d H:i:s");
 
