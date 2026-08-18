@@ -542,6 +542,7 @@ class TrxTrpTicketController extends Controller
       $model_query->ticket_note     = $request->ticket_note;
       $model_query->updated_at      = $t_stamp;
       $model_query->updated_user    = $this->admin_id;
+      $model_query->sync            = 0;
       $model_query->save();
 
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
