@@ -20,7 +20,7 @@ use App\Exports\MyReport;
 use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-
+use App\Helpers\TrfMandiri;
 use App\Models\MySql\RptSalary;
 use App\Models\MySql\RptSalaryDtl;
 use App\Models\MySql\IsUser;
@@ -30,12 +30,15 @@ use App\Http\Requests\MySql\RptSalaryTripRequest;
 use App\Http\Resources\IsUserResource;
 use App\Http\Resources\MySql\RptSalaryDtlResource;
 use App\Http\Resources\MySql\RptSalaryResource;
+use App\Models\MySql\Bank;
 use App\Models\MySql\Employee;
 use App\Models\MySql\PotonganTrx;
 use App\Models\MySql\SalaryBonus;
 use App\Models\MySql\SalaryPaid;
+use App\Models\MySql\Setup;
 use App\Models\MySql\StandbyTrx;
 use App\Models\MySql\TrxTrp;
+use Illuminate\Support\Facades\Storage;
 
 class RptSalaryController extends Controller
 {
@@ -231,7 +234,7 @@ class RptSalaryController extends Controller
       },'asc');
     }
     //end for details2
-    ])->with(['val1_by'])->find($request->id);
+    ])->with(['val1_by','val2_by'])->find($request->id);
 
     // if($model_query->requested_by != $this->admin_id){
     //   return response()->json([
@@ -359,7 +362,7 @@ class RptSalaryController extends Controller
         throw new \Exception("Ada Tiket Yang Belum Diselesaikan",1);
       }
       
-      if( $model_query->val==1 )
+      if( $model_query->val1==1 || $model_query->val2==1)
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
       array_push( $SYSNOTES ,"Remove All Details \n");
@@ -446,12 +449,12 @@ class RptSalaryController extends Controller
         $model_query->val1_at = $t_stamp;
       }
 
-      // if(MyAdmin::checkScope($this->permissions, 'rpt_salary.val2',true) && !$model_query->val2){
-      //   $run_val++;
-      //   $model_query->val2 = 1;
-      //   $model_query->val2_user = $this->admin_id;
-      //   $model_query->val2_at = $t_stamp;
-      // }
+      if(MyAdmin::checkScope($this->permissions, 'rpt_salary.val2',true) && !$model_query->val2){
+        $run_val++;
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+      }
 
       // if(MyAdmin::checkScope($this->permissions, 'rpt_salary.val3',true) && !$model_query->val3){
       //   $run_val++;
@@ -473,10 +476,10 @@ class RptSalaryController extends Controller
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,
         "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
-        // "val2"=>$model_query->val2,
-        // "val2_user"=>$model_query->val2_user,
-        // "val2_at"=>$model_query->val2_at,
-        // "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null, 
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null, 
         // "val3"=>$model_query->val3,
         // "val3_user"=>$model_query->val3_user,
         // "val3_at"=>$model_query->val3_at,
@@ -521,6 +524,10 @@ class RptSalaryController extends Controller
       "uj_gaji"                   => 0,
       "uj_makan"                  => 0,
       "uj_dinas"                  => 0,
+      "uj_gaji_manual"            => 0,
+      "uj_makan_manual"           => 0,
+      "uj_dinas_manual"           => 0,
+      "payment_total"             => 0,
       "nominal_cut"               => 0,
       "salary_bonus_nominal"      => 0,
       "salary_bonus_nominal_2"    => 0,
@@ -694,6 +701,9 @@ class RptSalaryController extends Controller
           $newData["uj_gaji"]=$uj_gaji_s;
           $newData["uj_makan"]=$uj_makan_s;
           $newData["uj_dinas"]=$uj_dinas_s;
+          $newData["uj_gaji_manual"]=$uj_gaji_s;
+          $newData["uj_makan_manual"]=$uj_makan_s;
+          $newData["uj_dinas_manual"]=$uj_dinas_s;
 
           $newData["trip_tunggu_gaji"]=$trip_tunggu_gaji_s;
           $newData["trip_tunggu_dinas"]=$trip_tunggu_dinas_s;
@@ -722,6 +732,10 @@ class RptSalaryController extends Controller
           $data[$search]['uj_gaji']+=$uj_gaji_s;
           $data[$search]['uj_makan']+=$uj_makan_s;
           $data[$search]['uj_dinas']+=$uj_dinas_s;
+
+          $data[$search]['uj_gaji_manual']+=$uj_gaji_s;
+          $data[$search]['uj_makan_manual']+=$uj_makan_s;
+          $data[$search]['uj_dinas_manual']+=$uj_dinas_s;
 
           $data[$search]["trip_tunggu_gaji"]+=$trip_tunggu_gaji_s;
           $data[$search]["trip_tunggu_dinas"]+=$trip_tunggu_dinas_s;
@@ -775,6 +789,10 @@ class RptSalaryController extends Controller
           $newData["uj_makan"]=$uj_makan_k;
           $newData["uj_dinas"]=$uj_dinas_k;
 
+          $newData["uj_gaji_manual"]=$uj_gaji_k;
+          $newData["uj_makan_manual"]=$uj_makan_k;
+          $newData["uj_dinas_manual"]=$uj_dinas_k;
+
           $newData["trip_tunggu_gaji"]=$trip_tunggu_gaji_k;
           $newData["trip_tunggu_dinas"]=$trip_tunggu_dinas_k;
 
@@ -815,6 +833,10 @@ class RptSalaryController extends Controller
           $data[$search]['uj_gaji']+=$uj_gaji_k;
           $data[$search]['uj_makan']+=$uj_makan_k;
           $data[$search]['uj_dinas']+=$uj_dinas_k;
+
+          $data[$search]['uj_gaji_manual']+=$uj_gaji_k;
+          $data[$search]['uj_makan_manual']+=$uj_makan_k;
+          $data[$search]['uj_dinas_manual']+=$uj_dinas_k;
 
           $data[$search]["trip_tunggu_gaji"]+=$trip_tunggu_gaji_k;
           $data[$search]["trip_tunggu_dinas"]+=$trip_tunggu_dinas_k;
@@ -1672,6 +1694,16 @@ class RptSalaryController extends Controller
       if($empx->deleted==0)
       $v['kerajinan'] +=  $empx->workers_from!= env('APP_NAME') ? 0 : ($empx->role=='Supir' ? $kerajinan_s : $kerajinan_k);
 
+
+      $v['payment_total'] = $v["sb_gaji_2"]+$v["sb_makan_2"]+$v["sb_dinas_2"]+$v["salary_bonus_nominal_2"]+
+      $v["kerajinan"]+$v["salary_bonus_bonus_trip"]+
+      $v["trip_cpo_bonus_gaji"]+$v["trip_cpo_bonus_dinas"]+
+      $v["trip_pk_bonus_gaji"]+$v["trip_pk_bonus_dinas"]+
+      $v["trip_cangkang_bonus_gaji"]+$v["trip_cangkang_bonus_dinas"]+
+      $v["trip_tbs_bonus_gaji"]+$v["trip_tbs_bonus_dinas"]+
+      $v["trip_tbsk_bonus_gaji"]+$v["trip_tbsk_bonus_dinas"]-
+      $v['potongan_manual'];
+
       if(
         !($v["sb_gaji"] == 0 && $v["sb_makan"]==0 && $v["sb_dinas"] == 0 && 
         $v["sb_gaji_2"]==0 && $v["sb_makan_2"]==0 && $v["sb_dinas_2"]==0 && 
@@ -1749,9 +1781,9 @@ class RptSalaryController extends Controller
       'ttl_periode_2_stlh_pot' => 'AD',
       'ttl_periode_1_2' => 'AE',
       'trip_jumlah' => 'AF',
-      'uj_gaji' => 'AG',
-      'uj_makan' => 'AH',
-      'uj_dinas' => 'AI',
+      'uj_gaji_manual' => 'AG',
+      'uj_makan_manual' => 'AH',
+      'uj_dinas_manual' => 'AI',
       'trip_lain' => 'AJ',
       'trip_lain_gaji' => 'AK',
       'trip_lain_makan' => 'AL',
@@ -1775,7 +1807,7 @@ class RptSalaryController extends Controller
       'ttl_periode_2_stlh_pot' => 'ttl_periode_2 - potongan_manual',
       'ttl_periode_1_2' => 'ttl_periode_1 + ttl_periode_2_stlh_pot',
       
-      'total' => 'uj_gaji + uj_makan + uj_dinas + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
+      'total' => 'uj_gaji_manual + uj_makan_manual + uj_dinas_manual + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
       'grand_total' => 'ttl_periode_1_2 + total - employee_bpjs_kesehatan - employee_bpjs_jamsos',
       // 'sisa'         => 'barang_a - barang_c',
       // 'rata_rata'    => '(barang_a + barang_b + barang_c) / 3',
@@ -1826,9 +1858,9 @@ class RptSalaryController extends Controller
       $sm2 = $data[$k]["sb_makan_2"];
       $sd2 = $data[$k]["sb_dinas_2"];
 
-      $ug = $data[$k]["uj_gaji"];
-      $um = $data[$k]["uj_makan"];
-      $ud = $data[$k]["uj_dinas"];
+      $ug = $data[$k]["uj_gaji_manual"];
+      $um = $data[$k]["uj_makan_manual"];
+      $ud = $data[$k]["uj_dinas_manual"];
       $nc = $data[$k]["nominal_cut"];
 
       $sbn = $data[$k]["salary_bonus_nominal"];
@@ -1910,9 +1942,9 @@ class RptSalaryController extends Controller
       'ttl_periode_2_stlh_pot' => 'AA',
       'ttl_periode_1_2' => 'AB',
       'trip_jumlah' => 'AC',
-      'uj_gaji' => 'AD',
-      'uj_makan' => 'AE',
-      'uj_dinas' => 'AF',
+      'uj_gaji_manual' => 'AD',
+      'uj_makan_manual' => 'AE',
+      'uj_dinas_manual' => 'AF',
       'trip_lain' => 'AG',
       'trip_lain_gaji' => 'AH',
       'trip_lain_makan' => 'AI',
@@ -1934,7 +1966,7 @@ class RptSalaryController extends Controller
       'ttl_periode_2_stlh_pot' => 'ttl_periode_2 - potongan_manual',
       'ttl_periode_1_2' => 'ttl_periode_1 + ttl_periode_2_stlh_pot',
       
-      'total' => 'uj_gaji + uj_makan + uj_dinas + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
+      'total' => 'uj_gaji_manual + uj_makan_manual + uj_dinas_manual + trip_lain_gaji + trip_lain_makan + trip_lain_dinas + trip_tunggu_gaji + trip_tunggu_dinas - nominal_cut',
       'grand_total' => 'ttl_periode_1_2 + total - employee_bpjs_kesehatan - employee_bpjs_jamsos',
       // 'sisa'         => 'barang_a - barang_c',
       // 'rata_rata'    => '(barang_a + barang_b + barang_c) / 3',
@@ -2097,6 +2129,632 @@ class RptSalaryController extends Controller
       // ], 400);
       return response()->json([
         "message" => "Proses Data gagal",
+      ], 400);
+    }
+  }
+
+  public function generateCSVMandiriAndSend(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['rpt_salary.gen_mandiri']);
+    set_time_limit(0);
+    // $date = new \DateTime();
+    // $filename=$date->format("YmdHis").'-'.env('APP_NAME');
+
+    $date = new \DateTime();
+    $filename = env('MCM_ID').'14'.env('MCM_LOCAL_ID').'02'.$date->format("ymd").$date->format("Hi");
+
+    $t_stamp = date("Y-m-d H:i:s");
+
+    set_time_limit(0);
+    $callGet = $this->show( new RptSalaryRequest($request->toArray()));
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    $raw_data = $ori["data"];  
+
+    DB::beginTransaction();
+    try {
+      $data = $raw_data;
+      
+      $checkDetails = RptSalaryDtl::where("rpt_salary_id",$data['id'])->pluck('payment_status')->toArray();
+
+      if(!in_array('READY',$checkDetails)){
+        throw new \Exception("Data Tidak Dapat Dikirim",1);
+      }  
+      
+      $mandiri_bank_no =Setup::first()->mandiri_no_rek;
+      $trfMandiri = new TrfMandiri($mandiri_bank_no);
+
+      foreach ($raw_data['details'] as $k => $v) {
+        $payment_total = (int) $v['payment_total'];
+        if($payment_total == 0) continue;
+
+        $payment_method_id = 4; //$v['payment_method_id']
+        $jenis_rek = $v['employee_bank_name']=='Mandiri'?'IBU':($payment_method_id==4?'BAU':'OBU');
+        $dbank = Bank::where('code',$v['employee_bank_name'])->first();
+        $code_beda_bank = $dbank->code_duitku;
+
+        $trfMandiri->addRow($v['employee_rek_no'],$v['employee_rek_name'],$payment_total,$jenis_rek,$code_beda_bank);
+      }
+
+      $trfMandiri->generateBody();
+      $trfMandiri->generateHead();
+
+      $mime = ["ext"=>'txt'];
+  
+      $filePath = 'public/' .$filename . '.' . $mime["ext"];
+      Storage::put($filePath, $trfMandiri->getCSV());
+
+      $remotePath = "Upload/Users/MCM_BatchUpload/".$filename. '.' . $mime["ext"];
+      
+      try {
+        Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
+          // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
+          // MyLog::logging("kirim berhasil","kirim");
+      } catch (\Exception $e) {
+          // Handle the exception
+        MyLog::logging($e->getMessage(),"kirimgagal");
+        throw new \Exception("Data Gagal Dikirim",1);
+      }
+
+      RptSalary::where('id',$data['id'])->update([
+        "filename"=>$filename
+      ]);
+
+      RptSalaryDtl::where('rpt_salary_id',$data['id'])->update([
+        "status"=>"INQUIRY_PROCESS"
+      ]);
+
+      MyLog::sys("rpt_salary",$data['id'],"update details","update status to INQUIRY_PROCESS");
+      
+      DB::commit();
+
+      return response()->json([
+        "message" => "Proses Generate Berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses Generate gagal",
+      ], 400);
+    }
+
+  }
+  
+  public function getUpdate(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['rpt_salary.gen_mandiri']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\RptSalary,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      
+      $model_query = RptSalary::with('details')->find($request->id);
+
+      $checkDetails = RptSalaryDtl::where("rpt_salary_id",$request->id)->pluck('payment_status')->toArray();
+
+      //masih perlu di telusuri
+      if(!in_array('INQUIRY_PROCESS',$checkDetails)){
+        throw new \Exception("Data Sudah Tidak Dapat Ditambahkan",1);
+      }
+
+      $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.nack');
+      
+      if($getFtp==null){
+        $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.ack');
+        if($getFtp==null){
+          throw new \Exception("Data Belum Siap Untuk Diambil",1);
+        }
+      }
+
+      $lines = explode("\r\n", trim($getFtp));
+      $result = [];
+
+      foreach ($lines as $index => $line) {
+          // Skip baris pertama (header) dan baris kosong
+          if ($index === 0 || empty(trim($line))) {
+              continue;
+          }
+          
+          $fields = explode(';', $line);
+          
+          // Pastikan ada cukup field sebelum mengakses
+          if (count($fields) >= 43) {
+              $no = $fields[0];
+              $nama = $fields[1];
+              $status = $fields[42]; // Status ada di index 24
+              $reason = $fields[43];
+              
+              array_push($result,[
+                'no' => $no,
+                'nama' => $nama,
+                'status' => $status,
+                'reason' => $reason
+              ]);
+          }
+      }
+      $nos = array_map(function ($o){
+        return $o['no']; 
+      },$result);
+
+      $salary_paid_details = $model_query->details;
+      $r_data = [];
+      $SYSNOTES = [];
+
+      $had_failed = 0;
+      foreach ($salary_paid_details as $k => $v) {
+        $SYSOLD                     = clone($model_query);
+
+        $index = array_search($v->employee_rek_no,$nos);
+        if($index===false){
+          // $st="INQUIRY_FAILED";
+          // $stm = "NOT REGISTERED";
+          // $had_failed++;
+          $st = "READY";
+          $stm = null;
+        }else{
+          if($result[$index]['status']=="SUCCESS"){
+            $st = "READY";
+            $stm = null;
+          }else{
+            $st = 'INQUIRY_FAILED';
+            $stm = $result[$index]['reason'];
+            $had_failed++;
+          }
+        }
+
+        // if($k==0){
+        //   $had_failed++;
+        //   $v->status = 'INQUIRY_FAILED';
+        //   $v->failed_reason = 'Update Dl Nama Rek Nya';
+        // }else{
+        //   $v->status = 'INQUIRY_SUCCESS';
+        // }
+
+        $v->payment_status             = $st;
+        $v->payment_failed_reason      = $stm;
+        $v->updated_at         = $t_stamp;
+        $v->updated_user       = $this->admin_id;
+        $v->save();
+        $SYSNOTE = MyLib::compareChange($SYSOLD,$v);
+        array_push($r_data,$v);
+        array_push($SYSNOTES,$SYSNOTE);
+      }
+
+      // if($had_failed==0){
+      //   SalaryPaidDtl::where('salary_paid_id',$request->id)->update([
+      //     "status"=>"TRANSFER_PROCESS"
+      //   ]);
+
+      //   $r_data = array_map(function ($x) {
+      //     $x->status = 'TRANSFER_PROCESS';
+      //     return $x;
+      //   },$r_data);
+
+      //   MyLog::sys("salary_paid",$request->id,"update details","update status to TRANSFER_PROCESS");
+
+      // }
+
+
+      if($had_failed==0){
+        RptSalaryDtl::where('rpt_salary_id',$request->id)->update([
+          "payment_status"=>"TRANSFER_PROCESS"
+        ]);
+
+        RptSalary::where('id',$request->id)->update([
+          "payment_status"=>"WAIT",
+          'wait_at'=>$t_stamp
+        ]);
+
+        $r_data = array_map(function ($x) {
+          $x->payment_status = 'TRANSFER_PROCESS';
+          return $x;
+        },$r_data);
+
+        MyLog::sys("rpt_salary_dtl",$request->id,"update details","update details with rpt_salary_id = '".$request->id."' to TRANSFER_PROCESS");
+        MyLog::sys("rpt_salary",$request->id,"update master","update status to CLOSE");
+      }
+      // $trx_trp_ids = array_map(function($x){
+      //   return $x['trx_trp_id'];
+      // },$salary_paid_details);
+
+      // $trx_trps = TrxTrp::where("fin_status","P")->whereIn("id",$trx_trp_ids)->lockForUpdate()->get();
+      // foreach ($trx_trps as $key => $value) {
+      //   $value->fin_status = 'V';
+      //   $value->save();
+      // }
+
+      // $model_query->val = 1;
+      // $model_query->val_user = $this->admin_id;
+      // $model_query->val_at = $t_stamp;
+      // $model_query->save();
+      MyLog::sys("rpt_salary_dtl",null,"update status",implode(",",$SYSNOTES));
+      // MyLog::sys("rpt_salary_dtl",$request->id,"update status");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses cek status berhasil",
+        "details" => $r_data,
+        // "result"=>$fields
+        // "val"=>$model_query->val,
+        // "val_user"=>$model_query->val_user,
+        // "val_at"=>$model_query->val_at,
+        // "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function setToReady(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['rpt_salary.gen_mandiri']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\RptSalary,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+
+      $model_query            = RptSalary::with(['details'])
+      ->where("id",$request->id)->lockForUpdate()->first();
+
+      $datediff = MyLib::dateDiff($model_query->updated_at,$t_stamp);
+      if($datediff['minutes'] < 20){
+        throw new \Exception("Tunggu ".(20 - $datediff['minutes'])." menit lagi untuk set ke READY",1);
+      }
+
+      if($model_query->payment_status!=='OPEN'){
+        throw new \Exception("Data Tidak Dapat Diset ke READY",1);
+      }
+            
+      $SYSNOTES1=[];
+
+      foreach ($model_query->details as $k => $v) {
+        $SYSOLD_dtl            = clone($v);
+        $v->payment_status     = 'READY';
+        $v->created_at         = $t_stamp;
+        $v->created_user       = $this->admin_id;
+        $v->save();
+        $SYSNOTE1 = MyLib::compareChange($SYSOLD_dtl,$v);
+        array_unshift( $SYSNOTES1 , $SYSNOTE1 ); 
+      }
+
+      MyLog::sys("salary_paid",$request->id,"update detail",implode("\n",$SYSNOTES1));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses SET TO READY berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function renewData(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['rpt_salary.gen_mandiri']);
+    $rules = [
+      'detail_id' => "required|exists:\App\Models\MySql\RptSalaryDtl,id",
+    ];
+
+    $messages = [
+      'detail_id.required' => 'ID tidak boleh kosong',
+      'detail_id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $SYSNOTES = [];
+
+      $model_query = RptSalaryDtl::with(['employee'])->lockForUpdate()->where("id",$request->detail_id)->first();
+      $SYSOLD                     = clone($model_query);
+
+      if($model_query->payment_status!='INQUIRY_FAILED'){
+        throw new \Exception("Data Tidak Dapat Diperbaharui",1);
+      }
+
+      $model_query->employee_rek_no = $model_query->employee->rek_no;
+      $model_query->employee_rek_name = $model_query->employee->rek_name;
+      $model_query->employee_bank_name = $model_query->employee->bank->code;
+      
+      $model_query->updated_at         = $t_stamp;
+      $model_query->updated_user       = $this->admin_id;  
+
+      $model_query->payment_status = 'READY';
+      $model_query->payment_failed_reason = '';
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      $model_query->save(); 
+
+
+      array_push($SYSNOTES,"Detail:".$SYSNOTE);
+
+      MyLog::sys("salary_paid_dtl",null,"renew data",implode(",",$SYSNOTES));
+      DB::commit();
+      return response()->json([
+        "message" => "Proses update data berhasil",
+        "employee_rek_no"=>$model_query->employee_rek_no,
+        "employee_rek_name"=>$model_query->employee_rek_name,
+        "employee_bank_name"=>$model_query->employee_bank_name,
+        "payment_status"=>$model_query->payment_status,
+        "payment_failed_reason"=>$model_query->payment_failed_reason,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+  
+  public function setPaidDone(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['rpt_salary.gen_mandiri']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\RptSalary,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+
+      $model_query            = RptSalary::with(['details'])
+      ->where("id",$request->id)->lockForUpdate()->first();
+
+      if($model_query->payment_status=='CLOSE'){
+        throw new \Exception("Data Sudah Tidak Dapat Diset",1);
+      }
+
+      $SYSOLD                 = clone($model_query);
+            
+      $SYSNOTES1=[];
+      foreach ($model_query->details as $k => $v) {
+        $SYSOLD_dtl            = clone($v);
+        $v->payment_status     = 'DONE';
+        $v->save();
+        $SYSNOTE1 = MyLib::compareChange($SYSOLD_dtl,$v);
+        array_unshift( $SYSNOTES1 , $SYSNOTE1 ); 
+
+      }
+
+      $model_query->payment_status        = "CLOSE";
+      $model_query->updated_at    = $t_stamp;
+      $model_query->updated_user  = $this->admin_id; 
+      $model_query->save(); 
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      MyLog::sys("rpt_salary",$request->id,"set paid done",$SYSNOTE);
+      MyLog::sys("rpt_salary",$request->id,"update detail",implode("\n",$SYSNOTES1));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses set done data berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+
+  public function validateItems($details_in2){
+    $rules = [
+      
+      // 'details'                          => 'required|array',
+      'details.*.employee_id'            => 'required|exists:\App\Models\MySql\Employee,id',
+      // 'details.*.employee_id'            => 'required|in:Remove,Add,Edit',
+      'details.*.uj_gaji_manual'         => 'nullable|numeric',
+      'details.*.uj_makan_manual'        => 'nullable|numeric',
+      'details.*.uj_dinas_manual'        => 'nullable|numeric',
+      'details.*.uj_manual_reason'       => 'required',
+      // 'details.*.status'              => 'required|in:Y,N',
+    ];
+
+    $messages = [
+      'details.required' => 'Item harus di isi',
+      'details.array' => 'Format Pengambilan Barang Salah',
+    ];
+
+    // // Replace :index with the actual index value in the custom error messages
+    foreach ($details_in2 as $index => $msg) {
+      $messages["details.{$index}.id_uj.required"]          = $msg['employee_name']. " ID yang diminta tidak boleh kosong.";
+      $messages["details.{$index}.id_uj.exists"]            = $msg['employee_name']. ". ID yang diminta tidak terdaftar";
+
+      $messages["details.{$index}.uj_gaji_manual.numeric"]   = $msg['employee_name']. ". UJ Gaji Manual harus berupa angka.";
+      $messages["details.{$index}.uj_makan_manual.numeric"]   = $msg['employee_name']. ". UJ Makan Manual harus berupa angka.";
+      $messages["details.{$index}.uj_dinas_manual.numeric"]   = $msg['employee_name']. ". UJ Dinas Manual harus berupa angka.";
+      $messages["details.{$index}.uj_manual_reason.required"]   = $msg['employee_name']. ". Manual Reason harus diisi.";
+    }
+
+    $validator = Validator::make(['details' => $details_in2], $rules, $messages);
+
+    // Check if validation fails
+    if ($validator->fails()) {
+      foreach ($validator->messages()->all() as $k => $v) {
+        throw new MyException(["message" => $v], 400);
+      }
+    }
+  }
+
+  public function saveManual(Request $request)
+  {
+    MyAdmin::checkScope($this->permissions, 'rpt_salary.modify');
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\RptSalary,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $details_in = json_decode($request->details,true);
+    $this->validateItems($details_in);
+
+    $t_stamp = date("Y-m-d H:i:s");
+    
+    DB::beginTransaction();
+    try {
+      foreach ($details_in as $k => $v) {
+        $rsd = RptSalaryDtl::where('rpt_salary_id',$request->id)
+        ->where("employee_id",$v['employee_id'])->first();
+
+        
+        $SYSOLD  = clone($rsd);
+        $update_dt = [
+          "uj_gaji_manual" => $v['uj_gaji_manual'],        
+          "uj_makan_manual" => $v['uj_makan_manual'],        
+          "uj_dinas_manual" => $v['uj_dinas_manual'],
+          "uj_manual_reason" => $v['uj_manual_reason'],
+        ];
+
+        // $update_dt = [
+        //   "uj_gaji_manual" => $v['uj_gaji'],        
+        //   "uj_makan_manual" => $v['uj_makan'],        
+        //   "uj_dinas_manual" => $v['uj_dinas'],
+        //   "uj_manual_reason" => "",
+        // ];
+
+        RptSalaryDtl::where('rpt_salary_id',$request->id)
+        ->where("employee_id",$v['employee_id'])
+        ->update($update_dt);     
+
+        $SYSNOTE = MyLib::compareChange($SYSOLD,$update_dt);    
+        MyLog::sys($this->syslog_db,$request->id,"update","employee_id: $rsd->employee_id =>".$SYSNOTE);
+      }
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses Generate data berhasil",
+        "updated_at"=>$t_stamp,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      
+      return response()->json([
+        "message" => "Proses ubah data gagal",
       ], 400);
     }
   }

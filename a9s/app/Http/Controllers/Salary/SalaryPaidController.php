@@ -20,7 +20,7 @@ use App\Exports\MyReport;
 use App\Helpers\MyLib;
 use App\Helpers\MyAdmin;
 use App\Helpers\MyLog;
-
+use App\Helpers\TrfMandiri;
 use App\Models\MySql\SalaryPaid;
 use App\Models\MySql\SalaryPaidDtl;
 use App\Models\MySql\IsUser;
@@ -30,9 +30,12 @@ use App\Http\Requests\MySql\SalaryPaidRequest;
 use App\Http\Resources\IsUserResource;
 use App\Http\Resources\MySql\SalaryPaidDtlResource;
 use App\Http\Resources\MySql\SalaryPaidResource;
+use App\Models\MySql\Bank;
 use App\Models\MySql\Employee;
 use App\Models\MySql\SalaryBonus;
+use App\Models\MySql\Setup;
 use App\Models\MySql\StandbyTrx;
+use Illuminate\Support\Facades\Storage;
 
 class SalaryPaidController extends Controller
 {
@@ -211,7 +214,7 @@ class SalaryPaidController extends Controller
     ], 200);
   }
 
-  public function show(SalaryPaidRequest $request)
+  public function show(SalaryPaidRequest $request,$for_gen=false)
   {
     MyAdmin::checkScope($this->permissions, 'salary_paid.view');
 
@@ -227,7 +230,6 @@ class SalaryPaidController extends Controller
         ->whereColumn("id","employee_id");
       },'asc');
     }
-    //end for details2
     ])->with(['val1_by','val2_by','val3_by'])->find($request->id);
 
     // if($model_query->requested_by != $this->admin_id){
@@ -342,7 +344,7 @@ class SalaryPaidController extends Controller
       $model_query = SalaryPaid::where("id",$request->id)->lockForUpdate()->first();
       $SYSOLD      = clone($model_query);
       
-      if( $model_query->val==1 )
+      if( $model_query->val==1 || $model_query->val2==1)
       throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Ubah",1);
 
 
@@ -492,12 +494,12 @@ class SalaryPaidController extends Controller
         $model_query->val1_at = $t_stamp;
       }
 
-      // if(MyAdmin::checkScope($this->permissions, 'salary_paid.val2',true) && !$model_query->val2){
-      //   $run_val++;
-      //   $model_query->val2 = 1;
-      //   $model_query->val2_user = $this->admin_id;
-      //   $model_query->val2_at = $t_stamp;
-      // }
+      if(MyAdmin::checkScope($this->permissions, 'salary_paid.val2',true) && !$model_query->val2){
+        $run_val++;
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+      }
 
       // if(MyAdmin::checkScope($this->permissions, 'salary_paid.val3',true) && !$model_query->val3){
       //   $run_val++;
@@ -519,10 +521,10 @@ class SalaryPaidController extends Controller
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,
         "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null, 
-        // "val2"=>$model_query->val2,
-        // "val2_user"=>$model_query->val2_user,
-        // "val2_at"=>$model_query->val2_at,
-        // "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null, 
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null, 
         // "val3"=>$model_query->val3,
         // "val3_user"=>$model_query->val3_user,
         // "val3_at"=>$model_query->val3_at,
@@ -684,7 +686,9 @@ class SalaryPaidController extends Controller
 
     $sts = StandbyTrx::where('created_at',"<=",$model_query->period_end." 23:59:59")
     ->where('val',1)->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)
-    ->whereNull('salary_paid_id')->where('req_deleted',0)->where('deleted',0)->with(['details'=>function ($q){
+    ->whereNull('salary_paid_id')->where('req_deleted',0)->where('deleted',0)->with([
+    'details'=>function ($q){
+      // $q->with(['']);
       $q->where("be_paid",1);      
     }])->lockForUpdate()->get();
 
@@ -720,9 +724,7 @@ class SalaryPaidController extends Controller
         }
       }
 
-
       if($v->supir_id){
-
         $map_s = array_map(function($x){
           return $x['employee_id'];
         },$dt_dtl);
@@ -733,18 +735,27 @@ class SalaryPaidController extends Controller
           array_push($dt_dtl,[
             "salary_paid_id"        => $model_query->id,
             "employee_id"           => $v->supir_id,
-            // "standby_nominal"       => $nominal_s,
+            "employee_role"         => $v->employee_s->role,
+            "employee_name"         => $v->employee_s->name,
+            "employee_ktp_no"       => $v->employee_s->ktp_no,
+            "employee_rek_no"       => $v->employee_s->rek_no,
+            "employee_rek_name"     => $v->employee_s->rek_name,
+            "employee_bank_code"    => $v->employee_s->bank->code,
+            "payment_status"        => "READY",
+            // "standby_nominal"    => $nominal_s,
             "sb_gaji"               => $sb_gaji_s,
             "sb_makan"              => $sb_makan_s,
             "sb_dinas"              => $sb_dinas_s,
             // "salary_bonus_nominal"  => ($sb_dinas_s) || ($sb_gaji_s==0 && $sb_makan_s==0) ? 0 : $kerajinan_s,
             "salary_bonus_nominal"  => 0,
+            "payment_total"         => $sb_gaji_s+$sb_makan_s+$sb_dinas_s,
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_s;
           $dt_dtl[$search]['sb_gaji']+=$sb_gaji_s;
           $dt_dtl[$search]['sb_makan']+=$sb_makan_s;
           $dt_dtl[$search]['sb_dinas']+=$sb_dinas_s;
+          $dt_dtl[$search]['payment_total']+=$sb_gaji_s+$sb_makan_s+$sb_dinas_s;
         }
       }
 
@@ -760,18 +771,27 @@ class SalaryPaidController extends Controller
           array_push($dt_dtl,[
             "salary_paid_id"        => $model_query->id,
             "employee_id"           => $v->kernet_id,
+            "employee_role"         => $v->employee_k->role,
+            "employee_name"         => $v->employee_k->name,
+            "employee_ktp_no"       => $v->employee_k->ktp_no,
+            "employee_rek_no"       => $v->employee_k->rek_no,
+            "employee_rek_name"     => $v->employee_k->rek_name,
+            "employee_bank_code"    => $v->employee_k->bank->code,
+            "payment_status"        => "READY",
             // "standby_nominal"       => $nominal_k,
             "sb_gaji"               => $sb_gaji_k,
             "sb_makan"              => $sb_makan_k,
             "sb_dinas"              => $sb_dinas_k,
             // "salary_bonus_nominal"  => ($sb_dinas_k) || ($sb_gaji_k==0 && $sb_makan_k==0) ? 0 : $kerajinan_k,
             "salary_bonus_nominal"  => 0,
+            "payment_total"         => $sb_gaji_k+$sb_makan_k+$sb_dinas_k,
           ]);
         }else{
           // $dt_dtl[$search]['standby_nominal']+=$nominal_k;
           $dt_dtl[$search]['sb_gaji']+=$sb_gaji_k;
           $dt_dtl[$search]['sb_makan']+=$sb_makan_k;
           $dt_dtl[$search]['sb_dinas']+=$sb_dinas_k;
+          $dt_dtl[$search]['payment_total']+=$sb_gaji_k+$sb_makan_k+$sb_dinas_k;
         }
       }
 
@@ -802,15 +822,25 @@ class SalaryPaidController extends Controller
         array_push($dt_dtl,[
           "salary_paid_id"        => $model_query->id,
           "employee_id"           => $v->employee_id,
-          // "standby_nominal"       => 0,
+          "employee_role"         => $emp->role,
+          "employee_ktp_no"       => $emp->ktp_no,
+          "employee_name"         => $emp->name,
+          "employee_rek_no"       => $emp->rek_no,
+          "employee_rek_name"     => $emp->rek_name,
+          "employee_bank_code"    => $emp->bank->code,
+          "payment_status"        => "READY",
+        // "standby_nominal"       => 0,
           "sb_gaji"               => 0,
           "sb_makan"              => 0,
           "sb_dinas"              => 0,
           "salary_bonus_nominal"  => 0 + $v->nominal,
+          "payment_total"         => $v->nominal,
         ]);
       }else{
         $dt_dtl[$search]['salary_bonus_nominal']+=$v->nominal;
+        $dt_dtl[$search]['payment_total']+=$v->nominal;
       }
+      
       $v->salary_paid_id = $model_query->id;
       $v->save();
       $SYSNOTE = MyLib::compareChange($SYSOLD,$v);
@@ -1051,4 +1081,656 @@ class SalaryPaidController extends Controller
     ];
     return $result;
   }
+
+
+  public function generateCSVMandiriAndSend(Request $request){
+    MyAdmin::checkMultiScope($this->permissions, ['salary_paid.gen_mandiri']);
+    set_time_limit(0);
+    // $date = new \DateTime();
+    // $filename=$date->format("YmdHis").'-'.env('APP_NAME');
+
+    $date = new \DateTime();
+    $filename = env('MCM_ID').'14'.env('MCM_LOCAL_ID').'02'.$date->format("ymd").$date->format("Hi");
+
+    $t_stamp = date("Y-m-d H:i:s");
+
+    set_time_limit(0);
+    $callGet = $this->show( new SalaryPaidRequest($request->toArray()),true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    $raw_data = $ori["data"];  
+
+    DB::beginTransaction();
+    try {
+      $data = $raw_data;
+      
+      if($data['period_part']==2)
+      throw new \Exception("Periode 2 Wajib DiBuat dari Salary Report",1);
+
+      $checkDetails = SalaryPaidDtl::where("salary_paid_id",$data['id'])->pluck('payment_status')->toArray();
+
+      if(!in_array('READY',$checkDetails)){
+        throw new \Exception("Data Tidak Dapat Dikirim",1);
+      }  
+      
+      $mandiri_bank_no =Setup::first()->mandiri_no_rek;
+      $trfMandiri = new TrfMandiri($mandiri_bank_no);
+
+      foreach ($raw_data['details'] as $k => $v) {
+        $payment_total = (int) $v['payment_total'];
+        if($payment_total == 0) continue;
+
+        $payment_method_id = 4; //$v['payment_method_id']
+        $jenis_rek = $v['employee_bank_code']=='Mandiri'?'IBU':($payment_method_id==4?'BAU':'OBU');
+        $dbank = Bank::where('code',$v['employee_bank_code'])->first();
+        $code_beda_bank = $dbank->code_duitku;
+
+        $trfMandiri->addRow($v['employee_rek_no'],$v['employee_rek_name'],$payment_total,$jenis_rek,$code_beda_bank);
+      }
+
+      $trfMandiri->generateBody();
+      $trfMandiri->generateHead();
+
+      $mime = ["ext"=>'txt'];
+  
+      $filePath = 'public/' .$filename . '.' . $mime["ext"];
+      Storage::put($filePath, $trfMandiri->getCSV());
+
+      $remotePath = "Upload/Users/MCM_BatchUpload/".$filename. '.' . $mime["ext"];
+      
+      try {
+        Storage::disk('ftp')->put($remotePath,Storage::get($filePath));
+          // Storage::disk('ftp')->put($remotePath, file_get_contents(Storage::get($file)));
+          // MyLog::logging("kirim berhasil","kirim");
+      } catch (\Exception $e) {
+          // Handle the exception
+        MyLog::logging($e->getMessage(),"kirimgagal");
+        throw new \Exception("Data Gagal Dikirim",1);
+      }
+
+      SalaryPaid::where('id',$data['id'])->update([
+        "filename"=>$filename
+      ]);
+
+      SalaryPaidDtl::where('salary_paid_id',$data['id'])->update([
+        "status"=>"INQUIRY_PROCESS"
+      ]);
+
+      MyLog::sys("salary_paid",$data['id'],"update details","update status to INQUIRY_PROCESS");
+      
+      DB::commit();
+
+      return response()->json([
+        "message" => "Proses Generate Berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses Generate gagal",
+      ], 400);
+    }
+
+  }
+  
+  public function getUpdate(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['salary_paid.gen_mandiri']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\SalaryPaid,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      
+      $model_query = SalaryPaid::with('details')->find($request->id);
+
+      $checkDetails = SalaryPaidDtl::where("salary_paid_id",$request->id)->pluck('payment_status')->toArray();
+
+      //masih perlu di telusuri
+      if(!in_array('INQUIRY_PROCESS',$checkDetails)){
+        throw new \Exception("Data Sudah Tidak Dapat Ditambahkan",1);
+      }
+
+      $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.nack');
+      
+      if($getFtp==null){
+        $getFtp = Storage::disk('ftp')->get('Downloads/'.$model_query->filename.'.txt.ack');
+        if($getFtp==null){
+          throw new \Exception("Data Belum Siap Untuk Diambil",1);
+        }
+      }
+
+      $lines = explode("\r\n", trim($getFtp));
+      $result = [];
+
+      foreach ($lines as $index => $line) {
+          // Skip baris pertama (header) dan baris kosong
+          if ($index === 0 || empty(trim($line))) {
+              continue;
+          }
+          
+          $fields = explode(';', $line);
+          
+          // Pastikan ada cukup field sebelum mengakses
+          if (count($fields) >= 43) {
+              $no = $fields[0];
+              $nama = $fields[1];
+              $status = $fields[42]; // Status ada di index 24
+              $reason = $fields[43];
+              
+              array_push($result,[
+                'no' => $no,
+                'nama' => $nama,
+                'status' => $status,
+                'reason' => $reason
+              ]);
+          }
+      }
+      $nos = array_map(function ($o){
+        return $o['no']; 
+      },$result);
+
+      $salary_paid_details = $model_query->details;
+      $r_data = [];
+      $SYSNOTES = [];
+
+      $had_failed = 0;
+      foreach ($salary_paid_details as $k => $v) {
+        $SYSOLD                     = clone($model_query);
+
+        $index = array_search($v->employee_rek_no,$nos);
+        if($index===false){
+          // $st="INQUIRY_FAILED";
+          // $stm = "NOT REGISTERED";
+          // $had_failed++;
+          $st = "READY";
+          $stm = null;
+        }else{
+          if($result[$index]['status']=="SUCCESS"){
+            $st = "READY";
+            $stm = null;
+          }else{
+            $st = 'INQUIRY_FAILED';
+            $stm = $result[$index]['reason'];
+            $had_failed++;
+          }
+        }
+
+        // if($k==0){
+        //   $had_failed++;
+        //   $v->status = 'INQUIRY_FAILED';
+        //   $v->failed_reason = 'Update Dl Nama Rek Nya';
+        // }else{
+        //   $v->status = 'INQUIRY_SUCCESS';
+        // }
+
+        $v->payment_status             = $st;
+        $v->payment_failed_reason      = $stm;
+        $v->updated_at         = $t_stamp;
+        $v->updated_user       = $this->admin_id;
+        $v->save();
+        $SYSNOTE = MyLib::compareChange($SYSOLD,$v);
+        array_push($r_data,$v);
+        array_push($SYSNOTES,$SYSNOTE);
+      }
+
+      // if($had_failed==0){
+      //   SalaryPaidDtl::where('salary_paid_id',$request->id)->update([
+      //     "status"=>"TRANSFER_PROCESS"
+      //   ]);
+
+      //   $r_data = array_map(function ($x) {
+      //     $x->status = 'TRANSFER_PROCESS';
+      //     return $x;
+      //   },$r_data);
+
+      //   MyLog::sys("salary_paid",$request->id,"update details","update status to TRANSFER_PROCESS");
+
+      // }
+
+
+      if($had_failed==0){
+        SalaryPaidDtl::where('salary_paid_id',$request->id)->update([
+          "payment_status"=>"TRANSFER_PROCESS"
+        ]);
+
+        SalaryPaid::where('id',$request->id)->update([
+          "payment_status"=>"WAIT",
+          'wait_at'=>$t_stamp
+        ]);
+
+        $r_data = array_map(function ($x) {
+          $x->payment_status = 'TRANSFER_PROCESS';
+          return $x;
+        },$r_data);
+
+
+
+        MyLog::sys("salary_paid_dtl",$request->id,"update details","update details with salary_paid_id = '".$request->id."' to TRANSFER_PROCESS");
+        MyLog::sys("salary_paid",$request->id,"update master","update status to CLOSE");
+      }
+      // $trx_trp_ids = array_map(function($x){
+      //   return $x['trx_trp_id'];
+      // },$salary_paid_details);
+
+      // $trx_trps = TrxTrp::where("fin_status","P")->whereIn("id",$trx_trp_ids)->lockForUpdate()->get();
+      // foreach ($trx_trps as $key => $value) {
+      //   $value->fin_status = 'V';
+      //   $value->save();
+      // }
+
+      // $model_query->val = 1;
+      // $model_query->val_user = $this->admin_id;
+      // $model_query->val_at = $t_stamp;
+      // $model_query->save();
+      MyLog::sys("salary_paid_dtl",null,"update status",implode(",",$SYSNOTES));
+      // MyLog::sys("salary_paid_dtl",$request->id,"update status");
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses cek status berhasil",
+        "details" => $r_data,
+        // "result"=>$fields
+        // "val"=>$model_query->val,
+        // "val_user"=>$model_query->val_user,
+        // "val_at"=>$model_query->val_at,
+        // "val_by"=>$model_query->val_user ? new IsUserResource(IsUser::find($model_query->val_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function setToReady(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['salary_paid.gen_mandiri']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\SalaryPaid,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+
+      $model_query            = SalaryPaid::with(['details'])
+      ->where("id",$request->id)->lockForUpdate()->first();
+
+      $datediff = MyLib::dateDiff($model_query->updated_at,$t_stamp);
+      if($datediff['minutes'] < 20){
+        throw new \Exception("Tunggu ".(20 - $datediff['minutes'])." menit lagi untuk set ke READY",1);
+      }
+
+      if($model_query->payment_status!=='OPEN'){
+        throw new \Exception("Data Tidak Dapat Diset ke READY",1);
+      }
+            
+      $SYSNOTES1=[];
+
+      foreach ($model_query->details as $k => $v) {
+        $SYSOLD_dtl            = clone($v);
+        $v->payment_status     = 'READY';
+        $v->created_at         = $t_stamp;
+        $v->created_user       = $this->admin_id;
+        $v->save();
+        $SYSNOTE1 = MyLib::compareChange($SYSOLD_dtl,$v);
+        array_unshift( $SYSNOTES1 , $SYSNOTE1 ); 
+      }
+
+      MyLog::sys("salary_paid",$request->id,"update detail",implode("\n",$SYSNOTES1));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses SET TO READY berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  public function renewData(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['salary_paid.gen_mandiri']);
+    $rules = [
+      'detail_id' => "required|exists:\App\Models\MySql\SalaryPaidDtl,id",
+    ];
+
+    $messages = [
+      'detail_id.required' => 'ID tidak boleh kosong',
+      'detail_id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+      $SYSNOTES = [];
+
+      $model_query = SalaryPaidDtl::with(['employee'])->lockForUpdate()->where("id",$request->detail_id)->first();
+      $SYSOLD                     = clone($model_query);
+
+      if($model_query->payment_status!='INQUIRY_FAILED'){
+        throw new \Exception("Data Tidak Dapat Diperbaharui",1);
+      }
+
+      $model_query->employee_rek_no = $model_query->employee->rek_no;
+      $model_query->employee_rek_name = $model_query->employee->rek_name;
+      $model_query->employee_bank_code = $model_query->employee->bank->code;
+      
+      $model_query->updated_at         = $t_stamp;
+      $model_query->updated_user       = $this->admin_id;  
+
+      $model_query->payment_status = 'READY';
+      $model_query->payment_failed_reason = '';
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      $model_query->save(); 
+
+
+      array_push($SYSNOTES,"Detail:".$SYSNOTE);
+
+      MyLog::sys("salary_paid_dtl",null,"renew data",implode(",",$SYSNOTES));
+      DB::commit();
+      return response()->json([
+        "message" => "Proses update data berhasil",
+        "employee_rek_no"=>$model_query->employee_rek_no,
+        "employee_rek_name"=>$model_query->employee_rek_name,
+        "employee_bank_code"=>$model_query->employee_bank_code,
+        "payment_status"=>$model_query->payment_status,
+        "payment_failed_reason"=>$model_query->payment_failed_reason,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+  
+  public function setPaidDone(Request $request){
+    // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+    MyAdmin::checkMultiScope($this->permissions, ['salary_paid.gen_mandiri']);
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\SalaryPaid,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    $t_stamp = date("Y-m-d H:i:s");
+    DB::beginTransaction();
+    try {
+
+      $model_query            = SalaryPaid::with(['details'])
+      ->where("id",$request->id)->lockForUpdate()->first();
+
+      if($model_query->payment_status=='CLOSE'){
+        throw new \Exception("Data Sudah Tidak Dapat Diset",1);
+      }
+
+      $SYSOLD                 = clone($model_query);
+            
+      $SYSNOTES1=[];
+      foreach ($model_query->details as $k => $v) {
+        $SYSOLD_dtl            = clone($v);
+        $v->payment_status     = 'DONE';
+        $v->save();
+        $SYSNOTE1 = MyLib::compareChange($SYSOLD_dtl,$v);
+        array_unshift( $SYSNOTES1 , $SYSNOTE1 ); 
+
+      }
+
+      $model_query->payment_status        = "CLOSE";
+      $model_query->updated_at    = $t_stamp;
+      $model_query->updated_user  = $this->admin_id; 
+      $model_query->save(); 
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+      MyLog::sys("salary_paid",$request->id,"set paid done",$SYSNOTE);
+      MyLog::sys("salary_paid",$request->id,"update detail",implode("\n",$SYSNOTES1));
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses set done data berhasil",
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal",
+      ], 400);
+    }
+
+  }
+
+  // public function deleteData(Request $request){
+  //   // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+  //   MyAdmin::checkMultiScope($this->permissions, ['salary_paid.create','salary_paid.modify']);
+  //   $rules = [
+  //     'trx_trp_id' => "required|exists:\App\Models\MySql\SalaryPaidDtl,trx_trp_id",
+  //   ];
+
+  //   $messages = [
+  //     'trx_trp_id.required' => 'Trx Trp ID tidak boleh kosong',
+  //     'trx_trp_id.exists' => 'Trx Trp ID tidak terdaftar',
+  //   ];
+
+  //   $validator = Validator::make($request->all(), $rules, $messages);
+
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
+
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+  //     $SYSNOTES = [];
+
+  //     $model_query = SalaryPaidDtl::with(['salary_paid'=>function ($q){
+  //       $q->where("status","OPEN");
+  //     }])->where("trx_trp_id",$request->trx_trp_id)->lockForUpdate()->pluck("status")->toArray();
+
+
+      
+  //     if(count($model_query)==0){
+  //       throw new \Exception("Data Sudah Tidak Dapat Di Hapus",1);
+  //     }
+
+  //     if(!(in_array("READY",$model_query) || in_array("INQUIRY_FAILED",$model_query))){
+  //       throw new \Exception("Data Tidak Diizinkan untuk di Hapus".json_encode($model_query),1);
+  //     }
+
+  //     SalaryPaidDtl::with(['trx_trp','employee','salary_paid'=>function ($q){
+  //       $q->where("status","OPEN");
+  //     }])->where("trx_trp_id",$request->trx_trp_id)->delete();
+
+  //     // $SYSNOTE1 = MyLib::compareChange($SYSOLD1,$model_query->trx_trp);
+  //     // $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+  //     // $model_query->trx_trp->save(); 
+  //     // $model_query->save(); 
+
+
+  //     // array_push($SYSNOTES,"Detail:".$SYSNOTE);
+  //     // array_push($SYSNOTES,"Trx Trp:".$SYSNOTE1);
+
+  //     MyLog::sys("salary_paid_dtl",null,"delete data","delete data which have trx_trp_id:".$request->trx_trp_id);
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses delete data berhasil",
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses ubah data gagal",
+  //     ], 400);
+  //   }
+
+  // }
+
+  // public function setBatchNo(Request $request){
+  //   // MyAdmin::checkRole($this->role, ['SuperAdmin','Finance']);
+  //   MyAdmin::checkMultiScope($this->permissions, ['salary_paid.create','salary_paid.modify']);
+  //   $rules = [
+  //     'id' => "required|exists:\App\Models\MySql\SalaryPaid,id",
+  //     'batch_no' => "required",
+  //   ];
+
+  //   $messages = [
+  //     'id.required' => 'ID tidak boleh kosong',
+  //     'id.exists' => 'ID tidak terdaftar',
+  //     'batch_no.required' => 'No Batch tidak boleh kosong',
+  //     // 'id.exists' => 'ID tidak terdaftar',
+  //   ];
+
+  //   $validator = Validator::make($request->all(), $rules, $messages);
+
+  //   if ($validator->fails()) {
+  //     throw new ValidationException($validator);
+  //   }
+
+  //   $t_stamp = date("Y-m-d H:i:s");
+  //   DB::beginTransaction();
+  //   try {
+
+  //     $model_query                = SalaryPaid::where("id",$request->id)->lockForUpdate()->first();
+      
+  //     if($model_query->status=='CLOSE'){
+  //       throw new \Exception("Data Sudah Tidak Dapat Diset",1);
+  //     }
+      
+  //     $SYSOLD                     = clone($model_query);
+  //     $model_query->batch_no      = $request->batch_no;
+  //     $model_query->updated_at    = $t_stamp;
+  //     $model_query->updated_user  = $this->admin_id;  
+
+  //     $model_query->save(); 
+  //     $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);
+  //     MyLog::sys("salary_paid_dtl",null,"renew data",$SYSNOTE);
+
+  //     DB::commit();
+  //     return response()->json([
+  //       "message" => "Proses delete data berhasil",
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Proses ubah data gagal",
+  //     ], 400);
+  //   }
+
+  // }
+
+
 }

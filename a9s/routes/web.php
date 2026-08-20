@@ -170,6 +170,7 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::get('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'show']);
     Route::post('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'store']);
     Route::put('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'update']);
+    Route::put('/employee/save_bpjs', [\App\Http\Controllers\Employee\EmployeeController::class, 'saveBpjs']);
     Route::delete('/employee', [\App\Http\Controllers\Employee\EmployeeController::class, 'delete']);
     Route::put('/employee_unremove', [\App\Http\Controllers\Employee\EmployeeController::class, 'undelete']);
     Route::put('/employee_validasi', [\App\Http\Controllers\Employee\EmployeeController::class, 'validasi']);
@@ -290,6 +291,11 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::get('/salary_paid/pdf_preview', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'pdfPreview']);
     Route::get('/salary_paid/excel_download', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'excelDownload']);
     Route::get('/salary_paid/excel_download2', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'excelDownload2']);
+    Route::put('/salary_paid/set_paid_done', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'setPaidDone']);
+    Route::put('/salary_paid/get_update', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'getUpdate']);
+    Route::put('/salary_paid/set_to_ready', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'setToReady']);
+    Route::put('/salary_paid/gen_csv_and_send_mandiri', [\App\Http\Controllers\Salary\SalaryPaidController::class, 'generateCSVMandiriAndSend']);
+
 
     Route::get('/rpt_salarys', [\App\Http\Controllers\Salary\RptSalaryController::class, 'index']);
     Route::get('/rpt_salary', [\App\Http\Controllers\Salary\RptSalaryController::class, 'show']);
@@ -302,6 +308,11 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::get('/rpt_salary/excel_download2', [\App\Http\Controllers\Salary\RptSalaryController::class, 'excelDownload2']);
     Route::get('/rpt_salary/check_nilai_ascend', [\App\Http\Controllers\Salary\RptSalaryController::class, 'checkNilaiAscend']);
     Route::post('/rpt_salary/recal_trip', [\App\Http\Controllers\Salary\RptSalaryController::class, 'recalTrip']);
+    Route::put('/rpt_salary/set_paid_done', [\App\Http\Controllers\Salary\RptSalaryController::class, 'setPaidDone']);
+    Route::put('/rpt_salary/get_update', [\App\Http\Controllers\Salary\RptSalaryController::class, 'getUpdate']);
+    Route::put('/rpt_salary/set_to_ready', [\App\Http\Controllers\Salary\RptSalaryController::class, 'setToReady']);
+    Route::put('/rpt_salary/gen_csv_and_send_mandiri', [\App\Http\Controllers\Salary\RptSalaryController::class, 'generateCSVMandiriAndSend']);
+    Route::put('/rpt_salary/save_manual', [\App\Http\Controllers\Salary\RptSalaryController::class, 'saveManual']);
 
     Route::get('/salary_bonuses', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'index']);
     Route::get('/salary_bonus', [\App\Http\Controllers\Salary\SalaryBonusController::class, 'show']);

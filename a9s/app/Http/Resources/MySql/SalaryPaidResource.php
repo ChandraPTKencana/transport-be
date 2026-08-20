@@ -37,6 +37,8 @@ class SalaryPaidResource extends JsonResource
             'val3_by'           => new IsUserResource($this->whenLoaded('val3_by')),
             'val3_at'           => $this->val3_at ?? "",
 
+            'payment_status'    => $this->payment_status,
+
             'created_user'      => $this->created_user,
             'updated_user'      => $this->updated_user,
             'created_at'        => $this->created_at,

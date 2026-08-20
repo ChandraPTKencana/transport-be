@@ -46,6 +46,15 @@ class RptSalaryDtlResource extends JsonResource
             'uj_makan'                  => $this->uj_makan,
             'uj_dinas'                  => $this->uj_dinas,
 
+            'uj_gaji_manual'            => $this->uj_gaji_manual,
+            'uj_makan_manual'           => $this->uj_makan_manual,
+            'uj_dinas_manual'           => $this->uj_dinas_manual,
+            'uj_manual_reason'          => $this->uj_manual_reason,
+            
+            'payment_total'             => $this->payment_total,
+            'payment_status'            => $this->payment_status,
+            'payment_failed_reason'     => $this->payment_failed_reason,
+
             'nominal_cut'               => $this->nominal_cut,
             'salary_bonus_nominal'      => $this->salary_bonus_nominal,
             'salary_bonus_nominal_2'    => $this->salary_bonus_nominal_2,

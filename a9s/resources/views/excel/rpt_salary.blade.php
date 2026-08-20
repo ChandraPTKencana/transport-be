@@ -116,9 +116,9 @@
             {{ excelFormulaFromField( $formulas['ttl_periode_1_2'], $excelMap, $loop->iteration + $row_jump) }}
           </td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $trip_jumlah }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji"] }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan"] }}</td>
-          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_gaji_manual"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_makan_manual"] }}</td>
+          <td style="border: 1px solid black;" class="text-right p-1">{{ $v["uj_dinas_manual"] }}</td>
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_lain"] }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_lain_gaji"] }}</td> 
           <td style="border: 1px solid black;" class="text-right p-1">{{ $v["trip_lain_makan"] }}</td> 

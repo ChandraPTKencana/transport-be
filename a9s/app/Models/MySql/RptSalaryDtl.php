@@ -13,6 +13,7 @@ class RptSalaryDtl extends Model
 
     protected $primaryKey = null;
     public $incrementing = false;
+    protected $guarded = [];
 
     public function employee()
     {

@@ -232,7 +232,7 @@ class EmployeeController extends Controller
 
     $model_query = $model_query->exclude(["attachment_1"]);
 
-    $model_query = $model_query->with(['val_by','bank','deleted_by'])->get();
+    $model_query = $model_query->with(['val_by','val1_by','val2_by','bank','deleted_by'])->get();
 
     return response()->json([
       // "data"=>EmployeeResource::collection($employees->keyBy->id),
@@ -553,8 +553,8 @@ class EmployeeController extends Controller
       $model_query->address       = MyLib::emptyStrToNull($request->address);
       $model_query->status        = MyLib::emptyStrToNull($request->status);
 
-      $model_query->bpjs_kesehatan   = $request->bpjs_kesehatan;
-      $model_query->bpjs_jamsos      = $request->bpjs_jamsos;
+      // $model_query->bpjs_kesehatan   = $request->bpjs_kesehatan;
+      // $model_query->bpjs_jamsos      = $request->bpjs_jamsos;
 
       $model_query->religion      = $request->religion;
       
@@ -603,6 +603,80 @@ class EmployeeController extends Controller
       } catch (\Exception $e) {
         
       }
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+      // return response()->json([
+      //   "message" => $e->getMessage(),
+      // ], 400);
+      return response()->json([
+        "message" => "Proses ubah data gagal"
+      ], 400);
+    }
+  }
+
+  public function saveBpjs(Request $request)
+  {
+    MyAdmin::checkScope($this->permissions, 'employee.modify.bpjs');
+
+    $rules = [
+      'id' => "required|exists:\App\Models\MySql\Employee,id",
+    ];
+
+    $messages = [
+      'id.required' => 'ID tidak boleh kosong',
+      'id.exists' => 'ID tidak terdaftar',
+    ];
+
+    $validator = Validator::make($request->all(), $rules, $messages);
+
+    if ($validator->fails()) {
+      throw new ValidationException($validator);
+    }
+
+    // set_time_limit(0);
+    $t_stamp = date("Y-m-d H:i:s");
+    
+    DB::beginTransaction();
+    try {
+      $model_query                = Employee::where("id",$request->id)->lockForUpdate()->first();
+      
+      if($model_query->id==1){
+        throw new \Exception("Izin Ubah Ditolak",1);
+      }
+
+      if($model_query->val2==1)
+      throw new \Exception("Data sudah tervalidasi",1);
+
+      $SYSOLD                     = clone($model_query);
+
+      $model_query->bpjs_kesehatan  = $request->bpjs_kesehatan;
+      $model_query->bpjs_jamsos     = $request->bpjs_jamsos;
+      if(MyAdmin::checkScope($this->permissions, 'employee.val2',true) && $model_query->val2 == 0 ){
+        $model_query->val2            = 1;
+        $model_query->val2_user       = $this->admin_id;
+        $model_query->val2_at         = $t_stamp;
+      }
+
+      $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys($this->syslog_db,$request->id,"update bpjs",$SYSNOTE);
+
+      DB::commit();
+
+      return response()->json([
+        "message" => "Proses ubah data berhasil",
+        "updated_at" => $t_stamp,
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
+      ], 200);
+    } catch (\Exception $e) {
+      DB::rollback();
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),
@@ -685,7 +759,7 @@ class EmployeeController extends Controller
   }
 
   public function validasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['employee.val','employee.val1']);
+    MyAdmin::checkMultiScope($this->permissions, ['employee.val','employee.val1','employee.val2']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Employee,id",
@@ -723,6 +797,12 @@ class EmployeeController extends Controller
         $model_query->val1_at = $t_stamp;
       }
 
+      if(!$model_query->val2){
+        $model_query->val2 = 1;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+      }
+
       $model_query->save();
       
       $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
@@ -739,6 +819,10 @@ class EmployeeController extends Controller
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,
         "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
+        "val2"=>$model_query->val2,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
@@ -760,7 +844,7 @@ class EmployeeController extends Controller
   }
 
   public function unvalidasi(Request $request){
-    MyAdmin::checkMultiScope($this->permissions, ['employee.unval','employee.unval1']);
+    MyAdmin::checkMultiScope($this->permissions, ['employee.unval','employee.unval1','employee.unval2']);
 
     $rules = [
       'id' => "required|exists:\App\Models\MySql\Employee,id",
@@ -788,15 +872,22 @@ class EmployeeController extends Controller
 
       if(MyAdmin::checkScope($this->permissions, 'employee.unval',true) && $model_query->val){
         $model_query->val = 0;
-        // $model_query->val1_user = $this->admin_id;
-        // $model_query->val1_at = $t_stamp;
+        $model_query->val_user = $this->admin_id;
+        $model_query->val_at = $t_stamp;
       }
       
       if(MyAdmin::checkScope($this->permissions, 'employee.unval1',true) && $model_query->val1){
         $model_query->val1 = 0;
-        // $model_query->val1_user = $this->admin_id;
-        // $model_query->val1_at = $t_stamp;
+        $model_query->val1_user = $this->admin_id;
+        $model_query->val1_at = $t_stamp;
       }
+
+      if(MyAdmin::checkScope($this->permissions, 'employee.unval2',true) && $model_query->val2){
+        $model_query->val2 = 0;
+        $model_query->val2_user = $this->admin_id;
+        $model_query->val2_at = $t_stamp;
+      }
+
 
       // $model_query->val = 0;
       // if(!$model_query->val){
@@ -820,6 +911,9 @@ class EmployeeController extends Controller
         "val1_user"=>$model_query->val1_user,
         "val1_at"=>$model_query->val1_at,
         "val1_by"=>$model_query->val1_user ? new IsUserResource(IsUser::find($model_query->val1_user)) : null,
+        "val2_user"=>$model_query->val2_user,
+        "val2_at"=>$model_query->val2_at,
+        "val2_by"=>$model_query->val2_user ? new IsUserResource(IsUser::find($model_query->val2_user)) : null,
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();

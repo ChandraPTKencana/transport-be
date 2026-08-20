@@ -17,7 +17,18 @@ class SalaryPaidDtlResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
+            // 'salary_paid_id'     => $this->salary_paid_id,
             'employee_id'           => $this->employee_id,
+            'employee_name'         => $this->employee_name,
+            'employee_role'         => $this->employee_role,
+            'employee_ktp_no'       => $this->employee_ktp_no,
+            'employee_rek_no'       => $this->employee_rek_no,
+            'employee_rek_name'     => $this->employee_rek_name,
+            'employee_bank_code'    => $this->employee_bank_code,
+            'payment_total'         => $this->payment_total,
+            'payment_status'        => $this->payment_status,
+            'payment_failed_reason' => $this->payment_failed_reason,
+
             'employee'              => new EmployeeResource($this->whenLoaded('employee')),
             // 'standby_nominal'       => $this->standby_nominal,
             'sb_gaji'               => $this->sb_gaji,

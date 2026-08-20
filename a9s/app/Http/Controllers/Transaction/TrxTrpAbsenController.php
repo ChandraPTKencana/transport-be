@@ -622,11 +622,11 @@ class TrxTrpAbsenController extends Controller
       ], 200);
     } catch (\Exception $e) {
       DB::rollback();
-      return response()->json([
-        "getCode" => $e->getCode(),
-        "line" => $e->getLine(),
-        "message" => $e->getMessage(),
-      ], 400);
+      // return response()->json([
+      //   "getCode" => $e->getCode(),
+      //   "line" => $e->getLine(),
+      //   "message" => $e->getMessage(),
+      // ], 400);
       if ($e->getCode() == 1) {
         return response()->json([
           "message" => $e->getMessage(),

@@ -47,3 +47,7 @@ aplikasi logistik => upload gambar di temporary dl
 
     copy .env 
     ganti bank account code pada payment_method
+
+
+
+    KICK LOGISTIC_MANAGER DAN LOGISTIC SPV DARI salary_paid.val2
