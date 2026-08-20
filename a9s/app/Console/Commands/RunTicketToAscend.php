@@ -54,7 +54,7 @@ class RunTicketToAscend extends Command
         $connectionDB = DB::connection('sqlsrv');
       
         TrxTrp::where('req_deleted',0)->where('deleted',0)
-        ->whereIn('jenis',['CPO','PK'])->where('sync',0)->where('tanggal','>=','2026-08-01')
+        ->whereIn('jenis',['CPO','PK'])->where('sync',0)->where('tanggal','>=','2026-05-01')
         ->whereNotNull('ticket_a_no')
         ->where('ticket_b_bruto',">",0)
         ->chunkById(10, function ($stds) use($connectionDB) {
