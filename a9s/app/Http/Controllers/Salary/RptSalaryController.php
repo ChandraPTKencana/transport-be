@@ -450,6 +450,8 @@ class RptSalaryController extends Controller
       }
 
       if(MyAdmin::checkScope($this->permissions, 'rpt_salary.val2',true) && !$model_query->val2){
+        if($model_query->val1==0)
+        throw new \Exception("Data Perlu Divalidasi oleh Logistik terlebih dahulu",1);
         $run_val++;
         $model_query->val2 = 1;
         $model_query->val2_user = $this->admin_id;
