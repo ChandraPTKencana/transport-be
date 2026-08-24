@@ -347,9 +347,8 @@ class EmployeeController extends Controller
       $model_query->address       = MyLib::emptyStrToNull($request->address);
       $model_query->status        = MyLib::emptyStrToNull($request->status);
 
-      $model_query->bpjs_kesehatan   = $request->bpjs_kesehatan;
-      $model_query->bpjs_jamsos      = $request->bpjs_jamsos;
-
+      // $model_query->bpjs_kesehatan   = $request->bpjs_kesehatan;
+      // $model_query->bpjs_jamsos      = $request->bpjs_jamsos;
 
       $model_query->religion      = $request->religion;
       
