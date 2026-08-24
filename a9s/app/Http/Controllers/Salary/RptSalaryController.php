@@ -2450,8 +2450,8 @@ class RptSalaryController extends Controller
       ->where("id",$request->id)->lockForUpdate()->first();
 
       $datediff = MyLib::dateDiff($model_query->updated_at,$t_stamp);
-      if($datediff['minutes'] < 20){
-        throw new \Exception("Tunggu ".(20 - $datediff['minutes'])." menit lagi untuk set ke READY",1);
+      if($datediff['minutes'] < 10){
+        throw new \Exception("Tunggu ".(10 - $datediff['minutes'])." menit lagi untuk set ke READY",1);
       }
 
       if($model_query->payment_status!=='OPEN'){
