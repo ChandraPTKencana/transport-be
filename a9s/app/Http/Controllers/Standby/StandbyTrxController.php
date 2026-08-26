@@ -597,7 +597,7 @@ class StandbyTrxController extends Controller
       DB::statement("ALTER TABLE standby_trx AUTO_INCREMENT = $rollback_id");
 
 
-      if(isset($doc_locs)& count($doc_locs)>0){
+      if(isset($doc_locs) && count($doc_locs)>0){
         foreach ($doc_locs as $key => $value) {
           if ($value && Storage::disk('public')->exists($value)) {
             Storage::disk('public')->delete($value);
