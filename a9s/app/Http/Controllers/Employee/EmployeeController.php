@@ -784,19 +784,19 @@ class EmployeeController extends Controller
         throw new \Exception("Data Sudah Tervalidasi",1);
       }
       
-      if(!$model_query->val){
+      if(MyAdmin::checkScope($this->permissions, 'employee.val',true) && !$model_query->val){
         $model_query->val = 1;
         $model_query->val_user = $this->admin_id;
         $model_query->val_at = $t_stamp;
       }
 
-      if(!$model_query->val1){
+      if(MyAdmin::checkScope($this->permissions, 'employee.val1',true) && !$model_query->val1){
         $model_query->val1 = 1;
         $model_query->val1_user = $this->admin_id;
         $model_query->val1_at = $t_stamp;
       }
 
-      if(!$model_query->val2){
+      if(MyAdmin::checkScope($this->permissions, 'employee.val2',true) && !$model_query->val2){
         $model_query->val2 = 1;
         $model_query->val2_user = $this->admin_id;
         $model_query->val2_at = $t_stamp;
