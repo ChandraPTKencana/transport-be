@@ -1661,8 +1661,8 @@ class RptSalaryController extends Controller
         $v["employee_rek_no"]         = $empx->rek_no;
         $v["employee_rek_name"]       = $empx->rek_name;
         $v["employee_bank_name"]      = $empx->bank ? $empx->bank->code : "";
-        $v["employee_bpjs_kesehatan"] = $empx->bpjs_kesehatan;
-        $v["employee_bpjs_jamsos"]    = $empx->bpjs_jamsos;
+        $v["employee_bpjs_kesehatan"] = $empx->workers_from!= env('APP_NAME') ? 0 : $empx->bpjs_kesehatan;
+        $v["employee_bpjs_jamsos"]    = $empx->workers_from!= env('APP_NAME') ? 0 : $empx->bpjs_jamsos;
       }
 
       $v['kerajinan'] = 0;
