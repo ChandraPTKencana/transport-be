@@ -67,6 +67,7 @@ class RunConvertAbsen extends Command
         
         TrxAbsenForLoop::whereNull('gambar_loc')
         ->whereNotNull('gambar')
+        ->where('gambar', '!=', '')
         ->chunkById(10, function ($trxabsens) {
 
         foreach ($trxabsens as $trxabsen) {
