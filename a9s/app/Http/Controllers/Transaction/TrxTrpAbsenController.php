@@ -886,9 +886,9 @@ class TrxTrpAbsenController extends Controller
     $disk = Storage::disk('public'); 
     $absolutePath = $disk->path($trx->gambar_loc);
 
-    return response()->download(
+    DB::disconnect();
+    return response()->file(
         $absolutePath,
-        null,
         [
             'Cache-Control' => 'no-store, private',
             'Content-Type'  => "image/png",
