@@ -1807,8 +1807,6 @@ class StandbyTrxController extends Controller
 
     $trx = StandbyTrxDtl::findOrFail($id);
 
-    session()->save(); 
-
     $locField  = "attachment_{$n}_loc";
     $typeField = "attachment_{$n}_type";
 
@@ -1818,8 +1816,10 @@ class StandbyTrxController extends Controller
 
     /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
     $disk = Storage::disk('public');  
-    return $disk->response(
-        $trx->$locField,
+    $absolutePath = $disk->path($trx->$locField);
+
+    return response()->download(
+        $absolutePath, 
         null,
         [
             'Cache-Control' => 'no-store, private',

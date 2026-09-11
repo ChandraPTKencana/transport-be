@@ -878,16 +878,16 @@ class TrxTrpAbsenController extends Controller
     MyAdmin::checkScope($this->permissions, 'trp_trx.absen.view');
     $trx = TrxAbsen::where("trx_trp_id",$id)->where("id",$n)->first();
 
-    session()->save(); 
-
     abort_unless($trx->gambar_loc, 404,$trx->gambar_loc);
 
     abort_unless(Storage::disk('public')->exists($trx->gambar_loc), 404,"not exists");
 
     /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-    $disk = Storage::disk('public');  
-    return $disk->response(
-        $trx->gambar_loc,
+    $disk = Storage::disk('public'); 
+    $absolutePath = $disk->path($trx->gambar_loc);
+
+    return response()->download(
+        $absolutePath,
         null,
         [
             'Cache-Control' => 'no-store, private',

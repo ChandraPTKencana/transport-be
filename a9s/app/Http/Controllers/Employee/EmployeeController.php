@@ -1077,8 +1077,6 @@ class EmployeeController extends Controller
 
     $trx = Employee::exclude(['attachment_1','attachment_2'])->findOrFail($id);
     
-    session()->save(); 
-    
     if($n=='face'){
       $locField  = "face_loc_target";
       $typeField = "face_loc_type";
@@ -1093,8 +1091,10 @@ class EmployeeController extends Controller
 
     /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
     $disk = Storage::disk('public');  
-    return $disk->response(
-        $trx->$locField,
+    $absolutePath = $disk->path($trx->$locField);
+
+    return response()->download(
+        $absolutePath, 
         null,
         [
             'Cache-Control' => 'no-store, private',

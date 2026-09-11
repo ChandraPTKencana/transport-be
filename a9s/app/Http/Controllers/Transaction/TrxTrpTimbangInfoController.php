@@ -580,8 +580,6 @@ class TrxTrpTimbangInfoController extends Controller
 
     $trx = TripInfo::where("trx_trp_id",$id)->where("id",$n)->first();
     
-    session()->save(); 
-    
     $locField = 'img_loc';
    
     abort_unless($trx->$locField, 404,$trx->$locField);
@@ -590,8 +588,10 @@ class TrxTrpTimbangInfoController extends Controller
 
     /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
     $disk = Storage::disk('public');  
-    return $disk->response(
-        $trx->$locField,
+    $absolutePath = $disk->path($trx->$locField);
+
+    return response()->download(
+        $absolutePath, 
         null,
         [
             'Cache-Control' => 'no-store, private',
