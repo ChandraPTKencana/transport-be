@@ -1076,7 +1076,9 @@ class EmployeeController extends Controller
     MyAdmin::checkScope($this->permissions, 'employee.view');
 
     $trx = Employee::exclude(['attachment_1','attachment_2'])->findOrFail($id);
-
+    
+    session()->save(); 
+    
     if($n=='face'){
       $locField  = "face_loc_target";
       $typeField = "face_loc_type";

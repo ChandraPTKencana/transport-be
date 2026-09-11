@@ -1807,6 +1807,8 @@ class StandbyTrxController extends Controller
 
     $trx = StandbyTrxDtl::findOrFail($id);
 
+    session()->save(); 
+
     $locField  = "attachment_{$n}_loc";
     $typeField = "attachment_{$n}_type";
 

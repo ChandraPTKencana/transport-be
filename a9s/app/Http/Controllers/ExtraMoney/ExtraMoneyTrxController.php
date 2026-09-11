@@ -2185,10 +2185,10 @@ class ExtraMoneyTrxController extends Controller
   {
     MyAdmin::checkScope($this->permissions, 'extra_money_trx.view');
 
-
-
     $trx = ExtraMoneyTrx::findOrFail($id);
 
+    session()->save(); 
+    
     $locField  = "attachment_{$n}_loc";
     $typeField = "attachment_{$n}_type";
 

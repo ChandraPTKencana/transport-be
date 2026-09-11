@@ -745,6 +745,8 @@ class PotonganMstController extends Controller
 
     $trx = PotonganMst::findOrFail($id);
 
+    session()->save(); 
+
     $locField  = "attachment_{$n}_loc";
     $typeField = "attachment_{$n}_type";
 

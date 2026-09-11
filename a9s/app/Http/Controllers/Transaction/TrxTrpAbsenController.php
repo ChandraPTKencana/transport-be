@@ -876,8 +876,9 @@ class TrxTrpAbsenController extends Controller
   public function getAttachment($id,$n)
   {
     MyAdmin::checkScope($this->permissions, 'trp_trx.absen.view');
-
     $trx = TrxAbsen::where("trx_trp_id",$id)->where("id",$n)->first();
+
+    session()->save(); 
 
     abort_unless($trx->gambar_loc, 404,$trx->gambar_loc);
 

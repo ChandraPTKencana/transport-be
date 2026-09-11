@@ -579,6 +579,9 @@ class TrxTrpTimbangInfoController extends Controller
     MyAdmin::checkScope($this->permissions, 'trp_trx.timbang_info.view');
 
     $trx = TripInfo::where("trx_trp_id",$id)->where("id",$n)->first();
+    
+    session()->save(); 
+    
     $locField = 'img_loc';
    
     abort_unless($trx->$locField, 404,$trx->$locField);
