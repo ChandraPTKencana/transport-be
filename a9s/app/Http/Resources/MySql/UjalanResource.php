@@ -22,6 +22,7 @@ class UjalanResource extends JsonResource
             'xto'               => $this->xto,
             'km_range'          => $this->km_range,
             'tipe'              => $this->tipe,
+            'group_name'        => $this->group_name,
             'asst_opt'          => $this->asst_opt,
             'jenis'             => $this->jenis,
             'harga'             => $this->harga,

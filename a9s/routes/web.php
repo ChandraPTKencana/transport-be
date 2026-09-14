@@ -60,6 +60,9 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::post('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'store']);
     Route::put('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'update']);
     Route::delete('/ujalan', [\App\Http\Controllers\Ujalan\UjalanController::class, 'delete']);
+    Route::delete('/ujalan/group_remove', [\App\Http\Controllers\Ujalan\UjalanController::class, 'deleteByGroup']);
+    Route::put('/ujalan/unremove', [\App\Http\Controllers\Ujalan\UjalanController::class, 'undelete']);
+    Route::put('/ujalan/group_unremove', [\App\Http\Controllers\Ujalan\UjalanController::class, 'undeleteByGroup']);
     Route::put('/ujalan_validasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'validasi']);
     Route::put('/ujalan_unvalidasi', [\App\Http\Controllers\Ujalan\UjalanController::class, 'unvalidasi']);
     Route::get('/ujalan/download_excel', [\App\Http\Controllers\Ujalan\UjalanController::class, 'downloadExcel']);

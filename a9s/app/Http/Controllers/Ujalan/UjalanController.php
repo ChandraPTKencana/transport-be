@@ -114,7 +114,7 @@ class UjalanController extends Controller
         $like_lists[$side[0]] = $side[1];
       }
 
-      $list_to_like = ["id","xto","tipe","jenis","harga","km_range","bonus_trip_supir","bonus_trip_kernet"];
+      $list_to_like = ["id","xto","tipe","group_name","jenis","harga","km_range","bonus_trip_supir","bonus_trip_kernet"];
 
       // $list_to_like_user = [
       //   ["val_name","val_user"],
@@ -472,6 +472,7 @@ class UjalanController extends Controller
 
       $model_query                    = new Ujalan();      
       $model_query->xto               = $request->xto;
+      $model_query->group_name        = MyLib::emptyStrToNull($request->group_name);
       // $model_query->km_range          = $request->km_range ?? 0;
       // $model_query->bonus_trip_supir  = $request->bonus_trip_supir ?? 0;
       // $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
@@ -698,6 +699,7 @@ class UjalanController extends Controller
         // $model_query->bonus_trip_kernet = $request->bonus_trip_kernet ?? 0;
         // $model_query->batas_persen_susut = MyLib::emptyStrToNull($request->batas_persen_susut);
         $model_query->tipe              = $request->tipe;
+        $model_query->group_name        = MyLib::emptyStrToNull($request->group_name);
         $model_query->jenis             = $request->jenis;
         $model_query->harga             = 0;
         $model_query->note_for_remarks  = MyLib::emptyStrToNull($request->note_for_remarks);
@@ -1316,6 +1318,213 @@ class UjalanController extends Controller
         "deleted_by"=>$model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
         "deleted_at"=>$model_query->deleted_at,
         "deleted_reason"=>$model_query->deleted_reason,
+      ], 200);
+    } catch (\Exception  $e) {
+      DB::rollback();
+      if ($e->getCode() == "23000")
+        return response()->json([
+          "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
+        ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+
+      return response()->json([
+        "message" => "Proses hapus data gagal",
+      ], 400);
+      //throw $th;
+    }
+  }
+
+  public function undelete(Request $request)
+  {
+    MyAdmin::checkScope($this->permissions, 'ujalan.unremove');
+
+    DB::beginTransaction();
+
+    try {
+      // $deleted_reason = $request->deleted_reason;
+      // if(!$deleted_reason)
+      // throw new \Exception("Sertakan Alasan Penghapusan",1);
+    
+      $model_query = Ujalan::where("id",$request->id)->lockForUpdate()->first();
+    
+      $SYSOLD                     = clone($model_query);
+      // if($model_query->requested_by != $this->admin_id){
+      //   throw new \Exception("Hanya yang membuat transaksi yang boleh melakukan penghapusan data",1);
+      // }
+      
+      // $model_querys = UjalanDetail::where("id_uj",$model_query->id)->lockForUpdate()->get();
+
+      if (!$model_query) {
+        throw new \Exception("Data tidak terdaftar", 1);
+      }
+
+      // if($model_query->val==1 || $model_query->deleted==1) 
+      // throw new \Exception("Data Sudah Divalidasi Dan Tidak Dapat Di Hapus",1);
+
+
+      // if($model_query->ref_id != null){
+      //   throw new \Exception("Hapus data ditolak. Data berasal dari transfer",1);
+      // }
+
+      // if($model_query->confirmed_by != null){
+      //   throw new \Exception("Hapus data ditolak. Data sudah dikonfirmasi",1);
+      // }
+      
+      $model_query->deleted = 0;
+      $model_query->deleted_user = $this->admin_id;
+      $model_query->deleted_at = date("Y-m-d H:i:s");
+      $model_query->save();
+
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("ujalan_mst",$request->id,"undelete",$SYSNOTE);
+
+      // UjalanDetail::where("id_uj",$model_query->id)->delete();
+      // $model_query->delete();
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses Kembalikan data berhasil",
+        "deleted"=>$model_query->deleted,
+        "deleted_user"=>$model_query->deleted_user,
+        "deleted_by"=>$model_query->deleted_user ? new IsUserResource(IsUser::find($model_query->deleted_user)) : null,
+        "deleted_at"=>$model_query->deleted_at,
+      ], 200);
+    } catch (\Exception  $e) {
+      DB::rollback();
+      if ($e->getCode() == "23000")
+        return response()->json([
+          "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
+        ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+
+      return response()->json([
+        "message" => "Proses hapus data gagal",
+      ], 400);
+      //throw $th;
+    }
+  }
+
+  public function deleteByGroup(Request $request)
+  {
+    MyAdmin::checkScope($this->permissions, 'ujalan.remove');
+
+    DB::beginTransaction();
+
+    try {
+      $deleted_reason = $request->deleted_reason;
+      if(!$deleted_reason)
+      throw new \Exception("Sertakan Alasan Penghapusan",1);
+
+      $group_name = $request->deleted_group;
+      if(!$group_name)
+      throw new \Exception("Sertakan Nama Group Penghapusan",1);
+    
+      $model_query = Ujalan::where("group_name",$group_name)->lockForUpdate()->get();
+      if(count($model_query)==0){
+        throw new \Exception("Nama Group Tidak Ditemukan",1); 
+      }
+      $dt_del = [];
+
+      foreach ($model_query as $key => $mq) {
+        $SYSOLD                     = clone($mq);
+        if($mq->deleted==0){
+          $mq->deleted = 1;
+          $mq->deleted_user = $this->admin_id;
+          $mq->deleted_at = date("Y-m-d H:i:s");
+          $mq->deleted_reason = $deleted_reason;
+          $mq->save();
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+          MyLog::sys("ujalan_mst",$mq->id,"delete",$SYSNOTE);
+  
+          array_push($dt_del,[
+            "id"=>$mq->id,
+            "deleted"=>$mq->deleted,
+            "deleted_user"=>$mq->deleted_user,
+            "deleted_by"=>$mq->deleted_user ? new IsUserResource(IsUser::find($mq->deleted_user)) : null,
+            "deleted_at"=>$mq->deleted_at,
+            "deleted_reason"=>$mq->deleted_reason,  
+          ]);
+        }
+      }
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses Hapus data berhasil",
+        "deletes" => $dt_del
+      ], 200);
+    } catch (\Exception  $e) {
+      DB::rollback();
+      if ($e->getCode() == "23000")
+        return response()->json([
+          "message" => "Data tidak dapat dihapus, data terkait dengan data yang lain nya",
+        ], 400);
+
+      if ($e->getCode() == 1) {
+        return response()->json([
+          "message" => $e->getMessage(),
+        ], 400);
+      }
+
+      return response()->json([
+        "message" => "Proses hapus data gagal",
+      ], 400);
+      //throw $th;
+    }
+  }
+
+  public function undeleteByGroup(Request $request)
+  {
+    MyAdmin::checkScope($this->permissions, 'ujalan.unremove');
+
+    DB::beginTransaction();
+
+    try {
+
+      $group_name = $request->deleted_group;
+      if(!$group_name)
+      throw new \Exception("Sertakan Nama Group Penghapusan",1);
+    
+      $model_query = Ujalan::where("group_name",$group_name)->lockForUpdate()->get();
+      if(count($model_query)==0){
+        throw new \Exception("Nama Group Tidak Ditemukan",1); 
+      }
+      $dt_del = [];
+
+      foreach ($model_query as $key => $mq) {
+        $SYSOLD                     = clone($mq);
+
+        if($mq->deleted==1){
+          $mq->deleted = 0;
+          $mq->deleted_user = $this->admin_id;
+          $mq->deleted_at = date("Y-m-d H:i:s");
+          $mq->save();
+          $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+          MyLog::sys("ujalan_mst",$mq->id,"undelete",$SYSNOTE);
+  
+          array_push($dt_del,[
+            "id"=>$mq->id,
+            "deleted"=>$mq->deleted,
+            "deleted_user"=>$mq->deleted_user,
+            "deleted_by"=>$mq->deleted_user ? new IsUserResource(IsUser::find($mq->deleted_user)) : null,
+            "deleted_at"=>$mq->deleted_at,
+          ]);
+        }
+      }
+
+      DB::commit();
+      return response()->json([
+        "message" => "Proses Kembalikan data berhasil",
+        "deletes" => $dt_del
       ], 200);
     } catch (\Exception  $e) {
       DB::rollback();
