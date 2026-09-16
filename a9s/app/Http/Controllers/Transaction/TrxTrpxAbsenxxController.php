@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\File;
 
 use Barryvdh\DomPDF\Facade\PDF;
 use Maatwebsite\Excel\Facades\Excel;
@@ -32,14 +31,16 @@ use App\Http\Resources\MySql\IsUserResource;
 
 use App\Exports\MyReport;
 use App\Http\Resources\MySql\TrxAbsenResource;
+use App\Http\Resources\MySql\TrxTrpResource;
 use InvalidArgumentException;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\AutoEncoder;
-class TrxTrpAbsenController extends Controller
+class TrxTrpxAbsenxxController extends Controller
 {
   private $admin;
   private $admin_id;
   private $permissions;
+  private $syslog_db = 'trx_trp';
 
   public function __construct(Request $request)
   {
@@ -115,6 +116,18 @@ class TrxTrpAbsenController extends Controller
               $q->orWhere($v, "like", $like_lists[$v]);
             }
           }
+          
+          $list_to_like_uj = [
+            ["uj_asst_opt","asst_opt"],
+          ];
+          foreach ($list_to_like_uj as $key => $v) {
+            if (isset($like_lists[$v[0]])) {
+              $q->orWhereIn('id_uj', function($q2)use($like_lists,$v) {
+                $q2->from('is_uj')
+                ->select('id')->where($v[1],'like',$like_lists[$v[0]]);          
+              });
+            }
+          }
     
           // if (isset($like_lists["requested_name"])) {
           //   $q->orWhereIn("requested_by", function($q2)use($like_lists) {
@@ -155,10 +168,14 @@ class TrxTrpAbsenController extends Controller
       if(count($fm_sorts)>0){
         usort($fm_sorts, function($a, $b) {return (int)$a['priority'] - (int)$b['priority'];});
         foreach ($fm_sorts as $key => $value) {
-          $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
-          if (count($first_row) > 0) {
-            $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
-            $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+          if(array_search($value['key'],['uj_asst_opt'])!==false){
+            $model_query = MyLib::queryOrderP1($model_query,"uj","id_uj",$value['key'],$filter_model[$value['key']]["sort_type"],"is_uj");
+          } else{
+            $model_query = $model_query->orderBy($value['key'], $filter_model[$value['key']]["sort_type"]);
+            if (count($first_row) > 0) {
+              $sort_symbol = $filter_model[$value['key']]["sort_type"] == "desc" ? "<=" : ">=";
+              $model_query = $model_query->where($value['key'],$sort_symbol,$first_row[$value['key']]);
+            }
           }
         }
       }
@@ -191,6 +208,8 @@ class TrxTrpAbsenController extends Controller
                 }
               }
             }
+          }else if(array_search($key,['uj_asst_opt'])!==false){
+            MyLib::queryCheckP1Dif("uj",$value,$key,$q,'is_uj',"id_uj");
           }else{
             MyLib::queryCheck($value,$key,$q);
           }
@@ -239,7 +258,7 @@ class TrxTrpAbsenController extends Controller
       $model_query = $model_query->where("deleted",0)->where("req_deleted",1);
     }
 
-    $model_query = $model_query->with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
+    $model_query = $model_query->with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','uj','trx_absens'=>function($q) {
       $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual');
     }])->get();
 
@@ -248,134 +267,72 @@ class TrxTrpAbsenController extends Controller
     ], 200);
   }
 
+  public function showBAbsen(TrxTrpAbsenRequest $request)
+  {
+    MyAdmin::checkMultiScope($this->permissions, ['trp_trx.view','trp_trx.ticket.view']);
+
+    $model_query = TrxTrp::with(['val_by','val1_by','val2_by','val3_by','val4_by','val5_by','val6_by','val_ticket_by','deleted_by','req_deleted_by','payment_method','uj','trx_absens'=>function ($q){
+      $q->where("status","B");
+    },'potongan'])->find($request->id);
+    return response()->json([
+      "data" => new TrxTrpResource($model_query),
+    ], 200);
+  }
+
   public function show(TrxTrpAbsenRequest $request)
   {
     MyAdmin::checkMultiScope($this->permissions, ['trp_trx.absen.view']);
 
-    $model_query = TrxTrp::with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','trx_absens'=>function($q) {
-      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar_loc");
+    $model_query = TrxTrp::with(['ritase_val_by','ritase_val1_by','ritase_val2_by','deleted_by','req_deleted_by','uj','trx_absens'=>function($q) {
+      $q->select('id','trx_trp_id','created_at','updated_at','status','is_manual',"gambar");
     }])->find($request->id);
 
 
-    // $data = new TrxTrpAbsenResource($model_query);
+    $data = new TrxTrpAbsenResource($model_query);
+    $data = collect($data);
 
-    $data = [
-      'id'                => $model_query->id,
-      'tanggal'           => $model_query->tanggal,
+    $data["img_leave_ts"]      = $model_query->ritase_leave_at;
+    $data["img_arrive_ts"]     = $model_query->ritase_arrive_at;
+    $data["img_return_ts"]     = $model_query->ritase_return_at;
+    $data["img_till_ts"]       = $model_query->ritase_till_at;
 
-      'id_uj'             => $model_query->id_uj,
-      'jenis'             => $model_query->jenis,
-      'xto'               => $model_query->xto,
-      'tipe'              => $model_query->tipe,
-
-      'supir_id'          => $model_query->supir_id ?? "",
-      'supir'             => $model_query->supir,
-      // 'supir_rek_no'      => $model_query->supir_rek_no ?? "",
-      // 'supir_rek_name'    => $model_query->supir_rek_name ?? "",
-      'kernet_id'         => $model_query->kernet_id ?? "",
-      'kernet'            => $model_query->kernet ?? "",
-      // 'kernet_rek_no'     => $model_query->kernet_rek_no ?? "",
-      // 'kernet_rek_name'   => $model_query->kernet_rek_name ?? "",
-      'no_pol'            => $model_query->no_pol,
-      
-      'created_user'      => $model_query->created_user,
-      'updated_user'      => $model_query->updated_user,
-      'created_at'        => $model_query->created_at,
-      'updated_at'        => $model_query->updated_at,
-
-      'deleted'           => $model_query->deleted,
-      'deleted_user'      => $model_query->deleted_user ?? "",
-      'deleted_at'        => $model_query->deleted_at ?? "",
-      'deleted_by'        => $model_query->deleted_by ? new IsUserResource($model_query->deleted_by) : "",
-      'deleted_reason'    => $model_query->deleted_reason ?? "",
-
-      'req_deleted'       => $model_query->req_deleted,
-      'req_deleted_user'  => $model_query->req_deleted_user ?? "",
-      'req_deleted_at'    => $model_query->req_deleted_at ?? "",
-      'req_deleted_by'    => $model_query->req_deleted_by ? new IsUserResource($model_query->req_deleted_by) : "",
-      'req_deleted_reason'=> $model_query->req_deleted_reason ?? "",
-
-      'transition_target' => $model_query->transition_target ?? "",
-      'transition_type'   => $model_query->transition_type ?? "",
-      // 'trx_absens'        => $model_query->trx_absens,
-
-      'ritase_leave_at'   => $model_query->ritase_leave_at ?? "",
-      'ritase_arrive_at'  => $model_query->ritase_arrive_at ?? "",
-      'ritase_return_at'  => $model_query->ritase_return_at ?? "",
-      'ritase_till_at'    => $model_query->ritase_till_at ?? "",
-      
-      'ritase_note'       => $model_query->ritase_note ?? "",
-      
-      'ritase_val'        => $model_query->ritase_val,
-      'ritase_val_user'   => $model_query->ritase_val_user ?? "",
-      'ritase_val_by'     => $model_query->ritase_val_by ? new IsUserResource($model_query->ritase_val_by) : "",
-      'ritase_val_at'     => $model_query->ritase_val_at ?? "",
-
-      'ritase_val1'       => $model_query->ritase_val1,
-      'ritase_val1_user'  => $model_query->ritase_val1_user ?? "",
-      'ritase_val1_by'    => $model_query->ritase_val1_by ? new IsUserResource($model_query->ritase_val1_by) : "",
-      'ritase_val1_at'    => $model_query->ritase_val1_at ?? "",
-
-      'ritase_val2'       => $model_query->ritase_val2,
-      'ritase_val2_user'  => $model_query->ritase_val2_user ?? "",
-      'ritase_val2_by'    => $model_query->ritase_val2_by ? new IsUserResource($model_query->ritase_val2_by) : "",
-      'ritase_val2_at'    => $model_query->ritase_val2_at ?? "",
-
-      "img_leave_ts"      => $model_query->ritase_leave_at,
-      "img_arrive_ts"     => $model_query->ritase_arrive_at,
-      "img_return_ts"     => $model_query->ritase_return_at,
-      "img_till_ts"       => $model_query->ritase_till_at,
-    ];
-
-    $data['img_leaves']=[];
+    $img_leaves = [];
+    $data['img_leave']="";
     foreach ($model_query->trx_absens as $k => $v) {
-      if($v->gambar_loc){
-        // $img = "data:image/png;base64,";
-        $img = File::exists(files_path($v->gambar_loc)) ? "data:image/png;base64,".base64_encode(File::get(files_path($v->gambar_loc))) :"";
-        if($v['status']=="B") {
-          $data["img_leave"]   = $img;
-          array_push($data['img_leaves'],[
-            "id"=>$v["id"],
-            "gambar"=>$img,
-          ]);
-        }
-  
-        if($v['status']=="T") 
-        $data["img_arrive"]   = $img;
-  
-        if($v['status']=="K") 
-        $data["img_return"]   = $img;
-  
-        if($v['status']=="S") 
-        $data["img_till"]   = $img;
+      // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
+      $img = "data:image/png;base64,";
+      if(mb_detect_encoding($v->gambar)===false){
+        $img.=base64_encode($v->gambar);
       }else{
-
-        // mb_convert_encoding($img, 'UTF-8', 'UTF-8')
-        $img = "data:image/png;base64,";
-        if(mb_detect_encoding($v->gambar)===false){
-          $img.=base64_encode($v->gambar);
-        }else{
-          $img.=$v->gambar;        
-        }
-        
-        if($v['status']=="B") {
-          $data["img_leave"]   = $img;
-          array_push($data['img_leaves'],[
-            "id"=>$v["id"],
-            "gambar"=>$img,
-          ]);
-        }
-  
-        if($v['status']=="T") 
-        $data["img_arrive"]   = $img;
-  
-        if($v['status']=="K") 
-        $data["img_return"]   = $img;
-  
-        if($v['status']=="S") 
-        $data["img_till"]   = $img;
+        $img.=$v->gambar;        
       }
+      
+      if($v['status']=="B") {
+        $data["img_leave"]   = $img;
+        array_push($img_leaves,[
+          "id"=>$v["id"],
+          "gambar"=>$img,
+          "is_manual"=>$v["is_manual"],
+        ]);
+      }
+
+      if($v['status']=="T") {
+        $data["img_arrive"]   = $img;
+        $data["img_arrive_is_manual"]   = $v["is_manual"];
+      }
+
+      if($v['status']=="K") {
+        $data["img_return"]   = $img;
+        $data["img_return_is_manual"]   = $v["is_manual"];
+      }
+
+      if($v['status']=="S") {
+        $data["img_till"]   = $img;
+        $data["img_till_is_manual"]   = $v["is_manual"];
+      }
+
     }
+    $data['img_leaves']=$img_leaves;
 
     // $data['trx_absens']= array_filter($data['trx_absens']->toArray(),function($x){
     //   $x['status']=="B";
@@ -414,7 +371,7 @@ class TrxTrpAbsenController extends Controller
       // $blob_img_leave = base64_encode(file_get_contents($path));
       $image = Image::read($path)->scale(height: $this->height);
       $compressedImageBinary = (string)$image->encode(new AutoEncoder(quality: $this->quality));
-      // $blob_img_leave = base64_encode($compressedImageBinary);      
+      $blob_img_leave = base64_encode($compressedImageBinary);      
     }
 
     if (!$request->hasFile('img_leave_file') && $img_leave == null) {
@@ -650,18 +607,35 @@ class TrxTrpAbsenController extends Controller
       if(!$model_query->ritase_note && (!$model_query->ritase_leave_at || !$model_query->ritase_arrive_at || !$model_query->ritase_return_at || !$model_query->ritase_till_at) )
       throw new \Exception("Gambar Belum Lengkap dan tidak disertai Catatan",1);
 
+      $permit_continue_trx = TrxTrpController::permit_continue_trx($model_query,true);
+      // throw new \Exception("ID ".$permit_continue_trx."Absensinya Masih Belum Lengkap",1);
+      
+      if(count($permit_continue_trx) > 1){
+        throw new \Exception("ID ".implode(",",$permit_continue_trx)." Absensinya Masih Belum Lengkap",1);
+      }
+
+      // cari trx absen yang belum lengkap diisi apabila ada lebih dari 1 maka tidak bisa validasi
+      $SYSOLD                     = clone($model_query);
+
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val',true) && !$model_query->ritase_val){
         $model_query->ritase_val = 1;
         $model_query->ritase_val_user = $this->admin_id;
         $model_query->ritase_val_at = $t_stamp;
       }
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val1',true) && !$model_query->ritase_val1){
+
+        if($model_query->ritase_val==0) 
+        throw new \Exception("App1 Belum Memvalidasi",1);
+
         $model_query->ritase_val1 = 1;
         $model_query->ritase_val1_user = $this->admin_id;
         $model_query->ritase_val1_at = $t_stamp;
       }
 
       if(MyAdmin::checkScope($this->permissions, 'trp_trx.absen.val2',true) && !$model_query->ritase_val2){
+        if($model_query->ritase_val==0) 
+        throw new \Exception("App1 Belum Memvalidasi",1);
+
         $model_query->ritase_val2 = 1;
         $model_query->ritase_val2_user = $this->admin_id;
         $model_query->ritase_val2_at = $t_stamp;
@@ -669,7 +643,8 @@ class TrxTrpAbsenController extends Controller
       
       $model_query->save();
 
-      MyLog::sys("trx_trp",$request->id,"approve_absen");
+      $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query); 
+      MyLog::sys("trx_trp",$request->id,"approve_absen",$SYSNOTE);
 
       DB::commit();
       return response()->json([
@@ -713,44 +688,53 @@ class TrxTrpAbsenController extends Controller
     $t_stamp = date("Y-m-d H:i:s");
     DB::beginTransaction();
     try {
+      $SYSNOTES = [];
       $model_query = TrxTrp::whereIn("id",$ids)->lockForUpdate()->get();
       $valList = [];
       
       foreach ($model_query as $key => $v) {
-          $change=0;
-          if($v->ritase_val != 0){
-            $v->ritase_val        = 0;
-            $change++;
-          }
-          if($v->ritase_val1 != 0){
-            $v->ritase_val1       = 0;
-            $change++;
-          }
-          if($v->ritase_val2 != 0){
-            $v->ritase_val2       = 0;
-            $change++;
-          }
-          if($change > 0){
-            $v->updated_at        = $t_stamp;
-            $v->updated_user      = $this->admin_id;
-    
-            $v->save();
+        $SYSOLD                     = clone($v);
+        if($v->salary_paid_id != null){
+          throw new \Exception("Data #".$v->id." Tidak Bisa Di unvalidasi lagi karna sudah memiliki Salary Paid ID",1);
+        }
+        $change=0;
+        if($v->ritase_val != 0){
+          $v->ritase_val        = 0;
+          $change++;
+        }
+        if($v->ritase_val1 != 0){
+          $v->ritase_val1       = 0;
+          $change++;
+        }
+        if($v->ritase_val2 != 0){
+          $v->ritase_val2       = 0;
+          $change++;
+        }
+        if($change > 0){
+          $v->updated_at        = $t_stamp;
+          $v->updated_user      = $this->admin_id;
+  
+          $v->save();
 
-            array_push($valList,[
-              "id"          => $v->id,
-              "ritase_val"  => $v->ritase_val,
-              "ritase_val1" => $v->ritase_val1,
-              "ritase_val2" => $v->ritase_val2,
-              "updated_at"  => $v->updated_at,
-            ]);
-          }
+          array_push($valList,[
+            "id"          => $v->id,
+            "ritase_val"  => $v->ritase_val,
+            "ritase_val1" => $v->ritase_val1,
+            "ritase_val2" => $v->ritase_val2,
+            "updated_at"  => $v->updated_at,
+          ]);
+        }
+
+        $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);         
+        array_push($SYSNOTES,$SYSNOTE);
       }
+      MyLog::sys($this->syslog_db,null,"clearValVal1",implode(",",$SYSNOTES));
 
       $nids = array_map(function($x) {
         return $x['id'];        
       },$valList);
       
-      MyLog::sys("trx_trp",null,"unval_absen",implode(",",$nids));
+      // MyLog::sys("trx_trp",null,"unval_absen",implode(",",$nids));
 
       DB::commit();
       if(count($nids) == 0 ){
@@ -781,5 +765,46 @@ class TrxTrpAbsenController extends Controller
       ], 400);
     }
 
+  }
+
+
+  public function downloadExcel(Request $request){
+    MyAdmin::checkScope($this->permissions, 'trp_trx.absen.download_file');
+
+    set_time_limit(0);
+    $callGet = $this->index($request, true);
+    if ($callGet->getStatusCode() != 200) return $callGet;
+    $ori = json_decode(json_encode($callGet), true)["original"];
+    
+
+    $newDetails = [];
+
+    foreach ($ori["data"] as $key => $value) {
+      $value['tanggal']=date("d-m-Y",strtotime($value["tanggal"]));
+      array_push($newDetails,$value);
+    }
+
+    $filter_model = json_decode($request->filter_model,true);
+    $tanggal = $filter_model['tanggal'];    
+
+
+    $date_from=date("d-m-Y",strtotime($tanggal['value_1']));
+    $date_to=date("d-m-Y",strtotime($tanggal['value_2']));
+
+    $date = new \DateTime();
+    $filename=$date->format("YmdHis").'-trx_trp'."[".$date_from."*".$date_to."]";
+
+    $mime=MyLib::mime("xlsx");
+    // $bs64=base64_encode(Excel::raw(new TangkiBBMReport($data), $mime["exportType"]));
+    $bs64=base64_encode(Excel::raw(new MyReport(["data"=>$newDetails],'excel.trx_trp_absen_raw'), $mime["exportType"]));
+
+
+    $result = [
+      "contentType" => $mime["contentType"],
+      "data" => $bs64,
+      "dataBase64" => $mime["dataBase64"] . $bs64,
+      "filename" => $filename . "." . $mime["ext"],
+    ];
+    return $result;
   }
 }

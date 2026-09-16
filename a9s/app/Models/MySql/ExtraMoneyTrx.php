@@ -74,4 +74,14 @@ class ExtraMoneyTrx extends Model
         return $this->belongsTo(PaymentMethod::class, "payment_method_id", 'id');
     }
 
+    public function prev_trx_trp()
+    {
+        return $this->belongsTo(TrxTrp::class, "prev_trx_trp_id", 'id');
+    }
+
+    public function fin_payment_req_dtl_2()
+    {
+        return $this->hasMany(FinPaymentReqDtl2::class, 'extra_money_trx_id');
+    }
+
 }

@@ -80,4 +80,38 @@ class PSTripSupirKernet
     }
     return $result;
   }
+
+  public static function fn_supir_kernet_for_transfer_2($trx_trp){
+    $result = [
+      "supir_money"=>0,
+      "kernet_money"=>0,
+
+      "supir_potongan_trx_money"=>0,
+      "kernet_potongan_trx_money"=>0,
+      "supir_potongan_trx_ids"=>[],
+      "kernet_potongan_trx_ids"=>[],
+    ];
+
+    foreach ($trx_trp->uj->details2 as $k1 => $v1) {
+      if($v1->xfor=='Kernet'){
+        $result['kernet_money']+= $v1->qty * $v1->amount;
+      }else{
+        $result['supir_money']+= $v1->qty * $v1->amount;
+      }
+    }
+  
+    foreach ($trx_trp->potongan as $kx => $v2) {
+      if($v2->potongan_mst->employee_id == $trx_trp->supir_id){
+        $result["supir_potongan_trx_money"]+=$v2->nominal_cut;
+        array_push($result["supir_potongan_trx_ids"],$v2->potongan_mst->id);
+      }
+
+      if($v2->potongan_mst->employee_id == $trx_trp->kernet_id){
+        $result["kernet_potongan_trx_money"]+=$v2->nominal_cut;
+        array_push($result["kernet_potongan_trx_ids"],$v2->potongan_mst->id);
+      }
+    }
+    
+    return $result;
+  }
 }

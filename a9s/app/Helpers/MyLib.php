@@ -89,20 +89,132 @@ class MyLib
     }
     return $note;
   }
+  private static function valueToString(mixed $value): string
+  {
+      if ($value === null) {
+          return 'NULL';
+      }
 
+      if (is_bool($value)) {
+          return $value ? 'true' : 'false';
+      }
+
+      if (is_int($value) || is_float($value) || is_string($value)) {
+          return (string) $value;
+      }
+
+      if ($value instanceof CarbonInterface) {
+          return $value->toDateTimeString();
+      }
+
+      if ($value instanceof BackedEnum) {
+          return (string) $value->value;
+      }
+
+      if ($value instanceof Expression) {
+          // DB::raw()
+          return '[SQL Expression]';
+      }
+
+      // if ($value instanceof Geometry) {
+      //     // Point, Polygon, LineString, MultiPolygon, dll.
+      //     return method_exists($value, 'toWkt')
+      //         ? $value->toWkt()
+      //         : json_encode($value, JSON_UNESCAPED_UNICODE);
+      // }
+
+      if ($value instanceof Collection) {
+          return json_encode(
+              $value->toArray(),
+              JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+          );
+      }
+
+      if ($value instanceof JsonSerializable) {
+          return json_encode(
+              $value,
+              JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+          );
+      }
+
+      if (is_array($value)) {
+          return json_encode(
+              $value,
+              JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+          );
+      }
+
+      if (method_exists($value, '__toString')) {
+          return (string) $value;
+      }
+
+      return json_encode(
+          $value,
+          JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+      ) ?: gettype($value);
+  }
   public static function compareChange($old,$new){
-    $note="";
-    $o = is_array($old) ? $old : $old->toArray();
-    $n = is_array($new) ? $new : $new->toArray();
+    // $note = "";
+    // $o = is_array($old) ? $old : $old->toArray();
+    // $n = is_array($new) ? $new : $new->toArray();
+
+    // foreach ($o as $k => $v) {
+    //   if (isset($n[$k]) && $n[$k] != $v) {
+    //     if ($note == "") {
+    //       $note .= "Data yang berubah: \n";
+    //     }
+    //     $note .= "[" . $k . "] " . $v . " => " . $n[$k] . "\n";
+    //   }
+    // }
+    // return $note;
+    $note = '';
+
+    $o = is_array($old)
+        ? $old
+        : $old->getAttributes();
+
+    $n = is_array($new)
+        ? $new
+        : $new->getAttributes();
+
+      foreach (($old->logData ?? []) as $k => $v) {
+        $o[$k] = $v;
+      }
+
+      foreach (($new->logData ?? []) as $k => $v) {
+        $n[$k] = $v;
+      }
 
     foreach ($o as $k => $v) {
-      if(isset($n[$k]) && $n[$k]!=$v){
-        if($note==""){
-          $note.="Data yang berubah: \n";
+
+        if (!array_key_exists($k, $n)) {
+            continue;
         }
-        $note.="[".$k."] ".$v." => ".$n[$k]."\n";
-      }
+
+        if ($k === 'geofence_area') {
+            $oldValue = self::normalizeGeometry($v);
+            $newValue = self::normalizeGeometry($n[$k]);
+        } else {
+            $oldValue = self::valueToString($v);
+            $newValue = self::valueToString($n[$k]);
+        }
+        
+        if ($oldValue === $newValue) {
+            continue;
+        }
+
+        if ($note === '') {
+            $note = "Data yang berubah:\n";
+        }
+
+        $note .= sprintf(
+            "[%s] %s => %s\n",
+            $k,
+            $oldValue,
+            $newValue
+        );
     }
+
     return $note;
   }
 

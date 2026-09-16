@@ -258,6 +258,26 @@ Route::middleware('no-prefix-api')->group(function () {
     Route::get('/fin_payment_req/get_trx_trp_unprocessed', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'get_trx_trp_unprocessed']);
     Route::get('/fin_payment_req/download_view', [\App\Http\Controllers\Finance\FinPaymentReqController::class, 'excelDownload']);
 
+    Route::get('/fin_payment_req2s', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'index']);
+    Route::get('/fin_payment_req2', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'show']);
+    Route::post('/fin_payment_req2/trx_trp', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'storeTrxTrp']);
+    Route::put('/fin_payment_req2/trx_trp', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'updateTrxTrp']);
+    Route::post('/fin_payment_req2/extra_money_trx', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'storeExtraMoneyTrx']);
+    Route::put('/fin_payment_req2/extra_money_trx', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'updateExtraMoneyTrx']);
+    Route::delete('/fin_payment_req2', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'delete']);
+    Route::put('/fin_payment_req2_validasi', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'validasi']);
+
+    Route::put('/fin_payment_req2_dtl/renew_data', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'renewData']);
+    Route::delete('/fin_payment_req2_dtl/delete_data', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'deleteData']);
+    Route::put('/fin_payment_req2/set_batch_no', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'setBatchNo']);
+    Route::put('/fin_payment_req2/set_paid_done', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'setPaidDone']);
+    Route::put('/fin_payment_req2/get_update', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'getUpdate']);
+    Route::put('/fin_payment_req2/set_to_ready', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'setToReady']);
+    Route::put('/fin_payment_req2/gen_csv_and_send_mandiri', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'generateCSVMandiriAndSend']);
+    Route::get('/fin_payment_req2/get_trx_trp_unprocessed', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'get_trx_trp_unprocessed']);
+    Route::get('/fin_payment_req2/get_extra_money_trx_unprocessed', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'get_extra_money_trx_unprocessed']);
+    Route::get('/fin_payment_req2/download_view', [\App\Http\Controllers\Finance\FinPaymentReq2Controller::class, 'excelDownload']);
+
 
     Route::get('/permission_lists', [\App\Http\Controllers\Permission\PermissionListController::class, 'index']);
 

@@ -165,6 +165,11 @@ class TrxTrp extends Model
     {
         return $this->hasMany(FinPaymentReqDtl::class, 'trx_trp_id');
     }
+
+    public function fin_payment_req_dtl_2()
+    {
+        return $this->hasMany(FinPaymentReqDtl2::class, 'trx_trp_id');
+    }
     
     public function timbang_val1_by()
     {
