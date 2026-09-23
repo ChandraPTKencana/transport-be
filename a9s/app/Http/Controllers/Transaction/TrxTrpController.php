@@ -3351,63 +3351,63 @@ class TrxTrpController extends Controller
     }
   }
 
-  public function LinkToExtraMoneyTrx(Request $request)
-  {
-    DB::beginTransaction();
-    try {
-      $model_query = new TrxTrp();
+  // public function LinkToExtraMoneyTrx(Request $request)
+  // {
+  //   DB::beginTransaction();
+  //   try {
+  //     $model_query = new TrxTrp();
 
-      $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3,4,5])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
-        $q->where('val5',1)->orWhere('val6',1);
-      })->where('received_payment',0)->whereDoesntHave('fin_payment_req_dtl')->get();
-      $update=0;
-      $syslogs=[];
-      foreach ($model_query as $key => $mq) {
-        $all_id=[];
-        $emts =ExtraMoneyTrx::where(function ($q)use($mq){
-          $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
-        })->whereIn("payment_method_id",[2,3,4,5])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
-        ->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)->where('val6',1)
-        ->whereNull("trx_trp_id")->get();
+  //     $model_query = $model_query->where("deleted",0)->where("req_deleted",0)->whereIn('payment_method_id',[2,3,4,5])->where('val',1)->where('val1',1)->where('val2',1)->where(function ($q){
+  //       $q->where('val5',1)->orWhere('val6',1);
+  //     })->where('received_payment',0)->whereDoesntHave('fin_payment_req_dtl')->get();
+  //     $update=0;
+  //     $syslogs=[];
+  //     foreach ($model_query as $key => $mq) {
+  //       $all_id=[];
+  //       $emts =ExtraMoneyTrx::where(function ($q)use($mq){
+  //         $q->where("employee_id",$mq->supir_id)->orWhere("employee_id",$mq->kernet_id);
+  //       })->whereIn("payment_method_id",[2,3,4,5])->where("received_payment",0)->where("deleted",0)->where("req_deleted",0)
+  //       ->where('val1',1)->where('val2',1)->where('val3',1)->where('val4',1)->where('val5',1)->where('val6',1)
+  //       ->whereNull("trx_trp_id")->get();
 
-        foreach ($emts as $kemt => $emt) {
-          $emt->trx_trp_id = $mq->id;
-          $emt->update();
-          $update++;
-          array_push($all_id,$emt->id);
-        }
+  //       foreach ($emts as $kemt => $emt) {
+  //         $emt->trx_trp_id = $mq->id;
+  //         $emt->update();
+  //         $update++;
+  //         array_push($all_id,$emt->id);
+  //       }
 
-        if(count($all_id)>0){
-          array_push($syslogs,"trx_trp_id:".$mq->id."->".implode(",",$all_id));
-        }
-      }
-      MyLog::sys("extra_money",null,"linktotrxtrp",implode("|",$syslogs));
-      DB::commit();
-      if($update==0){
-        return response()->json([
-          "message" => "Extra Money Tidak ada yang Dihubungkan",
-        ], 400);  
-      }
-      return response()->json([
-        "message" => "Extra Money Berhasil Dihubungkan",
-      ], 200);
-    } catch (\Exception $e) {
-      DB::rollback();
-      if ($e->getCode() == 1) {
-        return response()->json([
-          "message" => $e->getMessage(),
-        ], 400);
-      }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
-      return response()->json([
-        "message" => "Extra Money Gagal Dihubungkan",
-      ], 400);
-    }
-  }
+  //       if(count($all_id)>0){
+  //         array_push($syslogs,"trx_trp_id:".$mq->id."->".implode(",",$all_id));
+  //       }
+  //     }
+  //     MyLog::sys("extra_money",null,"linktotrxtrp",implode("|",$syslogs));
+  //     DB::commit();
+  //     if($update==0){
+  //       return response()->json([
+  //         "message" => "Extra Money Tidak ada yang Dihubungkan",
+  //       ], 400);  
+  //     }
+  //     return response()->json([
+  //       "message" => "Extra Money Berhasil Dihubungkan",
+  //     ], 200);
+  //   } catch (\Exception $e) {
+  //     DB::rollback();
+  //     if ($e->getCode() == 1) {
+  //       return response()->json([
+  //         "message" => $e->getMessage(),
+  //       ], 400);
+  //     }
+  //     // return response()->json([
+  //     //   "getCode" => $e->getCode(),
+  //     //   "line" => $e->getLine(),
+  //     //   "message" => $e->getMessage(),
+  //     // ], 400);
+  //     return response()->json([
+  //       "message" => "Extra Money Gagal Dihubungkan",
+  //     ], 400);
+  //   }
+  // }
 
 
   // public function indexold(Request $request, $download = false)
