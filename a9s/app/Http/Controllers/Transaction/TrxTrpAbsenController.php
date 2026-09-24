@@ -789,7 +789,7 @@ class TrxTrpAbsenController extends Controller
           ]);
         }
 
-        $SYSNOTE = MyLib::compareChange($SYSOLD,$model_query);         
+        $SYSNOTE = MyLib::compareChange($SYSOLD,$v);         
         array_push($SYSNOTES,$SYSNOTE);
       }
       MyLog::sys($this->syslog_db,null,"clearValVal1",implode(",",$SYSNOTES));
@@ -819,11 +819,11 @@ class TrxTrpAbsenController extends Controller
           "message" => $e->getMessage(),
         ], 400);
       }
-      // return response()->json([
-      //   "getCode" => $e->getCode(),
-      //   "line" => $e->getLine(),
-      //   "message" => $e->getMessage(),
-      // ], 400);
+      return response()->json([
+        "getCode" => $e->getCode(),
+        "line" => $e->getLine(),
+        "message" => $e->getMessage(),
+      ], 400);
       return response()->json([
         "message" => "Proses clear validasi gagal",
       ], 400);
