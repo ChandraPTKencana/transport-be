@@ -72,6 +72,8 @@ class RunTicketToAscend extends Command
                 $list_ticket= $list_ticket->map(function ($item) {
                     return array_map('utf8_encode', (array)$item);
                 })->toArray();
+                $this->info("=========== Done :".json_encode($list_ticket)."===========");
+
 
                 if($list_ticket['BrutoTerima']==0){
                     $temp_ac_accounts = $connectionDB->table("palm_tickets")
