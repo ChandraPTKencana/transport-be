@@ -64,16 +64,33 @@ class RunTicketToAscend extends Command
                 $this->info("Ticket BrutoTerima: {$std->ticket_b_bruto}\n ");
                 $this->info("Ticket TaraTerima: {$std->ticket_b_tara}\n ");
 
-                $temp_ac_accounts = $connectionDB->table("palm_tickets")
-                ->where('TicketNo',$std->ticket_a_no)
-                ->update([
-                    "BrutoTerima" => $std->ticket_b_bruto,    
-                    "TaraTerima" => $std->ticket_b_tara,    
-                ]);
+                $list_ticket = $connectionDB->table("palm_tickets")
+                ->select('TicketNo','BrutoTerima')
+                ->whereDate('TicketNo',$std->ticket_a_no)
+                ->get();
+                
+                $list_ticket= $list_ticket->map(function ($item) {
+                    return array_map('utf8_encode', (array)$item);
+                })->toArray();
 
-                $std->update([
-                    'sync' => 1,
-                ]);
+                if($list_ticket['BrutoTerima']==0){
+                    $temp_ac_accounts = $connectionDB->table("palm_tickets")
+                    ->where('TicketNo',$std->ticket_a_no)
+                    ->update([
+                        "BrutoTerima" => $std->ticket_b_bruto,    
+                        "TaraTerima" => $std->ticket_b_tara,    
+                    ]);
+                    if($temp_ac_accounts){
+                        $std->update([
+                            'sync' => 1,
+                        ]);
+                    }
+                }else{
+                    $std->update([
+                        'sync' => 2,
+                    ]);
+                }
+
                 $this->info("=========== Done :".date("Y-m-d H:i:s")."===========");
             }
         });
