@@ -67,15 +67,14 @@ class RunTicketToAscend extends Command
                 $list_ticket = $connectionDB->table("palm_tickets")
                 ->select('TicketNo','BrutoTerima')
                 ->where('TicketNo',$std->ticket_a_no)
-                ->get();
+                ->first();
                 
-                $list_ticket= $list_ticket->map(function ($item) {
-                    return array_map('utf8_encode', (array)$item);
-                })->toArray();
-                $this->info("=========== Done :".json_encode($list_ticket)."===========");
+                $nlt = [];
+                foreach((array)$list_ticket as $key=>$val){
+                    $nlt[$key]=mb_convert_encoding($val, 'UTF-8');
+                }
 
-
-                if($list_ticket['BrutoTerima']==0){
+                if($nlt['BrutoTerima']==0){
                     $temp_ac_accounts = $connectionDB->table("palm_tickets")
                     ->where('TicketNo',$std->ticket_a_no)
                     ->update([
