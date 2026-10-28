@@ -66,7 +66,7 @@ class RunTicketToAscend extends Command
 
                 $list_ticket = $connectionDB->table("palm_tickets")
                 ->select('TicketNo','BrutoTerima')
-                ->whereDate('TicketNo',$std->ticket_a_no)
+                ->where('TicketNo',$std->ticket_a_no)
                 ->get();
                 
                 $list_ticket= $list_ticket->map(function ($item) {
